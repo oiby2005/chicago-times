@@ -1,0 +1,64 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Inter:wght@400..800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-white text-[#111111] antialiased selection:bg-gray-200;
+    font-family: var(--font-sans), 'Inter', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6, .font-serif {
+    font-family: var(--font-serif), 'Playfair Display', Georgia, serif;
+  }
+}
+
+/* Suppress ONLY vertical grid lines (border-r / border-l) on page body content (excluding header, nav, sticky, & signin) */
+body:not(.signin-page) div[class*="border-r"]:not(header *):not(nav *):not(.sticky *):not(.signin-wrapper *),
+body:not(.signin-page) div[class*="border-l"]:not(header *):not(nav *):not(.sticky *):not(.signin-wrapper *),
+body:not(.signin-page) div[class*="md:border-r"]:not(header *):not(nav *):not(.sticky *):not(.signin-wrapper *),
+body:not(.signin-page) div[class*="md:border-l"]:not(header *):not(nav *):not(.sticky *):not(.signin-wrapper *),
+body:not(.signin-page) div[class*="lg:border-r"]:not(header *):not(nav *):not(.sticky *):not(.signin-wrapper *),
+body:not(.signin-page) div[class*="lg:border-l"]:not(header *):not(nav *):not(.sticky *):not(.signin-wrapper *),
+body:not(.signin-page) div[class*="sm:border-r"]:not(header *):not(nav *):not(.sticky *):not(.signin-wrapper *) {
+  border-right-color: transparent !important;
+  border-left-color: transparent !important;
+}
+
+/* Suppress horizontal grey section divider lines on main page body content (excluding header, nav, sticky, & signin) */
+body:not(.signin-page) :not(header):not(nav):not(.sticky):not(header *):not(nav *):not(.sticky *):not(.signin-wrapper *).border-\[\#e2e2e2\],
+body:not(.signin-page) :not(header):not(nav):not(.sticky):not(header *):not(nav *):not(.sticky *):not(.signin-wrapper *).border-\[\#d4d4d4\],
+body:not(.signin-page) :not(header):not(nav):not(.sticky):not(header *):not(nav *):not(.sticky *):not(.signin-wrapper *).border-\[\#d9d9d9\],
+body:not(.signin-page) :not(header):not(nav):not(.sticky):not(header *):not(nav *):not(.sticky *):not(.signin-wrapper *).border-\[\#cccccc\],
+body:not(.signin-page) :not(header):not(nav):not(.sticky):not(header *):not(nav *):not(.sticky *):not(.signin-wrapper *).border-\[\#e5e5e5\],
+body:not(.signin-page) :not(header):not(nav):not(.sticky):not(header *):not(nav *):not(.sticky *):not(.signin-wrapper *).border-\[\#eaeaea\],
+body:not(.signin-page) :not(header):not(nav):not(.sticky):not(header *):not(nav *):not(.sticky *):not(.signin-wrapper *).border-gray-100,
+body:not(.signin-page) :not(header):not(nav):not(.sticky):not(header *):not(nav *):not(.sticky *):not(.signin-wrapper *).border-gray-200,
+body:not(.signin-page) :not(header):not(nav):not(.sticky):not(header *):not(nav *):not(.sticky *):not(.signin-wrapper *).border-gray-300 {
+  border-color: transparent !important;
+}
+
+body:not(.signin-page) :not(header):not(nav):not(.sticky):not(header *):not(nav *):not(.sticky *):not(.signin-wrapper *) > hr {
+  border-color: transparent !important;
+  opacity: 0 !important;
+}
+
+/* Explicitly preserve all grey borders, card outlines, dividers, and input borders on Sign In page */
+body.signin-page *,
+.signin-page *,
+.signin-wrapper * {
+  border-color: revert;
+}
+.signin-wrapper {
+  border: 1px solid #cccccc !important;
+}
+.signin-wrapper input {
+  border: 1px solid #cccccc !important;
+}
+.signin-wrapper input:focus {
+  border-color: #00558c !important;
+}
+
+
