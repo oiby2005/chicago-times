@@ -575,12 +575,13 @@ export const Navbar: React.FC = () => {
         onClose={() => setIsSearchOverlayOpen(false)}
       />
       <nav className="bg-white border-b border-[#e2e2e2] relative z-40 select-none overflow-visible">
-        <Container className="relative">
+        <Container className="relative xl:px-[3.5cm]">
           {/* Single Line Clean Navigation Row */}
           <div className="flex items-center justify-between py-0 overflow-visible relative">
-            <div className="flex items-center justify-between w-full pr-1">
-              {allCategories.map((title) => {
+            <div className="flex items-center justify-between w-full">
+              {allCategories.map((title, index) => {
                 const isActive = activeTab === title;
+                const isFirst = index === 0;
 
                 return (
                   <div
@@ -591,10 +592,10 @@ export const Navbar: React.FC = () => {
                   >
                     <Link
                       href={getCategoryRoute(title)}
-                      className={`text-[12.5px] font-sans px-2 py-1.5 inline-block whitespace-nowrap tracking-tight transition-colors relative z-50 ${
+                      className={`text-[12px] font-sans ${isFirst ? "pr-1.5 pl-0" : "px-1.5"} py-1.5 inline-block whitespace-nowrap tracking-normal transition-colors relative z-50 ${
                         isActive
                           ? "bg-[#f8f8f8] font-bold text-black border-t border-l border-r border-[#d4d4d4] rounded-t-sm -mb-[2px] pb-[7px]"
-                          : "border border-transparent text-[#555555] font-medium hover:text-black hover:underline"
+                          : "border border-transparent text-[#444444] font-normal hover:text-black hover:underline"
                       }`}
                     >
                       {title}
@@ -604,17 +605,17 @@ export const Navbar: React.FC = () => {
               })}
 
               {/* Integrated Search Icon */}
-              <div className="flex items-center pl-1 flex-shrink-0 relative z-50">
+              <div className="flex items-center flex-shrink-0 relative z-50">
                 <Link
                   href="/search"
                   aria-label="Search"
-                  className="p-1 text-[#555555] hover:text-black transition-colors focus:outline-none cursor-pointer"
+                  className="py-1 pl-1 text-[#444444] hover:text-black transition-colors focus:outline-none cursor-pointer"
                 >
                   <svg
                     className="w-3.5 h-3.5"
                     fill="none"
                     stroke="currentColor"
-                    strokeWidth={2}
+                    strokeWidth={1.8}
                     viewBox="0 0 24 24"
                   >
                     <path

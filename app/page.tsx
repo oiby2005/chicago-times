@@ -1,11 +1,7 @@
 import React from "react";
 import Header from "@/components/navigation/Header";
 import StickyHeaderBar from "@/components/navigation/StickyHeaderBar";
-import HomeMainGrid from "@/components/home/HomeMainGrid";
-import HomeSecondarySections from "@/components/home/HomeSecondarySections";
-import HomeBottomGrid from "@/components/home/HomeBottomGrid";
-import HomeCategoryGrid from "@/components/home/HomeCategoryGrid";
-import HomeRealEstateInsights from "@/components/home/HomeRealEstateInsights";
+import NewHomeBody from "@/components/home/NewHomeBody";
 import StickySubscribeBar from "@/components/ui/StickySubscribeBar";
 import Footer from "@/components/layout/Footer";
 
@@ -15,11 +11,7 @@ export default function Home() {
       <div>
         <Header />
         <StickyHeaderBar />
-        <HomeMainGrid />
-        <HomeSecondarySections />
-        <HomeBottomGrid />
-        <HomeCategoryGrid />
-        <HomeRealEstateInsights />
+        <NewHomeBody />
         <StickySubscribeBar />
       </div>
       <Footer />

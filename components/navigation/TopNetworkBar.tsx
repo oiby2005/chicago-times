@@ -10,15 +10,17 @@ export const TopNetworkBar: React.FC = () => {
   ];
 
   return (
-    <div className="w-full bg-[#191919] text-white text-[11px] font-sans border-b border-[#2a2a2a]">
-      <Container className="flex items-center justify-between h-7 px-4">
-        <div className="flex items-center space-x-4">
+    <div className="w-full bg-[#191919] text-white font-sans border-b border-[#2a2a2a] select-none">
+      <Container className="flex items-center justify-between h-6 sm:h-6.5 px-4">
+        <div className="flex items-center space-x-5">
           {leftLinks.map((link) => (
             <a
               key={link.label}
               href={link.href}
-              className={`hover:underline tracking-tight ${
-                link.active ? "font-semibold text-white" : "text-[#cccccc]"
+              className={`text-[11.5px] sm:text-xs tracking-tight transition-colors hover:underline ${
+                link.active
+                  ? "font-medium text-white"
+                  : "font-normal text-[#cccccc] hover:text-white"
               }`}
             >
               {link.label}
@@ -28,7 +30,7 @@ export const TopNetworkBar: React.FC = () => {
         <div className="flex items-center">
           <a
             href="#"
-            className="text-[#cccccc] hover:underline tracking-tight text-[11px]"
+            className="text-[11.5px] sm:text-xs font-normal text-[#cccccc] hover:text-white hover:underline tracking-tight transition-colors"
           >
             WSJ | Buy Side
           </a>
