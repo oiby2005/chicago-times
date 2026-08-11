@@ -22,6 +22,29 @@ export interface Article {
 }
 
 export const homepageArticles: Record<string, Article> = {
+  "biden-cancer-disease-spread-further": {
+    id: "biden-1",
+    slug: "biden-cancer-disease-spread-further",
+    category: "US",
+    topicBreadcrumb: "US",
+    title: "How Serious Is Joe Biden’s Cancer as His Son Says the Disease Has Spread Further",
+    deck: "Former U.S. President Joe Biden is facing a worsening health situation after his son Hunter Biden said the cancer has spread to his bones and described the disease as \"very painful\" and \"very debilitating.\"",
+    summary: "Former U.S. President Joe Biden is facing a worsening health situation after his son Hunter Biden said the cancer has spread to his bones and described the disease as \"very painful\" and \"very debilitating.\"",
+    author: "Dylan Candice Odulio",
+    publishedDate: "08/09/26 AT 11:30 AM EDT",
+    imageUrl: "https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?auto=format&fit=crop&w=1200&q=80",
+    photoCaption: "Former U.S. President Joe Biden",
+    commentCount: 42,
+    listenTime: "3 min",
+    paragraphs: [
+      "Joe Biden’s health has taken a more serious turn.",
+      "In an interview with the BBC on Friday, August 7, 2026, Hunter Biden said his father’s prostate cancer has spread further, including to his bones. The former president is 83 years old, and his office has not publicly disclosed additional details about where else the cancer may have spread.",
+      "Biden’s cancer was first made public in May 2025, when his personal office announced that he had been diagnosed with an aggressive form of prostate cancer. The statement said the cancer had a Gleason score of 9, placing it in Grade Group 5, and had already metastasized to the bone.",
+      "The diagnosis came after Biden had already left the White House. He served as the 46th president of the United States from 2021 to 2025, following his earlier career as a U.S. senator and vice president under Barack Obama.",
+      "Hunter Biden said watching his father deal with the disease has been difficult for the family. He also said that his father continues to make public appearances and speak about issues important to him despite his health problems.",
+      "What does it mean when prostate cancer spreads to the bones?"
+    ]
+  },
   // Featured Article from Screenshots
   "trump-frustrated-homeland-security-secretary": {
     id: "0",

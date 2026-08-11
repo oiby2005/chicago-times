@@ -2,10 +2,13 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Container from "@/components/layout/Container";
 import WSJLogo from "@/components/ui/WSJLogo";
 
 export default function SignInPage() {
+  const router = useRouter();
+  const [isSignUp, setIsSignUp] = useState(false); // default to Login mode
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -14,6 +17,7 @@ export default function SignInPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     document.body.classList.add("signin-page");
@@ -22,24 +26,81 @@ export default function SignInPage() {
     };
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!fullName.trim() || !email.trim() || !password.trim()) {
+    setError("");
+
+    // Validate all fields: Full Name, Email, Password, Confirm Password
+    if (!fullName.trim() || !email.trim() || !password.trim() || !confirmPassword.trim()) {
       setError("Please fill in all required fields.");
       return;
     }
+
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
       return;
     }
+
+    if (isSignUp) {
+      setSubmitted(true);
+      return;
+    }
+
+    // Login logic
+    setLoading(true);
+
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ fullName, email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        setError(data.message || "Invalid credentials.");
+        setLoading(false);
+        return;
+      }
+
+      // Save token and user details to localStorage
+      if (typeof window !== "undefined") {
+        localStorage.setItem("wsj_token", data.token);
+        localStorage.setItem("wsj_user", JSON.stringify(data.user));
+      }
+
+      // Redirect user to their role-specific dashboard
+      const role = data.user.role;
+      if (role === "admin") {
+        router.push("/admin-dashboard");
+      } else if (role === "writer") {
+        router.push("/writer-dashboard");
+      } else if (role === "reader") {
+        router.push("/reader-dashboard");
+      } else {
+        router.push("/");
+      }
+    } catch (err) {
+      console.error("Login connection error:", err);
+      setError("Unable to connect to Express backend server. Please verify backend is running on http://localhost:5000.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const toggleMode = () => {
+    setIsSignUp(!isSignUp);
     setError("");
-    setSubmitted(true);
+    setSubmitted(false);
   };
 
   return (
     <main className="signin-page min-h-screen bg-white text-[#111111] font-sans flex flex-col justify-between select-none">
       <div>
-        {/* Minimal Centered WSJ Logo Navbar (White Background with Exact WSJ SVG Masthead) */}
+        {/* Minimal Centered WSJ Logo Navbar */}
         <header className="w-full bg-white border-b border-[#e2e2e2] py-4 text-center">
           <Link href="/" className="inline-block">
             <WSJLogo className="w-full max-w-[320px] sm:max-w-[440px] h-[42px] sm:h-[56px] mx-auto block select-none" />
@@ -49,15 +110,15 @@ export default function SignInPage() {
         {/* Main Sign In / Sign Up Form Card */}
         <div className="py-12 bg-white">
           <Container className="flex justify-center items-center">
-            <div className="signin-wrapper w-full max-w-[460px] bg-white border border-[#cccccc] rounded-2xl p-6 sm:p-8 shadow-sm space-y-4">
+            <div className="signin-wrapper w-full max-w-5xl bg-white border-0 p-6 sm:p-12 space-y-6">
               {/* Header Row */}
               <div className="flex items-start justify-between pb-4 border-b border-[#f0f0f0] mb-6">
                 <div>
-                  <h2 className="text-2xl font-serif font-bold text-[#111111] leading-tight">
-                    Sign Up
+                  <h2 className="text-2xl sm:text-3xl font-serif font-bold text-[#111111] leading-tight">
+                    {isSignUp ? "Sign Up" : "Login"}
                   </h2>
-                  <p className="text-[10px] font-sans font-bold text-[#999999] tracking-widest uppercase mt-0.5">
-                    CREATE YOUR ACCOUNT
+                  <p className="text-[10px] sm:text-[11px] font-sans font-bold text-[#999999] tracking-widest uppercase mt-0.5">
+                    {isSignUp ? "CREATE YOUR ACCOUNT" : "SIGN IN TO YOUR ACCOUNT"}
                   </p>
                 </div>
                 <Link
@@ -70,22 +131,22 @@ export default function SignInPage() {
               </div>
 
               {submitted ? (
-                <div className="bg-gray-50 border border-gray-200 p-6 rounded-xl text-center space-y-2 my-4">
-                  <h3 className="text-base font-serif font-bold text-gray-900">
-                    Account Created Successfully!
+                <div className="bg-gray-50 border border-gray-200 p-8 rounded-xl text-center space-y-3 my-4">
+                  <h3 className="text-lg font-serif font-bold text-gray-900">
+                    {isSignUp ? "Account Created Successfully!" : "Signed In Successfully!"}
                   </h3>
-                  <p className="text-xs text-gray-600 font-sans">
-                    Welcome to WSJ, <strong className="text-black">{fullName}</strong>.
+                  <p className="text-sm text-gray-600 font-sans">
+                    Welcome to WSJ{fullName ? `, ${fullName}` : ""}.
                   </p>
                   <button
                     onClick={() => setSubmitted(false)}
-                    className="text-xs text-[#00558c] hover:underline pt-3 block mx-auto font-sans font-semibold"
+                    className="text-xs text-[#00558c] hover:underline pt-3 block mx-auto font-sans font-semibold cursor-pointer"
                   >
-                    Register another account
+                    {isSignUp ? "Register another account" : "Back to Sign In"}
                   </button>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+                <form onSubmit={handleSubmit} className="space-y-5" noValidate>
                   {error && (
                     <div className="text-xs font-sans text-red-600 text-center font-semibold mb-2">
                       {error}
@@ -95,7 +156,7 @@ export default function SignInPage() {
                   {/* Top Social Auth Button (Google) */}
                   <button
                     type="button"
-                    className="w-full bg-white hover:bg-gray-50 text-gray-800 border border-[#e2e2e2] rounded-lg font-sans text-sm font-medium py-3 px-4 flex items-center justify-center space-x-3 transition-colors cursor-pointer shadow-2xs mb-6"
+                    className="w-full bg-white hover:bg-gray-50 text-gray-800 border border-[#e2e2e2] rounded-lg font-sans text-sm font-medium py-3.5 px-4 flex items-center justify-center space-x-3 transition-colors cursor-pointer shadow-2xs mb-6"
                   >
                     <svg className="w-4 h-4" viewBox="0 0 24 24">
                       <path
@@ -254,21 +315,24 @@ export default function SignInPage() {
                     </div>
                   </div>
 
-                  {/* Primary Action Button: REGISTER ACCOUNT */}
+                  {/* Primary Action Button: SIGN IN or REGISTER ACCOUNT */}
                   <button
                     type="submit"
                     className="w-full bg-[#00558c] hover:bg-[#00426d] text-white font-sans text-xs font-bold uppercase tracking-wider py-3.5 rounded-xl transition-colors cursor-pointer shadow-xs mt-6 mb-6"
                   >
-                    REGISTER ACCOUNT
+                    {loading ? "SIGNING IN..." : isSignUp ? "REGISTER ACCOUNT" : "SIGN IN"}
                   </button>
 
-                  {/* Bottom Red Link */}
+                  {/* Bottom Red Link to Toggle Mode */}
                   <div className="text-center pt-2">
                     <button
                       type="button"
-                      className="text-xs font-sans font-bold text-[#8b0000] hover:underline cursor-pointer"
+                      onClick={toggleMode}
+                      className="text-xs sm:text-sm font-sans font-bold text-[#8b0000] hover:underline cursor-pointer"
                     >
-                      Already registered? Sign in instead
+                      {isSignUp
+                        ? "Already registered? Sign in instead"
+                        : "New to The Wall Street Journal? Create secure account"}
                     </button>
                   </div>
                 </form>
@@ -277,27 +341,6 @@ export default function SignInPage() {
           </Container>
         </div>
       </div>
-
-      {/* Minimal Dow Jones Footer (White Background, Screenshot 3) */}
-      <footer className="w-full bg-white border-t border-[#e2e2e2] py-6 text-center text-xs font-sans text-gray-600 space-y-2">
-        <div className="font-bold text-black uppercase tracking-wider text-[11px]">
-          DOW JONES
-        </div>
-        <div className="flex items-center justify-center space-x-2 text-[11.5px]">
-          <a href="#" className="underline hover:text-black">Customer Service</a>
-          <span>|</span>
-          <a href="#" className="underline hover:text-black">Privacy Notice</a>
-          <span>|</span>
-          <a href="#" className="underline hover:text-black">Cookie Notice</a>
-          <span>|</span>
-          <span className="border border-gray-400 rounded-full px-1.5 py-0.2 text-[10px] cursor-pointer">
-            🌓
-          </span>
-        </div>
-        <div className="text-[10.5px] text-gray-500 pt-1">
-          © 2026 Dow Jones & Company, Inc. All Rights Reserved.
-        </div>
-      </footer>
     </main>
   );
 }
