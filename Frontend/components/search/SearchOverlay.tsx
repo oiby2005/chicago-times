@@ -4,43 +4,104 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { homepageArticles } from "@/data/articles";
 
+import { authorsList } from "@/data/authors";
+
 interface SearchOverlayProps {
   isOpen: boolean;
   onClose: () => void;
 }
+
+const getInitials = (name: string) => {
+  if (!name) return "WR";
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+};
 
 export const SearchOverlay: React.FC<SearchOverlayProps> = ({
   isOpen,
   onClose,
 }) => {
   const [query, setQuery] = useState("");
+  const [writerName, setWriterName] = useState("Reader User");
+  const [writerBio, setWriterBio] = useState("Avid Reader & News Enthusiast");
+  const [writerAvatar, setWriterAvatar] = useState("");
+  const [writerRole, setWriterRole] = useState("READER");
+  const [allArticles, setAllArticles] = useState<any[]>([]);
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-      }
-    };
-    if (isOpen) {
-      window.addEventListener("keydown", handleKeyDown);
+    let name = "Reader User";
+    let bio = "Avid Reader & News Enthusiast";
+    let avatar = "";
+    let role = "READER";
+    const storedUser = localStorage.getItem("wsj_user");
+    if (storedUser) {
+      try {
+        const u = JSON.parse(storedUser);
+        if (u.full_name || u.name) name = u.full_name || u.name;
+        if (u.bio) bio = u.bio;
+        if (u.avatar_url) avatar = u.avatar_url;
+        if (u.role) role = u.role.toUpperCase();
+      } catch (e) {}
     }
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
+    setWriterName(name);
+    setWriterBio(bio);
+    setWriterAvatar(avatar);
+    setWriterRole(role);
+
+    let combined = Object.values(homepageArticles);
+    const storedPosts = localStorage.getItem("wsj_posts");
+    if (storedPosts) {
+      try {
+        const parsed = JSON.parse(storedPosts);
+        const userArticles = parsed.map((p: any) => ({
+          id: p.id || String(Date.now()),
+          title: p.title,
+          summary: p.subheadline || p.title,
+          category: p.category || "Business",
+          author: name,
+          publishedDate: p.date,
+          imageUrl: "https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?auto=format&fit=crop&w=1200&q=80",
+        }));
+        combined = [...userArticles, ...combined];
+      } catch (e) {}
+    }
+    setAllArticles(combined);
+  }, [isOpen]);
+
+  const cleanQuery = query.trim().toLowerCase();
+
+  // Dynamically assemble active authors & users list
+  const activeAuthors = [
+    {
+      slug: "user",
+      name: writerName,
+      role: writerRole,
+      bio: writerBio,
+      image: writerAvatar,
+      href: writerRole === "ADMIN" ? "/admin-dashboard" : writerRole === "READER" ? "/reader-dashboard" : "/writer",
+    },
+    ...authorsList.filter((a) => a.slug !== "writer"),
+  ];
+
+  const matchingAuthors = cleanQuery
+    ? activeAuthors.filter((author) => author.name.toLowerCase().includes(cleanQuery))
+    : [];
+
+  const results = cleanQuery
+    ? allArticles.filter((article) => {
+        const titleMatch = article.title?.toLowerCase().includes(cleanQuery);
+        const summaryMatch = article.summary?.toLowerCase().includes(cleanQuery);
+        const categoryMatch = article.category?.toLowerCase().includes(cleanQuery);
+        const authorMatch = article.author?.toLowerCase().includes(cleanQuery);
+        return titleMatch || summaryMatch || categoryMatch || authorMatch;
+      })
+    : [];
 
   if (!isOpen) return null;
 
-  const results = query.trim()
-    ? Object.values(homepageArticles).filter(
-        (article) =>
-          article.title.toLowerCase().includes(query.toLowerCase()) ||
-          article.summary?.toLowerCase().includes(query.toLowerCase()) ||
-          article.category?.toLowerCase().includes(query.toLowerCase()) ||
-          article.author?.toLowerCase().includes(query.toLowerCase())
-      )
-    : [];
-
   return (
-    <div className="fixed inset-0 z-50 bg-white/92 backdrop-blur-xs flex flex-col justify-start pt-6 px-4 md:px-12 select-none overflow-y-auto animate-fadeIn">
+    <div className="fixed inset-0 z-[9999] bg-white w-full h-full min-h-screen flex flex-col justify-start pt-6 px-4 md:px-12 select-none overflow-y-auto">
       {/* Top Close Button (Screenshot) */}
       <button
         onClick={onClose}
@@ -51,7 +112,7 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({
       </button>
 
       <div className="max-w-4xl mx-auto w-full pt-10 pb-16">
-        {/* Main Search Input Form Row (Screenshot) */}
+        {/* Main Search Input Form Row */}
         <form
           onSubmit={(e) => e.preventDefault()}
           className="flex flex-col sm:flex-row items-stretch sm:items-end gap-3 mb-10"
@@ -88,7 +149,7 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({
           </button>
         </form>
 
-        {/* Centered Helper Box (Screenshot) */}
+        {/* Centered Helper Box */}
         <div className="max-w-xl mx-auto bg-[#f2f2f2] p-8 text-center rounded-xs space-y-3 border border-[#e2e2e2] shadow-xs my-6">
           <div className="text-xl text-black flex justify-center mb-1">
             <svg
@@ -116,10 +177,57 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({
         </div>
 
         {/* Search Results Display */}
-        {query.trim() !== "" && (
+        {cleanQuery !== "" && (
           <div className="mt-8 pt-6 border-t border-[#e2e2e2]">
+            {/* Matching Writers & Authors Section */}
+            {matchingAuthors.length > 0 && (
+              <div className="mb-8">
+                <div className="text-xs font-sans font-bold text-[#007cba] uppercase tracking-wider mb-3">
+                  Matching Writers ({matchingAuthors.length})
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {matchingAuthors.map((author) => (
+                    <Link
+                      key={author.slug}
+                      href={(author as any).href || `/author/${author.slug}`}
+                      onClick={onClose}
+                      className="block group bg-white p-4 border border-[#e2e2e2] hover:border-[#007cba] transition-colors rounded-xs shadow-xs"
+                    >
+                      <div className="flex items-center gap-3.5">
+                        {author.image ? (
+                          <img
+                            src={author.image}
+                            alt={author.name}
+                            className="w-11 h-11 rounded-full object-cover shrink-0"
+                          />
+                        ) : (
+                          <div className="w-11 h-11 rounded-full bg-[#f05011] text-white font-bold text-xs flex items-center justify-center shrink-0">
+                            {getInitials(author.name)}
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-serif font-bold text-base text-[#111111] group-hover:underline truncate">
+                              {author.name}
+                            </h4>
+                            <span className="text-[9px] font-sans font-bold uppercase tracking-wider text-[#007cba] bg-[#e0f2fe] px-1.5 py-0.5 rounded-xs shrink-0">
+                              {author.role || "READER"}
+                            </span>
+                          </div>
+                          <p className="text-xs font-sans text-gray-500 truncate mt-0.5">
+                            {author.bio}
+                          </p>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Article Results */}
             <div className="text-xs font-sans font-bold text-gray-500 uppercase tracking-wider mb-4">
-              {results.length} Search Result{results.length !== 1 ? "s" : ""} for “{query}”
+              Article Results ({results.length})
             </div>
 
             {results.length > 0 ? (
@@ -160,9 +268,11 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8 text-sm font-sans text-gray-500">
-                No matching articles found for “{query}”. Try another search term.
-              </div>
+              matchingAuthors.length === 0 && (
+                <div className="text-center py-8 text-sm font-sans text-gray-500">
+                  No matching articles or writers found for “<strong className="text-black">{query}</strong>”. Try another search term.
+                </div>
+              )
             )}
           </div>
         )}

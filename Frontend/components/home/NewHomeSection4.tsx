@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import AdPlaceholder from "@/components/ui/AdPlaceholder";
 
 export default function NewHomeSection4() {
   const [followedAuthor1, setFollowedAuthor1] = useState(false);
@@ -56,7 +57,7 @@ export default function NewHomeSection4() {
             {/* Brand Logo & Tagline */}
             <div className="pt-2 select-none">
               <span className="font-serif font-black text-[17px] sm:text-[19px] tracking-[0.14em] text-[#111111] block">
-                THE WALL STREET JOURNAL.
+                TIMES CHICAGO
               </span>
               <span className="font-sans font-bold text-[8.5px] text-[#666666] tracking-[0.24em] uppercase block mt-0.5">
                 IT&apos;S YOUR BUSINESS
@@ -90,7 +91,7 @@ export default function NewHomeSection4() {
                   </Link>
 
                   <h3 className="font-serif font-bold text-[22px] sm:text-[24px] leading-[1.18] text-[#111111] hover:text-gray-800 hover:underline cursor-pointer">
-                    <Link href="/article/why-it-is-impossible-to-get-a-restaurant-reservation">
+                    <Link prefetch={true} href="/article/why-it-is-impossible-to-get-a-restaurant-reservation">
                       Why It is Impossible to Get a Restaurant Reservation
                     </Link>
                   </h3>
@@ -129,7 +130,7 @@ export default function NewHomeSection4() {
                   </Link>
 
                   <h4 className="font-serif font-bold text-[16px] xl:text-[17px] leading-[1.22] text-[#111111] hover:underline cursor-pointer">
-                    <Link href="/article/the-cyberattack-that-brought-a-distant-war-to-small-town-minnesota">
+                    <Link prefetch={true} href="/article/the-cyberattack-that-brought-a-distant-war-to-small-town-minnesota">
                       The Cyberattack That Brought a Distant War to Small-Town Minnesota
                     </Link>
                   </h4>
@@ -150,7 +151,7 @@ export default function NewHomeSection4() {
                     EXCLUSIVE
                   </div>
                   <h4 className="font-serif font-bold text-[16px] xl:text-[17px] leading-[1.22] text-[#111111] hover:underline cursor-pointer">
-                    <Link href="/article/situational-awareness-bets-400-million-on-stealth-chip-startup">
+                    <Link prefetch={true} href="/article/situational-awareness-bets-400-million-on-stealth-chip-startup">
                       Situational Awareness Bets $400 Million on Stealth Chip Startup After Crash
                     </Link>
                   </h4>
@@ -192,7 +193,7 @@ export default function NewHomeSection4() {
                   </Link>
 
                   <h4 className="font-serif font-bold text-[16px] xl:text-[17px] leading-[1.22] text-[#111111] hover:underline cursor-pointer">
-                    <Link href="/article/hegseth-strips-security-clearance-from-bidens-air-force-secretary">
+                    <Link prefetch={true} href="/article/hegseth-strips-security-clearance-from-bidens-air-force-secretary">
                       Hegseth Strips Security Clearance From Biden’s Air Force Secretary
                     </Link>
                   </h4>
@@ -244,7 +245,7 @@ export default function NewHomeSection4() {
                 {/* Trump Hair Memes */}
                 <article className="pb-3.5">
                   <h4 className="font-serif font-bold text-[16px] xl:text-[17px] leading-[1.22] text-[#111111] hover:underline cursor-pointer">
-                    <Link href="/article/trump-showed-up-at-rally-with-lustrous-locks">
+                    <Link prefetch={true} href="/article/trump-showed-up-at-rally-with-lustrous-locks">
                       Trump Showed Up at a Rally With Lustrous Locks. The Memes Won’t Stop.
                     </Link>
                   </h4>
@@ -262,7 +263,7 @@ export default function NewHomeSection4() {
                 {/* Trump Fire Fed Governor Lisa Cook */}
                 <article className="pt-3.5">
                   <h4 className="font-serif font-bold text-[16px] xl:text-[17px] leading-[1.22] text-[#111111] hover:underline cursor-pointer">
-                    <Link href="/article/trump-revives-attempt-to-fire-fed-governor-lisa-cook">
+                    <Link prefetch={true} href="/article/trump-revives-attempt-to-fire-fed-governor-lisa-cook">
                       Trump Revives Attempt to Fire Fed Governor Lisa Cook
                     </Link>
                   </h4>
@@ -307,7 +308,7 @@ export default function NewHomeSection4() {
                   </Link>
 
                   <h3 className="font-serif font-bold text-[22px] sm:text-[24px] leading-[1.18] text-[#111111] hover:text-gray-800 hover:underline cursor-pointer">
-                    <Link href="/article/a-spa-in-the-middle-of-the-desert-500000-bathroom">
+                    <Link prefetch={true} href="/article/a-spa-in-the-middle-of-the-desert-500000-bathroom">
                       A Spa in the Middle of the Desert? It’s Actually a $500,000 Bathroom
                     </Link>
                   </h3>
@@ -347,7 +348,7 @@ export default function NewHomeSection4() {
                   </Link>
 
                   <h4 className="font-serif font-bold text-[16px] xl:text-[17px] leading-[1.22] text-[#111111] hover:underline cursor-pointer">
-                    <Link href="/article/she-escaped-teen-marriage-in-appalachia-harvard">
+                    <Link prefetch={true} href="/article/she-escaped-teen-marriage-in-appalachia-harvard">
                       She Escaped Teen Marriage in Appalachia. Her Time at Harvard Was Even Worse.
                     </Link>
                   </h4>
@@ -368,7 +369,7 @@ export default function NewHomeSection4() {
                     BOOK REVIEW
                   </div>
                   <h4 className="font-serif font-bold text-[16px] xl:text-[17px] leading-[1.22] text-[#111111] hover:underline cursor-pointer">
-                    <Link href="/article/15-books-we-read-this-week">
+                    <Link prefetch={true} href="/article/15-books-we-read-this-week">
                       15 Books We Read This Week
                     </Link>
                   </h4>
@@ -621,6 +622,7 @@ export default function NewHomeSection4() {
               <button
                 onClick={() => setIsMutedMainVideo(!isMutedMainVideo)}
                 className="absolute top-3 left-3 bg-white/95 hover:bg-white text-black font-sans font-bold text-[11.5px] px-3.5 py-1.5 rounded-full shadow-md flex items-center gap-1.5 cursor-pointer transition-colors z-10"
+                suppressHydrationWarning
               >
                 <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
                   <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z" />
@@ -642,6 +644,7 @@ export default function NewHomeSection4() {
                     onClick={() => setIsPlayingMainVideo(!isPlayingMainVideo)}
                     className="w-7 h-7 border border-[#00a3c4] bg-[#007cb9]/30 hover:bg-[#007cb9]/60 flex items-center justify-center text-white cursor-pointer transition-colors rounded-2xs"
                     aria-label={isPlayingMainVideo ? "Pause video" : "Play video"}
+                    suppressHydrationWarning
                   >
                     {isPlayingMainVideo ? (
                       <svg className="w-3 h-3 fill-current text-white" viewBox="0 0 24 24">
@@ -658,6 +661,7 @@ export default function NewHomeSection4() {
                   <button
                     onClick={() => setIsMutedMainVideo(!isMutedMainVideo)}
                     className="text-white/80 hover:text-white transition-colors cursor-pointer"
+                    suppressHydrationWarning
                   >
                     <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
                       <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z" />
@@ -673,7 +677,7 @@ export default function NewHomeSection4() {
                 {/* Right Action Icons */}
                 <div className="flex items-center gap-3 text-white/80">
                   {/* Share Icon */}
-                  <button className="hover:text-white transition-colors cursor-pointer" title="Share">
+                  <button className="hover:text-white transition-colors cursor-pointer" title="Share" suppressHydrationWarning>
                     <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
                       <polyline points="16 6 12 2 8 6" />
@@ -682,12 +686,12 @@ export default function NewHomeSection4() {
                   </button>
 
                   {/* Closed Captions CC Icon */}
-                  <button className="hover:text-white transition-colors cursor-pointer font-bold text-[11px] border border-white/60 px-1 py-0.5 rounded-2xs" title="Captions">
+                  <button className="hover:text-white transition-colors cursor-pointer font-bold text-[11px] border border-white/60 px-1 py-0.5 rounded-2xs" title="Captions" suppressHydrationWarning>
                     CC
                   </button>
 
                   {/* Fullscreen Icon */}
-                  <button className="hover:text-white transition-colors cursor-pointer" title="Fullscreen">
+                  <button className="hover:text-white transition-colors cursor-pointer" title="Fullscreen" suppressHydrationWarning>
                     <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
                     </svg>
@@ -1282,126 +1286,9 @@ export default function NewHomeSection4() {
             </div>
           </div>
 
-          {/* ==================== ADVERTISEMENT MODULE (dianomi) (Matching Screenshot) ==================== */}
+          {/* Empty Banner for Dianomi Advertisement */}
           <div className="border-t border-black pt-3 mt-8 pb-4">
-            <div className="flex items-center justify-between mb-4">
-              <span className="font-sans font-extrabold text-[12px] text-[#222222] tracking-wider uppercase">
-                ADVERTISEMENT
-              </span>
-              <span className="font-sans font-bold text-[13px] text-[#111111] tracking-tight hover:underline cursor-pointer">
-                dianomi
-              </span>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Item 1 */}
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                  <h4 className="font-sans font-normal text-[14px] leading-snug text-[#007cb9] hover:underline cursor-pointer">
-                    Robotics and Artificial Intelligence. Discover the trends.
-                  </h4>
-                  <span className="font-sans text-[12px] text-[#555555] mt-1 block">
-                    MarketViews
-                  </span>
-                </div>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=200&q=80"
-                  alt="Robotics and AI microchip"
-                  className="w-[68px] h-[52px] object-cover border border-gray-200 shrink-0"
-                />
-              </div>
-
-              {/* Item 2 */}
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                  <h4 className="font-sans font-normal text-[14px] leading-snug text-[#007cb9] hover:underline cursor-pointer">
-                    Discover top insights on commodity trends and developments.
-                  </h4>
-                  <span className="font-sans text-[12px] text-[#555555] mt-1 block">
-                    MarketViews
-                  </span>
-                </div>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=200&q=80"
-                  alt="Plant growing from soil"
-                  className="w-[68px] h-[52px] object-cover border border-gray-200 shrink-0"
-                />
-              </div>
-
-              {/* Item 3 */}
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                  <h4 className="font-sans font-normal text-[14px] leading-snug text-[#007cb9] hover:underline cursor-pointer">
-                    Stay updated with the newest gold market developments.
-                  </h4>
-                  <span className="font-sans text-[12px] text-[#555555] mt-1 block">
-                    MarketViews
-                  </span>
-                </div>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="https://images.unsplash.com/photo-1610375461246-83df859d849d?auto=format&fit=crop&w=200&q=80"
-                  alt="Gold bars"
-                  className="w-[68px] h-[52px] object-cover border border-gray-200 shrink-0"
-                />
-              </div>
-
-              {/* Item 4 */}
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                  <h4 className="font-sans font-normal text-[14px] leading-snug text-[#007cb9] hover:underline cursor-pointer">
-                    What is the latest on ETFs?
-                  </h4>
-                  <span className="font-sans text-[12px] text-[#555555] mt-1 block">
-                    MarketViews
-                  </span>
-                </div>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=200&q=80"
-                  alt="Stock ticker numbers"
-                  className="w-[68px] h-[52px] object-cover border border-gray-200 shrink-0"
-                />
-              </div>
-
-              {/* Item 5 */}
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                  <h4 className="font-sans font-normal text-[14px] leading-snug text-[#007cb9] hover:underline cursor-pointer">
-                    Uncover the latest trends in retirement planning strategies.
-                  </h4>
-                  <span className="font-sans text-[12px] text-[#555555] mt-1 block">
-                    MarketViews
-                  </span>
-                </div>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=200&q=80"
-                  alt="Seniors on bench"
-                  className="w-[68px] h-[52px] object-cover border border-gray-200 shrink-0"
-                />
-              </div>
-
-              {/* Item 6 */}
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                  <h4 className="font-sans font-normal text-[14px] leading-snug text-[#007cb9] hover:underline cursor-pointer">
-                    Discover the latest finance insights from global experts.
-                  </h4>
-                  <span className="font-sans text-[12px] text-[#555555] mt-1 block">
-                    MarketViews
-                  </span>
-                </div>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=200&q=80"
-                  alt="Wall Street sign"
-                  className="w-[68px] h-[52px] object-cover border border-gray-200 shrink-0"
-                />
-              </div>
-            </div>
+            <AdPlaceholder width="w-full" height="h-[120px]" resolution="728 × 90" />
           </div>
 
           {/* ==================== REAL ESTATE INSIGHTS MODULE (realtor.com) (Matching Screenshot) ==================== */}
@@ -1536,6 +1423,7 @@ export default function NewHomeSection4() {
                           ? "bg-gray-400 text-white"
                           : "bg-[#4f7382] hover:bg-[#3f6575] text-white"
                       }`}
+                      suppressHydrationWarning
                     >
                       {followedAuthor1 ? "Following" : "Follow"}
                     </button>
@@ -1579,6 +1467,7 @@ export default function NewHomeSection4() {
                             ? "bg-gray-400 text-white"
                             : "bg-[#4f7382] hover:bg-[#3f6575] text-white"
                         }`}
+                        suppressHydrationWarning
                       >
                         {followedAuthor2 ? "Following" : "Follow"}
                       </button>
@@ -2246,47 +2135,8 @@ export default function NewHomeSection4() {
           {/* ==================== STICKY BOTTOM ADVERTISEMENT & FLOATING VIDEO MODULE ==================== */}
           <div className="sticky top-20 z-20 mt-8 space-y-4 pt-2">
             
-            {/* Top Advertisement Label */}
-            <div className="text-center">
-              <span className="text-[10px] font-sans text-gray-400 uppercase tracking-widest">
-                Advertisement
-              </span>
-            </div>
-
-            {/* MarketViews Sponsored Banner Box */}
-            <Link
-              href="/article/what-is-the-latest-on-etfs"
-              className="bg-[#122a42] text-white overflow-hidden shadow-md cursor-pointer group border border-[#122a42] block"
-            >
-              <div className="aspect-[16/8] w-full overflow-hidden relative bg-[#051326]">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=600&q=80"
-                  alt="Stock Market Display"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-              </div>
-              <div className="p-3.5">
-                <h4 className="font-sans font-bold text-[15px] leading-tight text-white group-hover:underline">
-                  What is the latest on ETFs?
-                </h4>
-                <span className="font-serif italic text-[11.5px] text-gray-300 block mt-0.5">
-                  MarketViews
-                </span>
-                <div className="flex items-center justify-between pt-3">
-                  <svg className="w-3.5 h-3.5 text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                    <line x1="3" y1="9" x2="21" y2="9" />
-                    <line x1="9" y1="21" x2="9" y2="9" />
-                  </svg>
-                  <div className="w-7 h-7 bg-[#0274b6] group-hover:bg-[#005599] flex items-center justify-center text-white transition-colors">
-                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                      <polyline points="9 18 15 12 9 6" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-            </Link>
+            {/* Empty Banner below Refinancing Article */}
+            <AdPlaceholder width="w-full" height="h-[250px]" resolution="300 × 250" />
 
             {/* Floating Video Player Card */}
             {showStickyVideo && (
@@ -2304,6 +2154,7 @@ export default function NewHomeSection4() {
                   <button
                     onClick={() => setIsMutedVideo(!isMutedVideo)}
                     className="absolute top-2.5 left-2.5 bg-white/95 hover:bg-white text-black font-sans font-bold text-[11.5px] px-3 py-1.5 rounded-full shadow-md flex items-center gap-1.5 cursor-pointer transition-colors z-10 select-none"
+                    suppressHydrationWarning
                   >
                     <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
                       <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z" />
@@ -2338,6 +2189,7 @@ export default function NewHomeSection4() {
                       onClick={() => setIsPlayingStickyVideo(!isPlayingStickyVideo)}
                       className="w-7 h-7 rounded-full border border-gray-400 hover:bg-gray-100 flex items-center justify-center text-black cursor-pointer transition-colors"
                       aria-label={isPlayingStickyVideo ? "Pause video" : "Play video"}
+                      suppressHydrationWarning
                     >
                       {isPlayingStickyVideo ? (
                         <svg className="w-3 h-3 fill-current text-black" viewBox="0 0 24 24">
@@ -2360,6 +2212,7 @@ export default function NewHomeSection4() {
                       onClick={() => setShowStickyVideo(false)}
                       className="p-1 text-gray-500 hover:text-black transition-colors cursor-pointer"
                       aria-label="Close video player"
+                      suppressHydrationWarning
                     >
                       <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <line x1="18" y1="6" x2="6" y2="18" />

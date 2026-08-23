@@ -5,7 +5,7 @@ import Navbar from "./Navbar";
 
 export const Header: React.FC = () => {
   return (
-    <header className="w-full bg-white flex flex-col">
+    <header className="w-full bg-[#FAF7EE] flex flex-col border-b border-[#EAE6DA]">
       <TopNetworkBar />
       <LogoHeader />
       <Navbar />

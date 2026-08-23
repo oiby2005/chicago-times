@@ -6,8 +6,8 @@ export const SpecialOfferHeader: React.FC = () => {
       <div className="max-w-[1200px] mx-auto flex items-center justify-center">
         <a href="/" className="inline-block">
           <img
-            src="/images/wsj-masthead.svg"
-            alt="The Wall Street Journal"
+            src="/images/design-reference/Times Chicago.svg"
+            alt="Times Chicago"
             className="h-6 sm:h-7 w-auto object-contain"
           />
         </a>

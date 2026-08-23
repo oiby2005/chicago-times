@@ -15,7 +15,7 @@ export const Container: React.FC<ContainerProps> = ({
   return (
     <Component
       className={cn(
-        "w-full max-w-[1550px] mx-auto px-4 sm:px-6 xl:px-[3cm]",
+        "w-full max-w-[1280px] mx-auto px-2 sm:px-3 md:px-4",
         className
       )}
     >

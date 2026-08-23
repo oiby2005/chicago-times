@@ -2,6 +2,7 @@
 
 import React, { useState, useRef } from "react";
 import Link from "next/link";
+import AdPlaceholder from "@/components/ui/AdPlaceholder";
 
 interface ArticleItem {
   id: string;
@@ -18,7 +19,7 @@ const baseArticles: ArticleItem[] = [
     title: "The World Needs More People Like José Rizal",
     summary:
       "But first of all, who is José Rizal?If you ask Filipinos, they will tell you that José Rizal is a hero, a writer, and a martyr who died for his country. But that is probably the least interesting...",
-    author: "BY DYLAN CANDICE ODULIO",
+    author: "BY WRITER",
     date: "AUG 08, 2026",
     image: "/images/world/jose_rizal.jpg",
   },
@@ -27,7 +28,7 @@ const baseArticles: ArticleItem[] = [
     title: "The Bodies Were Finally Found. Gaza Is Only Beginning to Grieve.",
     summary:
       "A funeral is usually held days after a death. In Gaza, some families waited almost three years. This week, thousands of Palestinians gathered in Gaza City for a mass funeral following the recovery...",
-    author: "BY DYLAN CANDICE ODULIO",
+    author: "BY WRITER",
     date: "AUG 08, 2026",
     image: "/images/world/gaza_grieve.jpg",
   },
@@ -36,7 +37,7 @@ const baseArticles: ArticleItem[] = [
     title: 'This Italian Festival Lets You "Dunk" the Politician You Hate',
     summary:
       "Imagine choosing the politician who annoyed people the most this year then watching them get lowered into a river three times. That is the idea behind La Tonca, one of the strangest traditions...",
-    author: "BY DYLAN CANDICE ODULIO",
+    author: "BY WRITER",
     date: "AUG 07, 2026",
     image: "/images/world/italian_dunk.jpg",
   },
@@ -45,7 +46,7 @@ const baseArticles: ArticleItem[] = [
     title: "Mercury Retrograde Had Everyone Looking Back At Their Exes",
     summary:
       'Did you lose someone recently? Did a relationship end out of nowhere? Did someone you cared about suddenly become a stranger?Maybe you experienced what astrology believers call the "Mercury...',
-    author: "BY DYLAN CANDICE ODULIO",
+    author: "BY WRITER",
     date: "AUG 07, 2026",
     image: "/images/world/mercury_retrograde.jpg",
   },
@@ -286,54 +287,9 @@ export default function WorldPart2Section() {
               ))}
             </div>
           </div>
-
-          {/* NVIDIA Advertisement Banner */}
-          <div className="w-full bg-[#0b140c] text-white p-6 relative overflow-hidden border border-gray-800 flex flex-col items-center justify-between min-h-[220px]">
-            <div className="absolute inset-0 bg-gradient-to-b from-[#76b900]/20 via-transparent to-black opacity-60 pointer-events-none" />
-            <div className="relative z-10 text-center">
-              <div className="flex items-center justify-center gap-2 mb-4">
-                <span className="font-extrabold text-[24px] tracking-widest text-white">NVIDIA</span>
-              </div>
-              <p className="text-[12px] font-sans text-gray-300 uppercase tracking-widest">
-                THE POWER OF AI &amp; GRAPHICS
-              </p>
-            </div>
-            <div className="w-full relative z-10 aspect-[16/9] mt-3 overflow-hidden rounded bg-emerald-950/40 border border-emerald-500/30 flex items-center justify-center">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=600&q=80"
-                alt="NVIDIA Tech"
-                className="w-full h-full object-cover mix-blend-luminosity opacity-80"
-              />
-            </div>
-          </div>
-
-          {/* TESLA Advertisement Banner */}
-          <div className="w-full bg-black text-white p-5 border border-gray-800 flex flex-col justify-between min-h-[360px]">
-            <div className="flex items-center justify-center gap-2 py-2">
-              <span className="font-bold tracking-[0.3em] text-[18px] text-white font-sans">
-                T E S L A
-              </span>
-            </div>
-            <div className="my-4 relative">
-              <div className="border border-red-600 p-4 text-center mb-3">
-                <p className="font-sans font-extrabold italic text-[16px] leading-tight uppercase tracking-wider text-white">
-                  BEST CAR<br />FOR RENT<br />TODAY
-                </p>
-              </div>
-              <div className="w-full aspect-[16/10] relative overflow-hidden my-2">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&w=600&q=80"
-                  alt="Tesla Model S"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            </div>
-            <p className="font-sans italic text-[11px] leading-snug text-gray-400 text-center px-2 border-t border-gray-800 pt-3">
-              Tesla has confirmed that the long-awaited Model S Plaid, the newest and the most powerful version of its larger electric saloon will go into production late next year
-            </p>
-          </div>
+          {/* Sidebar Ad Placeholders with Resolution Display */}
+          <AdPlaceholder width="w-full" height="h-[250px]" resolution="300 × 250" />
+          <AdPlaceholder width="w-full" height="h-[600px]" resolution="300 × 600" />
         </aside>
       </div>
     </section>

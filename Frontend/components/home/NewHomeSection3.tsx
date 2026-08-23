@@ -6,175 +6,212 @@ import Link from "next/link";
 export default function NewHomeSection3() {
   return (
     <section className="w-full bg-white text-[#111111] pt-2 pb-6">
-      {/* 12-Column Grid Alignment matching Section 1 & Section 2 */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-0">
-        
-        {/* ==================== LEFT MAIN CONTAINER (9 of 12 Cols ~ 75%) ==================== */}
-        <div className="lg:col-span-9 pr-0 lg:pr-6 lg:border-r lg:border-gray-300">
-          
-          {/* Top Divider Line across Left Column */}
-          <div className="border-t border-black pt-3 pb-1 mb-2" />
+      {/* ==================== SECTION 3: EDITOR'S PICKS ==================== */}
+      <div className="border-t-2 border-black pt-2 mb-3">
+        <h2 className="font-serif font-bold text-[22px] text-[#111111] tracking-tight">
+          Editor’s Picks
+        </h2>
+      </div>
 
-          {/* 3-Column Card Layout */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 pb-4">
-            
-            {/* Card 1: Private Equity Boyfriend */}
-            <article className="flex flex-col justify-between">
-              <div>
-                <Link
-                  href="/article/this-summers-hottest-arm-candy-is-a-private-equity-boyfriend"
-                  className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 border border-gray-200 mb-2.5"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=600&q=80"
-                    alt="This Summer's Hottest Arm Candy Is a Private Equity Boyfriend"
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                  />
-                </Link>
-                <h3 className="font-serif font-bold text-[17px] xl:text-[18px] leading-[1.22] text-[#111111] hover:text-gray-800 hover:underline cursor-pointer">
-                  <Link href="/article/this-summers-hottest-arm-candy-is-a-private-equity-boyfriend">
-                    This Summer’s Hottest Arm Candy Is a Private Equity Boyfriend
-                  </Link>
-                </h3>
-              </div>
-              <div className="font-sans text-[11px] text-gray-500 mt-2 flex items-center gap-1">
-                <span>💬</span>
-                <span>456</span>
-              </div>
-            </article>
-
-            {/* Card 2: Lost Civilization */}
-            <article className="flex flex-col justify-between">
-              <div>
-                <Link
-                  href="/article/a-lost-civilization-is-baffling-experts-and-rewriting-chinas-origin-story"
-                  className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 border border-gray-200 mb-2.5 group"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src="https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=600&q=80"
-                    alt="A Lost Civilization Is Baffling Experts"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <div className="absolute bottom-1 right-1 bg-black/60 text-white font-sans text-[9px] px-1 py-0.5 rounded-2xs pointer-events-none">
-                    Photo: ZUMA Press
-                  </div>
-                </Link>
-                <h3 className="font-serif font-bold text-[17px] xl:text-[18px] leading-[1.22] text-[#111111] hover:text-gray-800 hover:underline cursor-pointer">
-                  <Link href="/article/a-lost-civilization-is-baffling-experts-and-rewriting-chinas-origin-story">
-                    A Lost Civilization Is Baffling Experts and Rewriting China’s Origin Story
-                  </Link>
-                </h3>
-              </div>
-              <div className="font-sans text-[11px] text-gray-500 mt-2 flex items-center gap-1">
-                <span>💬</span>
-                <span>151</span>
-              </div>
-            </article>
-
-            {/* Card 3: My Secret Diet */}
-            <article className="flex flex-col justify-between">
-              <div>
-                <Link
-                  href="/article/my-secret-diet-is-a-trip-to-europe"
-                  className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 border border-gray-200 mb-2.5"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src="https://images.unsplash.com/photo-1567206563064-6f60f40a2b57?auto=format&fit=crop&w=600&q=80"
-                    alt="My Secret Diet Is a Trip to Europe"
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                  />
-                </Link>
-                <h3 className="font-serif font-bold text-[17px] xl:text-[18px] leading-[1.22] text-[#111111] hover:text-gray-800 hover:underline cursor-pointer">
-                  <Link href="/article/my-secret-diet-is-a-trip-to-europe">
-                    My Secret Diet Is a Trip to Europe
-                  </Link>
-                </h3>
-              </div>
-              <div className="font-sans text-[11px] text-gray-500 mt-2 flex items-center gap-1">
-                <span>💬</span>
-                <span>326</span>
-              </div>
-            </article>
-
-          </div>
-
-          {/* Bottom Line inside Left Column */}
-          <div className="border-b border-gray-300 pt-2" />
-
-        </div>
-
-        {/* ==================== RIGHT SIDEBAR CONTAINER (3 of 12 Cols ~ 25%) ==================== */}
-        <div className="lg:col-span-3 pl-0 lg:pl-6 pt-3 lg:pt-0 flex flex-col gap-4">
-          
-          {/* Top Advertisement Label */}
-          <div className="text-right lg:text-center">
-            <span className="text-[10px] font-sans text-gray-400 uppercase tracking-widest">
-              Advertisement
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pb-6">
+        {/* Editor's Picks Left Featured Column (6 of 12 cols) */}
+        <div className="lg:col-span-6 border-b lg:border-b-0 lg:border-r lg:border-gray-300 lg:pr-6 pb-6 lg:pb-0">
+          <article className="pb-4">
+            <span className="inline-block bg-red-100 text-red-700 font-sans font-bold text-[10px] px-2 py-0.5 uppercase tracking-wider mb-2">
+              NEW | INTERVIEW
             </span>
-          </div>
-
-          {/* MarketViews Sponsored Banner */}
-          <Link
-            href="/article/what-is-the-latest-on-etfs"
-            className="bg-[#0e2744] text-white overflow-hidden shadow-xs cursor-pointer group border border-[#0e2744] block"
-          >
-            <div className="aspect-[16/8] w-full overflow-hidden relative bg-[#051326]">
+            <h3 className="font-serif font-bold text-[22px] sm:text-[24px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-2">
+              <Link prefetch={true} href="/article/tanya-byron-stop-misusing-mental-health-terms-triggered">
+                Tanya Byron: Stop misusing mental health terms like ‘triggered’
+              </Link>
+            </h3>
+            <p className="font-sans text-[13px] leading-[1.4] text-[#555555] mb-3">
+              The clinical psychologist has had enough of people adopting mental health labels to describe normal feelings such as grief, disappointment and sadness.
+            </p>
+            <div className="font-sans text-[11px] text-gray-500 mb-3 font-semibold uppercase">
+              HEALTH &amp; FITNESS
+            </div>
+            <Link
+              href="/article/tanya-byron-stop-misusing-mental-health-terms-triggered"
+              className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 border border-gray-200"
+            >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=600&q=80"
-                alt="Stock Market Board"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                src="/images/harvard-woman.jpg"
+                alt="Tanya Byron"
+                className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
               />
-            </div>
-            <div className="p-3.5">
-              <h4 className="font-sans font-bold text-[14px] leading-tight text-white group-hover:underline">
-                What is the latest on ETFs?
-              </h4>
-              <span className="font-serif italic text-[11.5px] text-gray-300 block mt-0.5">
-                MarketViews
-              </span>
-              <div className="flex items-center justify-between pt-3">
-                <svg className="w-3.5 h-3.5 text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                  <line x1="3" y1="9" x2="21" y2="9" />
-                  <line x1="9" y1="21" x2="9" y2="9" />
-                </svg>
-                <div className="w-6 h-6 bg-[#0274b6] group-hover:bg-[#005599] flex items-center justify-center text-white transition-colors">
-                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <polyline points="9 18 15 12 9 6" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </Link>
+            </Link>
+          </article>
 
-          {/* "Got a tip for us?" Callout Box */}
-          <div className="border border-gray-400 p-3 bg-white flex items-center gap-3.5 cursor-pointer hover:bg-gray-50 transition-colors">
-            <div className="w-7 h-7 shrink-0 text-black flex items-center justify-center">
-              <svg className="w-6 h-6 stroke-current fill-none" viewBox="0 0 24 24" strokeWidth="1.5">
-                <rect x="2" y="4" width="20" height="16" rx="1" />
-                <path d="M22 6L12 13L2 6" />
-              </svg>
+          <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200">
+            <article>
+              <Link href="/article/why-earl-spencer-haunted-ghost-diana" className="block relative aspect-[4/3] w-full overflow-hidden bg-gray-100 border border-gray-200 mb-2">
+                <img src="/images/bourdain-movie.jpg" alt="Earl Spencer" className="w-full h-full object-cover" />
+              </Link>
+              <h4 className="font-serif font-bold text-[14.5px] leading-tight text-[#111111]">
+                Why Earl Spencer is still haunted by the ghost of Diana
+              </h4>
+              <span className="font-sans text-[10px] text-gray-500 font-bold uppercase mt-1 block">ROYAL FAMILY</span>
+            </article>
+
+            <article>
+              <Link href="/article/emma-barnett-hysterectomy-never-wanted" className="block relative aspect-[4/3] w-full overflow-hidden bg-gray-100 border border-gray-200 mb-2">
+                <img src="/images/ariana-grande.jpg" alt="Emma Barnett" className="w-full h-full object-cover" />
+              </Link>
+              <h4 className="font-serif font-bold text-[14.5px] leading-tight text-[#111111]">
+                Emma Barnett: Why I had the hysterectomy I never wanted to have
+              </h4>
+              <span className="font-sans text-[10px] text-gray-500 font-bold uppercase mt-1 block">HEALTH &amp; FITNESS</span>
+            </article>
+          </div>
+        </div>
+
+        {/* Editor's Picks Right Grid (6 of 12 cols) */}
+        <div className="lg:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <article>
+            <Link href="/article/undercover-drug-cop-psychedelics" className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 border border-gray-200 mb-2">
+              <img src="/images/handcuffs-money.jpg" alt="Undercover drug cop" className="w-full h-full object-cover" />
+            </Link>
+            <h4 className="font-serif font-bold text-[16px] leading-[1.22] text-[#111111] hover:underline cursor-pointer">
+              I was an undercover drug cop. Now I experiment with psychedelics
+            </h4>
+            <span className="font-sans text-[10px] text-gray-500 font-bold uppercase mt-1 block">BOOKS</span>
+          </article>
+
+          <article>
+            <Link href="/article/books-we-couldnt-finish-american-psycho" className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 border border-gray-200 mb-2">
+              <img src="/images/wine-plane.jpg" alt="Books couldnt finish" className="w-full h-full object-cover" />
+            </Link>
+            <h4 className="font-serif font-bold text-[16px] leading-[1.22] text-[#111111] hover:underline cursor-pointer">
+              The books we couldn’t finish — from American Psycho and Dubliners to Flesh
+            </h4>
+            <span className="font-sans text-[10px] text-gray-500 font-bold uppercase mt-1 block">BOOKS</span>
+          </article>
+
+          <article>
+            <Link href="/article/best-worst-james-bond-themes" className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 border border-gray-200 mb-2">
+              <img src="/images/dc-townhouse.jpg" alt="James Bond themes" className="w-full h-full object-cover" />
+            </Link>
+            <h4 className="font-serif font-bold text-[16px] leading-[1.22] text-[#111111] hover:underline cursor-pointer">
+              The best (and worst) James Bond themes — and who should sing it next
+            </h4>
+            <span className="font-sans text-[10px] text-gray-500 font-bold uppercase mt-1 block">FILM</span>
+          </article>
+
+          <article>
+            <Link href="/article/king-charles-wont-slow-down" className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 border border-gray-200 mb-2">
+              <img src="/images/kevin_warsh.jpg" alt="King Charles" className="w-full h-full object-cover" />
+            </Link>
+            <h4 className="font-serif font-bold text-[16px] leading-[1.22] text-[#111111] hover:underline cursor-pointer">
+              King Charles won’t slow down and won’t do what he’s told
+            </h4>
+            <span className="font-sans text-[10px] text-gray-500 font-bold uppercase mt-1 block">ROYAL FAMILY</span>
+          </article>
+        </div>
+      </div>
+
+      {/* ==================== SECTION 4: YOUR WEEKEND, WSJ PROMOTION & FREE EXPRESSION ==================== */}
+      <div className="border-t border-gray-300 pt-6 mt-4">
+        {/* WSJ Promotion Banner matching reference */}
+        <div className="border border-gray-300 p-6 sm:p-8 bg-[#fafafa] flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
+          <div className="flex-1 max-w-xl">
+            <span className="font-sans font-extrabold text-[10px] tracking-widest text-blue-700 uppercase block mb-1">
+              WSJ PROMOTION
+            </span>
+            <h3 className="font-serif font-bold text-[22px] sm:text-[26px] text-[#111111] leading-tight mb-2">
+              Special Offer
+            </h3>
+            <p className="font-sans text-[13px] text-[#444444] mb-4 leading-relaxed">
+              Trust your source. Trust your decisions. Let WSJ’s fact-based journalism help you make sense of what’s already happened and navigate what’s ahead.
+            </p>
+            <Link
+              href="/special-offer"
+              className="bg-[#007cb9] hover:bg-[#005599] text-white font-sans font-bold text-[12.5px] px-6 py-2.5 inline-block transition-colors shadow-2xs"
+            >
+              VIEW MEMBERSHIP OPTIONS
+            </Link>
+          </div>
+          <div className="shrink-0 text-center border-t md:border-t-0 md:border-l border-gray-300 pt-4 md:pt-0 md:pl-8">
+            <img src="/images/design-reference/Times Chicago.svg" alt="Times Chicago" className="h-10 sm:h-12 w-auto mx-auto mb-1" />
+            <span className="font-sans text-[9px] font-bold text-gray-500 uppercase tracking-widest block">IT'S YOUR BUSINESS</span>
+          </div>
+        </div>
+
+        {/* Your Weekend & Free Expression 12-col Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Your Weekend Column (8 of 12 cols) */}
+          <div className="lg:col-span-8 lg:border-r lg:border-gray-300 lg:pr-6">
+            <div className="border-t border-black pt-2 mb-3">
+              <h3 className="font-serif font-bold text-[18px] text-[#111111]">Your Weekend</h3>
             </div>
-            <div>
-              <span className="font-sans font-bold text-[13px] text-[#111111] leading-tight block">
-                Got a tip for us?
-              </span>
-              <Link
-                href="/newsletter"
-                className="font-sans font-bold text-[13px] text-[#111111] leading-tight block hover:underline"
-              >
-                Here’s how to submit
+            <article className="pb-4">
+              <Link href="/article/why-it-is-impossible-to-get-a-restaurant-reservation" className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 border border-gray-200 mb-3">
+                <img src="/images/berkshire_resort.jpg" alt="Restaurant reservation" className="w-full h-full object-cover" />
+              </Link>
+              <h3 className="font-serif font-bold text-[22px] leading-tight text-[#111111] hover:underline cursor-pointer mb-2">
+                Why It Is Impossible to Get a Restaurant Reservation
+              </h3>
+              <p className="font-sans text-[13px] text-[#555555]">
+                New apps, membership clubs and other middlemen are fighting over access to high-spending customers and the eateries they love.
+              </p>
+            </article>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3 border-t border-gray-200">
+              <article>
+                <h4 className="font-serif font-bold text-[15px] leading-tight text-[#111111]">
+                  The Cyberattack That Brought a Distant War to Small-Town Minnesota
+                </h4>
+              </article>
+              <article>
+                <h4 className="font-serif font-bold text-[15px] leading-tight text-[#111111]">
+                  Situational Awareness Sets Save Million-on-Stealth-Chip Startup After Crash
+                </h4>
+              </article>
+            </div>
+          </div>
+
+          {/* WSJ Opinion | Free Expression Column (4 of 12 cols) */}
+          <div className="lg:col-span-4 bg-[#f8f9fa] border border-gray-200 p-5">
+            <div className="border-b border-black pb-2 mb-3">
+              <h3 className="font-serif font-bold text-[16px] text-[#111111] uppercase tracking-wider">
+                WSJ Opinion | Free Expression
+              </h3>
+            </div>
+            <div className="space-y-4">
+              <article>
+                <h4 className="font-serif font-bold text-[15px] leading-tight text-[#111111]">
+                  Trump Should Worry About 1968
+                </h4>
+                <span className="font-sans text-[11px] text-gray-500 block mt-0.5">By Matthew Continetti</span>
+              </article>
+              <article className="pt-3 border-t border-gray-200">
+                <h4 className="font-serif font-bold text-[15px] leading-tight text-[#111111]">
+                  Gawking at Ariana Grande Isn’t Noble
+                </h4>
+                <span className="font-sans text-[11px] text-gray-500 block mt-0.5">By Emma Camp</span>
+              </article>
+              <article className="pt-3 border-t border-gray-200">
+                <h4 className="font-serif font-bold text-[15px] leading-tight text-[#111111]">
+                  No Day at the Beach
+                </h4>
+                <span className="font-sans text-[11px] text-gray-500 block mt-0.5">By Christopher A. Scale</span>
+              </article>
+            </div>
+            <div className="mt-5 pt-3 border-t border-gray-300">
+              <Link href="/opinion" className="block text-center bg-[#334155] hover:bg-[#1e293b] text-white font-sans font-bold text-[12px] py-2 transition-colors">
+                Go to Free Expression
               </Link>
             </div>
           </div>
-
         </div>
+      </div>
 
+      {/* ==================== AD 03 BANNER ==================== */}
+      <div className="w-full bg-gray-100 border border-gray-300 h-[120px] sm:h-[140px] flex items-center justify-center my-6">
+        <span className="font-serif font-bold text-[32px] text-gray-700">Ad 03</span>
       </div>
     </section>
   );
 }
+

@@ -1,11 +1,13 @@
 import React from "react";
 import Link from "next/link";
 import Header from "@/components/navigation/Header";
+import StickyHeaderBar from "@/components/navigation/StickyHeaderBar";
 import Footer from "@/components/layout/Footer";
 import Container from "@/components/layout/Container";
 import StickySubscribeBar from "@/components/ui/StickySubscribeBar";
 import { getArticleBySlug } from "@/data/articles";
 import ArticleTopBar from "@/components/article/ArticleTopBar";
+import BookmarkButton from "@/components/article/BookmarkButton";
 import RecentInUsSidebar from "@/components/article/RecentInUsSidebar";
 import NewsletterSignupBanner from "@/components/article/NewsletterSignupBanner";
 import ArticleCommentsSection from "@/components/article/ArticleCommentsSection";
@@ -17,10 +19,27 @@ interface ArticlePageProps {
   params: Promise<{ slug: string }>;
 }
 
+
+
+export async function generateStaticParams() {
+  return [
+    { slug: "afghanistan-refugees" },
+    { slug: "gaza-humanitarian" },
+    { slug: "trump-tax-cuts" },
+    { slug: "sam-altman-openai" },
+    { slug: "meta-glasses" },
+    { slug: "bitcoin-all-time-high" },
+    { slug: "nvidia-market-cap" },
+    { slug: "real-estate-mortgage-rates" },
+    { slug: "biden-health-update" },
+    { slug: "sample_draft_1" },
+    { slug: "sample_draft_2" },
+  ];
+}
+
 export default async function ArticlePage({ params }: ArticlePageProps) {
-  const { slug } = await params;
-  const article = getArticleBySlug(slug);
-  const authorObj = getAuthorForArticle(slug);
+  const article = getArticleBySlug(slug) || {};
+  const authorObj = getAuthorForArticle(slug, article?.author || "writer");
 
   // Default values matching Screenshots 1 & 2
   const category = article.category || "US";
@@ -31,76 +50,116 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     article.deck ||
     article.summary ||
     'Former U.S. President Joe Biden is facing a worsening health situation after his son Hunter Biden said the cancer has spread to his bones and described the disease as "very painful" and "very debilitating."';
-  const authorName = article.author || "Dylan Candice Odulio";
+  const authorName = article.author || "writer";
   const publishedDate = article.publishedDate || "08/09/26 AT 11:30 AM EDT";
   const imageUrl =
     article.imageUrl ||
     "https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?auto=format&fit=crop&w=1200&q=80";
   const photoCaption = article.photoCaption || "Former U.S. President Joe Biden";
 
+  const getInitials = (name: string) => {
+    if (!name) return "WR";
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  };
+
+  const currentArticleData = {
+    id: article.id || slug,
+    slug: slug,
+    title: title,
+    deck: deck,
+    category: category,
+    date: publishedDate,
+    author: authorName,
+    image: imageUrl,
+  };
+
   return (
     <main className="min-h-screen bg-white text-[#111111] font-sans flex flex-col justify-between select-none">
       <div>
-        {/* Main Header & Navigation (completely untouched) */}
+        {/* Main Header & Navigation */}
         <Header />
+        <StickyHeaderBar />
 
         {/* NEW Article Page Body */}
         <div className="article-body">
           {/* Section 1: Top Bar (< BACK TO NEWSFEED + A A A, Bookmark, Share) */}
-          <ArticleTopBar />
+          <ArticleTopBar article={currentArticleData} />
 
           {/* Section 2: Main Article Content & Recent in US Sidebar */}
           <Container className="py-8">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
               {/* Left Column: Main Article Body (Span 8) */}
               <article className="lg:col-span-8 space-y-5">
-                {/* Category Kicker */}
-                <div className="font-sans font-extrabold text-[11px] text-[#111111] uppercase tracking-wider">
-                  {category}
+                {/* Category & EXCLUSIVE Badge matching Image 1 */}
+                <div className="flex items-center space-x-3 mb-3 font-sans">
+                  <span className="text-[12px] font-sans font-bold text-[#666666] tracking-wider uppercase">
+                    {category}
+                  </span>
                 </div>
 
-                {/* Article Headline */}
-                <h1 className="font-serif font-bold text-3xl sm:text-4xl md:text-[38px] lg:text-[40px] text-[#111111] leading-[1.14] tracking-tight">
+                {/* Article Headline using Encorpada Classic Compressed Bold by dooType */}
+                <h1 className="text-3xl sm:text-4xl md:text-[38px] lg:text-[40px] font-encorpada-headline font-bold text-[#111111] mb-4">
                   {title}
                 </h1>
 
-                {/* Subheadline / Deck */}
-                <p className="font-serif text-base sm:text-lg md:text-[19px] text-[#555555] leading-relaxed">
+                {/* Subheadline / Deck (Sans-Serif matching Image 1) */}
+                <p className="font-sans text-base sm:text-lg md:text-[19px] text-[#555555] leading-relaxed">
                   {deck}
                 </p>
 
-                {/* Author Byline & Date Row */}
-                <div className="pt-2 pb-4 border-b border-[#e5e7eb] flex items-center gap-3">
-                  {/* Circular Author Avatar Link */}
-                  <Link href={`/author/${authorObj.slug}`}>
-                    <img
-                      src={authorObj.image}
-                      alt={authorObj.name}
-                      className="w-9 h-9 rounded-full object-cover shrink-0 hover:opacity-90 transition-opacity cursor-pointer"
-                    />
-                  </Link>
-
-                  {/* Author Name + LinkedIn Icon + Published Date */}
-                  <div className="text-xs font-sans space-y-0.5">
-                    <div className="flex items-center gap-1.5 font-bold text-[#111111]">
-                      <Link
-                        href={`/author/${authorObj.slug}`}
-                        className="font-bold text-[#111111] hover:underline cursor-pointer"
-                      >
-                        By {authorObj.name}
-                      </Link>
-                      <a
-                        href={authorObj.linkedinUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center justify-center w-3.5 h-3.5 bg-[#0077b5] text-white rounded-[2px] text-[8px] font-bold leading-none hover:opacity-80 transition-opacity"
-                        title={`${authorObj.name} LinkedIn Profile`}
-                      >
-                        in
-                      </a>
+                {/* Author Byline & Share + Bookmark Icons placed directly next to Writer Name */}
+                <div className="pt-2 pb-4 border-b border-[#e5e7eb]">
+                  <div className="font-sans flex items-center gap-3.5 flex-wrap">
+                    {/* Writer's Circular Headshot Profile Image placed in front of By Writer name */}
+                    <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden shrink-0 border border-gray-200 shadow-xs bg-gray-100 flex items-center justify-center">
+                      {authorObj.image ? (
+                        <img
+                          src={authorObj.image}
+                          alt={authorObj.name}
+                          className="w-full h-full object-cover rounded-full"
+                        />
+                      ) : (
+                        <div className="w-full h-full rounded-full bg-[#111111] text-white flex items-center justify-center font-bold text-sm">
+                          {authorObj.name.charAt(0).toUpperCase()}
+                        </div>
+                      )}
                     </div>
-                    <div className="text-[10px] uppercase tracking-wider text-gray-400 font-medium">
-                      Published {publishedDate}
+
+                    {/* Writer Name + Inline Share & Bookmark Icons + Published Date */}
+                    <div>
+                      <div className="text-[14px] font-bold text-[#111111] leading-tight flex items-center gap-2 flex-wrap">
+                        <span>
+                          By{" "}
+                          <Link
+                            href={`/author/${authorObj.slug}`}
+                            className="underline hover:text-black cursor-pointer"
+                          >
+                            {authorObj.name}
+                          </Link>
+                        </span>
+
+                        {/* Share Icon directly next to writer name */}
+                        <button
+                          type="button"
+                          className="inline-flex items-center justify-center w-7 h-7 rounded-lg border border-[#cbd5e1] bg-white hover:bg-slate-100 text-[#334155] hover:text-[#0f172a] transition-colors cursor-pointer shadow-2xs ml-1"
+                          title="Share Article"
+                          aria-label="Share Article"
+                          suppressHydrationWarning
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                            <path d="M4 19c2.5-2.5 6-4.5 11-4.5v4.5l8-8.5L15 2v4.5C8.5 6.5 4.5 11 4 19z" />
+                          </svg>
+                        </button>
+
+                        {/* Bookmark Icon directly next to Share icon */}
+                        <BookmarkButton article={currentArticleData} variant="inline" />
+                      </div>
+
+                      <div className="text-[13.5px] font-semibold text-[#555555] leading-tight mt-1">
+                        {publishedDate.includes("Aug") && !publishedDate.includes("Aug.") ? publishedDate.replace("Aug", "Aug.") : publishedDate}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -263,7 +322,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               </article>
 
               {/* Right Column: Recent in US Sidebar & MarketViews Ad Card (Span 4) */}
-              <div className="lg:col-span-4 sticky top-6 pl-0 lg:pl-4">
+              <div className="lg:col-span-4 lg:sticky lg:top-6 pl-0 lg:pl-4 mt-8 lg:mt-0">
                 <RecentInUsSidebar categoryName={category} />
                 <MarketViewsAdCard />
               </div>

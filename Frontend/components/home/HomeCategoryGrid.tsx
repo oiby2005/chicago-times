@@ -3,16 +3,18 @@
 import React from "react";
 import Link from "next/link";
 import Container from "@/components/layout/Container";
+import AdPlaceholder from "@/components/ui/AdPlaceholder";
 import { homepageArticles } from "@/data/articles";
+import { getCategoryRoute } from "@/components/navigation/Navbar";
 
 // Reusable Grey Skeleton Column Component for Screenshots 2, 3, 4, 5
 const SkeletonColumn: React.FC<{ title: string }> = ({ title }) => (
   <div className="space-y-4">
     <div className="border-t-2 border-black pt-2 flex items-center justify-between">
-      <h3 className="font-serif font-bold text-xl text-black flex items-center space-x-1 cursor-pointer hover:underline">
+      <Link href={getCategoryRoute(title)} className="font-serif font-bold text-xl text-black flex items-center space-x-1 cursor-pointer hover:underline">
         <span>{title}</span>
         <span className="text-sm font-sans font-bold ml-1">&gt;</span>
-      </h3>
+      </Link>
     </div>
     {/* Grey Skeleton Image Box */}
     <div className="w-full aspect-[4/3] bg-[#e6e6e6] rounded-xs mb-3" />
@@ -51,10 +53,10 @@ export const HomeCategoryGrid: React.FC = () => {
             {/* Economy Column (Span 2.7) */}
             <div className="md:col-span-3 space-y-4">
               <div className="border-t-2 border-black pt-2 flex items-center justify-between">
-                <h3 className="font-serif font-bold text-xl text-black flex items-center space-x-1 cursor-pointer hover:underline">
+                <Link href="/economy" className="font-serif font-bold text-xl text-black flex items-center space-x-1 cursor-pointer hover:underline">
                   <span>Economy</span>
                   <span className="text-sm font-sans font-bold ml-1">&gt;</span>
-                </h3>
+                </Link>
               </div>
               <div className="space-y-3">
                 <Link href={`/article/${art["chinas-new-export-engine-supplying-factories"]?.slug || "chinas-new-export-engine-supplying-factories"}`}>
@@ -85,10 +87,10 @@ export const HomeCategoryGrid: React.FC = () => {
             {/* Real Estate Column (Span 2.7) */}
             <div className="md:col-span-3 space-y-4">
               <div className="border-t-2 border-black pt-2 flex items-center justify-between">
-                <h3 className="font-serif font-bold text-xl text-black flex items-center space-x-1 cursor-pointer hover:underline">
+                <Link href="/real-estate" className="font-serif font-bold text-xl text-black flex items-center space-x-1 cursor-pointer hover:underline">
                   <span>Real Estate</span>
                   <span className="text-sm font-sans font-bold ml-1">&gt;</span>
-                </h3>
+                </Link>
               </div>
               <div className="space-y-3">
                 <Link href={`/article/${art["washington-dc-billionaire-boomtown"]?.slug || "washington-dc-billionaire-boomtown"}`}>
@@ -119,10 +121,10 @@ export const HomeCategoryGrid: React.FC = () => {
             {/* Sports Column (Span 2.7) */}
             <div className="md:col-span-3 space-y-4">
               <div className="border-t-2 border-black pt-2 flex items-center justify-between">
-                <h3 className="font-serif font-bold text-xl text-black flex items-center space-x-1 cursor-pointer hover:underline">
+                <Link href="/sports" className="font-serif font-bold text-xl text-black flex items-center space-x-1 cursor-pointer hover:underline">
                   <span>Sports</span>
                   <span className="text-sm font-sans font-bold ml-1">&gt;</span>
-                </h3>
+                </Link>
               </div>
               <div className="space-y-3">
                 <Link href={`/article/${art["investors-whose-spacex-shares-vanished"]?.slug || "investors-whose-spacex-shares-vanished"}`}>
@@ -150,37 +152,9 @@ export const HomeCategoryGrid: React.FC = () => {
               </div>
             </div>
 
-            {/* Right Sidebar MarketViews Stack (Span 3.6) */}
-            <div className="md:col-span-3 space-y-4">
-              <div className="text-[10px] text-gray-500 font-sans text-right">
-                Advertisement
-              </div>
-              <div className="bg-[#122b40] text-white p-4 space-y-4 rounded-xs">
-                <div className="text-xs font-bold tracking-tight border-b border-gray-600 pb-2">
-                  What is the latest on ETFs? <br />
-                  <span className="text-gray-400 font-serif italic text-[11px]">
-                    MarketViews
-                  </span>
-                </div>
-                <div className="text-xs font-bold tracking-tight border-b border-gray-600 pb-2">
-                  Get the latest commodity trends from industry experts. <br />
-                  <span className="text-gray-400 font-serif italic text-[11px]">
-                    MarketViews
-                  </span>
-                </div>
-                <div className="text-xs font-bold tracking-tight border-b border-gray-600 pb-2">
-                  Stay updated with the newest gold market developments. <br />
-                  <span className="text-gray-400 font-serif italic text-[11px]">
-                    MarketViews
-                  </span>
-                </div>
-                <div className="text-xs font-bold tracking-tight">
-                  Uncover the latest trends in retirement planning strategies. <br />
-                  <span className="text-gray-400 font-serif italic text-[11px]">
-                    MarketViews
-                  </span>
-                </div>
-              </div>
+            {/* Right Sidebar MarketViews AdPlaceholder */}
+            <div className="md:col-span-3">
+              <AdPlaceholder width="w-full" height="h-[250px]" resolution="300 × 250" />
             </div>
           </div>
         </div>
@@ -199,36 +173,8 @@ export const HomeCategoryGrid: React.FC = () => {
             <div className="md:col-span-3">
               <SkeletonColumn title="CFO" />
             </div>
-            <div className="md:col-span-3 space-y-4">
-              <div className="text-[10px] text-gray-500 font-sans text-right">
-                Advertisement
-              </div>
-              <div className="bg-[#122b40] text-white p-4 space-y-4 rounded-xs">
-                <div className="text-xs font-bold tracking-tight border-b border-gray-600 pb-2">
-                  What is the latest on ETFs? <br />
-                  <span className="text-gray-400 font-serif italic text-[11px]">
-                    MarketViews
-                  </span>
-                </div>
-                <div className="text-xs font-bold tracking-tight border-b border-gray-600 pb-2">
-                  Get the latest commodity trends from industry experts. <br />
-                  <span className="text-gray-400 font-serif italic text-[11px]">
-                    MarketViews
-                  </span>
-                </div>
-                <div className="text-xs font-bold tracking-tight border-b border-gray-600 pb-2">
-                  Stay updated with the newest gold market developments. <br />
-                  <span className="text-gray-400 font-serif italic text-[11px]">
-                    MarketViews
-                  </span>
-                </div>
-                <div className="text-xs font-bold tracking-tight">
-                  Uncover the latest trends in retirement planning strategies. <br />
-                  <span className="text-gray-400 font-serif italic text-[11px]">
-                    MarketViews
-                  </span>
-                </div>
-              </div>
+            <div className="md:col-span-3">
+              <AdPlaceholder width="w-full" height="h-[250px]" resolution="300 × 250" />
             </div>
           </div>
         </div>
@@ -245,36 +191,8 @@ export const HomeCategoryGrid: React.FC = () => {
             <div className="md:col-span-3">
               <SkeletonColumn title="Logistics Report" />
             </div>
-            <div className="md:col-span-3 space-y-4">
-              <div className="text-[10px] text-gray-500 font-sans text-right">
-                Advertisement
-              </div>
-              <div className="bg-[#122b40] text-white p-4 space-y-4 rounded-xs">
-                <div className="text-xs font-bold tracking-tight border-b border-gray-600 pb-2">
-                  What is the latest on ETFs? <br />
-                  <span className="text-gray-400 font-serif italic text-[11px]">
-                    MarketViews
-                  </span>
-                </div>
-                <div className="text-xs font-bold tracking-tight border-b border-gray-600 pb-2">
-                  Get the latest commodity trends from industry experts. <br />
-                  <span className="text-gray-400 font-serif italic text-[11px]">
-                    MarketViews
-                  </span>
-                </div>
-                <div className="text-xs font-bold tracking-tight border-b border-gray-600 pb-2">
-                  Stay updated with the newest gold market developments. <br />
-                  <span className="text-gray-400 font-serif italic text-[11px]">
-                    MarketViews
-                  </span>
-                </div>
-                <div className="text-xs font-bold tracking-tight">
-                  Uncover the latest trends in retirement planning strategies. <br />
-                  <span className="text-gray-400 font-serif italic text-[11px]">
-                    MarketViews
-                  </span>
-                </div>
-              </div>
+            <div className="md:col-span-3">
+              <AdPlaceholder width="w-full" height="h-[250px]" resolution="300 × 250" />
             </div>
           </div>
         </div>
@@ -293,28 +211,8 @@ export const HomeCategoryGrid: React.FC = () => {
             <div className="md:col-span-3">
               <SkeletonColumn title="Barron's" />
             </div>
-            <div className="md:col-span-3 space-y-2">
-              <div className="text-[10px] text-gray-500 font-sans text-right">
-                Advertisement
-              </div>
-              <div className="bg-[#6384ff] text-white p-6 rounded-xs space-y-6 flex flex-col justify-between min-h-[500px]">
-                <div className="space-y-4">
-                  <div className="text-xs font-serif font-black tracking-wider uppercase border-b border-blue-400 pb-2">
-                    WSJ — CPO Council
-                  </div>
-                  <h4 className="font-serif font-bold text-2xl sm:text-3xl leading-tight">
-                    Elevate Your People Leadership. Navigate Workforce Transformation with Confidence.
-                  </h4>
-                </div>
-                <div className="space-y-3">
-                  <button className="bg-white/20 hover:bg-white/30 border border-white text-white text-xs font-bold px-4 py-2 rounded-full">
-                    Learn More
-                  </button>
-                  <div className="text-[10px] font-serif font-bold uppercase tracking-wider text-blue-200">
-                    WSJ Leadership Institute
-                  </div>
-                </div>
-              </div>
+            <div className="md:col-span-3">
+              <AdPlaceholder width="w-full" height="h-[500px]" resolution="300 × 500" />
             </div>
           </div>
         </div>
@@ -333,28 +231,8 @@ export const HomeCategoryGrid: React.FC = () => {
             <div className="md:col-span-3">
               <SkeletonColumn title="Investor's Business Daily" />
             </div>
-            <div className="md:col-span-3 space-y-2">
-              <div className="text-[10px] text-gray-500 font-sans text-right">
-                Advertisement
-              </div>
-              <div className="bg-[#6384ff] text-white p-6 rounded-xs space-y-6 flex flex-col justify-between min-h-[500px]">
-                <div className="space-y-4">
-                  <div className="text-xs font-serif font-black tracking-wider uppercase border-b border-blue-400 pb-2">
-                    WSJ — CPO Council
-                  </div>
-                  <h4 className="font-serif font-bold text-2xl sm:text-3xl leading-tight">
-                    Elevate Your People Leadership. Navigate Workforce Transformation with Confidence.
-                  </h4>
-                </div>
-                <div className="space-y-3">
-                  <button className="bg-white/20 hover:bg-white/30 border border-white text-white text-xs font-bold px-4 py-2 rounded-full">
-                    Learn More
-                  </button>
-                  <div className="text-[10px] font-serif font-bold uppercase tracking-wider text-blue-200">
-                    WSJ Leadership Institute
-                  </div>
-                </div>
-              </div>
+            <div className="md:col-span-3">
+              <AdPlaceholder width="w-full" height="h-[500px]" resolution="300 × 500" />
             </div>
           </div>
         </div>

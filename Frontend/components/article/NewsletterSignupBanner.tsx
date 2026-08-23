@@ -14,7 +14,7 @@ export default function NewsletterSignupBanner() {
   };
 
   return (
-    <div className="w-full border-y border-[#e5e7eb] py-6 my-8">
+    <div className="w-full border-y border-[#e5e7eb] py-6 my-8 clear-both flow-root">
       {/* Title / Heading */}
       <h3 className="font-serif font-bold text-xl sm:text-2xl text-[#b8860b] leading-tight">
         Wall Street Journal Fast Start — Let the best of news come to you

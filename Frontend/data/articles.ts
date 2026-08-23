@@ -30,7 +30,7 @@ export const homepageArticles: Record<string, Article> = {
     title: "How Serious Is Joe Biden’s Cancer as His Son Says the Disease Has Spread Further",
     deck: "Former U.S. President Joe Biden is facing a worsening health situation after his son Hunter Biden said the cancer has spread to his bones and described the disease as \"very painful\" and \"very debilitating.\"",
     summary: "Former U.S. President Joe Biden is facing a worsening health situation after his son Hunter Biden said the cancer has spread to his bones and described the disease as \"very painful\" and \"very debilitating.\"",
-    author: "Dylan Candice Odulio",
+    author: "Nivedita Chakrapani",
     publishedDate: "08/09/26 AT 11:30 AM EDT",
     imageUrl: "https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?auto=format&fit=crop&w=1200&q=80",
     photoCaption: "Former U.S. President Joe Biden",
@@ -54,7 +54,7 @@ export const homepageArticles: Record<string, Article> = {
     summary: "While president has complained about Markwayne Mullin, an administration official says Trump has no plans to fire him",
     deck: "While president has complained about Markwayne Mullin, an administration official says Trump has no plans to fire him",
     category: "Politics",
-    author: "Michelle Hackman and Marianne LeVine",
+    author: "Michelle Hackman",
     publishedDate: "Aug. 7, 2026 9:00 pm ET",
     imageUrl: "https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?auto=format&fit=crop&w=1200&q=80",
     photoCaption: "Homeland Security Secretary Markwayne Mullin is facing strong internal opposition",
@@ -79,7 +79,7 @@ export const homepageArticles: Record<string, Article> = {
     summary: "While president has complained about Markwayne Mullin, an administration official says Trump has no plans to fire him",
     deck: "While president has complained about Markwayne Mullin, an administration official says Trump has no plans to fire him",
     category: "Politics",
-    author: "Michelle Hackman and Marianne LeVine",
+    author: "Ethan Carter",
     publishedDate: "Aug. 7, 2026 9:00 pm ET",
     imageUrl: "https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?auto=format&fit=crop&w=1200&q=80",
     photoCaption: "Homeland Security Secretary Markwayne Mullin is facing strong internal opposition",
@@ -106,7 +106,7 @@ export const homepageArticles: Record<string, Article> = {
       "The new assessment updates past forecasts that Russia's leader wouldn't provoke the alliance during the Ukraine war.",
     commentCount: 409,
     category: "World",
-    author: "Warren P. Strobel and Michael R. Gordon",
+    author: "Samuel Mauricio Patiño Fuentes",
     publishedDate: "August 7, 2026",
   },
   "republican-oppose-blanche": {
@@ -653,6 +653,20 @@ export function getArticleBySlug(slug: string): Article {
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
     .join(" ");
 
+  const staffWriters = [
+    "Nivedita Chakrapani",
+    "Ethan Carter",
+    "Samuel Mauricio Patiño Fuentes",
+    "Michelle Hackman",
+  ];
+
+  let hash = 0;
+  for (let i = 0; i < slug.length; i++) {
+    hash = (hash << 5) - hash + slug.charCodeAt(i);
+    hash |= 0;
+  }
+  const pickedAuthor = staffWriters[Math.abs(hash) % staffWriters.length];
+
   return {
     id: slug,
     slug: slug,
@@ -661,7 +675,7 @@ export function getArticleBySlug(slug: string): Article {
     summary: "Full analysis, background, and expert coverage on this developing story from The Wall Street Journal.",
     category: "Politics",
     topicBreadcrumb: "POLITICS • POLICY",
-    author: "Michelle Hackman and Marianne LeVine",
+    author: pickedAuthor,
     publishedDate: "Aug. 7, 2026 9:00 pm ET",
     commentCount: 181,
     listenTime: "2 min",

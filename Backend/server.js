@@ -18,6 +18,11 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use('/api/auth', authRoutes);
 
+// Root endpoint
+app.get('/', (req, res) => {
+  res.status(200).json({ status: 'ok', message: 'WSJ Express Backend Server Running', health: '/api/health' });
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok', message: 'WSJ Express Backend Server Running' });

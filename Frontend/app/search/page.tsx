@@ -1,20 +1,65 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Container from "@/components/layout/Container";
 import { homepageArticles } from "@/data/articles";
+import { authorsList } from "@/data/authors";
+
+const getInitials = (name: string) => {
+  if (!name) return "WR";
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+};
 
 export default function SearchPage() {
   const [query, setQuery] = useState("");
+  const [writerName, setWriterName] = useState("Reader User");
+  const [writerBio, setWriterBio] = useState("Avid Reader & News Enthusiast");
+  const [writerAvatar, setWriterAvatar] = useState("");
+  const [writerRole, setWriterRole] = useState("READER");
 
-  const results = query.trim()
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedUser = localStorage.getItem("wsj_user");
+      if (storedUser) {
+        try {
+          const u = JSON.parse(storedUser);
+          if (u.full_name || u.name) setWriterName(u.full_name || u.name);
+          if (u.bio) setWriterBio(u.bio);
+          if (u.avatar_url) setWriterAvatar(u.avatar_url);
+          if (u.role) setWriterRole(u.role.toUpperCase());
+        } catch (e) {}
+      }
+    }
+  }, []);
+
+  const cleanQuery = query.trim().toLowerCase();
+
+  const activeAuthors = [
+    {
+      slug: "user",
+      name: writerName,
+      role: writerRole,
+      bio: writerBio,
+      image: writerAvatar,
+      href: writerRole === "ADMIN" ? "/admin-dashboard" : writerRole === "READER" ? "/reader-dashboard" : "/writer",
+    },
+    ...authorsList.filter((a) => a.slug !== "writer"),
+  ];
+
+  const matchingAuthors = cleanQuery
+    ? activeAuthors.filter((author) => author.name.toLowerCase().includes(cleanQuery))
+    : [];
+
+  const results = cleanQuery
     ? Object.values(homepageArticles).filter(
         (article) =>
-          article.title.toLowerCase().includes(query.toLowerCase()) ||
-          article.summary?.toLowerCase().includes(query.toLowerCase()) ||
-          article.category?.toLowerCase().includes(query.toLowerCase()) ||
-          article.author?.toLowerCase().includes(query.toLowerCase())
+          article.title.toLowerCase().includes(cleanQuery) ||
+          article.summary?.toLowerCase().includes(cleanQuery) ||
+          article.category?.toLowerCase().includes(cleanQuery) ||
+          article.author?.toLowerCase().includes(cleanQuery)
       )
     : [];
 
@@ -66,12 +111,14 @@ export default function SearchPage() {
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   autoFocus
+                  suppressHydrationWarning
                   className="w-full bg-transparent text-xl sm:text-2xl font-sans text-black placeholder:text-gray-400 outline-none pr-4"
                 />
               </div>
 
               <button
                 type="submit"
+                suppressHydrationWarning
                 className="bg-[#bcbcbc] hover:bg-[#999999] text-white text-xs font-bold font-sans tracking-wider px-6 py-2.5 rounded-xs flex items-center justify-center space-x-1.5 uppercase transition-colors shrink-0 cursor-pointer shadow-xs"
               >
                 <span>SEARCH</span>
@@ -119,10 +166,56 @@ export default function SearchPage() {
             </div>
 
             {/* Live Results Feed */}
-            {query.trim() !== "" && (
+            {cleanQuery !== "" && (
               <div className="mt-8 pt-6 border-t border-[#e2e2e2]">
+                {/* Matching Writers & Authors Section */}
+                {matchingAuthors.length > 0 && (
+                  <div className="mb-8">
+                    <div className="text-xs font-sans font-bold text-[#007cba] uppercase tracking-wider mb-3">
+                      Matching Writers ({matchingAuthors.length})
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {matchingAuthors.map((author) => (
+                        <Link
+                          key={author.slug}
+                          href={(author as any).href || `/author/${author.slug}`}
+                          className="block group bg-white p-4 border border-[#e2e2e2] hover:border-[#007cba] transition-colors rounded-xs shadow-xs"
+                        >
+                          <div className="flex items-center gap-3.5">
+                            {author.image ? (
+                              <img
+                                src={author.image}
+                                alt={author.name}
+                                className="w-11 h-11 rounded-full object-cover shrink-0"
+                              />
+                            ) : (
+                              <div className="w-11 h-11 rounded-full bg-[#f05011] text-white font-bold text-xs flex items-center justify-center shrink-0">
+                                {getInitials(author.name)}
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <h4 className="font-serif font-bold text-base text-[#111111] group-hover:underline truncate">
+                                  {author.name}
+                                </h4>
+                                <span className="text-[9px] font-sans font-bold uppercase tracking-wider text-[#007cba] bg-[#e0f2fe] px-1.5 py-0.5 rounded-xs shrink-0">
+                                  {author.role || "READER"}
+                                </span>
+                              </div>
+                              <p className="text-xs font-sans text-gray-500 truncate mt-0.5">
+                                {author.bio}
+                              </p>
+                            </div>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Article Results */}
                 <div className="text-xs font-sans font-bold text-gray-500 uppercase tracking-wider mb-4">
-                  {results.length} Search Result{results.length !== 1 ? "s" : ""} for “{query}”
+                  Article Results ({results.length})
                 </div>
 
                 {results.length > 0 ? (
@@ -162,9 +255,11 @@ export default function SearchPage() {
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-8 text-sm font-sans text-gray-500 bg-white border border-[#e2e2e2] rounded-xs">
-                    No matching articles found for “<strong className="text-black">{query}</strong>”. Try another search term.
-                  </div>
+                  matchingAuthors.length === 0 && (
+                    <div className="text-center py-8 text-sm font-sans text-gray-500 bg-white border border-[#e2e2e2] rounded-xs">
+                      No matching articles or writers found for “<strong className="text-black">{query}</strong>”. Try another search term.
+                    </div>
+                  )
                 )}
               </div>
             )}

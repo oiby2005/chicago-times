@@ -148,6 +148,7 @@ export const Footer: React.FC = () => {
           <button
             onClick={scrollToTop}
             className="bg-[#b3b3b3] hover:bg-[#a0a0a0] text-white text-[11px] font-bold uppercase tracking-wider px-4 py-2 flex items-center space-x-1.5 transition-colors"
+            suppressHydrationWarning
           >
             <span>BACK TO TOP</span>
             <span className="text-[11px] font-black">^</span>
@@ -163,8 +164,8 @@ export const Footer: React.FC = () => {
               <div className="flex items-center space-x-6">
                 <a href="/" className="inline-block">
                   <img
-                    src="/images/wsj-masthead.svg"
-                    alt="The Wall Street Journal"
+                    src="/images/design-reference/Times Chicago.svg"
+                    alt="Times Chicago"
                     className="h-6 sm:h-7 w-auto object-contain block -ml-3 sm:-ml-3.5"
                   />
                 </a>
@@ -194,7 +195,7 @@ export const Footer: React.FC = () => {
       <div className="w-full bg-[#e8e8e8] pt-6 pb-6">
         <Container>
           {/* Multi-Column Links Section */}
-          <div className="pb-6 overflow-x-auto">
+          <div className="pb-6 overflow-x-auto no-scrollbar">
             <div className="min-w-[980px] grid grid-cols-12 gap-0 text-[11.5px]">
               {/* Column 1: News (Span 3) */}
               <div className="col-span-3 pr-4 border-r border-[#d4d4d4]">
@@ -414,7 +415,7 @@ export const Footer: React.FC = () => {
 
             {/* Google Play & App Store Badges */}
             <div className="flex items-center space-x-2 pl-3">
-              <button className="bg-black text-white px-2.5 py-1 rounded text-[10px] font-sans flex items-center space-x-1">
+              <button className="bg-black text-white px-2.5 py-1 rounded text-[10px] font-sans flex items-center space-x-1" suppressHydrationWarning>
                 <span className="text-[12px]">▶</span>
                 <div className="text-left leading-none">
                   <span className="text-[7px] uppercase block text-gray-400">
@@ -423,7 +424,7 @@ export const Footer: React.FC = () => {
                   <span className="font-bold text-[10px]">Google Play</span>
                 </div>
               </button>
-              <button className="bg-black text-white px-2.5 py-1 rounded text-[10px] font-sans flex items-center space-x-1">
+              <button className="bg-black text-white px-2.5 py-1 rounded text-[10px] font-sans flex items-center space-x-1" suppressHydrationWarning>
                 <span className="text-[12px]"></span>
                 <div className="text-left leading-none">
                   <span className="text-[7px] uppercase block text-gray-400">

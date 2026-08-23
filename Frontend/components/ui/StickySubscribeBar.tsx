@@ -26,13 +26,14 @@ export const StickySubscribeBar: React.FC = () => {
 
         {/* Right Action Button & Close */}
         <div className="flex items-center space-x-3">
-          <button className="bg-[#007cba] hover:bg-[#006996] text-white font-sans text-xs font-bold px-4 py-2 rounded-xs tracking-tight transition-colors whitespace-nowrap">
+          <button className="bg-[#007cba] hover:bg-[#006996] text-white font-sans text-xs font-bold px-4 py-2 rounded-xs tracking-tight transition-colors whitespace-nowrap" suppressHydrationWarning>
             Subscribe Now
           </button>
           <button
             onClick={() => setIsVisible(false)}
             aria-label="Close"
             className="text-gray-500 hover:text-black text-sm font-bold p-1 focus:outline-none"
+            suppressHydrationWarning
           >
             ✕
           </button>

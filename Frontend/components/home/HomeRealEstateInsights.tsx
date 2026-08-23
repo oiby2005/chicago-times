@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import Container from "@/components/layout/Container";
+import AdPlaceholder from "@/components/ui/AdPlaceholder";
 
 export const HomeRealEstateInsights: React.FC = () => {
   return (
@@ -13,179 +14,76 @@ export const HomeRealEstateInsights: React.FC = () => {
           {/* LEFT COLUMN: DIANOMI ADS & REAL ESTATE INSIGHTS (Span 8)       */}
           {/* =============================================================== */}
           <div className="md:col-span-8 space-y-6">
-            {/* 1. ADVERTISEMENT (DIANOMI) SECTION */}
+            {/* 1. ADVERTISEMENT SECTION */}
             <div className="border-t-2 border-black pt-3">
-              <div className="flex items-center justify-between pb-2 mb-4">
-                <span className="text-xs font-sans font-bold text-[#111111] uppercase tracking-wider">
-                  ADVERTISEMENT
-                </span>
-                <span className="text-xs font-sans font-bold text-[#111111]">
-                  dianomi
-                </span>
-              </div>
-
-              {/* 3-Column x 2-Row Dianomi Ad Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 pb-6 border-b-2 border-black text-xs">
-                {/* Item 1 */}
-                <div className="flex items-start space-x-2">
-                  <div className="space-y-1 flex-1">
-                    <a href="#" className="font-sans text-[#007cba] hover:underline font-bold block leading-snug">
-                      Get the latest commodity trends from industry experts.
-                    </a>
-                    <span className="text-[10px] text-gray-500 font-serif italic block">
-                      MarketViews
-                    </span>
-                  </div>
-                  <img
-                    src="/images/refinery-energy.jpg"
-                    alt="Commodities"
-                    className="w-14 h-14 object-cover rounded-xs shrink-0"
-                  />
-                </div>
-
-                {/* Item 2 */}
-                <div className="flex items-start space-x-2">
-                  <div className="space-y-1 flex-1">
-                    <a href="#" className="font-sans text-[#007cba] hover:underline font-bold block leading-snug">
-                      Discover the latest finance insights from global experts.
-                    </a>
-                    <span className="text-[10px] text-gray-500 font-serif italic block">
-                      MarketViews
-                    </span>
-                  </div>
-                  <img
-                    src="/images/investigator-magnifying-glass.jpg"
-                    alt="Finance"
-                    className="w-14 h-14 object-cover rounded-xs shrink-0"
-                  />
-                </div>
-
-                {/* Item 3 */}
-                <div className="flex items-start space-x-2">
-                  <div className="space-y-1 flex-1">
-                    <a href="#" className="font-sans text-[#007cba] hover:underline font-bold block leading-snug">
-                      Uncover the latest trends in retirement planning strategies.
-                    </a>
-                    <span className="text-[10px] text-gray-500 font-serif italic block">
-                      MarketViews
-                    </span>
-                  </div>
-                  <img
-                    src="/images/wine-plane.jpg"
-                    alt="Retirement"
-                    className="w-14 h-14 object-cover rounded-xs shrink-0"
-                  />
-                </div>
-
-                {/* Item 4 */}
-                <div className="flex items-start space-x-2">
-                  <div className="space-y-1 flex-1">
-                    <a href="#" className="font-sans text-[#007cba] hover:underline font-bold block leading-snug">
-                      Robotics and Artificial Intelligence. Discover the trends.
-                    </a>
-                    <span className="text-[10px] text-gray-500 font-serif italic block">
-                      MarketViews
-                    </span>
-                  </div>
-                  <img
-                    src="/images/hero-ai-software.jpg"
-                    alt="Robotics"
-                    className="w-14 h-14 object-cover rounded-xs shrink-0"
-                  />
-                </div>
-
-                {/* Item 5 */}
-                <div className="flex items-start space-x-2">
-                  <div className="space-y-1 flex-1">
-                    <a href="#" className="font-sans text-[#007cba] hover:underline font-bold block leading-snug">
-                      What is the latest on ETFs?
-                    </a>
-                    <span className="text-[10px] text-gray-500 font-serif italic block">
-                      MarketViews
-                    </span>
-                  </div>
-                  <img
-                    src="/images/amazon-data-center.jpg"
-                    alt="ETFs"
-                    className="w-14 h-14 object-cover rounded-xs shrink-0"
-                  />
-                </div>
-
-                {/* Item 6 */}
-                <div className="flex items-start space-x-2">
-                  <div className="space-y-1 flex-1">
-                    <a href="#" className="font-sans text-[#007cba] hover:underline font-bold block leading-snug">
-                      Stay updated with the newest gold market developments.
-                    </a>
-                    <span className="text-[10px] text-gray-500 font-serif italic block">
-                      MarketViews
-                    </span>
-                  </div>
-                  <img
-                    src="/images/handcuffs-money.jpg"
-                    alt="Gold"
-                    className="w-14 h-14 object-cover rounded-xs shrink-0"
-                  />
-                </div>
-              </div>
+              <AdPlaceholder width="w-full" height="h-[120px]" resolution="728 × 90" />
             </div>
 
             {/* 2. REAL ESTATE INSIGHTS SECTION (Confined to Span 8, NOT 100% full width) */}
             <div className="pt-2">
               <div className="flex items-center justify-between pb-3">
-                <h3 className="font-serif font-bold text-xl text-[#111111]">
+                <h3 className="font-serif font-bold text-xl sm:text-2xl text-black">
                   Real Estate Insights
                 </h3>
-                <div className="text-xs font-sans text-gray-600 flex items-center space-x-1">
-                  <span>Content provided by</span>
-                  <span className="font-bold text-[#d00000] flex items-center gap-0.5">
-                    🏠 realtor.com
-                  </span>
-                </div>
               </div>
 
-              {/* 3-Column Real Estate Insights Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 text-xs">
-                {/* Insight 1 */}
-                <div className="flex items-start space-x-3">
-                  <img
-                    src="/images/ariana-grande.jpg"
-                    alt="Sen Warren"
-                    className="w-16 h-12 object-cover rounded-xs shrink-0"
-                  />
+              {/* 3-Column Real Estate Grid matching Screenshot 5 */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-2">
+                {/* Article 1 */}
+                <div className="space-y-2">
+                  <div className="w-full aspect-[4/3] bg-gray-100 rounded-xs overflow-hidden border border-gray-200">
+                    <img
+                      src="/images/real-estate-house-1.jpg"
+                      alt="House 1"
+                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                  <div className="text-[10px] font-bold font-sans text-gray-500 uppercase tracking-wider">
+                    BUYING
+                  </div>
                   <a href="#" className="font-serif font-bold text-sm text-black hover:underline leading-snug">
-                    EXCL: Sen. Warren Slams Compass Private Listings Network in Letter to CEO
+                    Inside the Most Expensive Penthouse Deal of the Quarter
                   </a>
                 </div>
 
-                {/* Insight 2 */}
-                <div className="flex items-start space-x-3">
-                  <img
-                    src="/images/harvard-woman.jpg"
-                    alt="Ali Larter"
-                    className="w-16 h-12 object-cover rounded-xs shrink-0"
-                  />
+                {/* Article 2 */}
+                <div className="space-y-2">
+                  <div className="w-full aspect-[4/3] bg-gray-100 rounded-xs overflow-hidden border border-gray-200">
+                    <img
+                      src="/images/real-estate-house-2.jpg"
+                      alt="House 2"
+                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                  <div className="text-[10px] font-bold font-sans text-gray-500 uppercase tracking-wider">
+                    COMMERCIAL
+                  </div>
                   <a href="#" className="font-serif font-bold text-sm text-black hover:underline leading-snug">
-                    Ali Larter Shares Glimpse Inside 'Simple' Idaho Lifestyle After Quitting L.A.
+                    Office Tower Conversions Surge in Downtown Metro Areas
                   </a>
                 </div>
 
-                {/* Insight 3 */}
-                <div className="flex items-start space-x-3">
-                  <img
-                    src="/images/nyc-skyscrapers.jpg"
-                    alt="UK Homebuyers"
-                    className="w-16 h-12 object-cover rounded-xs shrink-0"
-                  />
+                {/* Article 3 */}
+                <div className="space-y-2">
+                  <div className="w-full aspect-[4/3] bg-gray-100 rounded-xs overflow-hidden border border-gray-200">
+                    <img
+                      src="/images/real-estate-house-3.jpg"
+                      alt="House 3"
+                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                  <div className="text-[10px] font-bold font-sans text-gray-500 uppercase tracking-wider">
+                    GLOBAL REAL ESTATE
+                  </div>
                   <a href="#" className="font-serif font-bold text-sm text-black hover:underline leading-snug">
                     Why U.K. Homebuyers Are Flocking to This Affordable Heartland State
                   </a>
                 </div>
               </div>
 
-              {/* Grey Advertisement Box Below Real Estate Insights (Screenshot 5) */}
-              <div className="w-full bg-[#f4f4f4] border border-[#d4d4d4] rounded-xs p-6 text-center text-gray-500 font-sans font-bold text-xs uppercase tracking-wider h-[160px] flex items-center justify-center mt-6">
-                ADVERTISEMENT
+              {/* Grey Advertisement Box Below Real Estate Insights */}
+              <div className="mt-6">
+                <AdPlaceholder width="w-full" height="h-[160px]" resolution="300 × 250" />
               </div>
             </div>
           </div>

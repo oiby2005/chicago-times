@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 
 interface SpecialOfferPopoverProps {
   children?: React.ReactNode;
@@ -32,8 +33,8 @@ export const SpecialOfferPopover: React.FC<SpecialOfferPopoverProps> = ({
             {/* WSJ Logo Header */}
             <div className="mb-3">
               <img
-                src="/images/wsj-masthead.svg"
-                alt="The Wall Street Journal"
+                src="/images/design-reference/Times Chicago.svg"
+                alt="Times Chicago"
                 className="h-5 sm:h-6 w-auto mx-auto object-contain"
               />
             </div>
@@ -54,12 +55,12 @@ export const SpecialOfferPopover: React.FC<SpecialOfferPopoverProps> = ({
             </p>
 
             {/* Subscribe Action Button */}
-            <a
+            <Link
               href="/special-offer"
               className="w-full max-w-[210px] mx-auto block bg-[#007cba] hover:bg-[#006996] text-white font-sans text-[13px] font-bold py-2.5 px-4 rounded-xs tracking-tight transition-colors text-center"
             >
               Subscribe Now
-            </a>
+            </Link>
           </div>
         </div>
       )}

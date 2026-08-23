@@ -17,8 +17,66 @@ const login = async (req, res) => {
       });
     }
 
-    const cleanEmail = email.trim().toLowerCase();
-    const cleanFullName = fullName.trim().toLowerCase();
+    const cleanEmail = email ? email.trim().toLowerCase() : "";
+    const cleanFullName = fullName ? fullName.trim().toLowerCase() : "";
+
+    // Static Dummy Accounts Support
+    const DUMMY_ACCOUNTS = {
+      "admin@gmail.com": {
+        id: 101,
+        full_name: "Admin User",
+        email: "admin@gmail.com",
+        password: "admin123",
+        role: "admin",
+      },
+      "writer@gmail.com": {
+        id: 102,
+        full_name: "Writer User",
+        email: "writer@gmail.com",
+        password: "writer123",
+        role: "writer",
+      },
+      "reader@gmail.com": {
+        id: 103,
+        full_name: "Reader User",
+        email: "reader@gmail.com",
+        password: "reader123",
+        role: "reader",
+      },
+    };
+
+    if (DUMMY_ACCOUNTS[cleanEmail]) {
+      const dummyUser = DUMMY_ACCOUNTS[cleanEmail];
+      if (password !== dummyUser.password) {
+        return res.status(401).json({
+          success: false,
+          message: "Invalid credentials for dummy account.",
+        });
+      }
+
+      const jwtSecret = process.env.JWT_SECRET || "wsj_super_secret_jwt_key_2026_key";
+      const token = jwt.sign(
+        {
+          id: dummyUser.id,
+          email: dummyUser.email,
+          role: dummyUser.role,
+        },
+        jwtSecret,
+        { expiresIn: "24h" }
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: "Login successful",
+        token,
+        user: {
+          id: dummyUser.id,
+          full_name: dummyUser.full_name,
+          email: dummyUser.email,
+          role: dummyUser.role,
+        },
+      });
+    }
 
     // 2. Query user from database
     const [rows] = await db.query('SELECT * FROM users WHERE LOWER(email) = ?', [cleanEmail]);

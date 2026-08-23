@@ -9,12 +9,12 @@ export interface Author {
 
 export const authorsList: Author[] = [
   {
-    slug: "dylan-candice-odulio",
-    name: "Dylan Candice Odulio",
+    slug: "writer",
+    name: "Writer User",
     role: "WRITER",
-    bio: "Content writer and aspiring journalist with 2 years of news-writing experience, skilled in research, article writing, and current affairs coverage.",
+    bio: "Journalist & Columnist",
     image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80",
-    linkedinUrl: "https://www.linkedin.com/in/candice-odulio-1a4b68411/",
+    linkedinUrl: "https://www.linkedin.com/in/your-profile",
   },
   {
     slug: "nivedita-chakrapani",
@@ -50,16 +50,59 @@ export const authorsData: Record<string, Author> = authorsList.reduce(
   {} as Record<string, Author>
 );
 
-export function getAuthorBySlug(slug: string): Author {
-  return authorsData[slug] || authorsList[0];
+export function extractSingleAuthorName(rawName: string): string {
+  if (!rawName) return "Writer User";
+  let clean = rawName.trim().replace(/^by\s+/i, "");
+  const parts = clean.split(/\s+(?:and|&)\s+|,/i);
+  return parts[0].trim();
 }
 
-export function getAuthorForArticle(articleSlugOrId: string): Author {
-  let hash = 0;
-  for (let i = 0; i < articleSlugOrId.length; i++) {
-    hash = (hash << 5) - hash + articleSlugOrId.charCodeAt(i);
-    hash |= 0;
+export function getAuthorBySlug(slug: string): Author {
+  if (!slug) return authorsList[0];
+
+  let cleanSlug = slug.toLowerCase().trim();
+  if (cleanSlug.includes("-and-")) {
+    cleanSlug = cleanSlug.split("-and-")[0].trim();
   }
-  const index = Math.abs(hash) % authorsList.length;
-  return authorsList[index];
+
+  if (authorsData[cleanSlug]) return authorsData[cleanSlug];
+
+  const found = authorsList.find(
+    (a) => a.slug.toLowerCase() === cleanSlug || a.name.toLowerCase() === cleanSlug
+  );
+  if (found) return found;
+
+  const rawFormatted = cleanSlug
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+
+  const singleName = extractSingleAuthorName(rawFormatted);
+  const singleSlug = singleName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
+  return {
+    slug: singleSlug,
+    name: singleName,
+    role: "WRITER",
+    bio: `Contributor and writer covering news, analysis, and current affairs.`,
+    image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80",
+    linkedinUrl: "https://www.linkedin.com",
+  };
+}
+
+export function getAuthorForArticle(articleSlugOrId: string, authorName?: string): Author {
+  if (authorName && authorName.trim()) {
+    const singleAuthor = extractSingleAuthorName(authorName);
+    const cleanSlug = singleAuthor.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
+    const found = authorsList.find(
+      (a) => a.name.toLowerCase() === singleAuthor.toLowerCase() || a.slug === cleanSlug
+    );
+    if (found) return found;
+
+    return getAuthorBySlug(cleanSlug);
+  }
+
+  const cleanSlug = articleSlugOrId.toLowerCase().trim();
+  return authorsData[cleanSlug] || authorsList[0];
 }

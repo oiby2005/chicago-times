@@ -1,0 +1,6 @@
+   ▲ Next.js 15.5.23
+   - Experiments (use with caution):
+     · optimizePackageImports
+
+   Creating an optimized production build ...
+Next.js build worker exited with code: 1073807364 and signal: null

@@ -350,10 +350,8 @@ export const HomeBottomGrid: React.FC = () => {
                 </div>
               </div>
 
-              {/* Grey Advertisement Box Below Recommended Videos (Screenshot 3) */}
-              <div className="w-full bg-[#f4f4f4] border border-[#d4d4d4] rounded-xs p-6 text-center text-gray-500 font-sans font-bold text-xs uppercase tracking-wider h-[160px] flex items-center justify-center mt-4">
-                ADVERTISEMENT
-              </div>
+              {/* Grey Advertisement Box Below Recommended Videos */}
+              <AdPlaceholder width="w-full" height="h-[160px]" resolution="300 × 160" />
             </div>
           </div>
         </div>
@@ -426,10 +424,8 @@ export const HomeBottomGrid: React.FC = () => {
                 </div>
               </div>
 
-              {/* Grey Advertisement Bar Below WSJ Buy Side (Screenshot 3) */}
-              <div className="w-full bg-[#f4f4f4] border border-[#d4d4d4] rounded-xs p-4 text-center text-gray-500 font-sans font-bold text-xs uppercase tracking-wider h-[120px] flex items-center justify-center mt-6">
-                ADVERTISEMENT
-              </div>
+              {/* Grey Advertisement Bar Below WSJ Buy Side */}
+              <AdPlaceholder width="w-full" height="h-[120px]" resolution="728 × 120" />
             </div>
 
             {/* Journal Reports Sidebar (Span 4 - Enlarged Font Sizes) */}
@@ -539,7 +535,7 @@ export const HomeBottomGrid: React.FC = () => {
 
             {/* Right Sidebar Ad Placeholder (Span 4) */}
             <div className="md:col-span-4 space-y-4">
-              <AdPlaceholder width="w-full" height="h-[600px]" />
+              <AdPlaceholder width="w-full" height="h-[600px]" resolution="300 × 600" />
             </div>
           </div>
         </div>

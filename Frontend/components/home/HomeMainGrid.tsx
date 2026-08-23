@@ -14,7 +14,7 @@ export const HomeMainGrid: React.FC = () => {
       <Container>
         {/* Top Leaderboard Advertisement Banner */}
         <div className="w-full flex justify-center mb-6">
-          <AdPlaceholder width="w-[728px] max-w-full" height="h-[90px]" />
+          <AdPlaceholder width="w-[728px] max-w-full" height="h-[90px]" resolution="728 × 90" />
         </div>
 
         {/* Main 3-Column Grid Layout */}
@@ -414,7 +414,7 @@ export const HomeMainGrid: React.FC = () => {
 
             {/* Right Sidebar AdPlaceholder */}
             <div className="w-full flex justify-center pt-2">
-              <AdPlaceholder width="w-full max-w-[300px]" height="h-[250px]" />
+              <AdPlaceholder width="w-full max-w-[300px]" height="h-[250px]" resolution="300 × 250" />
             </div>
           </div>
         </div>

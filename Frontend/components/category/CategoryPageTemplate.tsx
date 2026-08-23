@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useMemo } from "react";
 import Link from "next/link";
 import Header from "@/components/navigation/Header";
 import StickyHeaderBar from "@/components/navigation/StickyHeaderBar";
 import Footer from "@/components/layout/Footer";
 import Container from "@/components/layout/Container";
 import StickySubscribeBar from "@/components/ui/StickySubscribeBar";
+import AdPlaceholder from "@/components/ui/AdPlaceholder";
 
 interface CategoryPageTemplateProps {
   categoryTitle?: string;
@@ -30,7 +31,7 @@ export default function CategoryPageTemplate({
   const upperCategory = categoryTitle.toUpperCase();
 
   // Part 1 Hero Articles tailored with category title
-  const heroArticles = {
+  const heroArticles = useMemo(() => ({
     card1: {
       title: `Key Legislative Shifts Impacting ${categoryTitle} Policies Nationwide`,
       summary: `Regulatory frameworks governing ${categoryTitle.toLowerCase()} are experiencing major updates following bipartisan deliberations in Washington...`,
@@ -55,14 +56,14 @@ export default function CategoryPageTemplate({
       image: "/images/world/perez_hilton.jpg",
       slug: `innovation-in-${categoryTitle.toLowerCase().replace(/[^a-z0-9]/g, "-")}`,
     },
-  };
+  }), [categoryTitle]);
 
-  const baseNewsArticles: ArticleItem[] = [
+  const baseNewsArticles: ArticleItem[] = useMemo(() => [
     {
       id: "jose-rizal",
       title: `How Leadership Principles Are Reshaping ${categoryTitle} in 2026`,
       summary: `Historical insights and modern strategic frameworks continue to guide executives navigating complex international markets...`,
-      author: "BY DYLAN CANDICE ODULIO",
+      author: "BY WRITER",
       date: "AUG 08, 2026",
       image: "/images/world/jose_rizal.jpg",
     },
@@ -70,7 +71,7 @@ export default function CategoryPageTemplate({
       id: "gaza-grieve",
       title: `Humanitarian Initiatives and Economic Aid Focus on Impacted Regions`,
       summary: `International organizations roll out targeted funding and infrastructure support to stabilize key economic corridors...`,
-      author: "BY DYLAN CANDICE ODULIO",
+      author: "BY WRITER",
       date: "AUG 08, 2026",
       image: "/images/world/gaza_grieve.jpg",
     },
@@ -78,7 +79,7 @@ export default function CategoryPageTemplate({
       id: "italian-dunk",
       title: `Unconventional Traditions and Cultural Festivals Draw Global Attention`,
       summary: `Local celebrations showcase unique cultural history, attracting international visitors and boosting regional tourism...`,
-      author: "BY DYLAN CANDICE ODULIO",
+      author: "BY WRITER",
       date: "AUG 07, 2026",
       image: "/images/world/italian_dunk.jpg",
     },
@@ -86,7 +87,7 @@ export default function CategoryPageTemplate({
       id: "mercury-retrograde",
       title: `Market Volatility and Behavioral Trends in the ${categoryTitle} Sector`,
       summary: `Behavioral economists examine consumer sentiment shifts during periods of rapid digital transformation...`,
-      author: "BY DYLAN CANDICE ODULIO",
+      author: "BY WRITER",
       date: "AUG 07, 2026",
       image: "/images/world/mercury_retrograde.jpg",
     },
@@ -138,9 +139,9 @@ export default function CategoryPageTemplate({
       date: "AUG 06, 2026",
       image: "https://images.unsplash.com/photo-1548625149-fc4a29cf7092?auto=format&fit=crop&w=400&q=80",
     },
-  ];
+  ], [categoryTitle]);
 
-  const trendingItems = [
+  const trendingItems = useMemo(() => [
     {
       id: 1,
       title: `Key Developments shaping ${categoryTitle} this quarter`,
@@ -166,12 +167,12 @@ export default function CategoryPageTemplate({
       title: `Analysis: What Recent Reports Signal for Future Industry Growth`,
       views: "15 views since publication",
     },
-  ];
+  ], [categoryTitle]);
 
-  const getPageArticles = (page: number) => {
-    const shift = (page - 1) % baseNewsArticles.length;
+  const activeArticles = useMemo(() => {
+    const shift = (currentPage - 1) % baseNewsArticles.length;
     return [...baseNewsArticles.slice(shift), ...baseNewsArticles.slice(0, shift)];
-  };
+  }, [currentPage, baseNewsArticles]);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= 11) {
@@ -179,8 +180,6 @@ export default function CategoryPageTemplate({
       newsSectionRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   };
-
-  const activeArticles = getPageArticles(currentPage);
 
   return (
     <main className="min-h-screen bg-white flex flex-col justify-between text-[#111111]">
@@ -330,9 +329,9 @@ export default function CategoryPageTemplate({
                   {activeArticles.map((article, idx) => (
                     <article
                       key={`${article.id}-page${currentPage}-${idx}`}
-                      className="py-5 flex flex-row items-start gap-4 sm:gap-5"
+                      className="py-5 flex flex-col sm:flex-row items-start gap-3 sm:gap-5"
                     >
-                      <div className="w-[160px] sm:w-[195px] shrink-0">
+                      <div className="w-full sm:w-[195px] shrink-0">
                         <Link
                           href={`/article/${article.id}`}
                           className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 border border-gray-200"
@@ -447,55 +446,9 @@ export default function CategoryPageTemplate({
                   </div>
                 </div>
 
-                {/* NVIDIA Advertisement Banner */}
-                <div className="w-full bg-[#0b140c] text-white p-6 relative overflow-hidden border border-gray-800 flex flex-col items-center justify-between min-h-[220px]">
-                  <div className="absolute inset-0 bg-gradient-to-b from-[#76b900]/20 via-transparent to-black opacity-60 pointer-events-none" />
-                  <div className="relative z-10 text-center">
-                    <div className="flex items-center justify-center gap-2 mb-4">
-                      <span className="font-extrabold text-[24px] tracking-widest text-white">
-                        NVIDIA
-                      </span>
-                    </div>
-                    <p className="text-[12px] font-sans text-gray-300 uppercase tracking-widest">
-                      THE POWER OF AI &amp; GRAPHICS
-                    </p>
-                  </div>
-                  <div className="w-full relative z-10 aspect-[16/9] mt-3 overflow-hidden rounded bg-emerald-950/40 border border-emerald-500/30 flex items-center justify-center">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=600&q=80"
-                      alt="NVIDIA Tech"
-                      className="w-full h-full object-cover mix-blend-luminosity opacity-80"
-                    />
-                  </div>
-                </div>
-
-                {/* TESLA Advertisement Banner */}
-                <div className="w-full bg-black text-white p-5 border border-gray-800 flex flex-col justify-between min-h-[360px]">
-                  <div className="flex items-center justify-center gap-2 py-2">
-                    <span className="font-bold tracking-[0.3em] text-[18px] text-white font-sans">
-                      T E S L A
-                    </span>
-                  </div>
-                  <div className="my-4 relative">
-                    <div className="border border-red-600 p-4 text-center mb-3">
-                      <p className="font-sans font-extrabold italic text-[16px] leading-tight uppercase tracking-wider text-white">
-                        BEST CAR<br />FOR RENT<br />TODAY
-                      </p>
-                    </div>
-                    <div className="w-full aspect-[16/10] relative overflow-hidden my-2">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src="https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&w=600&q=80"
-                        alt="Tesla Model S"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  </div>
-                  <p className="font-sans italic text-[11px] leading-snug text-gray-400 text-center px-2 border-t border-gray-800 pt-3">
-                    Tesla has confirmed that the long-awaited Model S Plaid, the newest and the most powerful version of its larger electric saloon will go into production late next year
-                  </p>
-                </div>
+                {/* Sidebar Ad Placeholders with Resolution Display */}
+                <AdPlaceholder width="w-full" height="h-[250px]" resolution="300 × 250" />
+                <AdPlaceholder width="w-full" height="h-[600px]" resolution="300 × 600" />
               </aside>
             </div>
           </div>

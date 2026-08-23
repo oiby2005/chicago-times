@@ -171,33 +171,8 @@ export const HomeSecondarySections: React.FC = () => {
 
             {/* Right Sidebar Column (Span 4) */}
             <div className="md:col-span-4 space-y-5">
-              {/* MarketViews Sponsored Cards Stack */}
-              <div className="bg-[#122b40] text-white p-4 space-y-4 rounded-xs">
-                <div className="text-xs font-bold tracking-tight border-b border-gray-600 pb-2">
-                  What is the latest on ETFs? <br />
-                  <span className="text-gray-400 font-serif italic text-[11px]">
-                    MarketViews
-                  </span>
-                </div>
-                <div className="text-xs font-bold tracking-tight border-b border-gray-600 pb-2">
-                  Find expert news and trends in the world of commodities. <br />
-                  <span className="text-gray-400 font-serif italic text-[11px]">
-                    MarketViews
-                  </span>
-                </div>
-                <div className="text-xs font-bold tracking-tight border-b border-gray-600 pb-2">
-                  Stay updated with the newest gold market developments. <br />
-                  <span className="text-gray-400 font-serif italic text-[11px]">
-                    MarketViews
-                  </span>
-                </div>
-                <div className="text-xs font-bold tracking-tight">
-                  Uncover the latest trends in retirement planning strategies. <br />
-                  <span className="text-gray-400 font-serif italic text-[11px]">
-                    MarketViews
-                  </span>
-                </div>
-              </div>
+              {/* Empty Banner for MarketViews Advertisement */}
+              <AdPlaceholder width="w-full" height="h-[250px]" resolution="300 × 250" />
 
               {/* Tip Submission Box (Matching Screenshot 2 Exactly) */}
               <div className="border border-black bg-white p-4 flex items-center space-x-3 rounded-xs shadow-2xs">
@@ -216,9 +191,7 @@ export const HomeSecondarySections: React.FC = () => {
               </div>
 
               {/* Grey Advertisement Box Filling Remaining Sidebar Space */}
-              <div className="w-full bg-[#f4f4f4] border border-[#d4d4d4] rounded-xs p-6 text-center text-gray-500 font-sans font-bold text-xs uppercase tracking-wider h-[180px] flex items-center justify-center">
-                ADVERTISEMENT
-              </div>
+              <AdPlaceholder width="w-full" height="h-[180px]" resolution="300 × 180" />
             </div>
           </div>
         </div>
@@ -374,10 +347,8 @@ export const HomeSecondarySections: React.FC = () => {
                       💬 {art["how-family-flower-farm-became-essential-chanel"]?.commentCount || 9}
                     </div>
 
-                    {/* Grey Advertisement Box Below Chanel Story (Screenshot 1) */}
-                    <div className="w-full bg-[#f4f4f4] border border-[#d4d4d4] rounded-xs p-4 text-center text-gray-500 font-sans font-bold text-xs uppercase tracking-wider h-[100px] flex items-center justify-center mt-4">
-                      ADVERTISEMENT
-                    </div>
+                    {/* Grey Advertisement Box Below Chanel Story */}
+                    <AdPlaceholder width="w-full" height="h-[100px]" resolution="300 × 100" />
                   </div>
                 </div>
 
@@ -513,10 +484,8 @@ export const HomeSecondarySections: React.FC = () => {
                 </div>
               </div>
 
-              {/* Grey Advertisement Box Below Most Popular News (Screenshot 1) */}
-              <div className="w-full bg-[#f4f4f4] border border-[#d4d4d4] rounded-xs p-4 text-center text-gray-500 font-sans font-bold text-xs uppercase tracking-wider h-[140px] flex items-center justify-center mt-4">
-                ADVERTISEMENT
-              </div>
+              {/* Grey Advertisement Box Below Most Popular News */}
+              <AdPlaceholder width="w-full" height="h-[140px]" resolution="300 × 140" />
             </div>
           </div>
         </div>
@@ -558,24 +527,35 @@ export const HomeSecondarySections: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Politics 2: Chinese Subscriber Guide */}
-                <div className="space-y-2.5">
-                  <div className="w-full aspect-[4/3] bg-[#f4f4f4] border border-[#d4d4d4] rounded-xs overflow-hidden">
+                {/* Politics Coursiv Advertisement Card matching Image 1 */}
+                <div className="bg-[#f4f5f7] border border-[#e5e7eb] rounded-xs p-3.5 space-y-2.5 select-none">
+                  {/* Image with blue Ad overlay badge */}
+                  <div className="relative w-full aspect-[4/3] bg-gray-200 rounded-xs overflow-hidden">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src="/images/handcuffs-money.jpg"
-                      alt="Handcuffs money"
+                      src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=600&q=80"
+                      alt="Coursiv AI Work Team"
                       className="w-full h-full object-cover"
                     />
+                    <span className="absolute top-2 left-2 bg-[#2563eb] text-white font-sans font-bold text-[11px] px-2 py-0.5 rounded-2xs shadow-xs tracking-tight">
+                      Ad
+                    </span>
                   </div>
-                  <h4 className="font-serif font-bold text-lg sm:text-xl text-black leading-snug">
-                    诈骗、制裁与空壳公司指南
+
+                  {/* Brand Name */}
+                  <div className="font-sans font-bold text-[16px] text-[#0284c7] leading-none pt-0.5">
+                    Coursiv
+                  </div>
+
+                  {/* Main Chinese Headline */}
+                  <h4 className="font-sans font-black text-[18px] text-[#111111] leading-tight">
+                    用AI更聪明地工作
                   </h4>
-                  <p className="text-xs sm:text-sm font-sans text-[#333333] leading-relaxed">
-                    保护您的全局业务，免受跨国犯罪组织与洗钱活动的侵害。
+
+                  {/* Subtitle */}
+                  <p className="font-sans text-[13.5px] text-[#555555] leading-normal font-normal">
+                    用热门AI技能提升你的职业
                   </p>
-                  <span className="inline-block bg-black text-white text-[10px] font-bold font-sans uppercase px-2 py-0.5 rounded-xs">
-                    SUBSCRIBER MESSAGE
-                  </span>
                 </div>
 
                 {/* Politics 3: Fauci Legal Trouble */}
@@ -612,10 +592,8 @@ export const HomeSecondarySections: React.FC = () => {
                 </div>
               </div>
 
-              {/* Grey Advertisement Bar Below Politics Main Feed (Screenshot 2) */}
-              <div className="w-full bg-[#f4f4f4] border border-[#d4d4d4] rounded-xs p-4 text-center text-gray-500 font-sans font-bold text-xs uppercase tracking-wider h-[120px] flex items-center justify-center mt-6">
-                ADVERTISEMENT
-              </div>
+              {/* Grey Advertisement Bar Below Politics Main Feed */}
+              <AdPlaceholder width="w-full" height="h-[120px]" resolution="728 × 120" />
             </div>
 
             {/* Polymarket Partner Widget & Advertisement Sidebar (Span 4, Screenshot 2) */}
@@ -677,10 +655,8 @@ export const HomeSecondarySections: React.FC = () => {
                 </div>
               </div>
 
-              {/* Grey Advertisement Box Below Polymarket Widget (Screenshot 2) */}
-              <div className="w-full bg-[#f4f4f4] border border-[#d4d4d4] rounded-xs p-6 text-center text-gray-500 font-sans font-bold text-xs uppercase tracking-wider h-[180px] flex items-center justify-center">
-                ADVERTISEMENT
-              </div>
+              {/* Grey Advertisement Box Below Polymarket Widget */}
+              <AdPlaceholder width="w-full" height="h-[180px]" resolution="300 × 180" />
             </div>
           </div>
         </div>

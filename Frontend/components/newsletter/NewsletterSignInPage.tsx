@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import Header from "@/components/navigation/Header";
 import Footer from "@/components/layout/Footer";
 
@@ -13,32 +14,11 @@ interface NewsletterItem {
 
 const newslettersList: NewsletterItem[] = [
   {
-    id: "us",
-    title: "US",
-    frequency: "Weekday mornings",
-    description:
-      "The biggest national headlines, policy shifts and the stories shaping America — delivered before your first coffee.",
-  },
-  {
     id: "world",
     title: "World",
     frequency: "Daily",
     description:
       "Global affairs, conflicts, diplomacy and the international stories that move markets and minds.",
-  },
-  {
-    id: "politics",
-    title: "Politics",
-    frequency: "Weekday mornings",
-    description:
-      "Sharp coverage of Washington, elections, legislation and the power plays behind the headlines.",
-  },
-  {
-    id: "economy-markets",
-    title: "Economy & Markets",
-    frequency: "Weekday mornings",
-    description:
-      "Markets, macro trends, Fed watch and the numbers that matter — explained clearly, every trading day.",
   },
   {
     id: "business",
@@ -48,25 +28,39 @@ const newslettersList: NewsletterItem[] = [
       "Corporate earnings, deals, leadership moves and the strategies driving the world of business.",
   },
   {
-    id: "crypto",
-    title: "Crypto",
-    frequency: "Weekday Morning",
+    id: "us",
+    title: "U.S.",
+    frequency: "Weekday mornings",
     description:
-      "Up to date, breaking crypto news about the latest Bitcoin, Ethereum, Blockchain, NFTs, and Altcoin trends and events.",
+      "The biggest national headlines, policy shifts and stories shaping America — delivered before your first coffee.",
   },
   {
-    id: "technology",
-    title: "Technology",
+    id: "politics",
+    title: "Politics",
+    frequency: "Weekday mornings",
+    description:
+      "Sharp coverage of Washington, elections, legislation and the power plays behind the headlines.",
+  },
+  {
+    id: "economy",
+    title: "Economy",
+    frequency: "Daily",
+    description:
+      "Macroeconomic trends, global central bank policy, labor markets and inflation analysis.",
+  },
+  {
+    id: "tech",
+    title: "Tech",
     frequency: "Daily",
     description:
       "AI, big tech, startups and the innovations rewriting how we live and work.",
   },
   {
-    id: "travel",
-    title: "Travel",
-    frequency: "Once a week",
+    id: "markets-finance",
+    title: "Markets & Finance",
+    frequency: "Weekday mornings",
     description:
-      "Destinations, industry trends and smart travel intelligence for the modern globetrotter.",
+      "Markets, macro trends, Fed watch and financial numbers that matter — explained clearly every trading day.",
   },
   {
     id: "opinion",
@@ -76,25 +70,60 @@ const newslettersList: NewsletterItem[] = [
       "Provocative columns and expert commentary on the debates that define our time.",
   },
   {
-    id: "ceo-spotlight",
-    title: "CEO Spotlight",
-    frequency: "Once a week",
+    id: "free-expression",
+    title: "Free Expression",
+    frequency: "Weekly",
     description:
-      "Exclusive profiles and insights from the executives and visionaries leading global business.",
+      "Perspectives on free speech, open debate, culture and civil liberties.",
+  },
+  {
+    id: "arts",
+    title: "Arts",
+    frequency: "Weekly",
+    description:
+      "Book reviews, art exhibitions, theater, film and cultural coverage.",
+  },
+  {
+    id: "lifestyle",
+    title: "Lifestyle",
+    frequency: "Weekly",
+    description:
+      "Food, wine, design, entertaining and modern luxury living.",
+  },
+  {
+    id: "real-estate",
+    title: "Real Estate",
+    frequency: "Weekly",
+    description:
+      "Residential real estate trends, luxury homes, commercial property and housing markets.",
+  },
+  {
+    id: "personal-finance",
+    title: "Personal Finance",
+    frequency: "Weekly",
+    description:
+      "Smart money advice, retirement planning, tax strategies and personal investing.",
+  },
+  {
+    id: "health",
+    title: "Health",
+    frequency: "Weekly",
+    description:
+      "The latest health news, scientific trends and medical information explained clearly.",
+  },
+  {
+    id: "style",
+    title: "Style",
+    frequency: "Weekly",
+    description:
+      "Fashion trends, grooming, luxury goods and design intelligence.",
   },
   {
     id: "sports",
     title: "Sports",
     frequency: "Daily",
     description:
-      "Scores, storylines and the business of sports — from the field to the boardroom.",
-  },
-  {
-    id: "health",
-    title: "Health",
-    frequency: "Once a week",
-    description:
-      "The latest health news, scientific trends and medical information, covered in a way that helps you make sense of the complex and constantly changing field of medical knowledge.",
+      "Scores, athletic analysis and the business of global sports — from the field to the boardroom.",
   },
 ];
 
@@ -131,10 +160,192 @@ export const NewsletterSignInPage: React.FC = () => {
       return;
     }
     setErrorMessage("");
+
+    // Map selected IDs to exact titles
+    const selectedTitles = newslettersList
+      .filter((item) => selectedIds.includes(item.id))
+      .map((item) => item.title);
+
+    const now = new Date();
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+    const dateStr = `${now.getDate()}-${months[now.getMonth()]},${now.getFullYear()}`;
+
+    const newSub = {
+      id: `nl-${Date.now()}`,
+      email: email.trim(),
+      newsletters: selectedTitles,
+      subscribedDate: dateStr,
+    };
+
+    // Retrieve existing subscribers from storage or defaults
+    const existingJson = localStorage.getItem("wsj_newsletter_subscribers");
+    let existingSubs: any[] = [];
+    if (existingJson) {
+      try {
+        existingSubs = JSON.parse(existingJson);
+      } catch (err) {
+        existingSubs = [];
+      }
+    } else {
+      existingSubs = [
+        {
+          id: "sub_1",
+          email: "akramyoonos54354@gmail.com",
+          newsletters: ["US", "ECONOMY & MARKETS"],
+          subscribedDate: "Aug 17, 2026",
+        },
+        {
+          id: "sub_2",
+          email: "circuitridergary@duck.com",
+          newsletters: [
+            "US",
+            "WORLD",
+            "POLITICS",
+            "ECONOMY & MARKETS",
+            "BUSINESS",
+            "CRYPTO",
+            "TECHNOLOGY",
+            "TRAVEL",
+            "OPINION",
+            "CEO SPOTLIGHT",
+            "SPORTS",
+            "HEALTH",
+          ],
+          subscribedDate: "Aug 14, 2026",
+        },
+        {
+          id: "sub_3",
+          email: "monlinebrands@gmail.com",
+          newsletters: ["US", "POLITICS", "SPORTS"],
+          subscribedDate: "Aug 11, 2026",
+        },
+        {
+          id: "sub_4",
+          email: "akramyoonos1433@gmail.com",
+          newsletters: ["US", "WORLD", "ECONOMY & MARKETS", "BUSINESS"],
+          subscribedDate: "Aug 10, 2026",
+        },
+        {
+          id: "sub_5",
+          email: "odulio.dylan@gmail.com",
+          newsletters: [
+            "US",
+            "WORLD",
+            "POLITICS",
+            "ECONOMY & MARKETS",
+            "BUSINESS",
+            "CRYPTO",
+            "TECHNOLOGY",
+            "TRAVEL",
+            "OPINION",
+            "CEO SPOTLIGHT",
+            "SPORTS",
+            "HEALTH",
+          ],
+          subscribedDate: "Aug 10, 2026",
+        },
+      ];
+    }
+
+    // Filter out duplicate email if already subscribed, then prepend new entry
+    const updatedSubs = [
+      newSub,
+      ...existingSubs.filter(
+        (s: any) => s.email.toLowerCase() !== email.trim().toLowerCase()
+      ),
+    ];
+
+    localStorage.setItem(
+      "wsj_newsletter_subscribers",
+      JSON.stringify(updatedSubs)
+    );
+    window.dispatchEvent(new Event("wsj_newsletter_updated"));
+
     setSubmitted(true);
   };
 
   const isAllSelected = selectedIds.length === newslettersList.length;
+
+  if (submitted) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col justify-between selection:bg-yellow-100">
+        {/* Existing Homepage Header */}
+        <Header />
+
+        {/* Main Newsletter Success Content */}
+        <main className="flex-1 w-full bg-white select-none">
+          {/* Top Gold Banner */}
+          <section className="w-full bg-[#f6f5f1] py-5 sm:py-7 text-center border-b border-[#e5e4de]">
+            <div className="max-w-[1200px] mx-auto px-4">
+              <h1 className="font-serif font-bold text-2xl sm:text-3xl text-[#b8860b] uppercase tracking-[0.2em] mb-1.5">
+                NEWSLETTERS
+              </h1>
+              <div className="w-10 h-[2px] bg-[#b8860b] mx-auto mb-2" />
+              <p className="font-sans text-xs sm:text-[13px] text-[#666666] font-normal">
+                Stay up to date with our daily newsletter
+              </p>
+            </div>
+          </section>
+
+          {/* Success Message Body */}
+          <section className="w-full py-16 sm:py-24 px-4 text-center">
+            <div className="max-w-[600px] mx-auto flex flex-col items-center">
+              {/* Green Checkmark Circle */}
+              <div className="w-12 h-12 rounded-full border-2 border-[#16a34a] flex items-center justify-center mb-5 text-[#16a34a]">
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2.5}
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M4.5 12.75l6 6 9-13.5"
+                  />
+                </svg>
+              </div>
+
+              {/* You're all signed up! */}
+              <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#111111] mb-3">
+                You&apos;re all signed up!
+              </h2>
+
+              {/* Subtitle text */}
+              <p className="font-sans text-xs sm:text-sm text-[#666666] leading-relaxed max-w-[460px] mx-auto mb-8">
+                Thanks for subscribing. Check your inbox to confirm your subscription and start receiving the best of our reporting.
+              </p>
+
+              {/* BACK TO HOME Button */}
+              <Link
+                href="/"
+                className="bg-[#b8860b] hover:bg-[#996f08] text-white font-sans font-bold text-xs uppercase tracking-wider py-3 px-8 transition-colors shadow-xs inline-block"
+              >
+                BACK TO HOME
+              </Link>
+            </div>
+          </section>
+        </main>
+
+        {/* Existing Homepage Footer */}
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white flex flex-col justify-between selection:bg-yellow-100">
@@ -144,12 +355,12 @@ export const NewsletterSignInPage: React.FC = () => {
       {/* Main Newsletter Content */}
       <main className="flex-1 w-full bg-white">
         {/* Top Gold Banner */}
-        <section className="w-full bg-[#f6f5f1] py-9 sm:py-11 text-center border-b border-[#e5e4de] select-none">
+        <section className="w-full bg-[#f6f5f1] py-5 sm:py-7 text-center border-b border-[#e5e4de] select-none">
           <div className="max-w-[1200px] mx-auto px-4">
-            <h1 className="font-serif font-bold text-3xl sm:text-4xl text-[#b8860b] uppercase tracking-[0.25em] mb-2.5">
+            <h1 className="font-serif font-bold text-2xl sm:text-3xl text-[#b8860b] uppercase tracking-[0.2em] mb-1.5">
               NEWSLETTERS
             </h1>
-            <div className="w-12 h-[2px] bg-[#b8860b] mx-auto mb-3" />
+            <div className="w-10 h-[2px] bg-[#b8860b] mx-auto mb-2" />
             <p className="font-sans text-xs sm:text-[13px] text-[#666666] font-normal">
               Stay up to date with our daily newsletter
             </p>
@@ -157,15 +368,15 @@ export const NewsletterSignInPage: React.FC = () => {
         </section>
 
         {/* Hero Headline Section */}
-        <section className="w-full py-10 sm:py-14 px-4 select-none">
+        <section className="w-full py-6 sm:py-8 px-4 select-none">
           <div className="max-w-[800px] mx-auto text-center">
-            <h2 className="font-serif text-2xl sm:text-3xl md:text-[32px] font-bold text-[#111111] leading-tight mb-3">
+            <h2 className="font-serif text-xl sm:text-2xl font-bold text-[#111111] leading-tight mb-2">
               Let the best of The Wall Street Journal news come to you.
             </h2>
 
-            <div className="w-10 h-[2px] bg-[#b8860b] mx-auto mb-6" />
+            <div className="w-8 h-[2px] bg-[#b8860b] mx-auto mb-4" />
 
-            <div className="font-sans text-[12.5px] text-[#555555] leading-relaxed max-w-[580px] mx-auto mb-8 space-y-1">
+            <div className="font-sans text-[12px] text-[#555555] leading-relaxed max-w-[580px] mx-auto mb-6 space-y-1">
               <p>
                 Select any of the free newsletters below. Then, enter your
                 email address and click &quot;Sign Up.&quot;
@@ -192,8 +403,10 @@ export const NewsletterSignInPage: React.FC = () => {
 
             {/* Select All Button */}
             <button
+              type="button"
               onClick={toggleSelectAll}
-              className="bg-[#b8860b] hover:bg-[#996f08] text-white font-sans font-bold text-xs uppercase tracking-wider py-3.5 px-8 rounded-none transition-colors shadow-xs mx-auto block text-center cursor-pointer"
+              suppressHydrationWarning
+              className="bg-[#b8860b] hover:bg-[#996f08] text-white font-sans font-bold text-xs uppercase tracking-wider py-2.5 px-6 rounded-none transition-colors shadow-xs mx-auto block text-center cursor-pointer"
             >
               {isAllSelected ? "DESELECT ALL NEWSLETTERS" : "SELECT ALL NEWSLETTERS"}
             </button>
@@ -201,11 +414,11 @@ export const NewsletterSignInPage: React.FC = () => {
         </section>
 
         {/* Horizontal Divider */}
-        <div className="border-b border-[#e2e2e2] max-w-[840px] mx-auto mb-10 px-4" />
+        <div className="border-b border-[#e2e2e2] max-w-[840px] mx-auto mb-6 px-4" />
 
         {/* 2-Column Newsletter Selection Grid */}
-        <section className="max-w-[840px] mx-auto px-4 mb-16 select-none">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10 text-left">
+        <section className="max-w-[840px] mx-auto px-4 mb-8 select-none">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 text-left">
             {newslettersList.map((item) => {
               const isChecked = selectedIds.includes(item.id);
 
@@ -216,6 +429,7 @@ export const NewsletterSignInPage: React.FC = () => {
                     id={`checkbox-${item.id}`}
                     checked={isChecked}
                     onChange={() => toggleCheckbox(item.id)}
+                    suppressHydrationWarning
                     className="w-4 h-4 rounded-xs border-gray-400 text-[#b8860b] focus:ring-[#b8860b] accent-[#b8860b] cursor-pointer mt-1 flex-shrink-0"
                   />
                   <div className="flex-1">
@@ -254,7 +468,7 @@ export const NewsletterSignInPage: React.FC = () => {
               </p>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="w-full">
+            <form onSubmit={handleSubmit} className="w-full" suppressHydrationWarning>
               {errorMessage && (
                 <div className="text-red-600 font-sans text-xs text-center mb-4 font-semibold">
                   {errorMessage}
@@ -284,6 +498,7 @@ export const NewsletterSignInPage: React.FC = () => {
                     placeholder="Enter your email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    suppressHydrationWarning
                     className="w-full pl-10 pr-3.5 py-3 border border-[#cccccc] focus:border-[#b8860b] text-xs sm:text-sm font-sans text-[#333333] placeholder-gray-400 outline-none transition-colors rounded-none bg-white"
                   />
                 </div>
@@ -291,6 +506,7 @@ export const NewsletterSignInPage: React.FC = () => {
                 {/* Submit Button */}
                 <button
                   type="submit"
+                  suppressHydrationWarning
                   className="w-full sm:w-auto bg-[#b8860b] hover:bg-[#996f08] text-white font-sans font-bold text-xs uppercase tracking-wider py-3.5 px-8 rounded-none transition-colors whitespace-nowrap cursor-pointer"
                 >
                   SIGN UP NOW

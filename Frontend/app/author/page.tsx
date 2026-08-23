@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 
 export default function AuthorIndexPage() {
-  redirect("/author/dylan-candice-odulio");
+  redirect("/writer");
 }
+
