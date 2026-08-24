@@ -149,7 +149,7 @@ export const EightCategoryGridSection: React.FC = () => {
 
             {/* Main Headline */}
             <h4 className="font-serif font-bold text-[17px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-3">
-              <Link prefetch={true} href={`/article/${item.mainSlug}`}>
+              <Link href={`/article/${item.mainSlug}`}>
                 {item.mainHeadline}
               </Link>
             </h4>
@@ -157,7 +157,7 @@ export const EightCategoryGridSection: React.FC = () => {
             {/* Sub Article 1 */}
             <div className="pt-1 pb-2">
               <h5 className="font-serif font-bold text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
-                <Link prefetch={true} href={`/article/${item.sub1Slug}`}>
+                <Link href={`/article/${item.sub1Slug}`}>
                   {item.sub1Text}
                 </Link>
               </h5>
@@ -166,7 +166,7 @@ export const EightCategoryGridSection: React.FC = () => {
             {/* Sub Article 2 */}
             <div className="pt-1">
               <h5 className="font-serif font-bold text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
-                <Link prefetch={true} href={`/article/${item.sub2Slug}`}>
+                <Link href={`/article/${item.sub2Slug}`}>
                   {item.sub2Text}
                 </Link>
               </h5>
@@ -203,7 +203,7 @@ export const EightCategoryGridSection: React.FC = () => {
 
             {/* Main Headline */}
             <h4 className="font-serif font-bold text-[17px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-3">
-              <Link prefetch={true} href={`/article/${item.mainSlug}`}>
+              <Link href={`/article/${item.mainSlug}`}>
                 {item.mainHeadline}
               </Link>
             </h4>
@@ -211,7 +211,7 @@ export const EightCategoryGridSection: React.FC = () => {
             {/* Sub Article 1 */}
             <div className="pt-1 pb-2">
               <h5 className="font-serif font-bold text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
-                <Link prefetch={true} href={`/article/${item.sub1Slug}`}>
+                <Link href={`/article/${item.sub1Slug}`}>
                   {item.sub1Text}
                 </Link>
               </h5>
@@ -220,7 +220,7 @@ export const EightCategoryGridSection: React.FC = () => {
             {/* Sub Article 2 */}
             <div className="pt-1">
               <h5 className="font-serif font-bold text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
-                <Link prefetch={true} href={`/article/${item.sub2Slug}`}>
+                <Link href={`/article/${item.sub2Slug}`}>
                   {item.sub2Text}
                 </Link>
               </h5>

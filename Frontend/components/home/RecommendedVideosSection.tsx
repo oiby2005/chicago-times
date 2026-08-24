@@ -59,7 +59,7 @@ export const RecommendedVideosSection: React.FC = () => {
           <article key={video.id} className="flex items-start justify-between gap-3">
             {/* Title */}
             <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.2] text-[#111111] hover:underline cursor-pointer flex-1">
-              <Link prefetch={true} href={`/article/${video.slug}`}>
+              <Link href={`/article/${video.slug}`}>
                 {video.title}
               </Link>
             </h4>

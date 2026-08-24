@@ -89,7 +89,7 @@ export const BusinessCategorySection: React.FC = () => {
         {leftArticles.map((art, idx) => (
           <article key={art.id} className={`py-2.5 ${idx === 0 ? "pt-0" : ""} ${idx === leftArticles.length - 1 ? "pb-0" : ""}`}>
             <h3 className={`font-serif font-bold text-[#111111] hover:text-[#333333] hover:underline cursor-pointer ${idx === 0 ? "text-[26px] sm:text-[28px] lg:text-[30px] leading-[1.12]" : "text-[20px] sm:text-[21px] leading-[1.18]"}`} style={{ whiteSpace: art.customBreakTitle ? "pre-line" : "normal" }}>
-              <Link prefetch={true} href={`/article/${art.slug}`}>
+              <Link href={`/article/${art.slug}`}>
                 {art.customBreakTitle || art.title}
               </Link>
             </h3>
@@ -117,7 +117,7 @@ export const BusinessCategorySection: React.FC = () => {
             />
           </Link>
           <h2 className="font-serif font-bold text-[20px] sm:text-[21px] leading-[1.18] text-[#111111] hover:text-[#333333] hover:underline cursor-pointer">
-            <Link prefetch={true} href={`/article/${centerMainArticle.slug}`}>
+            <Link href={`/article/${centerMainArticle.slug}`}>
               {centerMainArticle.title}
             </Link>
           </h2>
@@ -138,7 +138,7 @@ export const BusinessCategorySection: React.FC = () => {
                 />
               </Link>
               <h3 className="font-serif font-bold text-[15px] sm:text-[15.5px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
-                <Link prefetch={true} href={`/article/${art.slug}`}>
+                <Link href={`/article/${art.slug}`}>
                   {art.title}
                 </Link>
               </h3>
@@ -154,7 +154,7 @@ export const BusinessCategorySection: React.FC = () => {
           {rightTopArticles.map((art, idx) => (
             <article key={art.id} className={`py-3 ${idx === 0 ? "pt-0" : ""} flex items-start justify-between space-x-3`}>
               <h3 className="font-serif font-bold text-[17px] sm:text-[17.5px] leading-[1.18] text-[#111111] hover:underline cursor-pointer flex-1" style={{ whiteSpace: art.customBreakTitle ? "pre-line" : "normal" }}>
-                <Link prefetch={true} href={`/article/${art.slug}`}>
+                <Link href={`/article/${art.slug}`}>
                   {art.customBreakTitle || art.title}
                 </Link>
               </h3>

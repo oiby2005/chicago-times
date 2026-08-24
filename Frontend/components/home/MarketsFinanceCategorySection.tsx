@@ -31,7 +31,7 @@ export const MarketsFinanceCategorySection: React.FC = () => {
             />
           </Link>
           <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
-            <Link prefetch={true} href="/article/eddie-richardson-south-london-gangster">
+            <Link href="/article/eddie-richardson-south-london-gangster">
               Eddie Richardson, south London gangster
             </Link>
           </h4>
@@ -50,7 +50,7 @@ export const MarketsFinanceCategorySection: React.FC = () => {
             />
           </Link>
           <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
-            <Link prefetch={true} href="/article/enyd-williams-powerhouse-at-bbc-radio-drama">
+            <Link href="/article/enyd-williams-powerhouse-at-bbc-radio-drama">
               Enyd Williams, powerhouse at BBC radio drama
             </Link>
           </h4>
@@ -69,7 +69,7 @@ export const MarketsFinanceCategorySection: React.FC = () => {
             />
           </Link>
           <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
-            <Link prefetch={true} href="/article/tom-chadbon-game-of-thrones-actor">
+            <Link href="/article/tom-chadbon-game-of-thrones-actor">
               Tom Chadbon, Game of Thrones actor
             </Link>
           </h4>
@@ -88,7 +88,7 @@ export const MarketsFinanceCategorySection: React.FC = () => {
             />
           </Link>
           <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
-            <Link prefetch={true} href="/article/frank-beard-beardless-zz-top-drummer">
+            <Link href="/article/frank-beard-beardless-zz-top-drummer">
               Frank Beard, beardless ZZ Top drummer
             </Link>
           </h4>

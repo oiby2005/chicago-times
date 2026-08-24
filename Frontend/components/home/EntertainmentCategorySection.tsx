@@ -32,7 +32,7 @@ export const EntertainmentCategorySection: React.FC = () => {
                 </span>
               </div>
               <h3 className="font-serif font-bold text-[26px] sm:text-[30px] leading-[1.12] text-[#111111] hover:underline cursor-pointer mb-2">
-                <Link prefetch={true} href="/article/the-new-faces-of-the-grand-tour">
+                <Link href="/article/the-new-faces-of-the-grand-tour">
                   The new faces of The<br />
                   Grand Tour: We have<br />
                   Jeremy Clarkson’s<br />
@@ -86,7 +86,7 @@ export const EntertainmentCategorySection: React.FC = () => {
                     </span>
                   </div>
                   <h4 className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-2">
-                    <Link prefetch={true} href="/article/abigails-party-tamzin-outhwaite">
+                    <Link href="/article/abigails-party-tamzin-outhwaite">
                       Abigail’s Party — Tamzin Outhwaite makes Beverly her own
                     </Link>
                   </h4>
@@ -117,7 +117,7 @@ export const EntertainmentCategorySection: React.FC = () => {
                     </span>
                   </div>
                   <h4 className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-2">
-                    <Link prefetch={true} href="/article/why-have-men-gone-off-the-rails">
+                    <Link href="/article/why-have-men-gone-off-the-rails">
                       Why have men gone off the rails? They can’t make an honest living
                     </Link>
                   </h4>
@@ -154,7 +154,7 @@ export const EntertainmentCategorySection: React.FC = () => {
                 </span>
               </div>
               <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-2">
-                <Link prefetch={true} href="/article/the-1m-secret-hiding-in-a-french-garden-shed">
+                <Link href="/article/the-1m-secret-hiding-in-a-french-garden-shed">
                   The £1m secret hiding in a French garden shed... and what happened next
                 </Link>
               </h4>
@@ -176,7 +176,7 @@ export const EntertainmentCategorySection: React.FC = () => {
                 />
               </Link>
               <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-2">
-                <Link prefetch={true} href="/article/the-hilarious-tale-of-a-jilted-bride">
+                <Link href="/article/the-hilarious-tale-of-a-jilted-bride">
                   The hilarious tale of a jilted bride — the best (and worst) Fringe comedy
                 </Link>
               </h4>
@@ -206,7 +206,7 @@ export const EntertainmentCategorySection: React.FC = () => {
                 </span>
               </div>
               <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-2">
-                <Link prefetch={true} href="/article/recollections-of-an-unrepentant-nazi-mass-murderer">
+                <Link href="/article/recollections-of-an-unrepentant-nazi-mass-murderer">
                   Recollections of an unrepentant Nazi mass murderer
                 </Link>
               </h4>
@@ -228,7 +228,7 @@ export const EntertainmentCategorySection: React.FC = () => {
                 />
               </Link>
               <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-2">
-                <Link prefetch={true} href="/article/a-real-life-lion-king">
+                <Link href="/article/a-real-life-lion-king">
                   A real-life Lion King: ‘It’s the holy grail of natural history film-making’
                 </Link>
               </h4>

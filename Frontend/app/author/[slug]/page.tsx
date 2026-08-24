@@ -16,36 +16,26 @@ interface AuthorPageProps {
 }
 
 export default function AuthorPage({ params }: AuthorPageProps) {
-  const [authorData, setAuthorData] = useState<any>(null);
-  const [hasPublishedArticles, setHasPublishedArticles] = useState<boolean>(false);
+  const { slug } = React.use(params);
+  const authorData = getAuthorBySlug(slug);
+  const [hasPublishedArticles, setHasPublishedArticles] = useState<boolean>(true);
 
   useEffect(() => {
-    params.then(({ slug }) => {
-      const data = getAuthorBySlug(slug);
-      setAuthorData(data);
-
-      const isWriterUser = slug.toLowerCase() === "writer" || (data.name || "").toLowerCase() === "writer user";
-      if (isWriterUser) {
-        if (typeof window !== "undefined") {
-          const storedPostsStr = localStorage.getItem("wsj_published_posts");
-          if (storedPostsStr) {
-            try {
-              const storedPosts = JSON.parse(storedPostsStr);
-              setHasPublishedArticles(storedPosts.length > 0);
-            } catch (e) {
-              setHasPublishedArticles(false);
-            }
-          } else {
-            setHasPublishedArticles(false);
-          }
+    const isWriterUser = slug.toLowerCase() === "writer" || ((authorData?.name || "").toLowerCase() === "writer user");
+    if (isWriterUser && typeof window !== "undefined") {
+      const storedPostsStr = localStorage.getItem("wsj_published_posts");
+      if (storedPostsStr) {
+        try {
+          const storedPosts = JSON.parse(storedPostsStr);
+          setHasPublishedArticles(storedPosts.length > 0);
+        } catch (e) {
+          setHasPublishedArticles(false);
         }
       } else {
-        setHasPublishedArticles(true);
+        setHasPublishedArticles(false);
       }
-    });
-  }, [params]);
-
-  if (!authorData) return null;
+    }
+  }, [slug, authorData]);
 
   return (
     <main className="min-h-screen bg-white text-[#111111] font-sans flex flex-col justify-between select-none">

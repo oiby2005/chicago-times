@@ -60,7 +60,7 @@ export const EditorialsSection: React.FC = () => {
             <article className="flex items-start justify-between space-x-3">
               <div className="flex-1">
                 <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-1.5">
-                  <Link prefetch={true} href={`/article/${art.slug}`}>
+                  <Link href={`/article/${art.slug}`}>
                     {art.title}
                   </Link>
                 </h4>

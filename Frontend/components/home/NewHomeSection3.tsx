@@ -21,7 +21,7 @@ export default function NewHomeSection3() {
               NEW | INTERVIEW
             </span>
             <h3 className="font-serif font-bold text-[22px] sm:text-[24px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-2">
-              <Link prefetch={true} href="/article/tanya-byron-stop-misusing-mental-health-terms-triggered">
+              <Link href="/article/tanya-byron-stop-misusing-mental-health-terms-triggered">
                 Tanya Byron: Stop misusing mental health terms like ‘triggered’
               </Link>
             </h3>

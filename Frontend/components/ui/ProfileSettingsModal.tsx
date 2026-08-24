@@ -99,11 +99,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
       onSave(updatedUser);
     }
 
-    setShowSavedToast(true);
-    setTimeout(() => {
-      setShowSavedToast(false);
-      onClose();
-    }, 600);
+    onClose();
   };
 
   return (

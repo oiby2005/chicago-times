@@ -20,7 +20,7 @@ export default function NewHomeSection2() {
           <div className="md:col-span-4 flex flex-col divide-y divide-gray-200">
             <article className="pb-3">
               <h3 className="font-serif font-bold text-[19px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
-                <Link prefetch={true} href="/article/business-secretary-wife-favourite-labour-general-secretary">
+                <Link href="/article/business-secretary-wife-favourite-labour-general-secretary">
                   Business secretary’s wife is favourite for Labour general secretary
                 </Link>
               </h3>
@@ -31,7 +31,7 @@ export default function NewHomeSection2() {
 
             <article className="py-3">
               <h4 className="font-serif font-bold text-[15px] leading-[1.22] text-[#111111] hover:underline cursor-pointer">
-                <Link prefetch={true} href="/article/domestic-abuse-is-illegal-asylum-seekers-told">
+                <Link href="/article/domestic-abuse-is-illegal-asylum-seekers-told">
                   Domestic abuse is illegal, asylum seekers told in advice on UK life
                 </Link>
               </h4>
@@ -42,7 +42,7 @@ export default function NewHomeSection2() {
 
             <article className="pt-3">
               <h4 className="font-serif font-bold text-[15px] leading-[1.22] text-[#111111] hover:underline cursor-pointer">
-                <Link prefetch={true} href="/article/migrant-who-raped-sleeping-woman-allowed-to-stay-in-uk">
+                <Link href="/article/migrant-who-raped-sleeping-woman-allowed-to-stay-in-uk">
                   Migrant who raped sleeping woman allowed to stay in UK
                 </Link>
               </h4>
@@ -64,7 +64,7 @@ export default function NewHomeSection2() {
                 />
               </Link>
               <h3 className="font-serif font-bold text-[20px] leading-[1.18] text-[#111111] hover:underline cursor-pointer">
-                <Link prefetch={true} href="/article/inside-the-wales-wildfire-zone-like-something-from-apocalypse-now">
+                <Link href="/article/inside-the-wales-wildfire-zone-like-something-from-apocalypse-now">
                   Inside the Wales wildfire zone: ‘Like something from Apocalypse Now’
                 </Link>
               </h3>

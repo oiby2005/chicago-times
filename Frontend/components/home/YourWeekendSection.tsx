@@ -31,7 +31,7 @@ export const YourWeekendSection: React.FC = () => {
 
           <div>
             <h3 className="font-serif font-bold text-[24px] sm:text-[28px] leading-[1.15] text-[#111111] hover:underline cursor-pointer mb-2">
-              <Link prefetch={true} href="/article/why-it-is-impossible-to-get-restaurant-reservation">
+              <Link href="/article/why-it-is-impossible-to-get-restaurant-reservation">
                 Why It is Impossible to Get a Restaurant Reservation
               </Link>
             </h3>
@@ -63,7 +63,7 @@ export const YourWeekendSection: React.FC = () => {
               />
             </Link>
             <h4 className="font-serif font-bold text-[17px] sm:text-[19px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-1.5">
-              <Link prefetch={true} href="/article/the-cyberattack-that-brought-distant-war">
+              <Link href="/article/the-cyberattack-that-brought-distant-war">
                 The Cyberattack That Brought a Distant War to Small-Town Minnesota
               </Link>
             </h4>
@@ -80,7 +80,7 @@ export const YourWeekendSection: React.FC = () => {
           <article className="flex-1 flex flex-col justify-between">
             <div>
               <h4 className="font-serif font-bold text-[17px] sm:text-[19px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-1.5">
-                <Link prefetch={true} href="/article/situational-awareness-bets-400-million">
+                <Link href="/article/situational-awareness-bets-400-million">
                   Situational Awareness Bets $400 Million on Stealth Chip Startup After Crash
                 </Link>
               </h4>

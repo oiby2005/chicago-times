@@ -44,7 +44,7 @@ export const APlusMainNewsSection: React.FC<APlusMainNewsSectionProps> = ({
 
       {/* Headline */}
       <h1 className="font-serif font-bold text-[26px] sm:text-[30px] lg:text-[32px] leading-[1.15] text-[#111111] hover:text-[#333333] hover:underline cursor-pointer tracking-tight">
-        <Link prefetch={true} href={`/article/${slug}`}>
+        <Link href={`/article/${slug}`}>
           {title}
         </Link>
       </h1>

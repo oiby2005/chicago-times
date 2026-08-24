@@ -9,6 +9,9 @@ interface SubCategoryPageProps {
   }>;
 }
 
+export const dynamic = "force-dynamic";
+export const dynamicParams = true;
+
 export async function generateStaticParams() {
   return [
     { category: "business", slug: ["cfo-spotlight"] },

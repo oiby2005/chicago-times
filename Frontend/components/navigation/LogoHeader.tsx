@@ -136,7 +136,7 @@ export const LogoHeader: React.FC = () => {
       <div className="pt-2 space-y-1">
         <Link
           href={dashboardHref}
-          prefetch={true}
+         
           onClick={() => setShowDropdown(false)}
           className="flex items-center space-x-3 px-3 py-2.5 hover:bg-slate-50 rounded-xl text-xs font-bold text-[#1e293b] transition-colors cursor-pointer group"
         >
@@ -149,7 +149,7 @@ export const LogoHeader: React.FC = () => {
         {userRole === "writer" && (
           <Link
             href="/writer"
-            prefetch={true}
+           
             onClick={() => setShowDropdown(false)}
             className="flex items-center space-x-3 px-3 py-2.5 hover:bg-slate-50 rounded-xl text-xs font-bold text-[#1e293b] transition-colors cursor-pointer group"
           >

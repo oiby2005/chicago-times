@@ -34,7 +34,7 @@ export const EditorsPicksSection: React.FC = () => {
               
               {/* Title matched to Business Secretary's wife font size (26px-30px) */}
               <h3 className="font-serif font-bold text-[26px] sm:text-[28px] lg:text-[30px] leading-[1.12] text-[#111111] hover:text-[#333333] hover:underline cursor-pointer mb-2">
-                <Link prefetch={true} href="/article/tanya-byron-stop-misusing-mental-health-terms">
+                <Link href="/article/tanya-byron-stop-misusing-mental-health-terms">
                   Tanya Byron: Stop misusing mental health terms like ‘triggered’
                 </Link>
               </h3>
@@ -80,7 +80,7 @@ export const EditorsPicksSection: React.FC = () => {
               </Link>
               <div className="flex-1 flex flex-col justify-between h-full min-h-[100px] sm:min-h-[115px]">
                 <h4 className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
-                  <Link prefetch={true} href="/article/why-earl-spencer-is-still-haunted">
+                  <Link href="/article/why-earl-spencer-is-still-haunted">
                     Why Earl Spencer is still haunted by the ghost of Diana
                   </Link>
                 </h4>
@@ -101,7 +101,7 @@ export const EditorsPicksSection: React.FC = () => {
               </Link>
               <div className="flex-1 flex flex-col justify-between h-full min-h-[100px] sm:min-h-[115px]">
                 <h4 className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
-                  <Link prefetch={true} href="/article/emma-barnett-why-i-had-hysterectomy">
+                  <Link href="/article/emma-barnett-why-i-had-hysterectomy">
                     Emma Barnett: Why I had the hysterectomy I never wanted to have
                   </Link>
                 </h4>
@@ -137,7 +137,7 @@ export const EditorsPicksSection: React.FC = () => {
                     NEW
                   </span>
                   <h4 className="font-serif font-bold text-[15px] sm:text-[15.5px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
-                    <Link prefetch={true} href="/article/undercover-drugs-cop-psychedelics">
+                    <Link href="/article/undercover-drugs-cop-psychedelics">
                       I was an undercover drugs cop. Now I experiment with psychedelics
                     </Link>
                   </h4>
@@ -155,7 +155,7 @@ export const EditorsPicksSection: React.FC = () => {
                     />
                   </Link>
                   <h4 className="font-serif font-bold text-[15px] sm:text-[15.5px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
-                    <Link prefetch={true} href="/article/best-worst-james-bond-themes">
+                    <Link href="/article/best-worst-james-bond-themes">
                       The best (and worst) James Bond themes — and who should sing it next
                     </Link>
                   </h4>
@@ -179,7 +179,7 @@ export const EditorsPicksSection: React.FC = () => {
                     />
                   </Link>
                   <h4 className="font-serif font-bold text-[15px] sm:text-[15.5px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
-                    <Link prefetch={true} href="/article/the-books-we-couldnt-finish">
+                    <Link href="/article/the-books-we-couldnt-finish">
                       The books we couldn’t finish — from American Psycho and Dubliners to Flesh
                     </Link>
                   </h4>
@@ -203,7 +203,7 @@ export const EditorsPicksSection: React.FC = () => {
                     DEBORAH ROSS
                   </span>
                   <h4 className="font-serif font-bold text-[15px] sm:text-[15.5px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
-                    <Link prefetch={true} href="/article/king-charles-wont-slow-down">
+                    <Link href="/article/king-charles-wont-slow-down">
                       King Charles won’t slow down and won’t do what he’s told
                     </Link>
                   </h4>

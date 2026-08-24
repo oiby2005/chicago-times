@@ -36,7 +36,7 @@ export const CeoExecsCategorySection: React.FC = () => {
             </span>
           </div>
           <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
-            <Link prefetch={true} href="/article/the-workwear-brands-that-mean-business">
+            <Link href="/article/the-workwear-brands-that-mean-business">
               The workwear brands that mean business
             </Link>
           </h4>
@@ -60,7 +60,7 @@ export const CeoExecsCategorySection: React.FC = () => {
             </span>
           </div>
           <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
-            <Link prefetch={true} href="/article/sign-up-for-the-times-luxx-newsletter">
+            <Link href="/article/sign-up-for-the-times-luxx-newsletter">
               Sign up for the Times LUXX newsletter
             </Link>
           </h4>
@@ -84,7 +84,7 @@ export const CeoExecsCategorySection: React.FC = () => {
             </span>
           </div>
           <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
-            <Link prefetch={true} href="/article/the-poshest-prams-to-shop-now">
+            <Link href="/article/the-poshest-prams-to-shop-now">
               The poshest prams to shop now
             </Link>
           </h4>
@@ -103,7 +103,7 @@ export const CeoExecsCategorySection: React.FC = () => {
             />
           </Link>
           <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
-            <Link prefetch={true} href="/article/what-your-posh-cycling-gear-says-about-you">
+            <Link href="/article/what-your-posh-cycling-gear-says-about-you">
               What your posh cycling gear says about you
             </Link>
           </h4>

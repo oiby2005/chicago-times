@@ -27,7 +27,7 @@ export const LifestyleCategorySection: React.FC = () => {
             {/* Left Headline */}
             <div className="md:col-span-4 flex flex-col justify-start">
               <h3 className="font-serif font-bold text-[26px] sm:text-[30px] leading-[1.12] text-[#111111] hover:underline cursor-pointer mb-2">
-                <Link prefetch={true} href="/article/chicest-stays-in-balearic-islands">
+                <Link href="/article/chicest-stays-in-balearic-islands">
                   These are the chicest<br />
                   stays in the Balearic<br />
                   islands
@@ -75,7 +75,7 @@ export const LifestyleCategorySection: React.FC = () => {
                     </span>
                   </div>
                   <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-2">
-                    <Link prefetch={true} href="/article/are-airport-lounges-worth-it">
+                    <Link href="/article/are-airport-lounges-worth-it">
                       Are airport lounges worth it? Probably not, according to new study
                     </Link>
                   </h4>
@@ -103,7 +103,7 @@ export const LifestyleCategorySection: React.FC = () => {
                     </span>
                   </div>
                   <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-2">
-                    <Link prefetch={true} href="/article/this-ayrshire-hotels-new-spa-is-star-turn">
+                    <Link href="/article/this-ayrshire-hotels-new-spa-is-star-turn">
                       This Ayrshire hotel’s new spa is the star turn
                     </Link>
                   </h4>
@@ -132,7 +132,7 @@ export const LifestyleCategorySection: React.FC = () => {
                 />
               </Link>
               <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-2">
-                <Link prefetch={true} href="/article/naples-hotel-scene-has-never-been-better">
+                <Link href="/article/naples-hotel-scene-has-never-been-better">
                   Naples’ hotel scene has never been better. Here’s where to stay
                 </Link>
               </h4>
@@ -156,7 +156,7 @@ export const LifestyleCategorySection: React.FC = () => {
                 </span>
               </div>
               <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-2">
-                <Link prefetch={true} href="/article/win-a-luxury-highlands-break">
+                <Link href="/article/win-a-luxury-highlands-break">
                   Win a luxury Highlands break worth up to £1,210 with Glenmorangie House
                 </Link>
               </h4>
@@ -178,7 +178,7 @@ export const LifestyleCategorySection: React.FC = () => {
                 />
               </Link>
               <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-2">
-                <Link prefetch={true} href="/article/these-beautiful-islands-are-closer-than-you-think">
+                <Link href="/article/these-beautiful-islands-are-closer-than-you-think">
                   These beautiful islands are closer to home than you think
                 </Link>
               </h4>
@@ -202,7 +202,7 @@ export const LifestyleCategorySection: React.FC = () => {
                 </span>
               </div>
               <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-2">
-                <Link prefetch={true} href="/article/why-book-a-cruise-and-stay-with-times-holidays">
+                <Link href="/article/why-book-a-cruise-and-stay-with-times-holidays">
                   Why book a cruise-and-stay with Times Holidays? The best offers for 2027 and 2028
                 </Link>
               </h4>

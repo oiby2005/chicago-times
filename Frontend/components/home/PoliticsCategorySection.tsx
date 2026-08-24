@@ -32,7 +32,7 @@ export const PoliticsCategorySection: React.FC = () => {
             />
           </Link>
           <h3 className="font-serif font-bold text-[17px] sm:text-[18px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-1.5">
-            <Link prefetch={true} href="/article/hegseth-strips-security-clearance-biden-air-force-secretary">
+            <Link href="/article/hegseth-strips-security-clearance-biden-air-force-secretary">
               Hegseth Strips Security Clearance From Biden’s Air Force Secretary
             </Link>
           </h3>
@@ -57,7 +57,7 @@ export const PoliticsCategorySection: React.FC = () => {
             />
           </Link>
           <h3 className="font-serif font-bold text-[17px] sm:text-[18px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-1.5">
-            <Link prefetch={true} href="/article/hegseth-strips-security-clearance-biden-air-force-secretary-2">
+            <Link href="/article/hegseth-strips-security-clearance-biden-air-force-secretary-2">
               Hegseth Strips Security Clearance From Biden’s Air Force Secretary
             </Link>
           </h3>
@@ -71,7 +71,7 @@ export const PoliticsCategorySection: React.FC = () => {
           {/* Top Story */}
           <article className="pb-2.5 mb-2.5 border-b border-dashed border-[#CCCCCC]">
             <h4 className="font-serif font-bold text-[17px] sm:text-[18px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-1.5">
-              <Link prefetch={true} href="/article/trump-showed-up-at-rally-with-lustrous-locks">
+              <Link href="/article/trump-showed-up-at-rally-with-lustrous-locks">
                 Trump Showed Up at a Rally With Lustrous Locks. The Memes Won’t Stop.
               </Link>
             </h4>
@@ -83,7 +83,7 @@ export const PoliticsCategorySection: React.FC = () => {
           {/* Bottom Story */}
           <article className="pt-0">
             <h4 className="font-serif font-bold text-[17px] sm:text-[18px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-1.5">
-              <Link prefetch={true} href="/article/trump-revives-attempt-to-fire-fed-governor-lisa-cook">
+              <Link href="/article/trump-revives-attempt-to-fire-fed-governor-lisa-cook">
                 Trump Revives Attempt to Fire Fed Governor Lisa Cook
               </Link>
             </h4>

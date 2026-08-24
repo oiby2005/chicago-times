@@ -71,7 +71,7 @@ export const WorldPoliticsCategorySection: React.FC = () => {
 
             {/* Title */}
             <h3 className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.2] text-[#111111] hover:text-[#333333] hover:underline cursor-pointer">
-              <Link prefetch={true} href={`/article/${art.slug}`}>
+              <Link href={`/article/${art.slug}`}>
                 {art.title}
               </Link>
             </h3>

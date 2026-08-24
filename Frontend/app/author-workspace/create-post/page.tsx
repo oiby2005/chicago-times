@@ -1061,8 +1061,6 @@ export default function CreateNewPostPage() {
     safeSavePostsToStorage(existingPosts);
     window.dispatchEvent(new Event("wsj_posts_updated"));
 
-    await new Promise((resolve) => setTimeout(resolve, 800));
-
     setStatusMessage(null);
     if (typeof window !== "undefined") {
       window.location.href = "/writer-dashboard";
@@ -1149,8 +1147,6 @@ export default function CreateNewPostPage() {
 
     safeSavePostsToStorage(existingPosts);
     window.dispatchEvent(new Event("wsj_posts_updated"));
-
-    await new Promise((resolve) => setTimeout(resolve, 800));
 
     setStatusMessage(null);
     if (typeof window !== "undefined") {

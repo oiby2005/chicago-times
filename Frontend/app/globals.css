@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Inter:wght@400..800&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -15,9 +13,7 @@
   }
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Kumbh+Sans:wght@300;400;500&display=swap');
-
-/* Image 1 Typographic Style: Guaranteed single-story 'a' via Century Gothic & Kumbh Sans */
+/* Typographic Style Utilities */
 @font-face {
   font-family: 'Publica Sans Light';
   src: local('Publica Sans Light'), local('PublicaSans-Light'), local('PublicaSansLight');
@@ -29,7 +25,7 @@
 .font-publica,
 .font-publica-light,
 .font-publicaLight {
-  font-family: "Publica Sans Light", "Publica Sans", "Century Gothic", "Kumbh Sans", sans-serif !important;
+  font-family: "Publica Sans Light", "Publica Sans", var(--font-kumbh), "Century Gothic", sans-serif !important;
 }
 .font-arial-unicode,
 .font-arialUnicode {
@@ -50,16 +46,6 @@
 }
 
 @font-face {
-  font-family: 'Publica Sans Light';
-  src: local('Publica Sans Light'),
-       local('PublicaSans-Light'),
-       local('Publica Sans'),
-       local('PublicaSans');
-  font-weight: 300;
-  font-style: normal;
-}
-
-@font-face {
   font-family: 'Encorpada Classic Compressed Bold';
   src: local('Encorpada Classic Compressed Bold'),
        local('Encorpada Classic Compressed-Bold'),
@@ -72,7 +58,7 @@
   font-stretch: condensed;
 }
 
-/* Universal Article Title Typography matching Preview Title across entire website */
+/* Universal Article Title Typography matching Preview Title cleanly without transform glitches */
 .font-encorpada-headline, 
 .font-kepler-headline, 
 .font-escrow-headline, 
@@ -86,41 +72,8 @@
   line-height: 1.08 !important;
   color: #111111 !important;
   display: block;
-  transform: scaleX(0.86);
-  transform-origin: left top;
-  width: 116%;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-/* Suppress ONLY vertical grid lines (border-r / border-l) on page body content (excluding header, nav, sticky, signin, & article-body) */
-body:not(.signin-page) div[class*="border-r"]:not(header *):not(nav *):not(.sticky *):not(.signin-wrapper *):not(.article-body *):not(.article-body),
-body:not(.signin-page) div[class*="border-l"]:not(header *):not(nav *):not(.sticky *):not(.signin-wrapper *):not(.article-body *):not(.article-body),
-body:not(.signin-page) div[class*="md:border-r"]:not(header *):not(nav *):not(.sticky *):not(.signin-wrapper *):not(.article-body *):not(.article-body),
-body:not(.signin-page) div[class*="md:border-l"]:not(header *):not(nav *):not(.sticky *):not(.signin-wrapper *):not(.article-body *):not(.article-body),
-body:not(.signin-page) div[class*="lg:border-r"]:not(header *):not(nav *):not(.sticky *):not(.signin-wrapper *):not(.article-body *):not(.article-body),
-body:not(.signin-page) div[class*="lg:border-l"]:not(header *):not(nav *):not(.sticky *):not(.signin-wrapper *):not(.article-body *):not(.article-body),
-body:not(.signin-page) div[class*="sm:border-r"]:not(header *):not(nav *):not(.sticky *):not(.signin-wrapper *):not(.article-body *):not(.article-body) {
-  border-right-color: transparent !important;
-  border-left-color: transparent !important;
-}
-
-/* Suppress horizontal grey section divider lines on main page body content (excluding header, nav, sticky, signin, & article-body) */
-body:not(.signin-page) :not(header):not(nav):not(.sticky):not(.article-body):not(header *):not(nav *):not(.sticky *):not(.signin-wrapper *):not(.article-body *).border-\[\#e2e2e2\],
-body:not(.signin-page) :not(header):not(nav):not(.sticky):not(.article-body):not(header *):not(nav *):not(.sticky *):not(.signin-wrapper *):not(.article-body *).border-\[\#d4d4d4\],
-body:not(.signin-page) :not(header):not(nav):not(.sticky):not(.article-body):not(header *):not(nav *):not(.sticky *):not(.signin-wrapper *):not(.article-body *).border-\[\#d9d9d9\],
-body:not(.signin-page) :not(header):not(nav):not(.sticky):not(.article-body):not(header *):not(nav *):not(.sticky *):not(.signin-wrapper *):not(.article-body *).border-\[\#cccccc\],
-body:not(.signin-page) :not(header):not(nav):not(.sticky):not(.article-body):not(header *):not(nav *):not(.sticky *):not(.signin-wrapper *):not(.article-body *).border-\[\#e5e5e5\],
-body:not(.signin-page) :not(header):not(nav):not(.sticky):not(.article-body):not(header *):not(nav *):not(.sticky *):not(.signin-wrapper *):not(.article-body *).border-\[\#eaeaea\],
-body:not(.signin-page) :not(header):not(nav):not(.sticky):not(.article-body):not(header *):not(nav *):not(.sticky *):not(.signin-wrapper *):not(.article-body *).border-gray-100,
-body:not(.signin-page) :not(header):not(nav):not(.sticky):not(.article-body):not(header *):not(nav *):not(.sticky *):not(.signin-wrapper *):not(.article-body *).border-gray-200,
-body:not(.signin-page) :not(header):not(nav):not(.sticky):not(.article-body):not(header *):not(nav *):not(.sticky *):not(.signin-wrapper *):not(.article-body *).border-gray-300 {
-  border-color: transparent !important;
-}
-
-body:not(.signin-page) :not(header):not(nav):not(.sticky):not(.article-body):not(header *):not(nav *):not(.sticky *):not(.signin-wrapper *):not(.article-body *) > hr {
-  border-color: transparent !important;
-  opacity: 0 !important;
 }
 
 /* Explicitly preserve all grey borders, card outlines, dividers, and input borders on Sign In page */

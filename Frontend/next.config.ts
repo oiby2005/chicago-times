@@ -11,8 +11,12 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
+  onDemandEntries: {
+    maxInactiveAge: 60 * 60 * 1000,
+    pagesBufferLength: 50,
+  },
   experimental: {
-    optimizePackageImports: ["lucide-react"],
+    optimizePackageImports: ["lucide-react", "clsx", "tailwind-merge"],
   },
 };
 

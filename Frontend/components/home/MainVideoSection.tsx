@@ -172,7 +172,7 @@ export const MainVideoSection: React.FC = () => {
 
             {/* Title */}
             <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
-              <Link prefetch={true} href={`/article/${video.slug}`}>
+              <Link href={`/article/${video.slug}`}>
                 {video.title}
               </Link>
             </h4>

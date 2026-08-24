@@ -34,7 +34,7 @@ export const FashionScienceArtsSection: React.FC = () => {
 
           {/* Main Headline */}
           <h4 className="font-serif font-bold text-[17px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-3">
-            <Link prefetch={true} href="/article/why-slow-job-growth-doesnt-mean-labor-market-trouble">
+            <Link href="/article/why-slow-job-growth-doesnt-mean-labor-market-trouble">
               Why Slow Job Growth Doesn’t Mean the Labor Market Is in Trouble
             </Link>
           </h4>
@@ -42,7 +42,7 @@ export const FashionScienceArtsSection: React.FC = () => {
           {/* Sub Article 1 */}
           <div className="pt-1 pb-2">
             <h5 className="font-serif font-bold text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
-              <Link prefetch={true} href="/article/week-ahead-for-fx-bonds">
+              <Link href="/article/week-ahead-for-fx-bonds">
                 Week Ahead for FX, Bonds: U.S. Inflation Data in Focus
               </Link>
             </h5>
@@ -51,7 +51,7 @@ export const FashionScienceArtsSection: React.FC = () => {
           {/* Sub Article 2 */}
           <div className="pt-1">
             <h5 className="font-serif font-bold text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
-              <Link prefetch={true} href="/article/us-lost-23000-jobs-in-july">
+              <Link href="/article/us-lost-23000-jobs-in-july">
                 U.S. Lost 23,000 Jobs in July, While
               </Link>
             </h5>
@@ -84,7 +84,7 @@ export const FashionScienceArtsSection: React.FC = () => {
 
           {/* Main Headline */}
           <h4 className="font-serif font-bold text-[17px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-3">
-            <Link prefetch={true} href="/article/nycs-pied-a-terre-owners-hunt-creative-ways-tax">
+            <Link href="/article/nycs-pied-a-terre-owners-hunt-creative-ways-tax">
               NYC’s Pied-à-Terre Owners Hunt for Creative Ways to Dodge New Tax
             </Link>
           </h4>
@@ -92,7 +92,7 @@ export const FashionScienceArtsSection: React.FC = () => {
           {/* Sub Article 1 */}
           <div className="pt-1 pb-2">
             <h5 className="font-serif font-bold text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
-              <Link prefetch={true} href="/article/dc-home-market-gets-billionaire-bump">
+              <Link href="/article/dc-home-market-gets-billionaire-bump">
                 The D.C. Home Market Gets a Billionaire Bump
               </Link>
             </h5>
@@ -101,7 +101,7 @@ export const FashionScienceArtsSection: React.FC = () => {
           {/* Sub Article 2 */}
           <div className="pt-1">
             <h5 className="font-serif font-bold text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
-              <Link prefetch={true} href="/article/house-of-the-week-built-off-site">
+              <Link href="/article/house-of-the-week-built-off-site">
                 House of the Week: Built Off-Site and
               </Link>
             </h5>
@@ -134,7 +134,7 @@ export const FashionScienceArtsSection: React.FC = () => {
 
           {/* Main Headline */}
           <h4 className="font-serif font-bold text-[17px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-3">
-            <Link prefetch={true} href="/article/horse-racings-triple-crown-may-no-longer-be-worth-chasing">
+            <Link href="/article/horse-racings-triple-crown-may-no-longer-be-worth-chasing">
               Horse Racing’s Triple Crown May No Longer Be Worth Chasing
             </Link>
           </h4>
@@ -142,7 +142,7 @@ export const FashionScienceArtsSection: React.FC = () => {
           {/* Sub Article 1 */}
           <div className="pt-1 pb-2">
             <h5 className="font-serif font-bold text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
-              <Link prefetch={true} href="/article/the-king-of-soccer-went-rogue">
+              <Link href="/article/the-king-of-soccer-went-rogue">
                 The ‘King of Soccer’ Went Rogue and Nearly Lost His FIFA Empire
               </Link>
             </h5>
@@ -151,7 +151,7 @@ export const FashionScienceArtsSection: React.FC = () => {
           {/* Sub Article 2 */}
           <div className="pt-1">
             <h5 className="font-serif font-bold text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
-              <Link prefetch={true} href="/article/hes-known-as-big-dumper-but-this">
+              <Link href="/article/hes-known-as-big-dumper-but-this">
                 He’s Known as Big Dumper, but This
               </Link>
             </h5>

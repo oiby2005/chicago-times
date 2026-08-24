@@ -32,7 +32,7 @@ export const SportCategorySection: React.FC = () => {
                 </span>
               </div>
               <h3 className="font-serif font-bold text-[28px] sm:text-[32px] leading-[1.12] text-[#111111] hover:underline cursor-pointer mb-2">
-                <Link prefetch={true} href="/article/returning-robinsons-excellence">
+                <Link href="/article/returning-robinsons-excellence">
                   Returning<br />
                   Robinson’s<br />
                   excellence ensures<br />
@@ -80,7 +80,7 @@ export const SportCategorySection: React.FC = () => {
               </Link>
               <div className="flex flex-col justify-between flex-1">
                 <h4 className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-2">
-                  <Link prefetch={true} href="/article/spurs-in-double-swoop-for-marmoush-and-savinho">
+                  <Link href="/article/spurs-in-double-swoop-for-marmoush-and-savinho">
                     Spurs in double swoop for Marmoush and Savinho from City
                   </Link>
                 </h4>
@@ -110,7 +110,7 @@ export const SportCategorySection: React.FC = () => {
                     </span>
                   </div>
                   <h4 className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-2">
-                    <Link prefetch={true} href="/article/poor-old-warner-forever-the-victim">
+                    <Link href="/article/poor-old-warner-forever-the-victim">
                       Poor old Warner — forever the victim, never the culprit
                     </Link>
                   </h4>
@@ -147,7 +147,7 @@ export const SportCategorySection: React.FC = () => {
                 </span>
               </div>
               <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-2">
-                <Link prefetch={true} href="/article/root-ditches-tinkering-on-day-of-sharp-decisive-captaincy">
+                <Link href="/article/root-ditches-tinkering-on-day-of-sharp-decisive-captaincy">
                   Root ditches tinkering on day of sharp, decisive captaincy
                 </Link>
               </h4>
@@ -174,7 +174,7 @@ export const SportCategorySection: React.FC = () => {
                 </span>
               </div>
               <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-2">
-                <Link prefetch={true} href="/article/cocaine-ban-does-not-mean-the-end-for-kyrgios">
+                <Link href="/article/cocaine-ban-does-not-mean-the-end-for-kyrgios">
                   Cocaine ban does not mean the end for Kyrgios in sport that consumes stars
                 </Link>
               </h4>
@@ -204,7 +204,7 @@ export const SportCategorySection: React.FC = () => {
                 </span>
               </div>
               <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-2">
-                <Link prefetch={true} href="/article/united-submit-65m-bid-for-brightons-baleba">
+                <Link href="/article/united-submit-65m-bid-for-brightons-baleba">
                   United submit £65m bid for Brighton’s Baleba as Jones nears Inter move
                 </Link>
               </h4>
@@ -226,7 +226,7 @@ export const SportCategorySection: React.FC = () => {
                 />
               </Link>
               <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-2">
-                <Link prefetch={true} href="/article/off-grid-uk-athletics-coach-in-moroccan-jail">
+                <Link href="/article/off-grid-uk-athletics-coach-in-moroccan-jail">
                   ‘Off grid’ UK athletics coach in Moroccan jail for sexually assaulting minor
                 </Link>
               </h4>

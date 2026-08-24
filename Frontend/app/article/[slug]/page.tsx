@@ -21,6 +21,9 @@ interface ArticlePageProps {
 
 
 
+export const dynamic = "force-dynamic";
+export const dynamicParams = true;
+
 export async function generateStaticParams() {
   return [
     { slug: "afghanistan-refugees" },
@@ -38,6 +41,7 @@ export async function generateStaticParams() {
 }
 
 export default async function ArticlePage({ params }: ArticlePageProps) {
+  const { slug } = await params;
   const article = getArticleBySlug(slug) || {};
   const authorObj = getAuthorForArticle(slug, article?.author || "writer");
 

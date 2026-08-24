@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Source_Serif_4, Inter } from "next/font/google";
+import { Playfair_Display, Source_Serif_4, Inter, Bodoni_Moda, Kumbh_Sans } from "next/font/google";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -22,6 +22,19 @@ const inter = Inter({
   display: "swap",
 });
 
+const bodoni = Bodoni_Moda({
+  subsets: ["latin"],
+  variable: "--font-bodoni",
+  display: "swap",
+});
+
+const kumbh = Kumbh_Sans({
+  subsets: ["latin"],
+  weight: ["300", "400", "500"],
+  variable: "--font-kumbh",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "Times Chicago - Breaking News, Business, Financial & Economic News",
   description: "Latest news, analysis and comment from Times Chicago.",
@@ -36,7 +49,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${playfair.variable} ${sourceSerif.variable} ${inter.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${playfair.variable} ${sourceSerif.variable} ${inter.variable} ${bodoni.variable} ${kumbh.variable}`} suppressHydrationWarning>
       <body className="min-h-screen bg-white font-sans text-[#111111] antialiased flex flex-col" suppressHydrationWarning>
         {children}
       </body>

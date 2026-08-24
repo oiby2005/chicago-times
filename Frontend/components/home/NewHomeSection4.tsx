@@ -91,7 +91,7 @@ export default function NewHomeSection4() {
                   </Link>
 
                   <h3 className="font-serif font-bold text-[22px] sm:text-[24px] leading-[1.18] text-[#111111] hover:text-gray-800 hover:underline cursor-pointer">
-                    <Link prefetch={true} href="/article/why-it-is-impossible-to-get-a-restaurant-reservation">
+                    <Link href="/article/why-it-is-impossible-to-get-a-restaurant-reservation">
                       Why It is Impossible to Get a Restaurant Reservation
                     </Link>
                   </h3>
@@ -130,7 +130,7 @@ export default function NewHomeSection4() {
                   </Link>
 
                   <h4 className="font-serif font-bold text-[16px] xl:text-[17px] leading-[1.22] text-[#111111] hover:underline cursor-pointer">
-                    <Link prefetch={true} href="/article/the-cyberattack-that-brought-a-distant-war-to-small-town-minnesota">
+                    <Link href="/article/the-cyberattack-that-brought-a-distant-war-to-small-town-minnesota">
                       The Cyberattack That Brought a Distant War to Small-Town Minnesota
                     </Link>
                   </h4>
@@ -151,7 +151,7 @@ export default function NewHomeSection4() {
                     EXCLUSIVE
                   </div>
                   <h4 className="font-serif font-bold text-[16px] xl:text-[17px] leading-[1.22] text-[#111111] hover:underline cursor-pointer">
-                    <Link prefetch={true} href="/article/situational-awareness-bets-400-million-on-stealth-chip-startup">
+                    <Link href="/article/situational-awareness-bets-400-million-on-stealth-chip-startup">
                       Situational Awareness Bets $400 Million on Stealth Chip Startup After Crash
                     </Link>
                   </h4>
@@ -193,7 +193,7 @@ export default function NewHomeSection4() {
                   </Link>
 
                   <h4 className="font-serif font-bold text-[16px] xl:text-[17px] leading-[1.22] text-[#111111] hover:underline cursor-pointer">
-                    <Link prefetch={true} href="/article/hegseth-strips-security-clearance-from-bidens-air-force-secretary">
+                    <Link href="/article/hegseth-strips-security-clearance-from-bidens-air-force-secretary">
                       Hegseth Strips Security Clearance From Biden’s Air Force Secretary
                     </Link>
                   </h4>
@@ -245,7 +245,7 @@ export default function NewHomeSection4() {
                 {/* Trump Hair Memes */}
                 <article className="pb-3.5">
                   <h4 className="font-serif font-bold text-[16px] xl:text-[17px] leading-[1.22] text-[#111111] hover:underline cursor-pointer">
-                    <Link prefetch={true} href="/article/trump-showed-up-at-rally-with-lustrous-locks">
+                    <Link href="/article/trump-showed-up-at-rally-with-lustrous-locks">
                       Trump Showed Up at a Rally With Lustrous Locks. The Memes Won’t Stop.
                     </Link>
                   </h4>
@@ -263,7 +263,7 @@ export default function NewHomeSection4() {
                 {/* Trump Fire Fed Governor Lisa Cook */}
                 <article className="pt-3.5">
                   <h4 className="font-serif font-bold text-[16px] xl:text-[17px] leading-[1.22] text-[#111111] hover:underline cursor-pointer">
-                    <Link prefetch={true} href="/article/trump-revives-attempt-to-fire-fed-governor-lisa-cook">
+                    <Link href="/article/trump-revives-attempt-to-fire-fed-governor-lisa-cook">
                       Trump Revives Attempt to Fire Fed Governor Lisa Cook
                     </Link>
                   </h4>
@@ -308,7 +308,7 @@ export default function NewHomeSection4() {
                   </Link>
 
                   <h3 className="font-serif font-bold text-[22px] sm:text-[24px] leading-[1.18] text-[#111111] hover:text-gray-800 hover:underline cursor-pointer">
-                    <Link prefetch={true} href="/article/a-spa-in-the-middle-of-the-desert-500000-bathroom">
+                    <Link href="/article/a-spa-in-the-middle-of-the-desert-500000-bathroom">
                       A Spa in the Middle of the Desert? It’s Actually a $500,000 Bathroom
                     </Link>
                   </h3>
@@ -348,7 +348,7 @@ export default function NewHomeSection4() {
                   </Link>
 
                   <h4 className="font-serif font-bold text-[16px] xl:text-[17px] leading-[1.22] text-[#111111] hover:underline cursor-pointer">
-                    <Link prefetch={true} href="/article/she-escaped-teen-marriage-in-appalachia-harvard">
+                    <Link href="/article/she-escaped-teen-marriage-in-appalachia-harvard">
                       She Escaped Teen Marriage in Appalachia. Her Time at Harvard Was Even Worse.
                     </Link>
                   </h4>
@@ -369,7 +369,7 @@ export default function NewHomeSection4() {
                     BOOK REVIEW
                   </div>
                   <h4 className="font-serif font-bold text-[16px] xl:text-[17px] leading-[1.22] text-[#111111] hover:underline cursor-pointer">
-                    <Link prefetch={true} href="/article/15-books-we-read-this-week">
+                    <Link href="/article/15-books-we-read-this-week">
                       15 Books We Read This Week
                     </Link>
                   </h4>

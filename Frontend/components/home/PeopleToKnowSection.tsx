@@ -49,7 +49,7 @@ export const PeopleToKnowTop: React.FC = () => {
         <div className="pl-0 md:pl-4 pt-0 flex flex-col justify-start pb-0">
           <article className="pb-2.5 border-b border-dashed border-[#CCCCCC]">
             <h4 className="font-serif font-bold text-[17px] sm:text-[18px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-1.5">
-              <Link prefetch={true} href="/article/how-trumps-executive-assistant-became-talk-of-washington">
+              <Link href="/article/how-trumps-executive-assistant-became-talk-of-washington">
                 How Trump’s Ever-Present Executive Assistant Became the Talk of Washington
               </Link>
             </h4>
@@ -80,7 +80,7 @@ export const PeopleToKnowBottom: React.FC = () => {
         >
           <div>
             <h3 className="font-serif font-bold text-[18px] sm:text-[20px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-2">
-              <Link prefetch={true} href="/article/the-lakers-heiress-nba-succession-drama">
+              <Link href="/article/the-lakers-heiress-nba-succession-drama">
                 The Lakers Heiress at the Center of the NBA’s Nastiest Succession Drama
               </Link>
             </h3>
@@ -105,7 +105,7 @@ export const PeopleToKnowBottom: React.FC = () => {
           <article className="flex-1 flex flex-col justify-between">
             <div>
               <h4 className="font-serif font-bold text-[17px] sm:text-[18px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-1.5">
-                <Link prefetch={true} href="/article/what-to-know-about-florida-progressive-angie-nixon">
+                <Link href="/article/what-to-know-about-florida-progressive-angie-nixon">
                   What to Know About Florida Progressive Angie Nixon
                 </Link>
               </h4>

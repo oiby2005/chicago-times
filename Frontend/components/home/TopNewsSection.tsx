@@ -58,7 +58,7 @@ export const TopNewsSection: React.FC = () => {
           <article key={article.id} className="py-2.5 first:pt-0 last:pb-0 flex flex-col justify-between">
             <div>
               <h3 className="font-serif font-bold text-[17px] sm:text-[18px] leading-[1.2] text-[#111111] hover:text-[#333333] hover:underline cursor-pointer">
-                <Link prefetch={true} href={`/article/${article.slug}`}>
+                <Link href={`/article/${article.slug}`}>
                   {article.title}
                 </Link>
               </h3>

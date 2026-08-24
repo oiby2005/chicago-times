@@ -324,7 +324,7 @@ export const Navbar: React.FC = () => {
                   >
                     <Link
                       href={getCategoryRoute(title)}
-                      prefetch={true}
+                      prefetch={false}
                       onClick={() => setActiveTab(null)}
                       className={`text-[13px] font-['Century_Gothic','Publica_Sans_Light','Kumbh_Sans',sans-serif] ${
                         isActive
@@ -380,7 +380,7 @@ export const Navbar: React.FC = () => {
                     <li key={link.name}>
                       <Link
                         href={link.href}
-                        prefetch={true}
+                        prefetch={false}
                         onClick={() => setActiveTab(null)}
                         className="text-[12.5px] font-['Century_Gothic','Publica_Sans_Light','Kumbh_Sans',sans-serif] text-[#444444] hover:text-black hover:underline transition-colors block leading-snug"
                       >

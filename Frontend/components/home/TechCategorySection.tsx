@@ -42,7 +42,7 @@ export const TechCategorySection: React.FC = () => {
           </div>
 
           <h3 className="font-serif font-bold text-[22px] sm:text-[24px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-2">
-            <Link prefetch={true} href="/article/spanish-border-chaos-is-an-illusion">
+            <Link href="/article/spanish-border-chaos-is-an-illusion">
               Spanish Border Chaos Is an Illusion: Europe’s Borders Are Finally Working
             </Link>
           </h3>
@@ -58,7 +58,7 @@ export const TechCategorySection: React.FC = () => {
           {/* Story 1 */}
           <article className="pb-3 border-b border-dashed border-[#CCCCCC]">
             <h4 className="font-serif font-bold text-[17px] sm:text-[18px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-1.5">
-              <Link prefetch={true} href="/article/eus-internal-borders-start-to-harden">
+              <Link href="/article/eus-internal-borders-start-to-harden">
                 EU’s Internal Borders Start to Harden as Dispute Grows Over Migrants
               </Link>
             </h4>
@@ -70,7 +70,7 @@ export const TechCategorySection: React.FC = () => {
           {/* Story 2 */}
           <article className="py-3 border-b border-dashed border-[#CCCCCC]">
             <h4 className="font-serif font-bold text-[17px] sm:text-[18px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-1.5">
-              <Link prefetch={true} href="/article/russias-hottest-startup-sanctions-evasion">
+              <Link href="/article/russias-hottest-startup-sanctions-evasion">
                 Russia’s Hottest Startup Is a State-Backed Sanctions Evasion Network
               </Link>
             </h4>
@@ -86,7 +86,7 @@ export const TechCategorySection: React.FC = () => {
           {/* Story 3 */}
           <article className="pt-3">
             <h4 className="font-serif font-bold text-[17px] sm:text-[18px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-1.5">
-              <Link prefetch={true} href="/article/us-intel-links-russia-explosive-drone">
+              <Link href="/article/us-intel-links-russia-explosive-drone">
                 U.S. Intel Links Russia to Explosive Drone at German Airport
               </Link>
             </h4>

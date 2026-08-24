@@ -10,7 +10,7 @@ export const APlusSection2: React.FC = () => {
         {/* Left Text Card (6 of 12 cols) */}
         <div className="col-span-12 md:col-span-6 bg-[#F7F4EB] p-6 sm:p-10 flex flex-col justify-center">
           <h2 className="font-serif font-bold text-[26px] sm:text-[34px] leading-[1.15] text-[#111111] hover:underline cursor-pointer mb-4">
-            <Link prefetch={true} href="/article/the-gorgeous-tourist-free-adriatic-islands">
+            <Link href="/article/the-gorgeous-tourist-free-adriatic-islands">
               The gorgeous (and tourist-free) Adriatic islands with a royal link
             </Link>
           </h2>
