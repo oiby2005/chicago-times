@@ -593,6 +593,17 @@ export default function CreateNewPostPage() {
     window.addEventListener("mouseup", onMouseUp);
   };
 
+  const sanitizeEditorDOM = (container: HTMLElement | null) => {
+    if (!container) return;
+    const figures = Array.from(container.querySelectorAll("figure"));
+    figures.forEach((fig) => {
+      if (fig.parentElement && (fig.parentElement.tagName === "P" || fig.parentElement.tagName === "BLOCKQUOTE" || fig.parentElement.tagName === "PRE")) {
+        const parentBlock = fig.parentElement;
+        parentBlock.parentNode?.insertBefore(fig, parentBlock);
+      }
+    });
+  };
+
   const handleSetImageSize = (sizeStr: string) => {
     if (!selectedImgEl) return;
     const figure = (selectedImgEl.closest("figure") || selectedImgEl) as HTMLElement;
@@ -605,24 +616,33 @@ export default function CreateNewPostPage() {
   const handleSetImageAlign = (align: "left" | "center" | "right") => {
     if (!selectedImgEl) return;
     const figure = (selectedImgEl.closest("figure") || selectedImgEl) as HTMLElement;
+
+    if (figure.parentElement && (figure.parentElement.tagName === "P" || figure.parentElement.tagName === "BLOCKQUOTE")) {
+      const parentBlock = figure.parentElement;
+      parentBlock.parentNode?.insertBefore(figure, parentBlock);
+    }
+
     if (align === "left") {
       figure.style.float = "left";
-      figure.style.margin = "8px 24px 16px 0";
+      figure.style.margin = "12px 24px 16px 0";
       figure.style.clear = "left";
       figure.style.display = "block";
     } else if (align === "right") {
       figure.style.float = "right";
-      figure.style.margin = "8px 0 16px 24px";
+      figure.style.margin = "12px 0 16px 24px";
       figure.style.clear = "right";
       figure.style.display = "block";
     } else {
       figure.style.float = "none";
-      figure.style.margin = "20px auto";
+      figure.style.margin = "24px auto";
       figure.style.clear = "both";
       figure.style.display = "block";
     }
     setTimeout(() => updateSelectedImgPos(selectedImgEl), 50);
-    if (editorRef.current) setBodyContent(editorRef.current.innerHTML);
+    if (editorRef.current) {
+      sanitizeEditorDOM(editorRef.current);
+      setBodyContent(editorRef.current.innerHTML);
+    }
   };
 
   const [isDraggingImage, setIsDraggingImage] = useState(false);
@@ -803,13 +823,17 @@ export default function CreateNewPostPage() {
       const newImg = editingFigureEl.querySelector("img") as HTMLImageElement;
       if (newImg) setSelectedImgEl(newImg);
       setTimeout(() => updateSelectedImgPos(editingFigureEl), 50);
-      if (editorRef.current) setBodyContent(editorRef.current.innerHTML);
+      if (editorRef.current) {
+        sanitizeEditorDOM(editorRef.current);
+        setBodyContent(editorRef.current.innerHTML);
+      }
     } else {
       const imgTag = `<figure style="${figureStyle} max-width: 100%; box-sizing: border-box;"><img src="${finalUrl}" alt="${modalImageCaption || "Article image"}" style="width: 100%; border-radius: 12px; display: block;" /><div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; font-family: sans-serif;">${captionHtml}${creditHtml}</div></figure>&nbsp;`;
 
       if (editorRef.current) {
         editorRef.current.focus();
         document.execCommand("insertHTML", false, imgTag);
+        sanitizeEditorDOM(editorRef.current);
         setBodyContent(editorRef.current.innerHTML);
       }
     }
