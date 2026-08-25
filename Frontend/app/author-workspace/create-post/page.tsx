@@ -1401,13 +1401,14 @@ export default function CreateNewPostPage() {
                   {/* Interactive Selected Image Blue Outline & 4 Corner Dots + Dark Pill Toolbar Overlay matching Screenshot */}
                   {selectedImgEl && toolbarPos && (
                     <>
-                      {/* Floating Dark Quick Formatting Toolbar matching provided screenshot */}
+                      {/* Floating Dark Quick Formatting Toolbar matching Image 1 */}
                       <div
                         style={{
                           top: `${Math.max(-44, toolbarPos.top - 46)}px`,
-                          left: `${Math.max(0, toolbarPos.left + toolbarPos.width / 2 - 190)}px`,
+                          left: `${toolbarPos.left + toolbarPos.width / 2}px`,
+                          transform: "translateX(-50%)",
                         }}
-                        className="absolute bg-[#0b132b] text-white rounded-xl shadow-2xl px-3.5 py-1.5 flex items-center space-x-3 z-30 font-sans text-xs border border-slate-700/80 animate-in zoom-in-95 duration-100 shrink-0"
+                        className="absolute bg-[#0b132b] text-white rounded-xl shadow-2xl px-3.5 py-1.5 flex items-center space-x-3 z-30 font-sans text-xs border border-slate-700/80 animate-in zoom-in-95 duration-100 shrink-0 select-none"
                       >
                         <span className="text-[10px] font-mono text-slate-400 font-bold uppercase tracking-wider">
                           SIZE
@@ -1432,7 +1433,7 @@ export default function CreateNewPostPage() {
                           <button
                             type="button"
                             onClick={() => handleSetImageSize("100%")}
-                            className="px-1.5 py-0.5 hover:bg-slate-700 rounded transition-colors cursor-pointer"
+                            className="px-1.5 py-0.5 hover:bg-slate-700 rounded transition-colors cursor-pointer font-black"
                             title="Full Width (100%)"
                           >
                             FULL
@@ -1500,21 +1501,6 @@ export default function CreateNewPostPage() {
                             </svg>
                           </button>
                         </div>
-
-                        <span className="text-slate-700 font-light">|</span>
-
-                        {/* Edit Image Details Button */}
-                        <button
-                          type="button"
-                          onClick={handleEditSelectedImage}
-                          className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white rounded flex items-center space-x-1 transition-colors cursor-pointer"
-                          title="Edit Image Details (Caption, Credit, URL)"
-                        >
-                          <svg className="w-3.5 h-3.5 text-blue-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                          </svg>
-                          <span className="text-[10px] font-bold uppercase tracking-wider">EDIT</span>
-                        </button>
 
                         <span className="text-slate-700 font-light">|</span>
 
