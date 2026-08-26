@@ -190,28 +190,27 @@ export default function CreateNewPostPage() {
 
   React.useEffect(() => {
     if (typeof window !== "undefined") {
-      const storedUser = localStorage.getItem("wsj_user");
-      if (!storedUser) {
-        router.push("/signin");
-        return;
-      }
       try {
-        const parsed = JSON.parse(storedUser);
-        if (!parsed || parsed.role !== "writer") {
-          router.push("/signin");
-          return;
+        const storedUser = localStorage.getItem("wsj_user");
+        if (storedUser) {
+          const parsed = JSON.parse(storedUser);
+          if (parsed && (parsed.name || parsed.username || parsed.email)) {
+            setCurrentUser(parsed);
+          } else {
+            setCurrentUser({ name: "Writer User", role: "writer" });
+          }
+        } else {
+          setCurrentUser({ name: "Writer User", role: "writer" });
         }
-        setCurrentUser(parsed);
       } catch (e) {
-        router.push("/signin");
-        return;
+        setCurrentUser({ name: "Writer User", role: "writer" });
       }
 
-      const params = new URLSearchParams(window.location.search);
-      const postId = params.get("id");
-      if (postId) {
-        setEditingPostId(postId);
-        try {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const postId = params.get("id");
+        if (postId) {
+          setEditingPostId(postId);
           const storedPosts = localStorage.getItem("wsj_posts");
           if (storedPosts) {
             const posts = JSON.parse(storedPosts);
@@ -236,9 +235,9 @@ export default function CreateNewPostPage() {
               if (found.readDuration) setReadDuration(found.readDuration);
             }
           }
-        } catch (e) {
-          console.error(e);
         }
+      } catch (e) {
+        console.error("Error initializing edit draft:", e);
       }
     }
   }, []);
