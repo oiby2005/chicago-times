@@ -13,7 +13,6 @@ const availableSubCategories = [
   "Crypto",
   "Technology",
   "Travel",
-  "Opinion",
   "CFO Spotlight",
   "Sports",
   "Lifestyle",
@@ -130,6 +129,8 @@ export default function AdminEditPostPage() {
   const [tagInput, setTagInput] = useState("");
   const [readDuration, setReadDuration] = useState("5 min read");
   const [isExclusive, setIsExclusive] = useState(true);
+  const [homepagePlacement, setHomepagePlacement] = useState("None (Category and Search Only)");
+  const [newsletterBanner, setNewsletterBanner] = useState("Auto — Middle of article (default)");
 
   // Editor Ref & Visual WYSIWYG ContentEditable Formatting
   const editorRef = useRef<HTMLDivElement>(null);
@@ -819,9 +820,9 @@ export default function AdminEditPostPage() {
     if (modalImageSize.includes("450px")) exactWidthStyle = "width: 450px; max-width: 100%;";
     if (modalImageSize.includes("100%")) exactWidthStyle = "width: 100%;";
 
-    const captionHtml = modalImageCaption ? `<span style="font-size: 11px; font-style: italic; color: #475569;">${modalImageCaption}</span>` : "<span></span>";
+    const captionHtml = modalImageCaption ? `<span style="font-size: 11px; font-style: italic; color: #475569; margin-right: 12px;">${modalImageCaption}</span>` : "";
     const creditText = modalImageCredit ? (modalImageCredit.toUpperCase().startsWith("PHOTO:") ? modalImageCredit.toUpperCase() : `(PHOTO: ${modalImageCredit.toUpperCase()})`) : "";
-    const creditHtml = creditText ? `<span style="font-size: 10px; font-family: monospace; color: #64748b; text-transform: uppercase;">${creditText}</span>` : "<span></span>";
+    const creditHtml = creditText ? `<span style="font-size: 10px; font-family: monospace; color: #64748b; text-transform: uppercase; margin-left: auto; text-align: right;">${creditText}</span>` : "";
 
     let figureStyle = "";
     if (modalImageAlign.startsWith("Left")) {
@@ -834,14 +835,14 @@ export default function AdminEditPostPage() {
 
     if (editingFigureEl) {
       editingFigureEl.style.cssText = `${figureStyle} max-width: 100%; box-sizing: border-box;`;
-      editingFigureEl.innerHTML = `<img src="${finalUrl}" alt="${modalImageCaption || "Article image"}" style="width: 100%; border-radius: 12px; display: block;" /><div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; font-family: sans-serif;">${captionHtml}${creditHtml}</div>`;
+      editingFigureEl.innerHTML = `<img src="${finalUrl}" alt="${modalImageCaption || "Article image"}" style="width: 100%; border-radius: 12px; display: block;" /><div style="display: flex; justify-content: space-between; align-items: flex-start; margin-top: 6px; font-family: sans-serif; width: 100%; box-sizing: border-box;">${captionHtml}${creditHtml}</div>`;
       setEditingFigureEl(null);
       const newImg = editingFigureEl.querySelector("img") as HTMLImageElement;
       if (newImg) setSelectedImgEl(newImg);
       setTimeout(() => updateSelectedImgPos(editingFigureEl), 50);
       if (editorRef.current) setBodyContent(editorRef.current.innerHTML);
     } else {
-      const imgTag = `<figure style="${figureStyle} max-width: 100%; box-sizing: border-box;"><img src="${finalUrl}" alt="${modalImageCaption || "Article image"}" style="width: 100%; border-radius: 12px; display: block;" /><div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; font-family: sans-serif;">${captionHtml}${creditHtml}</div></figure>&nbsp;`;
+      const imgTag = `<figure style="${figureStyle} max-width: 100%; box-sizing: border-box;"><img src="${finalUrl}" alt="${modalImageCaption || "Article image"}" style="width: 100%; border-radius: 12px; display: block;" /><div style="display: flex; justify-content: space-between; align-items: flex-start; margin-top: 6px; font-family: sans-serif; width: 100%; box-sizing: border-box;">${captionHtml}${creditHtml}</div></figure>&nbsp;`;
 
       if (editorRef.current) {
         editorRef.current.focus();
@@ -1507,6 +1508,92 @@ export default function AdminEditPostPage() {
                             onChange={(e) => setReadDuration(e.target.value)}
                             className="w-full bg-white border border-[#e2e8f0] rounded-xl px-3.5 py-2.5 text-xs font-bold text-[#1e293b] focus:outline-none focus:border-[#2563eb]"
                           />
+                        </div>
+
+                        {/* HOMEPAGE PLACEMENT SECTION (Matching Admin Dashboard Published Posts Edit) */}
+                        <div className="border border-[#cbd5e1] bg-[#fffdfa] rounded-2xl p-3.5 space-y-2 text-left">
+                          <label className="block text-[10px] font-mono font-bold text-[#ea580c] uppercase tracking-wider">
+                            HOMEPAGE PLACEMENT
+                          </label>
+                          <div className="relative">
+                            <select
+                              value={homepagePlacement}
+                              onChange={(e) => setHomepagePlacement(e.target.value)}
+                              className="w-full bg-[#fffdf0] border border-[#facc15] rounded-xl px-3.5 py-2.5 text-xs font-bold text-[#1e293b] focus:outline-none focus:border-[#eab308] cursor-pointer appearance-none pr-8"
+                            >
+                              <option value="None (Category and Search Only)">None (Category and Search Only)</option>
+                              <option value="Home - Top News">Home - Top News</option>
+                              <option value="Home - A+ Main News">Home - A+ Main News</option>
+                              <option value="Home - Right Main Panel">Home - Right Main Panel</option>
+                              <option value="Home- In Depth Panel">Home- In Depth Panel</option>
+                              <option value="Home - Main Bottom Panel">Home - Main Bottom Panel</option>
+                              <option value="Home - Business Category">Home - Business Category</option>
+                              <option value="Home - World Politics Category">Home - World Politics Category</option>
+                              <option value="Home - Editors Picks">Home - Editors Picks</option>
+                              <option value="Home - Your Weekend">Home - Your Weekend</option>
+                              <option value="Home - Editorials">Home - Editorials</option>
+                              <option value="Home - People to know">Home - People to know</option>
+                              <option value="Home - Politics Category">Home - Politics Category</option>
+                              <option value="Home - Most Popular News">Home - Most Popular News</option>
+                              <option value="Home - Tech Category">Home - Tech Category</option>
+                              <option value="Home - Recommended Videos">Home - Recommended Videos</option>
+                              <option value="Home - Sport Category">Home - Sport Category</option>
+                              <option value="Home - Entertainment">Home - Entertainment</option>
+                              <option value="Home - Main Videos">Home - Main Videos</option>
+                              <option value="Home - Podcast">Home - Podcast</option>
+                              <option value="Home - Fashion Category">Home - Fashion Category</option>
+                              <option value="Home - Science">Home - Science</option>
+                              <option value="Home- Arts Category">Home- Arts Category</option>
+                              <option value="Home- Lifestyle Category">Home- Lifestyle Category</option>
+                              <option value="Home - A+ Section 2">Home - A+ Section 2</option>
+                              <option value="Home - CEO and Executives Category">Home - CEO and Executives Category</option>
+                              <option value="Home - Economy">Home - Economy</option>
+                              <option value="Home - Market and Finnace">Home - Market and Finnace</option>
+                              <option value="Home - Health Category">Home - Health Category</option>
+                              <option value="Home - Investing Category">Home - Investing Category</option>
+                              <option value="Home - Crypto Category">Home - Crypto Category</option>
+                              <option value="Home- Real Estate Category">Home- Real Estate Category</option>
+                              <option value="Home- Industries Category">Home- Industries Category</option>
+                              <option value="Home - Law Category">Home - Law Category</option>
+                              <option value="Home- Small Business Category">Home- Small Business Category</option>
+                            </select>
+                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-[#1e293b]">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                              </svg>
+                            </div>
+                          </div>
+                          <p className="text-[10px] font-mono text-[#64748b] leading-relaxed">
+                            Select where this story will be curated on the homepage layout. Any list slots will automatically push the newest article to rank #1 and shift older items down.
+                          </p>
+                        </div>
+
+                        {/* NEWSLETTER BANNER SECTION */}
+                        <div className="space-y-1.5 pt-1 text-left">
+                          <label className="block text-[10px] font-mono font-bold text-[#ea580c] uppercase tracking-wider">
+                            NEWSLETTER BANNER
+                          </label>
+                          <div className="relative">
+                            <select
+                              value={newsletterBanner}
+                              onChange={(e) => setNewsletterBanner(e.target.value)}
+                              className="w-full bg-[#fffdf0] border border-[#facc15] rounded-xl px-3.5 py-2.5 text-xs font-bold text-[#1e293b] focus:outline-none focus:border-[#eab308] cursor-pointer appearance-none pr-8"
+                            >
+                              <option value="Auto — Middle of article (default)">Auto — Middle of article (default)</option>
+                              <option value="Top of article">Top of article</option>
+                              <option value="Middle of article">Middle of article</option>
+                              <option value="End of article">End of article</option>
+                              <option value="Off — don't show">Off — don't show</option>
+                            </select>
+                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-[#1e293b]">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                              </svg>
+                            </div>
+                          </div>
+                          <p className="text-[10px] font-mono text-[#64748b] leading-relaxed">
+                            Where the "IBT Fast Start" signup banner appears inside this article.
+                          </p>
                         </div>
                       </div>
                     )}

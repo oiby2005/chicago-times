@@ -12,7 +12,6 @@ const availableSubCategories = [
   "Crypto",
   "Technology",
   "Travel",
-  "Opinion",
   "CFO Spotlight",
   "Sports",
   "Lifestyle",
@@ -798,7 +797,7 @@ export default function CreateNewPostPage() {
 
     if (editingFigureEl) {
       editingFigureEl.style.cssText = `${figureStyle} max-width: 100%; box-sizing: border-box;`;
-      editingFigureEl.innerHTML = `<img src="${finalUrl}" alt="${modalImageCaption || "Article image"}" style="width: 100%; border-radius: 12px; display: block;" /><div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; font-family: sans-serif;">${captionHtml}${creditHtml}</div>`;
+      editingFigureEl.innerHTML = `<img src="${finalUrl}" alt="${modalImageCaption || "Article image"}" style="width: 100%; border-radius: 12px; display: block;" /><div style="display: flex; justify-content: space-between; align-items: flex-start; margin-top: 6px; font-family: sans-serif; width: 100%; box-sizing: border-box;">${captionHtml}${creditHtml}</div>`;
       setEditingFigureEl(null);
       const newImg = editingFigureEl.querySelector("img") as HTMLImageElement;
       if (newImg) setSelectedImgEl(newImg);
@@ -808,7 +807,7 @@ export default function CreateNewPostPage() {
         setBodyContent(editorRef.current.innerHTML);
       }
     } else {
-      const imgTag = `<figure style="${figureStyle} max-width: 100%; box-sizing: border-box;"><img src="${finalUrl}" alt="${modalImageCaption || "Article image"}" style="width: 100%; border-radius: 12px; display: block;" /><div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; font-family: sans-serif;">${captionHtml}${creditHtml}</div></figure>&nbsp;`;
+      const imgTag = `<figure style="${figureStyle} max-width: 100%; box-sizing: border-box;"><img src="${finalUrl}" alt="${modalImageCaption || "Article image"}" style="width: 100%; border-radius: 12px; display: block;" /><div style="display: flex; justify-content: space-between; align-items: flex-start; margin-top: 6px; font-family: sans-serif; width: 100%; box-sizing: border-box;">${captionHtml}${creditHtml}</div></figure>&nbsp;`;
 
       if (editorRef.current) {
         editorRef.current.focus();
