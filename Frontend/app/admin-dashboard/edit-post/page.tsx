@@ -973,6 +973,9 @@ export default function AdminEditPostPage() {
       readDuration: readDuration || "5 min read",
       author: authorName,
       thumbnail: thumb,
+      homepagePlacement: homepagePlacement,
+      newsletterBanner: newsletterBanner,
+      publishedAt: Date.now(),
       views: 0,
     };
 
@@ -981,6 +984,21 @@ export default function AdminEditPostPage() {
       existingPosts[idx] = updatedPost;
     } else {
       existingPosts = [updatedPost, ...existingPosts];
+    }
+
+    // Manage Top News 3-item limit queue shifting logic
+    if (homepagePlacement && homepagePlacement.includes("Top News")) {
+      const topNewsPosts = existingPosts.filter(
+        (p: any) => p.status === "Published" && p.homepagePlacement && p.homepagePlacement.includes("Top News")
+      );
+
+      topNewsPosts.sort((a: any, b: any) => (b.publishedAt || 0) - (a.publishedAt || 0));
+
+      if (topNewsPosts.length > 3) {
+        for (let i = 3; i < topNewsPosts.length; i++) {
+          topNewsPosts[i].homepagePlacement = "None (Category and Search Only)";
+        }
+      }
     }
 
     safeSavePostsToStorage(existingPosts);

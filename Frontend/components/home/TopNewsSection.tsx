@@ -43,6 +43,60 @@ const topNewsData: TopNewsArticle[] = [
 ];
 
 export const TopNewsSection: React.FC = () => {
+  const [articles, setArticles] = React.useState<TopNewsArticle[]>(topNewsData);
+
+  const loadTopNews = React.useCallback(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const stored = localStorage.getItem("wsj_posts");
+      if (stored) {
+        const posts = JSON.parse(stored);
+        const topNewsPosts = posts.filter(
+          (p: any) =>
+            p.status === "Published" &&
+            p.homepagePlacement &&
+            p.homepagePlacement.includes("Top News")
+        );
+
+        // Sort by publishedAt descending (newest published first)
+        topNewsPosts.sort((a: any, b: any) => (b.publishedAt || 0) - (a.publishedAt || 0));
+
+        if (topNewsPosts.length > 0) {
+          const formatted: TopNewsArticle[] = topNewsPosts.slice(0, 3).map((p: any) => ({
+            id: p.id,
+            title: p.title,
+            slug: p.slug || p.id,
+            summary:
+              p.subheadline ||
+              p.cardSummary ||
+              (p.bodyContent
+                ? p.bodyContent.replace(/<[^>]+>/g, " ").trim().slice(0, 120) + "..."
+                : ""),
+            commentsCount: p.commentsCount || "0",
+            readTime: p.readDuration || p.readTime || "5 min read",
+          }));
+
+          // Fill with fallback defaults if less than 3
+          const merged = [...formatted];
+          for (let i = 0; i < topNewsData.length && merged.length < 3; i++) {
+            if (!merged.some((m) => m.id === topNewsData[i].id)) {
+              merged.push(topNewsData[i]);
+            }
+          }
+          setArticles(merged.slice(0, 3));
+          return;
+        }
+      }
+    } catch (e) {}
+    setArticles(topNewsData);
+  }, []);
+
+  React.useEffect(() => {
+    loadTopNews();
+    window.addEventListener("wsj_posts_updated", loadTopNews);
+    return () => window.removeEventListener("wsj_posts_updated", loadTopNews);
+  }, [loadTopNews]);
+
   return (
     <div className="w-full max-h-[12cm] h-full flex flex-col justify-between font-sans select-none overflow-hidden">
       {/* Section Header */}
@@ -54,7 +108,7 @@ export const TopNewsSection: React.FC = () => {
 
       {/* Articles List */}
       <div className="flex-1 flex flex-col justify-between divide-y divide-dashed divide-[#D6CEBF]">
-        {topNewsData.map((article) => (
+        {articles.map((article) => (
           <article key={article.id} className="py-2.5 first:pt-0 last:pb-0 flex flex-col justify-between">
             <div>
               <h3 className="font-serif font-bold text-[17px] sm:text-[18px] leading-[1.2] text-[#111111] hover:text-[#333333] hover:underline cursor-pointer">
