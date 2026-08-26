@@ -783,9 +783,9 @@ export default function CreateNewPostPage() {
     if (modalImageSize.includes("450px")) exactWidthStyle = "width: 450px; max-width: 100%;";
     if (modalImageSize.includes("100%")) exactWidthStyle = "width: 100%;";
 
-    const captionHtml = modalImageCaption ? `<span style="font-size: 11px; font-style: italic; color: #475569;">${modalImageCaption}</span>` : "<span></span>";
+    const captionHtml = modalImageCaption ? `<span style="font-size: 11px; font-style: italic; color: #475569; margin-right: 12px;">${modalImageCaption}</span>` : "";
     const creditText = modalImageCredit ? (modalImageCredit.toUpperCase().startsWith("PHOTO:") ? modalImageCredit.toUpperCase() : `(PHOTO: ${modalImageCredit.toUpperCase()})`) : "";
-    const creditHtml = creditText ? `<span style="font-size: 10px; font-family: monospace; color: #64748b; text-transform: uppercase;">${creditText}</span>` : "<span></span>";
+    const creditHtml = creditText ? `<span style="font-size: 10px; font-family: monospace; color: #64748b; text-transform: uppercase; margin-left: auto; text-align: right;">${creditText}</span>` : "";
 
     let figureStyle = "";
     if (modalImageAlign.startsWith("Left")) {
