@@ -12,6 +12,7 @@ const availableSubCategories = [
   "Crypto",
   "Technology",
   "Travel",
+  "Opinion",
   "CFO Spotlight",
   "Sports",
   "Lifestyle",

@@ -263,8 +263,6 @@ export const allCategories = [
   "Sports",
   "Lifestyle",
   "Science",
-  "Opinions",
-  "Editorials",
 ];
 
 export function getCategoryRoute(title: string): string {
