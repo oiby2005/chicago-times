@@ -130,6 +130,8 @@ export default function AdminReviewPostPage() {
   const [tagInput, setTagInput] = useState("");
   const [readDuration, setReadDuration] = useState("5 min read");
   const [isExclusive, setIsExclusive] = useState(true);
+  const [homepagePlacement, setHomepagePlacement] = useState("None (category & search only)");
+  const [newsletterBanner, setNewsletterBanner] = useState("Auto — Middle of article (default)");
 
   // Editor Ref & Visual WYSIWYG ContentEditable Formatting
   const editorRef = useRef<HTMLDivElement>(null);
@@ -735,50 +737,32 @@ export default function AdminReviewPostPage() {
     if (!selectedImgEl || !editorRef.current) return;
     const figure = (selectedImgEl.closest("figure") || selectedImgEl) as HTMLElement;
 
-    const currentMarginTopStr = figure.style.marginTop || "8px";
-    let currentMarginTop = parseInt(currentMarginTopStr, 10);
-    if (isNaN(currentMarginTop)) currentMarginTop = 8;
+    if (figure.parentElement && (figure.parentElement.tagName === "P" || figure.parentElement.tagName === "BLOCKQUOTE")) {
+      const parentBlock = figure.parentElement;
+      parentBlock.parentNode?.insertBefore(figure, parentBlock);
+    }
 
-    const step = 25;
+    let topBlock: HTMLElement = figure;
+    while (topBlock.parentElement && topBlock.parentElement !== editorRef.current) {
+      topBlock = topBlock.parentElement;
+    }
+    const parent = topBlock.parentElement || editorRef.current;
 
     if (direction === "up") {
-      const newMarginTop = currentMarginTop - step;
-      if (newMarginTop < -150) {
-        let topBlock: HTMLElement = figure;
-        while (topBlock.parentElement && topBlock.parentElement !== editorRef.current) {
-          topBlock = topBlock.parentElement;
-        }
-        const parent = topBlock.parentElement || editorRef.current;
-        const prev = topBlock.previousElementSibling as HTMLElement | null;
-        if (prev) {
-          parent.insertBefore(topBlock, prev);
-          figure.style.marginTop = "8px";
-        } else {
-          figure.style.marginTop = `${newMarginTop}px`;
-        }
-      } else {
-        figure.style.marginTop = `${newMarginTop}px`;
+      const prev = topBlock.previousElementSibling as HTMLElement | null;
+      if (prev) {
+        parent.insertBefore(topBlock, prev);
       }
     } else {
-      const newMarginTop = currentMarginTop + step;
-      if (newMarginTop > 150) {
-        let topBlock: HTMLElement = figure;
-        while (topBlock.parentElement && topBlock.parentElement !== editorRef.current) {
-          topBlock = topBlock.parentElement;
-        }
-        const parent = topBlock.parentElement || editorRef.current;
-        const next = topBlock.nextElementSibling as HTMLElement | null;
-        if (next) {
-          parent.insertBefore(next, topBlock);
-          figure.style.marginTop = "8px";
-        } else {
-          figure.style.marginTop = `${newMarginTop}px`;
-        }
-      } else {
-        figure.style.marginTop = `${newMarginTop}px`;
+      const next = topBlock.nextElementSibling as HTMLElement | null;
+      if (next) {
+        parent.insertBefore(next, topBlock);
       }
     }
 
+    figure.style.marginTop = "12px";
+
+    if (typeof sanitizeEditorDOM === "function") sanitizeEditorDOM(editorRef.current);
     setTimeout(() => updateSelectedImgPos(selectedImgEl), 30);
     if (editorRef.current) {
       setBodyContent(editorRef.current.innerHTML);
@@ -1512,6 +1496,69 @@ export default function AdminReviewPostPage() {
                             onChange={(e) => setReadDuration(e.target.value)}
                             className="w-full bg-white border border-[#e2e8f0] rounded-xl px-3.5 py-2.5 text-xs font-bold text-[#1e293b] focus:outline-none focus:border-[#2563eb]"
                           />
+                        </div>
+
+                        {/* HOMEPAGE PLACEMENT SECTION (Matching User Images 1 & 3) */}
+                        <div className="border border-[#cbd5e1] bg-[#fffdfa] rounded-2xl p-3.5 space-y-2 text-left">
+                          <label className="block text-[10px] font-mono font-bold text-[#ea580c] uppercase tracking-wider">
+                            HOMEPAGE PLACEMENT
+                          </label>
+                          <div className="relative">
+                            <select
+                              value={homepagePlacement}
+                              onChange={(e) => setHomepagePlacement(e.target.value)}
+                              className="w-full bg-[#fffdf0] border border-[#facc15] rounded-xl px-3.5 py-2.5 text-xs font-bold text-[#1e293b] focus:outline-none focus:border-[#eab308] cursor-pointer appearance-none pr-8"
+                            >
+                              <option value="None (category & search only)">None (category & search only)</option>
+                              <option value="Home — A+ Section (main hero)">Home — A+ Section (main hero)</option>
+                              <option value="Home — Top Stories">Home — Top Stories</option>
+                              <option value="Home — The Spotlight">Home — The Spotlight</option>
+                              <option value="Home — Most Read">Home — Most Read</option>
+                              <option value="Home — Latest News">Home — Latest News</option>
+                              <option value="Home — The Bottom Line">Home — The Bottom Line</option>
+                              <option value="Home — Business Feature (above Latest News)">Home — Business Feature (above Latest News)</option>
+                              <option value="Home — Technology Feature (above The Spotlight)">Home — Technology Feature (above The Spotlight)</option>
+                              <option value="Home — Contributor">Home — Contributor</option>
+                              <option value="Home — Visionary Voices">Home — Visionary Voices</option>
+                              <option value="Home — Main Section 2">Home — Main Section 2</option>
+                            </select>
+                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-[#1e293b]">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                              </svg>
+                            </div>
+                          </div>
+                          <p className="text-[10px] font-mono text-[#64748b] leading-relaxed">
+                            Select where this story will be curated on the homepage layout. Any list slots will automatically push the newest article to rank #1 and shift older items down.
+                          </p>
+                        </div>
+
+                        {/* NEWSLETTER BANNER SECTION (Matching User Images 1 & 2) */}
+                        <div className="space-y-1.5 pt-1 text-left">
+                          <label className="block text-[10px] font-mono font-bold text-[#ea580c] uppercase tracking-wider">
+                            NEWSLETTER BANNER
+                          </label>
+                          <div className="relative">
+                            <select
+                              value={newsletterBanner}
+                              onChange={(e) => setNewsletterBanner(e.target.value)}
+                              className="w-full bg-[#fffdf0] border border-[#facc15] rounded-xl px-3.5 py-2.5 text-xs font-bold text-[#1e293b] focus:outline-none focus:border-[#eab308] cursor-pointer appearance-none pr-8"
+                            >
+                              <option value="Auto — Middle of article (default)">Auto — Middle of article (default)</option>
+                              <option value="Top of article">Top of article</option>
+                              <option value="Middle of article">Middle of article</option>
+                              <option value="End of article">End of article</option>
+                              <option value="Off — don't show">Off — don't show</option>
+                            </select>
+                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-[#1e293b]">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                              </svg>
+                            </div>
+                          </div>
+                          <p className="text-[10px] font-mono text-[#64748b] leading-relaxed">
+                            Where the "IBT Fast Start" signup banner appears inside this article.
+                          </p>
                         </div>
                       </div>
                     )}

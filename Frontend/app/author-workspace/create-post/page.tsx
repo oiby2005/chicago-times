@@ -716,53 +716,33 @@ export default function CreateNewPostPage() {
   const handleMoveImage = (direction: "up" | "down") => {
     if (!selectedImgEl || !editorRef.current) return;
     const figure = (selectedImgEl.closest("figure") || selectedImgEl) as HTMLElement;
-    
-    // Read current margin-top on figure (default to 8px if not set)
-    const currentMarginTopStr = figure.style.marginTop || "8px";
-    let currentMarginTop = parseInt(currentMarginTopStr, 10);
-    if (isNaN(currentMarginTop)) currentMarginTop = 8;
 
-    const step = 25; // Move image by a small distance of 25px per click
+    if (figure.parentElement && (figure.parentElement.tagName === "P" || figure.parentElement.tagName === "BLOCKQUOTE")) {
+      const parentBlock = figure.parentElement;
+      parentBlock.parentNode?.insertBefore(figure, parentBlock);
+    }
+
+    let topBlock: HTMLElement = figure;
+    while (topBlock.parentElement && topBlock.parentElement !== editorRef.current) {
+      topBlock = topBlock.parentElement;
+    }
+    const parent = topBlock.parentElement || editorRef.current;
 
     if (direction === "up") {
-      const newMarginTop = currentMarginTop - step;
-      if (newMarginTop < -150) {
-        let topBlock: HTMLElement = figure;
-        while (topBlock.parentElement && topBlock.parentElement !== editorRef.current) {
-          topBlock = topBlock.parentElement;
-        }
-        const parent = topBlock.parentElement || editorRef.current;
-        const prev = topBlock.previousElementSibling as HTMLElement | null;
-        if (prev) {
-          parent.insertBefore(topBlock, prev);
-          figure.style.marginTop = "8px";
-        } else {
-          figure.style.marginTop = `${newMarginTop}px`;
-        }
-      } else {
-        figure.style.marginTop = `${newMarginTop}px`;
+      const prev = topBlock.previousElementSibling as HTMLElement | null;
+      if (prev) {
+        parent.insertBefore(topBlock, prev);
       }
     } else {
-      const newMarginTop = currentMarginTop + step;
-      if (newMarginTop > 150) {
-        let topBlock: HTMLElement = figure;
-        while (topBlock.parentElement && topBlock.parentElement !== editorRef.current) {
-          topBlock = topBlock.parentElement;
-        }
-        const parent = topBlock.parentElement || editorRef.current;
-        const next = topBlock.nextElementSibling as HTMLElement | null;
-        if (next) {
-          // Swap topBlock and next cleanly so it NEVER jumps to the bottom of the page!
-          parent.insertBefore(next, topBlock);
-          figure.style.marginTop = "8px";
-        } else {
-          figure.style.marginTop = `${newMarginTop}px`;
-        }
-      } else {
-        figure.style.marginTop = `${newMarginTop}px`;
+      const next = topBlock.nextElementSibling as HTMLElement | null;
+      if (next) {
+        parent.insertBefore(next, topBlock);
       }
     }
 
+    figure.style.marginTop = "12px";
+
+    sanitizeEditorDOM(editorRef.current);
     setTimeout(() => updateSelectedImgPos(selectedImgEl), 30);
     if (editorRef.current) {
       setBodyContent(editorRef.current.innerHTML);
@@ -1525,6 +1505,21 @@ export default function CreateNewPostPage() {
                             </svg>
                           </button>
                         </div>
+
+                        <span className="text-slate-700 font-light">|</span>
+
+                        {/* Edit Image Details Button */}
+                        <button
+                          type="button"
+                          onClick={handleEditSelectedImage}
+                          className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white rounded flex items-center space-x-1 transition-colors cursor-pointer"
+                          title="Edit Image Details (Caption, Credit, URL)"
+                        >
+                          <svg className="w-3.5 h-3.5 text-blue-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                          </svg>
+                          <span className="text-[10px] font-bold uppercase tracking-wider">EDIT</span>
+                        </button>
 
                         <span className="text-slate-700 font-light">|</span>
 
