@@ -973,7 +973,9 @@ export default function AdminEditPostPage() {
       readDuration: readDuration || "5 min read",
       author: authorName,
       thumbnail: thumb,
-      homepagePlacement: homepagePlacement,
+      homepagePlacement: (mainCategory === "Opinion" || mainCategory === "Editorial" || mainCategory === "Editorials")
+        ? "Home - Opinion Section"
+        : homepagePlacement,
       newsletterBanner: newsletterBanner,
       publishedAt: Date.now(),
       views: 0,
@@ -1453,6 +1455,8 @@ export default function AdminEditPostPage() {
                               <option value="Sports">Sports</option>
                               <option value="Lifestyle">Lifestyle</option>
                               <option value="Science">Science</option>
+                              <option value="Opinion">Opinion</option>
+                              <option value="Editorial">Editorial</option>
                             </select>
                             <div className="pointer-events-none absolute right-3 top-3 text-gray-500">
                               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -1548,15 +1552,21 @@ export default function AdminEditPostPage() {
                         </div>
 
                         {/* HOMEPAGE PLACEMENT SECTION (Matching Admin Dashboard Published Posts Edit) */}
-                        <div className="border border-[#cbd5e1] bg-[#fffdfa] rounded-2xl p-3.5 space-y-2 text-left">
+                        <div className={`border border-[#cbd5e1] bg-[#fffdfa] rounded-2xl p-3.5 space-y-2 text-left ${(mainCategory === "Opinion" || mainCategory === "Editorial" || mainCategory === "Editorials") ? "opacity-60 pointer-events-none bg-slate-100" : ""}`}>
                           <label className="block text-[10px] font-mono font-bold text-[#ea580c] uppercase tracking-wider">
                             HOMEPAGE PLACEMENT
                           </label>
+                          {(mainCategory === "Opinion" || mainCategory === "Editorial" || mainCategory === "Editorials") && (
+                            <div className="bg-amber-50 border border-amber-200 rounded-lg p-2 text-[11px] font-sans text-amber-800 font-semibold mb-2">
+                              ⚡ Opinion & Editorial articles are automatically published directly to the Opinion Page and Homepage Opinion Section. Homepage Placement is non-accessible.
+                            </div>
+                          )}
                           <div className="relative">
                             <select
-                              value={homepagePlacement}
+                              disabled={mainCategory === "Opinion" || mainCategory === "Editorial" || mainCategory === "Editorials"}
+                              value={(mainCategory === "Opinion" || mainCategory === "Editorial" || mainCategory === "Editorials") ? "Home - Opinion Section" : homepagePlacement}
                               onChange={(e) => setHomepagePlacement(e.target.value)}
-                              className="w-full bg-[#fffdf0] border border-[#facc15] rounded-xl px-3.5 py-2.5 text-xs font-bold text-[#1e293b] focus:outline-none focus:border-[#eab308] cursor-pointer appearance-none pr-8"
+                              className="w-full bg-[#fffdf0] border border-[#facc15] rounded-xl px-3.5 py-2.5 text-xs font-bold text-[#1e293b] focus:outline-none focus:border-[#eab308] cursor-pointer appearance-none pr-8 disabled:cursor-not-allowed disabled:bg-gray-100"
                             >
                               <option value="None (Category and Search Only)">None (Category and Search Only)</option>
                               <option value="Home - Top News">Home - Top News</option>
@@ -1985,7 +1995,7 @@ export default function AdminEditPostPage() {
                   </svg>
                 </div>
                 <h3 className="text-lg font-serif font-bold text-[#0f172a] tracking-tight">
-                  Insert Article Image
+                  {editingFigureEl ? "Edit Article Image" : "Insert Article Image"}
                 </h3>
               </div>
               <button

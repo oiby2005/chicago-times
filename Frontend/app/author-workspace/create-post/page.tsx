@@ -1707,6 +1707,8 @@ export default function CreateNewPostPage() {
                               <option value="Sports">Sports</option>
                               <option value="Lifestyle">Lifestyle</option>
                               <option value="Science">Science</option>
+                              <option value="Opinion">Opinion</option>
+                              <option value="Editorial">Editorial</option>
                             </select>
                             <div className="pointer-events-none absolute right-3 top-3 text-gray-500">
                               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">

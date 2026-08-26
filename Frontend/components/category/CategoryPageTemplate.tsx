@@ -169,10 +169,51 @@ export default function CategoryPageTemplate({
     },
   ], [categoryTitle]);
 
+  const [customArticles, setCustomArticles] = useState<ArticleItem[]>([]);
+
+  const loadCustomCategoryPosts = React.useCallback(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const stored = localStorage.getItem("wsj_posts");
+      if (stored) {
+        const posts = JSON.parse(stored);
+        const targetTitleLower = categoryTitle.toLowerCase();
+        const catPosts = posts.filter(
+          (p: any) =>
+            p.status === "Published" &&
+            ((p.category && p.category.toLowerCase() === targetTitleLower) ||
+             (p.subCategories && p.subCategories.some((s: string) => s.toLowerCase() === targetTitleLower)))
+        );
+
+        catPosts.sort((a: any, b: any) => (b.publishedAt || 0) - (a.publishedAt || 0));
+
+        const formatted: ArticleItem[] = catPosts.map((p: any) => ({
+          id: p.id || p.slug,
+          title: p.title,
+          summary:
+            p.subheadline ||
+            p.cardSummary ||
+            (p.bodyContent ? p.bodyContent.replace(/<[^>]+>/g, " ").trim().slice(0, 140) + "..." : ""),
+          author: `BY ${(p.author || "WRITER").toUpperCase()}`,
+          date: p.date ? p.date.toUpperCase() : "RECENT",
+          image: p.thumbnail || "/images/world/afiuni_judge.jpg",
+        }));
+        setCustomArticles(formatted);
+      }
+    } catch (e) {}
+  }, [categoryTitle]);
+
+  React.useEffect(() => {
+    loadCustomCategoryPosts();
+    window.addEventListener("wsj_posts_updated", loadCustomCategoryPosts);
+    return () => window.removeEventListener("wsj_posts_updated", loadCustomCategoryPosts);
+  }, [loadCustomCategoryPosts]);
+
   const activeArticles = useMemo(() => {
     const shift = (currentPage - 1) % baseNewsArticles.length;
-    return [...baseNewsArticles.slice(shift), ...baseNewsArticles.slice(0, shift)];
-  }, [currentPage, baseNewsArticles]);
+    const baseShifted = [...baseNewsArticles.slice(shift), ...baseNewsArticles.slice(0, shift)];
+    return [...customArticles, ...baseShifted];
+  }, [currentPage, baseNewsArticles, customArticles]);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= 11) {

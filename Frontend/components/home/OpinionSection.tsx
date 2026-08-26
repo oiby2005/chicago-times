@@ -56,6 +56,56 @@ const opinionArticles: OpinionArticle[] = [
 ];
 
 export const OpinionSection: React.FC = () => {
+  const [articles, setArticles] = React.useState<OpinionArticle[]>(opinionArticles);
+
+  const loadOpinionPosts = React.useCallback(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const stored = localStorage.getItem("wsj_posts");
+      if (stored) {
+        const posts = JSON.parse(stored);
+        const opinionPosts = posts.filter(
+          (p: any) =>
+            p.status === "Published" &&
+            (p.category === "Opinion" ||
+             p.category === "Editorial" ||
+             p.category === "Editorials" ||
+             (p.subCategories && p.subCategories.some((s: string) => s.toLowerCase().includes("opinion"))) ||
+             (p.homepagePlacement && p.homepagePlacement.includes("Opinion")))
+        );
+
+        opinionPosts.sort((a: any, b: any) => (b.publishedAt || 0) - (a.publishedAt || 0));
+
+        if (opinionPosts.length > 0) {
+          const formatted: OpinionArticle[] = opinionPosts.slice(0, 5).map((p: any) => ({
+            id: p.id,
+            author: (p.author || "BY WRITER").toUpperCase(),
+            title: p.title,
+            slug: p.slug || p.id,
+            imageUrl: p.thumbnail || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80",
+            isCircularImage: true,
+          }));
+
+          const merged = [...formatted];
+          for (let i = 0; i < opinionArticles.length && merged.length < 5; i++) {
+            if (!merged.some((m) => m.id === opinionArticles[i].id)) {
+              merged.push(opinionArticles[i]);
+            }
+          }
+          setArticles(merged.slice(0, 5));
+          return;
+        }
+      }
+    } catch (e) {}
+    setArticles(opinionArticles);
+  }, []);
+
+  React.useEffect(() => {
+    loadOpinionPosts();
+    window.addEventListener("wsj_posts_updated", loadOpinionPosts);
+    return () => window.removeEventListener("wsj_posts_updated", loadOpinionPosts);
+  }, [loadOpinionPosts]);
+
   return (
     <div className="w-full h-full flex flex-col justify-between font-sans select-none">
       {/* Section Header */}
@@ -67,7 +117,7 @@ export const OpinionSection: React.FC = () => {
 
       {/* Opinion Articles List */}
       <div className="flex-1 flex flex-col justify-between divide-y divide-dashed divide-[#D6CEBF]">
-        {opinionArticles.map((article) => (
+        {articles.map((article) => (
           <article key={article.id} className="py-2 flex items-start space-x-3 first:pt-0 last:pb-0">
             {/* Image */}
             <div className="shrink-0 pt-0.5">
