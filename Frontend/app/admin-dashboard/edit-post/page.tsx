@@ -1437,17 +1437,22 @@ export default function AdminEditPostPage() {
                               onChange={(e) => setMainCategory(e.target.value)}
                               className="w-full bg-[#f8fafc] border border-[#cbd5e1] rounded-xl px-3.5 py-2.5 text-xs font-bold text-[#1e293b] appearance-none focus:outline-none focus:border-[#2563eb] cursor-pointer"
                             >
-                              <option value="Business">Business</option>
-                              <option value="World">World</option>
-                              <option value="U.S.">U.S.</option>
+                              <option value="News">News</option>
+                              <option value="Law">Law</option>
                               <option value="Politics">Politics</option>
+                              <option value="Business">Business</option>
+                              <option value="Markets & Finance">Markets & Finance</option>
                               <option value="Economy">Economy</option>
                               <option value="Tech">Tech</option>
-                              <option value="Markets">Markets</option>
-                              <option value="Opinion">Opinion</option>
+                              <option value="Entertainment">Entertainment</option>
                               <option value="Arts">Arts</option>
+                              <option value="Industries">Industries</option>
+                              <option value="Fashion">Fashion</option>
+                              <option value="Investing">Investing</option>
+                              <option value="Health">Health</option>
+                              <option value="Sports">Sports</option>
                               <option value="Lifestyle">Lifestyle</option>
-                              <option value="Real Estate">Real Estate</option>
+                              <option value="Science">Science</option>
                             </select>
                             <div className="pointer-events-none absolute right-3 top-3 text-gray-500">
                               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">

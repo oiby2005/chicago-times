@@ -72,12 +72,21 @@ export const InDepthPanelSection: React.FC = () => {
               merged.push(inDepthArticles[i]);
             }
           }
-          setArticles(merged.slice(0, 4));
+          const finalArticles = merged.slice(0, 4).map((art, idx) => ({
+            ...art,
+            category: idx === 0 ? "IN DEPTH" : undefined,
+          }));
+          setArticles(finalArticles);
           return;
         }
       }
     } catch (e) {}
-    setArticles(inDepthArticles);
+    setArticles(
+      inDepthArticles.map((art, idx) => ({
+        ...art,
+        category: idx === 0 ? "IN DEPTH" : undefined,
+      }))
+    );
   }, []);
 
   React.useEffect(() => {
