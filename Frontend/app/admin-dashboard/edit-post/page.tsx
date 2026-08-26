@@ -1556,11 +1556,6 @@ export default function AdminEditPostPage() {
                           <label className="block text-[10px] font-mono font-bold text-[#ea580c] uppercase tracking-wider">
                             HOMEPAGE PLACEMENT
                           </label>
-                          {(mainCategory === "Opinion" || mainCategory === "Editorial" || mainCategory === "Editorials") && (
-                            <div className="bg-amber-50 border border-amber-200 rounded-lg p-2 text-[11px] font-sans text-amber-800 font-semibold mb-2">
-                              ⚡ Opinion & Editorial articles are automatically published directly to the Opinion Page and Homepage Opinion Section. Homepage Placement is non-accessible.
-                            </div>
-                          )}
                           <div className="relative">
                             <select
                               disabled={mainCategory === "Opinion" || mainCategory === "Editorial" || mainCategory === "Editorials"}

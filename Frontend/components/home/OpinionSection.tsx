@@ -124,9 +124,7 @@ export const OpinionSection: React.FC = () => {
               <img
                 src={article.imageUrl}
                 alt={article.author}
-                className={`w-[46px] h-[46px] object-cover bg-gray-100 border border-gray-200 ${
-                  article.isCircularImage ? "rounded-full" : "rounded-none"
-                }`}
+                className="w-[46px] h-[46px] object-cover bg-gray-100 border border-gray-200 rounded-none"
               />
             </div>
 
