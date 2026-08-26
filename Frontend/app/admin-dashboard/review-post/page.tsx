@@ -973,19 +973,32 @@ export default function AdminReviewPostPage() {
       existingPosts = [updatedPost, ...existingPosts];
     }
 
-    // Manage Top News 3-item limit queue shifting logic
-    if (homepagePlacement && homepagePlacement.includes("Top News")) {
-      const topNewsPosts = existingPosts.filter(
-        (p: any) => p.status === "Published" && p.homepagePlacement && p.homepagePlacement.includes("Top News")
-      );
+    // Manage Homepage Placement Queues (Top News: 3, A+ Main: 1, In Depth: 4, Main Bottom: 2, Right Main: 2)
+    const SECTION_LIMITS = [
+      { keyword: "Top News", max: 3 },
+      { keyword: "A+ Main News", max: 1 },
+      { keyword: "A+ Section (main hero)", max: 1 },
+      { keyword: "In Depth", max: 4 },
+      { keyword: "Main Bottom", max: 2 },
+      { keyword: "Right Main Panel", max: 2 },
+    ];
 
-      topNewsPosts.sort((a: any, b: any) => (b.publishedAt || 0) - (a.publishedAt || 0));
+    if (homepagePlacement && !homepagePlacement.startsWith("None")) {
+      SECTION_LIMITS.forEach(({ keyword, max }) => {
+        if (homepagePlacement.includes(keyword)) {
+          const sectionPosts = existingPosts.filter(
+            (p: any) => p.status === "Published" && p.homepagePlacement && p.homepagePlacement.includes(keyword)
+          );
 
-      if (topNewsPosts.length > 3) {
-        for (let i = 3; i < topNewsPosts.length; i++) {
-          topNewsPosts[i].homepagePlacement = "None (Category and Search Only)";
+          sectionPosts.sort((a: any, b: any) => (b.publishedAt || 0) - (a.publishedAt || 0));
+
+          if (sectionPosts.length > max) {
+            for (let i = max; i < sectionPosts.length; i++) {
+              sectionPosts[i].homepagePlacement = "None (Category and Search Only)";
+            }
+          }
         }
-      }
+      });
     }
 
     safeSavePostsToStorage(existingPosts);

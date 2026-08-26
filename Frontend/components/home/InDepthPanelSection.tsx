@@ -40,9 +40,55 @@ const inDepthArticles: InDepthArticle[] = [
 ];
 
 export const InDepthPanelSection: React.FC = () => {
+  const [articles, setArticles] = React.useState<InDepthArticle[]>(inDepthArticles);
+
+  const loadInDepth = React.useCallback(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const stored = localStorage.getItem("wsj_posts");
+      if (stored) {
+        const posts = JSON.parse(stored);
+        const inDepthPosts = posts.filter(
+          (p: any) =>
+            p.status === "Published" &&
+            p.homepagePlacement &&
+            p.homepagePlacement.includes("In Depth")
+        );
+
+        inDepthPosts.sort((a: any, b: any) => (b.publishedAt || 0) - (a.publishedAt || 0));
+
+        if (inDepthPosts.length > 0) {
+          const formatted: InDepthArticle[] = inDepthPosts.slice(0, 4).map((p: any, idx: number) => ({
+            id: p.id,
+            category: idx === 0 ? "IN DEPTH" : undefined,
+            title: p.title,
+            slug: p.slug || p.id,
+            imageUrl: p.thumbnail || "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=300&q=80",
+          }));
+
+          const merged = [...formatted];
+          for (let i = 0; i < inDepthArticles.length && merged.length < 4; i++) {
+            if (!merged.some((m) => m.id === inDepthArticles[i].id)) {
+              merged.push(inDepthArticles[i]);
+            }
+          }
+          setArticles(merged.slice(0, 4));
+          return;
+        }
+      }
+    } catch (e) {}
+    setArticles(inDepthArticles);
+  }, []);
+
+  React.useEffect(() => {
+    loadInDepth();
+    window.addEventListener("wsj_posts_updated", loadInDepth);
+    return () => window.removeEventListener("wsj_posts_updated", loadInDepth);
+  }, [loadInDepth]);
+
   return (
     <div className="w-full max-h-[9.5cm] h-full flex flex-col justify-between font-sans select-none overflow-hidden divide-y divide-dashed divide-[#D6CEBF]">
-      {inDepthArticles.map((article) => (
+      {articles.map((article) => (
         <article key={article.id} className="py-2 flex items-start justify-between space-x-2.5 first:pt-0 last:pb-0">
           <div className="flex-1 min-w-0 pr-1">
             {article.category && (

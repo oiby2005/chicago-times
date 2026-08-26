@@ -33,9 +33,61 @@ const mainBottomArticles: MainBottomArticle[] = [
 ];
 
 export const MainBottomPanelSection: React.FC = () => {
+  const [articles, setArticles] = React.useState<MainBottomArticle[]>(mainBottomArticles);
+
+  const loadMainBottom = React.useCallback(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const stored = localStorage.getItem("wsj_posts");
+      if (stored) {
+        const posts = JSON.parse(stored);
+        const mbPosts = posts.filter(
+          (p: any) =>
+            p.status === "Published" &&
+            p.homepagePlacement &&
+            p.homepagePlacement.includes("Main Bottom")
+        );
+
+        mbPosts.sort((a: any, b: any) => (b.publishedAt || 0) - (a.publishedAt || 0));
+
+        if (mbPosts.length > 0) {
+          const formatted: MainBottomArticle[] = mbPosts.slice(0, 2).map((p: any) => ({
+            id: p.id,
+            title: p.title,
+            slug: p.slug || p.id,
+            summary:
+              p.subheadline ||
+              p.cardSummary ||
+              (p.bodyContent
+                ? p.bodyContent.replace(/<[^>]+>/g, " ").trim().slice(0, 120) + "..."
+                : ""),
+            imageUrl: p.thumbnail || "https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?auto=format&fit=crop&w=800&q=80",
+            commentsCount: p.commentsCount || "0",
+          }));
+
+          const merged = [...formatted];
+          for (let i = 0; i < mainBottomArticles.length && merged.length < 2; i++) {
+            if (!merged.some((m) => m.id === mainBottomArticles[i].id)) {
+              merged.push(mainBottomArticles[i]);
+            }
+          }
+          setArticles(merged.slice(0, 2));
+          return;
+        }
+      }
+    } catch (e) {}
+    setArticles(mainBottomArticles);
+  }, []);
+
+  React.useEffect(() => {
+    loadMainBottom();
+    window.addEventListener("wsj_posts_updated", loadMainBottom);
+    return () => window.removeEventListener("wsj_posts_updated", loadMainBottom);
+  }, [loadMainBottom]);
+
   return (
     <div className="w-full h-full grid grid-cols-1 sm:grid-cols-2 gap-[0.4cm] font-sans select-none">
-      {mainBottomArticles.map((article) => (
+      {articles.map((article) => (
         <article key={article.id} className="flex flex-col justify-between">
           <div>
             <Link href={`/article/${article.slug}`} className="block relative aspect-[4/3] w-full overflow-hidden bg-gray-100 border border-gray-200 mb-2 group">

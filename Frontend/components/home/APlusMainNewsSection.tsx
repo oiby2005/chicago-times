@@ -24,13 +24,76 @@ export const APlusMainNewsSection: React.FC<APlusMainNewsSectionProps> = ({
 }) => {
   const [isBookmarked, setIsBookmarked] = useState(false);
 
+  const [activeArticle, setActiveArticle] = useState({
+    category,
+    title,
+    slug,
+    summary,
+    imageUrl,
+    commentsCount,
+    readTime,
+  });
+
+  const loadCustomAPlus = React.useCallback(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const stored = localStorage.getItem("wsj_posts");
+      if (stored) {
+        const posts = JSON.parse(stored);
+        const aPlusPosts = posts.filter(
+          (p: any) =>
+            p.status === "Published" &&
+            p.homepagePlacement &&
+            (p.homepagePlacement.includes("A+ Main News") ||
+             p.homepagePlacement.includes("A+ Section (main hero)"))
+        );
+
+        aPlusPosts.sort((a: any, b: any) => (b.publishedAt || 0) - (a.publishedAt || 0));
+
+        if (aPlusPosts.length > 0) {
+          const topPost = aPlusPosts[0];
+          setActiveArticle({
+            category: topPost.category ? topPost.category.toUpperCase() : category,
+            title: topPost.title || title,
+            slug: topPost.slug || topPost.id || slug,
+            summary:
+              topPost.subheadline ||
+              topPost.cardSummary ||
+              (topPost.bodyContent
+                ? topPost.bodyContent.replace(/<[^>]+>/g, " ").trim().slice(0, 160) + "..."
+                : summary),
+            imageUrl: topPost.thumbnail || imageUrl,
+            commentsCount: topPost.commentsCount || "0",
+            readTime: topPost.readDuration || topPost.readTime || readTime,
+          });
+          return;
+        }
+      }
+    } catch (e) {}
+    setActiveArticle({ category, title, slug, summary, imageUrl, commentsCount, readTime });
+  }, [category, title, slug, summary, imageUrl, commentsCount, readTime]);
+
+  React.useEffect(() => {
+    loadCustomAPlus();
+    window.addEventListener("wsj_posts_updated", loadCustomAPlus);
+    return () => window.removeEventListener("wsj_posts_updated", loadCustomAPlus);
+  }, [loadCustomAPlus]);
+
+  const displayCat = activeArticle.category;
+  const displayTitle = activeArticle.title;
+  const displaySlug = activeArticle.slug;
+  const displaySummary = activeArticle.summary;
+  const displayImage = activeArticle.imageUrl;
+  const displayComments = activeArticle.commentsCount;
+  const displayReadTime = activeArticle.readTime;
+
   return (
     <article className="w-full h-full flex flex-col justify-between font-sans select-none">
       {/* Featured Main Hero Image expanding horizontally to align with text below */}
-      <Link href={`/article/${slug}`} className="block w-full h-[8.4cm] overflow-hidden bg-gray-100 mb-3 group">
+      <Link href={`/article/${displaySlug}`} className="block w-full h-[8.4cm] overflow-hidden bg-gray-100 mb-3 group">
         <img
-          src={imageUrl}
-          alt={title}
+          src={displayImage}
+          alt={displayTitle}
           className="w-full h-full object-cover group-hover:scale-[1.01] transition-transform duration-300"
         />
       </Link>
@@ -38,20 +101,20 @@ export const APlusMainNewsSection: React.FC<APlusMainNewsSectionProps> = ({
       {/* Category / Kicker Tag */}
       <div className="mb-1">
         <span className="font-sans font-bold text-[11px] tracking-wider text-[#00558c] uppercase">
-          {category}
+          {displayCat}
         </span>
       </div>
 
       {/* Headline */}
       <h1 className="font-serif font-bold text-[26px] sm:text-[30px] lg:text-[32px] leading-[1.15] text-[#111111] hover:text-[#333333] hover:underline cursor-pointer tracking-tight">
-        <Link href={`/article/${slug}`}>
-          {title}
+        <Link href={`/article/${displaySlug}`}>
+          {displayTitle}
         </Link>
       </h1>
 
       {/* Summary */}
       <p className="font-sans text-[13.5px] sm:text-[14px] leading-[1.4] text-[#444444] mt-2">
-        {summary}
+        {displaySummary}
       </p>
 
       {/* Metadata Row: Comments, Read Time & Action Icons */}
@@ -71,9 +134,9 @@ export const APlusMainNewsSection: React.FC<APlusMainNewsSectionProps> = ({
                 d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
               />
             </svg>
-            <span>{commentsCount}</span>
+            <span>{displayComments}</span>
           </div>
-          <span>{readTime}</span>
+          <span>{displayReadTime}</span>
         </div>
 
         {/* Right Side: Bookmark & Share Icons */}
