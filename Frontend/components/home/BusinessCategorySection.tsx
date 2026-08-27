@@ -146,10 +146,10 @@ export const BusinessCategorySection: React.FC = () => {
     <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-0 font-sans select-none border-b border-dashed border-[#888070] pb-5">
       {/* COLUMN 1 (LEFT ~ 3 of 12 cols): Positions 1, 2, 3 */}
       <div 
-        className="col-span-12 md:col-span-1 lg:col-span-3 pr-0 md:pr-[0.3cm] pb-6 lg:pb-0 flex flex-col justify-start divide-y divide-dashed divide-[#888070]"
+        className="col-span-12 md:col-span-1 lg:col-span-3 pr-0 md:pr-[0.3cm] pb-6 lg:pb-0 flex flex-col justify-start"
         style={{ borderRight: "1.5px dashed #888070" }}
       >
-        {/* Business Category Section Topic Header */}
+        {/* Business Category Section Topic Header (No border below) */}
         <div className="pb-2 mb-1">
           <h2 className="font-serif font-bold text-[24px] sm:text-[26px] text-[#111111] leading-none tracking-tight">
             <Link href="/business" className="hover:underline">
@@ -158,20 +158,23 @@ export const BusinessCategorySection: React.FC = () => {
           </h2>
         </div>
 
-        {leftItems.map((art, idx) => (
-          <article key={art.id} className={`py-2.5 ${idx === 0 ? "pt-0" : ""} ${idx === leftItems.length - 1 ? "pb-0" : ""}`}>
-            <h3 className={`font-serif font-bold text-[#111111] hover:text-[#333333] hover:underline cursor-pointer ${idx === 0 ? "text-[26px] sm:text-[28px] lg:text-[30px] leading-[1.12]" : "text-[20px] sm:text-[21px] leading-[1.18]"}`} style={{ whiteSpace: art.customBreakTitle ? "pre-line" : "normal" }}>
-              <Link href={`/article/${art.slug}`}>
-                {art.customBreakTitle || art.title}
-              </Link>
-            </h3>
-            {art.summary && (
-              <p className="font-sans text-[12px] sm:text-[12.5px] leading-[1.38] text-[#555555] mt-1.5 line-clamp-3">
-                {art.summary}
-              </p>
-            )}
-          </article>
-        ))}
+        {/* Articles List with divide-y between articles only */}
+        <div className="divide-y divide-dashed divide-[#888070]">
+          {leftItems.map((art, idx) => (
+            <article key={art.id} className={`py-2.5 ${idx === 0 ? "pt-0" : ""} ${idx === leftItems.length - 1 ? "pb-0" : ""}`}>
+              <h3 className={`font-serif font-bold text-[#111111] hover:text-[#333333] hover:underline cursor-pointer ${idx === 0 ? "text-[26px] sm:text-[28px] lg:text-[30px] leading-[1.12]" : "text-[20px] sm:text-[21px] leading-[1.18]"}`} style={{ whiteSpace: art.customBreakTitle ? "pre-line" : "normal" }}>
+                <Link href={`/article/${art.slug}`}>
+                  {art.customBreakTitle || art.title}
+                </Link>
+              </h3>
+              {art.summary && (
+                <p className="font-sans text-[12px] sm:text-[12.5px] leading-[1.38] text-[#555555] mt-1.5 line-clamp-3">
+                  {art.summary}
+                </p>
+              )}
+            </article>
+          ))}
+        </div>
       </div>
 
       {/* COLUMN 2 (CENTER ~ 5 of 12 cols): Position 4 (Hero) and Positions 5, 6 (Bottom Cards) */}
