@@ -180,18 +180,27 @@ export default function WriterDashboard() {
 
   useEffect(() => {
     const loadUser = () => {
-      const stored = sessionStorage.getItem("wsj_user") || localStorage.getItem("wsj_user");
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored);
-          if (!parsed || (parsed.role !== "writer" && parsed.role !== "admin")) {
-            router.push("/signin");
-          } else {
-            setCurrentUser(parsed);
-          }
-        } catch (e) {
-          router.push("/signin");
-        }
+      const tabUser = sessionStorage.getItem("wsj_user");
+      const writerUser = localStorage.getItem("wsj_writer_user");
+      const adminUser = localStorage.getItem("wsj_admin_user");
+      const generalUser = localStorage.getItem("wsj_user");
+
+      let parsed: any = null;
+      if (tabUser) {
+        try { parsed = JSON.parse(tabUser); } catch (e) {}
+      }
+      if (!parsed && writerUser) {
+        try { parsed = JSON.parse(writerUser); } catch (e) {}
+      }
+      if (!parsed && adminUser) {
+        try { parsed = JSON.parse(adminUser); } catch (e) {}
+      }
+      if (!parsed && generalUser) {
+        try { parsed = JSON.parse(generalUser); } catch (e) {}
+      }
+
+      if (parsed) {
+        setCurrentUser(parsed);
       } else {
         router.push("/signin");
       }

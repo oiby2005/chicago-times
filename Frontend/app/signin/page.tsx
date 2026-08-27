@@ -227,6 +227,15 @@ export default function SignInPage() {
         localStorage.removeItem("wsj_lockout_until");
         localStorage.setItem("wsj_token", `dummy_token_${matchedAccount.role}_2026`);
         localStorage.setItem("wsj_user", JSON.stringify(userData));
+
+        if (matchedAccount.role === "writer") {
+          localStorage.setItem("wsj_writer_user", JSON.stringify(userData));
+        } else if (matchedAccount.role === "admin") {
+          localStorage.setItem("wsj_admin_user", JSON.stringify(userData));
+        } else if (matchedAccount.role === "reader") {
+          localStorage.setItem("wsj_reader_user", JSON.stringify(userData));
+        }
+
         window.dispatchEvent(new Event("wsj_user_updated"));
       }
 

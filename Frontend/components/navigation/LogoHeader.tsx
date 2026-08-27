@@ -31,18 +31,38 @@ export const LogoHeader: React.FC = () => {
 
   const loadUserFromStorage = () => {
     if (typeof window === "undefined") return;
-    const stored = sessionStorage.getItem("wsj_user") || localStorage.getItem("wsj_user");
-    const sessionActive = sessionStorage.getItem("wsj_session_active");
+    const tabUser = sessionStorage.getItem("wsj_user");
+    const writerUser = localStorage.getItem("wsj_writer_user");
+    const adminUser = localStorage.getItem("wsj_admin_user");
+    const readerUser = localStorage.getItem("wsj_reader_user");
+    const generalUser = localStorage.getItem("wsj_user");
 
     let parsed: any = null;
-    if (stored) {
-      try { parsed = JSON.parse(stored); } catch (e) {}
+    if (tabUser) {
+      try { parsed = JSON.parse(tabUser); } catch (e) {}
+    }
+    if (!parsed && isWriterDashboard && writerUser) {
+      try { parsed = JSON.parse(writerUser); } catch (e) {}
+    }
+    if (!parsed && isAdminDashboard && adminUser) {
+      try { parsed = JSON.parse(adminUser); } catch (e) {}
+    }
+    if (!parsed && writerUser) {
+      try { parsed = JSON.parse(writerUser); } catch (e) {}
+    }
+    if (!parsed && adminUser) {
+      try { parsed = JSON.parse(adminUser); } catch (e) {}
+    }
+    if (!parsed && readerUser) {
+      try { parsed = JSON.parse(readerUser); } catch (e) {}
+    }
+    if (!parsed && generalUser) {
+      try { parsed = JSON.parse(generalUser); } catch (e) {}
     }
 
-    if (parsed && (sessionActive === "true" || sessionStorage.getItem("wsj_user"))) {
+    if (parsed) {
       setCurrentUser(parsed);
     } else {
-      // By default, the website is SIGNED OUT
       setCurrentUser(null);
     }
   };
