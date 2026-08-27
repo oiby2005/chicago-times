@@ -962,7 +962,7 @@ export default function AdminReviewPostPage() {
       seoTitle: seoTitle,
       homepagePlacement: (mainCategory === "Opinion" || mainCategory === "Opinions" || mainCategory === "Editorial" || mainCategory === "Editorials")
         ? "Home - Opinion Section"
-        : homepagePlacement,
+        : (mainCategory === "Business" ? "Home - Business Category" : homepagePlacement),
       newsletterBanner: newsletterBanner,
       publishedAt: Date.now(),
       views: 0,
@@ -975,7 +975,7 @@ export default function AdminReviewPostPage() {
       existingPosts = [updatedPost, ...existingPosts];
     }
 
-    // Manage Homepage Placement Queues (Top News: 3, A+ Main: 1, In Depth: 4, Main Bottom: 2, Right Main: 2)
+    // Manage Homepage Placement Queues (Top News: 3, A+ Main: 1, In Depth: 4, Main Bottom: 2, Right Main: 2, Business: 8)
     const SECTION_LIMITS = [
       { keyword: "Top News", max: 3 },
       { keyword: "A+ Main News", max: 1 },
@@ -983,11 +983,17 @@ export default function AdminReviewPostPage() {
       { keyword: "In Depth", max: 4 },
       { keyword: "Main Bottom", max: 2 },
       { keyword: "Right Main Panel", max: 2 },
+      { keyword: "Business Category", max: 8 },
+      { keyword: "Business", max: 8 },
     ];
 
-    if (homepagePlacement && !homepagePlacement.startsWith("None")) {
+    const activePlacement = (mainCategory === "Opinion" || mainCategory === "Opinions" || mainCategory === "Editorial" || mainCategory === "Editorials")
+      ? "Home - Opinion Section"
+      : (mainCategory === "Business" ? "Home - Business Category" : homepagePlacement);
+
+    if (activePlacement && !activePlacement.startsWith("None")) {
       SECTION_LIMITS.forEach(({ keyword, max }) => {
-        if (homepagePlacement.includes(keyword)) {
+        if (activePlacement.includes(keyword)) {
           const sectionPosts = existingPosts.filter(
             (p: any) => p.status === "Published" && p.homepagePlacement && p.homepagePlacement.includes(keyword)
           );
@@ -1589,14 +1595,14 @@ export default function AdminReviewPostPage() {
                         </div>
 
                         {/* HOMEPAGE PLACEMENT SECTION (Matching User Images 1 & 3) */}
-                        <div className={`border border-[#cbd5e1] bg-[#fffdfa] rounded-2xl p-3.5 space-y-2 text-left ${(mainCategory === "Opinion" || mainCategory === "Opinions" || mainCategory === "Editorial" || mainCategory === "Editorials") ? "opacity-60 pointer-events-none bg-slate-100" : ""}`}>
+                        <div className={`border border-[#cbd5e1] bg-[#fffdfa] rounded-2xl p-3.5 space-y-2 text-left ${(mainCategory === "Opinion" || mainCategory === "Opinions" || mainCategory === "Editorial" || mainCategory === "Editorials" || mainCategory === "Business") ? "opacity-60 pointer-events-none bg-slate-100" : ""}`}>
                           <label className="block text-[10px] font-mono font-bold text-[#ea580c] uppercase tracking-wider">
                             HOMEPAGE PLACEMENT
                           </label>
                           <div className="relative">
                             <select
-                              disabled={mainCategory === "Opinion" || mainCategory === "Opinions" || mainCategory === "Editorial" || mainCategory === "Editorials"}
-                              value={(mainCategory === "Opinion" || mainCategory === "Opinions" || mainCategory === "Editorial" || mainCategory === "Editorials") ? "Home - Opinion Section" : homepagePlacement}
+                              disabled={mainCategory === "Opinion" || mainCategory === "Opinions" || mainCategory === "Editorial" || mainCategory === "Editorials" || mainCategory === "Business"}
+                              value={(mainCategory === "Opinion" || mainCategory === "Opinions" || mainCategory === "Editorial" || mainCategory === "Editorials") ? "Home - Opinion Section" : (mainCategory === "Business" ? "Home - Business Category" : homepagePlacement)}
                               onChange={(e) => setHomepagePlacement(e.target.value)}
                               className="w-full bg-[#fffdf0] border border-[#facc15] rounded-xl px-3.5 py-2.5 text-xs font-bold text-[#1e293b] focus:outline-none focus:border-[#eab308] cursor-pointer appearance-none pr-8 disabled:cursor-not-allowed disabled:bg-gray-100"
                             >
