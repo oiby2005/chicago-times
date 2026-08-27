@@ -3,13 +3,115 @@
 import React from "react";
 import Link from "next/link";
 
+interface LifeArticle {
+  id: string;
+  categoryTag?: string;
+  title: string;
+  slug: string;
+  summary?: string;
+  imageUrl: string;
+}
+
+const defaultArticles: LifeArticle[] = [
+  {
+    id: "life1",
+    title: "These are the chicest stays in the Balearic islands",
+    slug: "chicest-stays-in-balearic-islands",
+    summary: "From a boutique townhouse hotel in Menorca’s capital to a peaceful Ibiza villa with a pool, we’ve tracked down the finest spots to have on your radar",
+    imageUrl: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=800&q=80",
+  },
+  {
+    id: "life2",
+    categoryTag: "EXCLUSIVE",
+    title: "Are airport lounges worth it? Probably not, according to new study",
+    slug: "are-airport-lounges-worth-it",
+    imageUrl: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    id: "life3",
+    categoryTag: "REVIEW",
+    title: "This Ayrshire hotel’s new spa is the star turn",
+    slug: "this-ayrshire-hotels-new-spa-is-star-turn",
+    imageUrl: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    id: "life4",
+    title: "Naples’ hotel scene has never been better. Here’s where to stay",
+    slug: "naples-hotel-scene-has-never-been-better",
+    imageUrl: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=600&q=80",
+  },
+];
+
+const extractText = (html: string): string => {
+  if (typeof window === "undefined") return "";
+  const tmp = document.createElement("div");
+  tmp.innerHTML = html || "";
+  return (tmp.textContent || tmp.innerText || "").trim().slice(0, 140);
+};
+
 export const LifestyleCategorySection: React.FC = () => {
+  const [articles, setArticles] = React.useState<LifeArticle[]>(defaultArticles);
+
+  const loadPosts = React.useCallback(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const stored = localStorage.getItem("wsj_posts");
+      if (stored) {
+        const posts = JSON.parse(stored);
+        const lifePosts = posts.filter(
+          (p: any) =>
+            p.status === "Published" &&
+            (p.category === "Lifestyle" ||
+             p.category === "Travel" ||
+             p.category === "Food & Dining" ||
+             p.category === "Cars" ||
+             (p.homepagePlacement && p.homepagePlacement.includes("Lifestyle")))
+        );
+
+        lifePosts.sort((a: any, b: any) => (b.publishedAt || 0) - (a.publishedAt || 0));
+
+        if (lifePosts.length > 0) {
+          const formatted: LifeArticle[] = lifePosts.slice(0, 4).map((p: any) => ({
+            id: p.id,
+            title: p.title,
+            slug: p.slug || p.id,
+            summary: p.subheadline || extractText(p.bodyContent) || "",
+            imageUrl: p.thumbnail || "https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=800&q=80",
+          }));
+
+          const merged = [...formatted];
+          for (let i = 0; i < defaultArticles.length && merged.length < 4; i++) {
+            if (!merged.some((m) => m.id === defaultArticles[i].id)) {
+              merged.push(defaultArticles[i]);
+            }
+          }
+          setArticles(merged.slice(0, 4));
+          return;
+        }
+      }
+    } catch (e) {}
+    setArticles(defaultArticles);
+  }, []);
+
+  React.useEffect(() => {
+    loadPosts();
+    window.addEventListener("wsj_posts_updated", loadPosts);
+    return () => window.removeEventListener("wsj_posts_updated", loadPosts);
+  }, [loadPosts]);
+
+  const heroItem = articles[0] || defaultArticles[0];
+  const miniItem1 = articles[1] || defaultArticles[1];
+  const miniItem2 = articles[2] || defaultArticles[2];
+  const sidebarItem1 = articles[3] || defaultArticles[3];
+
   return (
     <div className="w-full font-sans select-none pt-2 pb-4 my-0">
-      {/* Section Header with dashed line BELOW the Lifestyle text */}
+      {/* Section Header */}
       <div className="flex items-center space-x-2 pb-3 mb-4 border-b border-dashed border-[#CCCCCC]">
         <h2 className="font-serif font-bold text-[26px] sm:text-[30px] text-[#4A2E80] tracking-tight">
-          Lifestyle
+          <Link href="/lifestyle" className="hover:underline">
+            Lifestyle
+          </Link>
         </h2>
         <div className="w-6 h-6 rounded-full bg-[#f4effc] flex items-center justify-center text-[#4A2E80] cursor-pointer hover:bg-[#e9defa]">
           <span className="text-[14px] font-bold leading-none">›</span>
@@ -27,26 +129,26 @@ export const LifestyleCategorySection: React.FC = () => {
             {/* Left Headline */}
             <div className="md:col-span-4 flex flex-col justify-start">
               <h3 className="font-serif font-bold text-[26px] sm:text-[30px] leading-[1.12] text-[#111111] hover:underline cursor-pointer mb-2">
-                <Link href="/article/chicest-stays-in-balearic-islands">
-                  These are the chicest<br />
-                  stays in the Balearic<br />
-                  islands
+                <Link href={`/article/${heroItem.slug}`}>
+                  {heroItem.title}
                 </Link>
               </h3>
-              <p className="font-sans text-[13px] leading-relaxed text-[#555555] mb-2">
-                From a boutique townhouse hotel in Menorca’s capital to a peaceful Ibiza villa with a pool, we’ve tracked down the finest spots to have on your radar
-              </p>
+              {heroItem.summary && (
+                <p className="font-sans text-[13px] leading-relaxed text-[#555555] mb-2 line-clamp-3">
+                  {heroItem.summary}
+                </p>
+              )}
             </div>
 
             {/* Right Large Hero Image */}
             <div className="md:col-span-4">
               <Link
-                href="/article/chicest-stays-in-balearic-islands"
+                href={`/article/${heroItem.slug}`}
                 className="block relative aspect-[4/3] w-full overflow-hidden bg-gray-100 group"
               >
                 <img
-                  src="https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=800&q=80"
-                  alt="Balearic islands villa resort terrace pool"
+                  src={heroItem.imageUrl}
+                  alt={heroItem.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
               </Link>
@@ -58,25 +160,27 @@ export const LifestyleCategorySection: React.FC = () => {
             {/* Mini Story 1 */}
             <div className="flex items-start space-x-3 pr-0 md:pr-3" style={{ borderRight: "1px solid #CCCCCC" }}>
               <Link
-                href="/article/are-airport-lounges-worth-it"
+                href={`/article/${miniItem1.slug}`}
                 className="block relative w-[140px] sm:w-[165px] aspect-[16/10] overflow-hidden bg-gray-100 flex-shrink-0 group"
               >
                 <img
-                  src="https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=600&q=80"
-                  alt="Airport lounge interior"
+                  src={miniItem1.imageUrl}
+                  alt={miniItem1.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
               </Link>
               <div className="flex flex-col justify-between flex-1">
                 <div>
-                  <div className="mb-1">
-                    <span className="font-sans font-bold text-[10px] tracking-wider text-[#b82e2e] uppercase">
-                      EXCLUSIVE
-                    </span>
-                  </div>
+                  {miniItem1.categoryTag && (
+                    <div className="mb-1">
+                      <span className="font-sans font-bold text-[10px] tracking-wider text-[#b82e2e] uppercase">
+                        {miniItem1.categoryTag}
+                      </span>
+                    </div>
+                  )}
                   <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-2">
-                    <Link href="/article/are-airport-lounges-worth-it">
-                      Are airport lounges worth it? Probably not, according to new study
+                    <Link href={`/article/${miniItem1.slug}`}>
+                      {miniItem1.title}
                     </Link>
                   </h4>
                 </div>
@@ -86,25 +190,27 @@ export const LifestyleCategorySection: React.FC = () => {
             {/* Mini Story 2 */}
             <div className="flex items-start space-x-3 pl-0 md:pl-1">
               <Link
-                href="/article/this-ayrshire-hotels-new-spa-is-star-turn"
+                href={`/article/${miniItem2.slug}`}
                 className="block relative w-[140px] sm:w-[165px] aspect-[16/10] overflow-hidden bg-gray-100 flex-shrink-0 group"
               >
                 <img
-                  src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80"
-                  alt="Ayrshire hotel resort sunset"
+                  src={miniItem2.imageUrl}
+                  alt={miniItem2.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
               </Link>
               <div className="flex flex-col justify-between flex-1">
                 <div>
-                  <div className="mb-1">
-                    <span className="font-sans font-bold text-[10px] tracking-wider text-[#336699] uppercase">
-                      REVIEW
-                    </span>
-                  </div>
+                  {miniItem2.categoryTag && (
+                    <div className="mb-1">
+                      <span className="font-sans font-bold text-[10px] tracking-wider text-[#336699] uppercase">
+                        {miniItem2.categoryTag}
+                      </span>
+                    </div>
+                  )}
                   <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-2">
-                    <Link href="/article/this-ayrshire-hotels-new-spa-is-star-turn">
-                      This Ayrshire hotel’s new spa is the star turn
+                    <Link href={`/article/${miniItem2.slug}`}>
+                      {miniItem2.title}
                     </Link>
                   </h4>
                 </div>
@@ -114,101 +220,25 @@ export const LifestyleCategorySection: React.FC = () => {
 
         </div>
 
-        {/* RIGHT SIDEBAR STORIES AREA (4 of 12 cols ~ 33%) */}
-        <div className="lg:col-span-4 pl-0 lg:pl-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 items-stretch pt-4 lg:pt-0 h-full">
-          
-          {/* Column 1 of Right Sidebar */}
-          <div className="flex flex-col justify-between pr-0 md:pr-2 h-full" style={{ borderRight: "1px solid #CCCCCC" }}>
-            {/* Story 1 */}
-            <article className="pb-3 mb-3 border-b border-dashed border-[#CCCCCC]">
-              <Link
-                href="/article/naples-hotel-scene-has-never-been-better"
-                className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 mb-2 group"
-              >
-                <img
-                  src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=600&q=80"
-                  alt="Naples hotel pool view"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
+        {/* RIGHT SIDEBAR STORIES AREA */}
+        <div className="lg:col-span-4 pl-0 lg:pl-4 flex flex-col justify-between pt-4 lg:pt-0 h-full">
+          <article className="pb-3 mb-3 border-b border-dashed border-[#CCCCCC]">
+            <Link
+              href={`/article/${sidebarItem1.slug}`}
+              className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 mb-2 group"
+            >
+              <img
+                src={sidebarItem1.imageUrl}
+                alt={sidebarItem1.title}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+            </Link>
+            <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-2">
+              <Link href={`/article/${sidebarItem1.slug}`}>
+                {sidebarItem1.title}
               </Link>
-              <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-2">
-                <Link href="/article/naples-hotel-scene-has-never-been-better">
-                  Naples’ hotel scene has never been better. Here’s where to stay
-                </Link>
-              </h4>
-            </article>
-
-            {/* Story 2 */}
-            <article className="pt-1">
-              <Link
-                href="/article/win-a-luxury-highlands-break"
-                className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 mb-2 group"
-              >
-                <img
-                  src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=80"
-                  alt="Luxury Glenmorangie House interior"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-              </Link>
-              <div className="mb-1">
-                <span className="font-sans font-bold text-[10px] tracking-wider text-[#336699] uppercase">
-                  WHERE WAS I? COMPETITION
-                </span>
-              </div>
-              <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-2">
-                <Link href="/article/win-a-luxury-highlands-break">
-                  Win a luxury Highlands break worth up to £1,210 with Glenmorangie House
-                </Link>
-              </h4>
-            </article>
-          </div>
-
-          {/* Column 2 of Right Sidebar */}
-          <div className="flex flex-col justify-between pl-0 md:pl-2 h-full">
-            {/* Story 3 */}
-            <article className="pb-3 mb-3 border-b border-dashed border-[#CCCCCC]">
-              <Link
-                href="/article/these-beautiful-islands-are-closer-than-you-think"
-                className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 mb-2 group"
-              >
-                <img
-                  src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80"
-                  alt="Beautiful island beach"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-              </Link>
-              <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-2">
-                <Link href="/article/these-beautiful-islands-are-closer-than-you-think">
-                  These beautiful islands are closer to home than you think
-                </Link>
-              </h4>
-            </article>
-
-            {/* Story 4 */}
-            <article className="pt-1">
-              <Link
-                href="/article/why-book-a-cruise-and-stay-with-times-holidays"
-                className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 mb-2 group"
-              >
-                <img
-                  src="https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=600&q=80"
-                  alt="Taj Mahal reflection at sunset"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-              </Link>
-              <div className="mb-1">
-                <span className="font-sans font-bold text-[10px] tracking-wider text-[#336699] uppercase">
-                  PROMOTED CONTENT
-                </span>
-              </div>
-              <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-2">
-                <Link href="/article/why-book-a-cruise-and-stay-with-times-holidays">
-                  Why book a cruise-and-stay with Times Holidays? The best offers for 2027 and 2028
-                </Link>
-              </h4>
-            </article>
-          </div>
-
+            </h4>
+          </article>
         </div>
 
       </div>
