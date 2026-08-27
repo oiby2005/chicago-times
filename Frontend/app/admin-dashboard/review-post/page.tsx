@@ -56,6 +56,34 @@ const compressImageFile = (file: File, maxWidth = 800, quality = 0.7): Promise<s
   });
 };
 
+const getAutomaticPlacement = (cat: string): string | null => {
+  if (!cat) return null;
+  const c = cat.toLowerCase().trim();
+  if (c.includes("opinion")) return "Home - Opinion Section";
+  if (c.includes("editorial")) return "Home - Editorials";
+  if (c === "business" || c.includes("corporate")) return "Home - Business Category";
+  if (c.includes("world politics")) return "Home - World Politics Category";
+  if (c.includes("politic") || c.includes("congress") || c.includes("election")) return "Home - Politics Category";
+  if (c.includes("tech") || c.includes("artificial") || c.includes("cyber") || c.includes("innovation")) return "Home - Tech Category";
+  if (c.includes("sport") || c.includes("soccer") || c.includes("golf") || c.includes("tennis") || c.includes("cricket")) return "Home - Sport Category";
+  if (c.includes("entertain") || c.includes("movie") || c.includes("television") || c.includes("music") || c.includes("celebrity")) return "Home - Entertainment";
+  if (c.includes("fashion") || c.includes("designer") || c.includes("jewelry")) return "Home - Fashion Category";
+  if (c.includes("science") || c.includes("space") || c.includes("climate") || c.includes("environment") || c.includes("research")) return "Home - Science";
+  if (c.includes("art") || c.includes("brand") || c.includes("architecture") || c.includes("book") || c.includes("culture")) return "Home- Arts Category";
+  if (c.includes("lifestyle") || c.includes("travel") || c.includes("food") || c.includes("car")) return "Home- Lifestyle";
+  if (c.includes("ceo") || c.includes("executive")) return "Home - CEOs & Executives";
+  if (c.includes("market") || c.includes("stock") || c.includes("currenc") || c.includes("bank")) return "Home - Markets & Finance";
+  if (c.includes("econom") || c.includes("job") || c.includes("rate")) return "Home - Economy";
+  if (c.includes("health") || c.includes("medical") || c.includes("mental")) return "Home - Health";
+  if (c.includes("invest") || c.includes("wealth")) return "Home - Investing";
+  if (c.includes("crypto")) return "Home - Crypto";
+  if (c.includes("real estate")) return "Home - Real Estate";
+  if (c.includes("industr") || c.includes("energy") || c.includes("automotive") || c.includes("manufactur") || c.includes("agricultur") || c.includes("construct")) return "Home - Industries";
+  if (c.includes("law") || c.includes("criminal") || c.includes("legal")) return "Home - Law";
+  if (c.includes("small business") || c.includes("entrepreneur")) return "Home - Small Business";
+  return null;
+};
+
 const safeSavePostsToStorage = (posts: any[]): boolean => {
   if (typeof window === "undefined") return false;
 

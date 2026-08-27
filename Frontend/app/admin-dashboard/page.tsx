@@ -1161,7 +1161,7 @@ ${divider70}
                           <td className="py-2.5 sm:py-3 pl-3 text-right whitespace-nowrap">
                             <button
                               onClick={() =>
-                                router.push(`/admin-dashboard/review-post?id=${proj.id}`)
+                                router.push(`/admin-dashboard/review-post?id=${encodeURIComponent(proj.id)}`)
                               }
                               className="bg-[#4b5563] hover:bg-[#374151] text-white font-extrabold text-[11px] uppercase tracking-wider px-4 py-1.5 rounded-md transition-all cursor-pointer shadow-2xs"
                             >
