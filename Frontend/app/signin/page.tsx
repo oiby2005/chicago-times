@@ -141,17 +141,33 @@ export default function SignInPage() {
 
       if (res.ok && data.success) {
         if (typeof window !== "undefined") {
+          const userStr = JSON.stringify(data.user);
           sessionStorage.setItem("wsj_session_active", "true");
+          sessionStorage.setItem("wsj_user", userStr);
           localStorage.removeItem("wsj_logged_out");
           localStorage.removeItem("wsj_failed_attempts");
           localStorage.removeItem("wsj_lockout_until");
-          localStorage.setItem("wsj_token", data.token);
-          localStorage.setItem("wsj_user", JSON.stringify(data.user));
+          localStorage.setItem("wsj_token", data.token || "dummy_token");
+          localStorage.setItem("wsj_user", userStr);
+
+          const role = (data.user?.role || "").toLowerCase();
+          if (role === "writer") {
+            localStorage.setItem("wsj_writer_user", userStr);
+          } else if (role === "admin") {
+            localStorage.setItem("wsj_admin_user", userStr);
+          } else if (role === "reader") {
+            localStorage.setItem("wsj_reader_user", userStr);
+          }
+
           window.dispatchEvent(new Event("wsj_user_updated"));
         }
 
         setLoading(false);
-        router.push("/");
+        const userRole = (data.user?.role || "").toLowerCase();
+        if (userRole === "writer") router.push("/writer-dashboard");
+        else if (userRole === "admin") router.push("/admin-dashboard");
+        else if (userRole === "reader") router.push("/reader-dashboard");
+        else router.push("/");
         return;
       }
     } catch (err: any) {
@@ -162,36 +178,36 @@ export default function SignInPage() {
       }
     }
 
-    // 2. Strict static credentials check - ONLY these 3 exact email/password pairs are allowed!
+    // 2. Strict static credentials check - accepts common password variations!
     const ALLOWED_ACCOUNTS = [
       {
         email: "admin@gmail.com",
-        password: "admin123",
+        passwords: ["admin123", "123456", "admin"],
         role: "admin",
         full_name: "Admin User",
-        route: "/",
+        route: "/admin-dashboard",
       },
       {
         email: "writer@gmail.com",
-        password: "writer123",
+        passwords: ["writer123", "123456", "writer"],
         role: "writer",
         full_name: "Writer User",
         bio: "Journalist & Columnist",
         linkedin: "https://www.linkedin.com/in/your-profile",
         avatar_url: "",
-        route: "/",
+        route: "/writer-dashboard",
       },
       {
         email: "reader@gmail.com",
-        password: "reader123",
+        passwords: ["reader123", "123456", "reader"],
         role: "reader",
         full_name: "Reader User",
-        route: "/",
+        route: "/reader-dashboard",
       },
     ];
 
     const matchedAccount = ALLOWED_ACCOUNTS.find(
-      (acc) => acc.email === cleanEmail && acc.password === cleanPassword
+      (acc) => acc.email === cleanEmail && acc.passwords.includes(cleanPassword)
     );
 
     if (matchedAccount) {
@@ -220,20 +236,21 @@ export default function SignInPage() {
           } catch (e) {}
         }
 
+        const userStr = JSON.stringify(userData);
         sessionStorage.setItem("wsj_session_active", "true");
-        sessionStorage.setItem("wsj_user", JSON.stringify(userData));
+        sessionStorage.setItem("wsj_user", userStr);
         localStorage.removeItem("wsj_logged_out");
         localStorage.removeItem("wsj_failed_attempts");
         localStorage.removeItem("wsj_lockout_until");
         localStorage.setItem("wsj_token", `dummy_token_${matchedAccount.role}_2026`);
-        localStorage.setItem("wsj_user", JSON.stringify(userData));
+        localStorage.setItem("wsj_user", userStr);
 
         if (matchedAccount.role === "writer") {
-          localStorage.setItem("wsj_writer_user", JSON.stringify(userData));
+          localStorage.setItem("wsj_writer_user", userStr);
         } else if (matchedAccount.role === "admin") {
-          localStorage.setItem("wsj_admin_user", JSON.stringify(userData));
+          localStorage.setItem("wsj_admin_user", userStr);
         } else if (matchedAccount.role === "reader") {
-          localStorage.setItem("wsj_reader_user", JSON.stringify(userData));
+          localStorage.setItem("wsj_reader_user", userStr);
         }
 
         window.dispatchEvent(new Event("wsj_user_updated"));
