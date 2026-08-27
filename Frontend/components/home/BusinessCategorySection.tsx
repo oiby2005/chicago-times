@@ -149,6 +149,15 @@ export const BusinessCategorySection: React.FC = () => {
         className="col-span-12 md:col-span-1 lg:col-span-3 pr-0 md:pr-[0.3cm] pb-6 lg:pb-0 flex flex-col justify-start divide-y divide-dashed divide-[#888070]"
         style={{ borderRight: "1.5px dashed #888070" }}
       >
+        {/* Business Category Section Topic Header */}
+        <div className="pb-2 mb-1">
+          <h2 className="font-serif font-bold text-[24px] sm:text-[26px] text-[#111111] leading-none tracking-tight">
+            <Link href="/business" className="hover:underline">
+              Business
+            </Link>
+          </h2>
+        </div>
+
         {leftItems.map((art, idx) => (
           <article key={art.id} className={`py-2.5 ${idx === 0 ? "pt-0" : ""} ${idx === leftItems.length - 1 ? "pb-0" : ""}`}>
             <h3 className={`font-serif font-bold text-[#111111] hover:text-[#333333] hover:underline cursor-pointer ${idx === 0 ? "text-[26px] sm:text-[28px] lg:text-[30px] leading-[1.12]" : "text-[20px] sm:text-[21px] leading-[1.18]"}`} style={{ whiteSpace: art.customBreakTitle ? "pre-line" : "normal" }}>
