@@ -3,7 +3,112 @@
 import React from "react";
 import Link from "next/link";
 
+interface EntArticle {
+  id: string;
+  categoryTag?: string;
+  title: string;
+  slug: string;
+  summary?: string;
+  imageUrl: string;
+  sectionTag?: string;
+}
+
+const defaultArticles: EntArticle[] = [
+  {
+    id: "ent1",
+    categoryTag: "NEW",
+    title: "The new faces of The Grand Tour: We have Jeremy Clarkson’s blessing",
+    slug: "the-new-faces-of-the-grand-tour",
+    summary: "Francis Bourgeois, Thomas Holland and James Engelsman are taking the wheel of the hit car show. They say they’re not trying to replace the original three amigos",
+    imageUrl: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80",
+    sectionTag: "TV & Radio",
+  },
+  {
+    id: "ent2",
+    categoryTag: "REVIEW | FIRST NIGHT",
+    title: "Abigail’s Party — Tamzin Outhwaite makes Beverly her own",
+    slug: "abigails-party-tamzin-outhwaite",
+    imageUrl: "https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?auto=format&fit=crop&w=600&q=80",
+    sectionTag: "Theatre & Dance",
+  },
+  {
+    id: "ent3",
+    categoryTag: "NEW | REVIEW | SOCIETY",
+    title: "Why have men gone off the rails? They can’t make an honest living",
+    slug: "why-have-men-gone-off-the-rails",
+    imageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80",
+    sectionTag: "Books",
+  },
+  {
+    id: "ent4",
+    categoryTag: "REVIEW",
+    title: "The £1m secret hiding in a French garden shed... and what happened next",
+    slug: "the-1m-secret-hiding-in-a-french-garden-shed",
+    imageUrl: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=600&q=80",
+    sectionTag: "TV & Radio",
+  },
+];
+
+const extractText = (html: string): string => {
+  if (typeof window === "undefined") return "";
+  const tmp = document.createElement("div");
+  tmp.innerHTML = html || "";
+  return (tmp.textContent || tmp.innerText || "").trim().slice(0, 140);
+};
+
 export const EntertainmentCategorySection: React.FC = () => {
+  const [articles, setArticles] = React.useState<EntArticle[]>(defaultArticles);
+
+  const loadPosts = React.useCallback(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const stored = localStorage.getItem("wsj_posts");
+      if (stored) {
+        const posts = JSON.parse(stored);
+        const entPosts = posts.filter(
+          (p: any) =>
+            p.status === "Published" &&
+            (p.category === "Entertainment" ||
+             (p.homepagePlacement && p.homepagePlacement.includes("Entertainment")))
+        );
+
+        entPosts.sort((a: any, b: any) => (b.publishedAt || 0) - (a.publishedAt || 0));
+
+        if (entPosts.length > 0) {
+          const formatted: EntArticle[] = entPosts.slice(0, 4).map((p: any) => ({
+            id: p.id,
+            title: p.title,
+            slug: p.slug || p.id,
+            summary: p.subheadline || extractText(p.bodyContent) || "",
+            imageUrl: p.thumbnail || "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80",
+            sectionTag: p.subCategories?.[0] || "Entertainment",
+          }));
+
+          const merged = [...formatted];
+          for (let i = 0; i < defaultArticles.length && merged.length < 4; i++) {
+            if (!merged.some((m) => m.id === defaultArticles[i].id)) {
+              merged.push(defaultArticles[i]);
+            }
+          }
+          setArticles(merged.slice(0, 4));
+          return;
+        }
+      }
+    } catch (e) {}
+    setArticles(defaultArticles);
+  }, []);
+
+  React.useEffect(() => {
+    loadPosts();
+    window.addEventListener("wsj_posts_updated", loadPosts);
+    return () => window.removeEventListener("wsj_posts_updated", loadPosts);
+  }, [loadPosts]);
+
+  const heroItem = articles[0] || defaultArticles[0];
+  const miniItem1 = articles[1] || defaultArticles[1];
+  const miniItem2 = articles[2] || defaultArticles[2];
+  const sidebarItem1 = articles[3] || defaultArticles[3];
+
   return (
     <div className="w-full font-sans select-none pt-2 pb-4 my-0">
       {/* Section Header with dashed line BELOW the Entertainment text */}
@@ -22,29 +127,30 @@ export const EntertainmentCategorySection: React.FC = () => {
         {/* LEFT & CENTER HERO AREA (8 of 12 cols ~ 67%) */}
         <div className="lg:col-span-8 pr-0 lg:pr-4 flex flex-col justify-start h-full" style={{ borderRight: "1px solid #CCCCCC" }}>
           
-          {/* Top Half: Left Headline Text (4 cols) + Large Hero Photo (4 cols) */}
+          {/* Top Half: Position 1 Hero */}
           <div className="grid grid-cols-1 md:grid-cols-8 gap-4 pb-4 border-b border-dashed border-[#CCCCCC]">
             {/* Left Headline */}
             <div className="md:col-span-4 flex flex-col justify-start">
-              <div className="mb-1">
-                <span className="font-sans font-bold text-[11px] tracking-wider text-[#b82e2e] uppercase">
-                  NEW
-                </span>
-              </div>
+              {heroItem.categoryTag && (
+                <div className="mb-1">
+                  <span className="font-sans font-bold text-[11px] tracking-wider text-[#b82e2e] uppercase">
+                    {heroItem.categoryTag}
+                  </span>
+                </div>
+              )}
               <h3 className="font-serif font-bold text-[26px] sm:text-[30px] leading-[1.12] text-[#111111] hover:underline cursor-pointer mb-2">
-                <Link href="/article/the-new-faces-of-the-grand-tour">
-                  The new faces of The<br />
-                  Grand Tour: We have<br />
-                  Jeremy Clarkson’s<br />
-                  blessing
+                <Link href={`/article/${heroItem.slug}`}>
+                  {heroItem.title}
                 </Link>
               </h3>
-              <p className="font-sans text-[13px] leading-relaxed text-[#555555] mb-2">
-                Francis Bourgeois, Thomas Holland and James Engelsman are taking the wheel of the hit car show. They say they’re not trying to replace the original three amigos
-              </p>
+              {heroItem.summary && (
+                <p className="font-sans text-[13px] leading-relaxed text-[#555555] mb-2 line-clamp-3">
+                  {heroItem.summary}
+                </p>
+              )}
               <div className="mt-1">
                 <span className="font-sans font-bold text-[12px] text-[#111111]">
-                  TV & Radio
+                  {heroItem.sectionTag || "TV & Radio"}
                 </span>
               </div>
             </div>
@@ -52,78 +158,82 @@ export const EntertainmentCategorySection: React.FC = () => {
             {/* Right Large Hero Image */}
             <div className="md:col-span-4">
               <Link
-                href="/article/the-new-faces-of-the-grand-tour"
+                href={`/article/${heroItem.slug}`}
                 className="block relative aspect-[4/3] w-full overflow-hidden bg-gray-100 group"
               >
                 <img
-                  src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80"
-                  alt="The Grand Tour presenter trio with sports car"
+                  src={heroItem.imageUrl}
+                  alt={heroItem.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
               </Link>
             </div>
           </div>
 
-          {/* Bottom Half: 2 Mini Columns */}
+          {/* Bottom Half: Positions 2 & 3 */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-            {/* Mini Story 1 */}
+            {/* Position 2 */}
             <div className="flex items-start space-x-3 pr-0 md:pr-3" style={{ borderRight: "1px solid #CCCCCC" }}>
               <Link
-                href="/article/abigails-party-tamzin-outhwaite"
+                href={`/article/${miniItem1.slug}`}
                 className="block relative w-[140px] sm:w-[165px] aspect-[16/10] overflow-hidden bg-gray-100 flex-shrink-0 group"
               >
                 <img
-                  src="https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?auto=format&fit=crop&w=600&q=80"
-                  alt="Theatre performance stage"
+                  src={miniItem1.imageUrl}
+                  alt={miniItem1.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
               </Link>
               <div className="flex flex-col justify-between flex-1">
                 <div>
-                  <div className="mb-1">
-                    <span className="font-sans font-bold text-[10px] tracking-wider text-[#b82e2e] uppercase">
-                      REVIEW | FIRST NIGHT
-                    </span>
-                  </div>
+                  {miniItem1.categoryTag && (
+                    <div className="mb-1">
+                      <span className="font-sans font-bold text-[10px] tracking-wider text-[#b82e2e] uppercase">
+                        {miniItem1.categoryTag}
+                      </span>
+                    </div>
+                  )}
                   <h4 className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-2">
-                    <Link href="/article/abigails-party-tamzin-outhwaite">
-                      Abigail’s Party — Tamzin Outhwaite makes Beverly her own
+                    <Link href={`/article/${miniItem1.slug}`}>
+                      {miniItem1.title}
                     </Link>
                   </h4>
                 </div>
                 <span className="font-sans font-bold text-[12px] text-[#111111]">
-                  Theatre & Dance
+                  {miniItem1.sectionTag || "Theatre & Dance"}
                 </span>
               </div>
             </div>
 
-            {/* Mini Story 2 */}
+            {/* Position 3 */}
             <div className="flex items-start space-x-3 pl-0 md:pl-1">
               <Link
-                href="/article/why-have-men-gone-off-the-rails"
+                href={`/article/${miniItem2.slug}`}
                 className="block relative w-[140px] sm:w-[165px] aspect-[16/10] overflow-hidden bg-gray-100 flex-shrink-0 group"
               >
                 <img
-                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80"
-                  alt="Man speaking outdoors"
+                  src={miniItem2.imageUrl}
+                  alt={miniItem2.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
               </Link>
               <div className="flex flex-col justify-between flex-1">
                 <div>
-                  <div className="mb-1">
-                    <span className="font-sans font-bold text-[10px] tracking-wider text-[#b82e2e] uppercase">
-                      NEW | REVIEW | SOCIETY
-                    </span>
-                  </div>
+                  {miniItem2.categoryTag && (
+                    <div className="mb-1">
+                      <span className="font-sans font-bold text-[10px] tracking-wider text-[#b82e2e] uppercase">
+                        {miniItem2.categoryTag}
+                      </span>
+                    </div>
+                  )}
                   <h4 className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-2">
-                    <Link href="/article/why-have-men-gone-off-the-rails">
-                      Why have men gone off the rails? They can’t make an honest living
+                    <Link href={`/article/${miniItem2.slug}`}>
+                      {miniItem2.title}
                     </Link>
                   </h4>
                 </div>
                 <span className="font-sans font-bold text-[12px] text-[#111111]">
-                  Books
+                  {miniItem2.sectionTag || "Books"}
                 </span>
               </div>
             </div>
@@ -131,113 +241,35 @@ export const EntertainmentCategorySection: React.FC = () => {
 
         </div>
 
-        {/* RIGHT SIDEBAR STORIES AREA (4 of 12 cols ~ 33%) */}
-        <div className="lg:col-span-4 pl-0 lg:pl-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 items-stretch pt-4 lg:pt-0 h-full">
-          
-          {/* Column 1 of Right Sidebar */}
-          <div className="flex flex-col justify-between pr-0 md:pr-2 h-full" style={{ borderRight: "1px solid #CCCCCC" }}>
-            {/* Story 1 */}
-            <article className="pb-3 mb-3 border-b border-dashed border-[#CCCCCC]">
-              <Link
-                href="/article/the-1m-secret-hiding-in-a-french-garden-shed"
-                className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 mb-2 group"
-              >
-                <img
-                  src="https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=600&q=80"
-                  alt="French garden shed artwork"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-              </Link>
+        {/* RIGHT SIDEBAR STORIES AREA (Position 4) */}
+        <div className="lg:col-span-4 pl-0 lg:pl-4 flex flex-col justify-between pt-4 lg:pt-0 h-full">
+          <article className="pb-3 mb-3 border-b border-dashed border-[#CCCCCC]">
+            <Link
+              href={`/article/${sidebarItem1.slug}`}
+              className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 mb-2 group"
+            >
+              <img
+                src={sidebarItem1.imageUrl}
+                alt={sidebarItem1.title}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+            </Link>
+            {sidebarItem1.categoryTag && (
               <div className="mb-1">
                 <span className="font-sans font-bold text-[10px] tracking-wider text-[#b82e2e] uppercase">
-                  REVIEW
+                  {sidebarItem1.categoryTag}
                 </span>
               </div>
-              <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-2">
-                <Link href="/article/the-1m-secret-hiding-in-a-french-garden-shed">
-                  The £1m secret hiding in a French garden shed... and what happened next
-                </Link>
-              </h4>
-              <span className="font-sans font-bold text-[12px] text-[#111111]">
-                TV & Radio
-              </span>
-            </article>
-
-            {/* Story 2 */}
-            <article className="pt-1">
-              <Link
-                href="/article/the-hilarious-tale-of-a-jilted-bride"
-                className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 mb-2 group"
-              >
-                <img
-                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80"
-                  alt="Fringe comedy bride performer"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
+            )}
+            <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-2">
+              <Link href={`/article/${sidebarItem1.slug}`}>
+                {sidebarItem1.title}
               </Link>
-              <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-2">
-                <Link href="/article/the-hilarious-tale-of-a-jilted-bride">
-                  The hilarious tale of a jilted bride — the best (and worst) Fringe comedy
-                </Link>
-              </h4>
-              <span className="font-sans font-bold text-[12px] text-[#111111]">
-                Comedy
-              </span>
-            </article>
-          </div>
-
-          {/* Column 2 of Right Sidebar */}
-          <div className="flex flex-col justify-between pl-0 md:pl-2 h-full">
-            {/* Story 3 */}
-            <article className="pb-3 mb-3 border-b border-dashed border-[#CCCCCC]">
-              <Link
-                href="/article/recollections-of-an-unrepentant-nazi-mass-murderer"
-                className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 mb-2 group"
-              >
-                <img
-                  src="https://images.unsplash.com/photo-1461360370896-922624d12aa1?auto=format&fit=crop&w=600&q=80"
-                  alt="Historical military photo"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-              </Link>
-              <div className="mb-1">
-                <span className="font-sans font-bold text-[10px] tracking-wider text-[#b82e2e] uppercase">
-                  NEW | HISTORY
-                </span>
-              </div>
-              <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-2">
-                <Link href="/article/recollections-of-an-unrepentant-nazi-mass-murderer">
-                  Recollections of an unrepentant Nazi mass murderer
-                </Link>
-              </h4>
-              <span className="font-sans font-bold text-[12px] text-[#111111]">
-                Books
-              </span>
-            </article>
-
-            {/* Story 4 */}
-            <article className="pt-1">
-              <Link
-                href="/article/a-real-life-lion-king"
-                className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 mb-2 group"
-              >
-                <img
-                  src="https://images.unsplash.com/photo-1534188753412-3e26d0d618d6?auto=format&fit=crop&w=600&q=80"
-                  alt="Lioness and cub in savanna"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-              </Link>
-              <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-2">
-                <Link href="/article/a-real-life-lion-king">
-                  A real-life Lion King: ‘It’s the holy grail of natural history film-making’
-                </Link>
-              </h4>
-              <span className="font-sans font-bold text-[12px] text-[#111111]">
-                TV & Radio
-              </span>
-            </article>
-          </div>
-
+            </h4>
+            <span className="font-sans font-bold text-[12px] text-[#111111]">
+              {sidebarItem1.sectionTag || "Entertainment"}
+            </span>
+          </article>
         </div>
 
       </div>

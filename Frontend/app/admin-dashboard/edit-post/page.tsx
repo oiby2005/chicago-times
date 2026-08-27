@@ -56,6 +56,34 @@ const compressImageFile = (file: File, maxWidth = 800, quality = 0.7): Promise<s
   });
 };
 
+const getAutomaticPlacement = (cat: string): string | null => {
+  if (!cat) return null;
+  const c = cat.toLowerCase().trim();
+  if (c.includes("opinion")) return "Home - Opinion Section";
+  if (c.includes("editorial")) return "Home - Editorials";
+  if (c === "business" || c.includes("corporate")) return "Home - Business Category";
+  if (c.includes("world politics")) return "Home - World Politics Category";
+  if (c.includes("politic") || c.includes("congress") || c.includes("election")) return "Home - Politics Category";
+  if (c.includes("tech") || c.includes("artificial") || c.includes("cyber") || c.includes("innovation")) return "Home - Tech Category";
+  if (c.includes("sport") || c.includes("soccer") || c.includes("golf") || c.includes("tennis") || c.includes("cricket")) return "Home - Sport Category";
+  if (c.includes("entertain") || c.includes("movie") || c.includes("television") || c.includes("music") || c.includes("celebrity")) return "Home - Entertainment";
+  if (c.includes("fashion") || c.includes("designer") || c.includes("jewelry")) return "Home - Fashion Category";
+  if (c.includes("science") || c.includes("space") || c.includes("climate") || c.includes("environment") || c.includes("research")) return "Home - Science";
+  if (c.includes("art") || c.includes("brand") || c.includes("architecture") || c.includes("book") || c.includes("culture")) return "Home- Arts Category";
+  if (c.includes("lifestyle") || c.includes("travel") || c.includes("food") || c.includes("car")) return "Home- Lifestyle";
+  if (c.includes("ceo") || c.includes("executive")) return "Home - CEOs & Executives";
+  if (c.includes("market") || c.includes("stock") || c.includes("currenc") || c.includes("bank")) return "Home - Markets & Finance";
+  if (c.includes("econom") || c.includes("job") || c.includes("rate")) return "Home - Economy";
+  if (c.includes("health") || c.includes("medical") || c.includes("mental")) return "Home - Health";
+  if (c.includes("invest") || c.includes("wealth")) return "Home - Investing";
+  if (c.includes("crypto")) return "Home - Crypto";
+  if (c.includes("real estate")) return "Home - Real Estate";
+  if (c.includes("industr") || c.includes("energy") || c.includes("automotive") || c.includes("manufactur") || c.includes("agricultur") || c.includes("construct")) return "Home - Industries";
+  if (c.includes("law") || c.includes("criminal") || c.includes("legal")) return "Home - Law";
+  if (c.includes("small business") || c.includes("entrepreneur")) return "Home - Small Business";
+  return null;
+};
+
 const safeSavePostsToStorage = (posts: any[]): boolean => {
   if (typeof window === "undefined") return false;
 
@@ -973,9 +1001,7 @@ export default function AdminEditPostPage() {
       readDuration: readDuration || "5 min read",
       author: authorName,
       thumbnail: thumb,
-      homepagePlacement: (mainCategory === "Opinion" || mainCategory === "Opinions" || mainCategory === "Editorial" || mainCategory === "Editorials")
-        ? "Home - Opinion Section"
-        : (mainCategory === "Business" ? "Home - Business Category" : homepagePlacement),
+      homepagePlacement: getAutomaticPlacement(mainCategory) || homepagePlacement,
       newsletterBanner: newsletterBanner,
       publishedAt: Date.now(),
       views: 0,
@@ -988,7 +1014,7 @@ export default function AdminEditPostPage() {
       existingPosts = [updatedPost, ...existingPosts];
     }
 
-    // Manage Homepage Placement Queues (Top News: 3, A+ Main: 1, In Depth: 4, Main Bottom: 2, Right Main: 2, Business: 8)
+    // Manage Homepage Placement Queues for All Categories
     const SECTION_LIMITS = [
       { keyword: "Top News", max: 3 },
       { keyword: "A+ Main News", max: 1 },
@@ -996,13 +1022,30 @@ export default function AdminEditPostPage() {
       { keyword: "In Depth", max: 4 },
       { keyword: "Main Bottom", max: 2 },
       { keyword: "Right Main Panel", max: 2 },
-      { keyword: "Business Category", max: 8 },
       { keyword: "Business", max: 8 },
+      { keyword: "World Politics", max: 4 },
+      { keyword: "Editorials", max: 4 },
+      { keyword: "Politics", max: 4 },
+      { keyword: "Tech", max: 4 },
+      { keyword: "Sport", max: 4 },
+      { keyword: "Entertainment", max: 4 },
+      { keyword: "Fashion", max: 4 },
+      { keyword: "Science", max: 4 },
+      { keyword: "Arts", max: 4 },
+      { keyword: "Lifestyle", max: 4 },
+      { keyword: "CEOs & Executives", max: 4 },
+      { keyword: "Markets & Finance", max: 4 },
+      { keyword: "Economy", max: 4 },
+      { keyword: "Health", max: 4 },
+      { keyword: "Investing", max: 4 },
+      { keyword: "Crypto", max: 4 },
+      { keyword: "Real Estate", max: 4 },
+      { keyword: "Industries", max: 4 },
+      { keyword: "Law", max: 4 },
+      { keyword: "Small Business", max: 4 },
     ];
 
-    const activePlacement = (mainCategory === "Opinion" || mainCategory === "Opinions" || mainCategory === "Editorial" || mainCategory === "Editorials")
-      ? "Home - Opinion Section"
-      : (mainCategory === "Business" ? "Home - Business Category" : homepagePlacement);
+    const activePlacement = getAutomaticPlacement(mainCategory) || homepagePlacement;
 
     if (activePlacement && !activePlacement.startsWith("None")) {
       SECTION_LIMITS.forEach(({ keyword, max }) => {
@@ -1608,14 +1651,14 @@ export default function AdminEditPostPage() {
                         </div>
 
                         {/* HOMEPAGE PLACEMENT SECTION (Matching Admin Dashboard Published Posts Edit) */}
-                        <div className={`border border-[#cbd5e1] bg-[#fffdfa] rounded-2xl p-3.5 space-y-2 text-left ${(mainCategory === "Opinion" || mainCategory === "Opinions" || mainCategory === "Editorial" || mainCategory === "Editorials" || mainCategory === "Business") ? "opacity-60 pointer-events-none bg-slate-100" : ""}`}>
+                        <div className={`border border-[#cbd5e1] bg-[#fffdfa] rounded-2xl p-3.5 space-y-2 text-left ${getAutomaticPlacement(mainCategory) ? "opacity-60 pointer-events-none bg-slate-100" : ""}`}>
                           <label className="block text-[10px] font-mono font-bold text-[#ea580c] uppercase tracking-wider">
                             HOMEPAGE PLACEMENT
                           </label>
                           <div className="relative">
                             <select
-                              disabled={mainCategory === "Opinion" || mainCategory === "Opinions" || mainCategory === "Editorial" || mainCategory === "Editorials" || mainCategory === "Business"}
-                              value={(mainCategory === "Opinion" || mainCategory === "Opinions" || mainCategory === "Editorial" || mainCategory === "Editorials") ? "Home - Opinion Section" : (mainCategory === "Business" ? "Home - Business Category" : homepagePlacement)}
+                              disabled={getAutomaticPlacement(mainCategory) !== null}
+                              value={getAutomaticPlacement(mainCategory) || homepagePlacement}
                               onChange={(e) => setHomepagePlacement(e.target.value)}
                               className="w-full bg-[#fffdf0] border border-[#facc15] rounded-xl px-3.5 py-2.5 text-xs font-bold text-[#1e293b] focus:outline-none focus:border-[#eab308] cursor-pointer appearance-none pr-8 disabled:cursor-not-allowed disabled:bg-gray-100"
                             >

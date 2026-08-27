@@ -11,7 +11,7 @@ interface WorldPoliticsArticle {
   imageUrl: string;
 }
 
-const worldPoliticsArticles: WorldPoliticsArticle[] = [
+const defaultArticles: WorldPoliticsArticle[] = [
   {
     id: "wp1",
     title: "Check your helicopters, Greece tells pilots after honeymoon crash",
@@ -40,10 +40,55 @@ const worldPoliticsArticles: WorldPoliticsArticle[] = [
 ];
 
 export const WorldPoliticsCategorySection: React.FC = () => {
+  const [articles, setArticles] = React.useState<WorldPoliticsArticle[]>(defaultArticles);
+
+  const loadPosts = React.useCallback(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const stored = localStorage.getItem("wsj_posts");
+      if (stored) {
+        const posts = JSON.parse(stored);
+        const wpPosts = posts.filter(
+          (p: any) =>
+            p.status === "Published" &&
+            (p.category === "World Politics" ||
+             (p.homepagePlacement && p.homepagePlacement.includes("World Politics")))
+        );
+
+        wpPosts.sort((a: any, b: any) => (b.publishedAt || 0) - (a.publishedAt || 0));
+
+        if (wpPosts.length > 0) {
+          const formatted: WorldPoliticsArticle[] = wpPosts.slice(0, 4).map((p: any) => ({
+            id: p.id,
+            title: p.title,
+            slug: p.slug || p.id,
+            imageUrl: p.thumbnail || "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=600&q=80",
+          }));
+
+          const merged = [...formatted];
+          for (let i = 0; i < defaultArticles.length && merged.length < 4; i++) {
+            if (!merged.some((m) => m.id === defaultArticles[i].id)) {
+              merged.push(defaultArticles[i]);
+            }
+          }
+          setArticles(merged.slice(0, 4));
+          return;
+        }
+      }
+    } catch (e) {}
+    setArticles(defaultArticles);
+  }, []);
+
+  React.useEffect(() => {
+    loadPosts();
+    window.addEventListener("wsj_posts_updated", loadPosts);
+    return () => window.removeEventListener("wsj_posts_updated", loadPosts);
+  }, [loadPosts]);
+
   return (
     <div className="w-full font-sans select-none pb-2 my-0">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[0.4cm]">
-        {worldPoliticsArticles.map((art) => (
+        {articles.map((art) => (
           <article
             key={art.id}
             className="flex flex-col justify-start"

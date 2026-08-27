@@ -13,7 +13,7 @@ interface EditorialArticle {
   imageUrl: string;
 }
 
-const editorialArticles: EditorialArticle[] = [
+const defaultArticles: EditorialArticle[] = [
   {
     id: "ed1",
     title: "Trump Should Worry About a ‘10-Year Itch’",
@@ -44,6 +44,55 @@ const editorialArticles: EditorialArticle[] = [
 ];
 
 export const EditorialsSection: React.FC = () => {
+  const [articles, setArticles] = React.useState<EditorialArticle[]>(defaultArticles);
+
+  const loadPosts = React.useCallback(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const stored = localStorage.getItem("wsj_posts");
+      if (stored) {
+        const posts = JSON.parse(stored);
+        const edPosts = posts.filter(
+          (p: any) =>
+            p.status === "Published" &&
+            (p.category === "Editorial" ||
+             p.category === "Editorials" ||
+             (p.homepagePlacement && p.homepagePlacement.includes("Editorial")))
+        );
+
+        edPosts.sort((a: any, b: any) => (b.publishedAt || 0) - (a.publishedAt || 0));
+
+        if (edPosts.length > 0) {
+          const formatted: EditorialArticle[] = edPosts.slice(0, 3).map((p: any) => ({
+            id: p.id,
+            title: p.title,
+            author: p.author || "EDITORIAL BOARD",
+            date: p.date || "Today",
+            hasFollowButton: true,
+            slug: p.slug || p.id,
+            imageUrl: p.thumbnail || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80",
+          }));
+
+          const merged = [...formatted];
+          for (let i = 0; i < defaultArticles.length && merged.length < 3; i++) {
+            if (!merged.some((m) => m.id === defaultArticles[i].id)) {
+              merged.push(defaultArticles[i]);
+            }
+          }
+          setArticles(merged.slice(0, 3));
+          return;
+        }
+      }
+    } catch (e) {}
+    setArticles(defaultArticles);
+  }, []);
+
+  React.useEffect(() => {
+    loadPosts();
+    window.addEventListener("wsj_posts_updated", loadPosts);
+    return () => window.removeEventListener("wsj_posts_updated", loadPosts);
+  }, [loadPosts]);
+
   return (
     <div className="w-full font-sans select-none bg-white border border-[#E5E0D5] overflow-hidden my-2">
       {/* Header Banner */}
@@ -55,7 +104,7 @@ export const EditorialsSection: React.FC = () => {
 
       {/* Editorial Items Container */}
       <div className="p-3.5 space-y-4">
-        {editorialArticles.map((art, idx) => (
+        {articles.map((art, idx) => (
           <React.Fragment key={art.id}>
             <article className="flex items-start justify-between space-x-3">
               <div className="flex-1">
@@ -90,7 +139,7 @@ export const EditorialsSection: React.FC = () => {
             </article>
 
             {/* Separator between items */}
-            {idx < editorialArticles.length - 1 && (
+            {idx < articles.length - 1 && (
               <hr className="border-t border-[#E5E0D5] my-3" />
             )}
           </React.Fragment>
