@@ -31,7 +31,7 @@ export const LogoHeader: React.FC = () => {
 
   const loadUserFromStorage = () => {
     if (typeof window === "undefined") return;
-    const stored = localStorage.getItem("wsj_user");
+    const stored = sessionStorage.getItem("wsj_user") || localStorage.getItem("wsj_user");
     const sessionActive = sessionStorage.getItem("wsj_session_active");
 
     let parsed: any = null;
@@ -39,7 +39,7 @@ export const LogoHeader: React.FC = () => {
       try { parsed = JSON.parse(stored); } catch (e) {}
     }
 
-    if (parsed && sessionActive === "true") {
+    if (parsed && (sessionActive === "true" || sessionStorage.getItem("wsj_user"))) {
       setCurrentUser(parsed);
     } else {
       // By default, the website is SIGNED OUT
@@ -80,10 +80,11 @@ export const LogoHeader: React.FC = () => {
   }, []);
 
   const handleSignOut = () => {
+    sessionStorage.removeItem("wsj_user");
+    sessionStorage.removeItem("wsj_session_active");
     localStorage.removeItem("wsj_user");
     localStorage.removeItem("wsj_token");
     localStorage.removeItem("wsj_admin_user");
-    sessionStorage.removeItem("wsj_session_active");
     setCurrentUser(null);
     setShowDropdown(false);
     window.dispatchEvent(new Event("wsj_user_updated"));

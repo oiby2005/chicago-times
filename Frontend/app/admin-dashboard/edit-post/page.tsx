@@ -220,7 +220,7 @@ export default function AdminEditPostPage() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const storedUser = localStorage.getItem("wsj_user");
+      const storedUser = sessionStorage.getItem("wsj_user") || localStorage.getItem("wsj_user");
       if (storedUser) {
         try {
           const parsed = JSON.parse(storedUser);

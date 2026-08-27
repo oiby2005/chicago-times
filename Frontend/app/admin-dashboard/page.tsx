@@ -143,7 +143,7 @@ export default function AdminDashboard() {
   const loadUserData = () => {
     if (typeof window === "undefined") return;
     const storedAdmin = localStorage.getItem("wsj_admin_user");
-    const storedUser = localStorage.getItem("wsj_user");
+    const storedUser = sessionStorage.getItem("wsj_user") || localStorage.getItem("wsj_user");
     let name = "Admin User";
     let email = "admin@gmail.com";
     let avatarUrl = "";

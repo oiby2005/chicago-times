@@ -180,11 +180,11 @@ export default function WriterDashboard() {
 
   useEffect(() => {
     const loadUser = () => {
-      const stored = localStorage.getItem("wsj_user");
+      const stored = sessionStorage.getItem("wsj_user") || localStorage.getItem("wsj_user");
       if (stored) {
         try {
           const parsed = JSON.parse(stored);
-          if (!parsed || parsed.role !== "writer") {
+          if (!parsed || (parsed.role !== "writer" && parsed.role !== "admin")) {
             router.push("/signin");
           } else {
             setCurrentUser(parsed);

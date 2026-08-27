@@ -221,6 +221,7 @@ export default function SignInPage() {
         }
 
         sessionStorage.setItem("wsj_session_active", "true");
+        sessionStorage.setItem("wsj_user", JSON.stringify(userData));
         localStorage.removeItem("wsj_logged_out");
         localStorage.removeItem("wsj_failed_attempts");
         localStorage.removeItem("wsj_lockout_until");

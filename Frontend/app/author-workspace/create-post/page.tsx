@@ -191,7 +191,7 @@ export default function CreateNewPostPage() {
   React.useEffect(() => {
     if (typeof window !== "undefined") {
       try {
-        const storedUser = localStorage.getItem("wsj_user");
+        const storedUser = sessionStorage.getItem("wsj_user") || localStorage.getItem("wsj_user");
         if (storedUser) {
           const parsed = JSON.parse(storedUser);
           if (parsed && (parsed.name || parsed.username || parsed.email)) {

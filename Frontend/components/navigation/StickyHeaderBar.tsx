@@ -22,7 +22,7 @@ export const StickyHeaderBar: React.FC = () => {
 
   const loadUser = () => {
     if (typeof window === "undefined") return;
-    const stored = localStorage.getItem("wsj_user");
+    const stored = sessionStorage.getItem("wsj_user") || localStorage.getItem("wsj_user");
     const sessionActive = sessionStorage.getItem("wsj_session_active");
 
     let parsed: any = null;
@@ -30,7 +30,7 @@ export const StickyHeaderBar: React.FC = () => {
       try { parsed = JSON.parse(stored); } catch (e) {}
     }
 
-    if (parsed && sessionActive === "true") {
+    if (parsed && (sessionActive === "true" || sessionStorage.getItem("wsj_user"))) {
       setCurrentUser(parsed);
     } else {
       setCurrentUser(null);
