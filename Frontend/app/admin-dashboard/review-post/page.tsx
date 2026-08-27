@@ -1009,6 +1009,7 @@ export default function AdminReviewPostPage() {
       { keyword: "In Depth", max: 4 },
       { keyword: "Main Bottom", max: 2 },
       { keyword: "Right Main Panel", max: 2 },
+      { keyword: "Editors Picks", max: 7 },
       { keyword: "Business", max: 8 },
       { keyword: "World Politics", max: 4 },
       { keyword: "Editorials", max: 4 },
