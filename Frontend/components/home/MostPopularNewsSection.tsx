@@ -10,7 +10,7 @@ interface PopularItem {
   imageUrl: string;
 }
 
-const popularArticles: PopularItem[] = [
+const defaultArticles: PopularItem[] = [
   {
     id: "pop1",
     title: "How Trump’s Ever-Present Executive Assistant Became the Talk of Washington",
@@ -44,6 +44,51 @@ const popularArticles: PopularItem[] = [
 ];
 
 export const MostPopularNewsSection: React.FC = () => {
+  const [articles, setArticles] = React.useState<PopularItem[]>(defaultArticles);
+
+  const loadPosts = React.useCallback(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const stored = localStorage.getItem("wsj_posts");
+      if (stored) {
+        const posts = JSON.parse(stored);
+        const popPosts = posts.filter(
+          (p: any) =>
+            p.status === "Published" &&
+            p.homepagePlacement &&
+            p.homepagePlacement.includes("Most Popular News")
+        );
+
+        popPosts.sort((a: any, b: any) => (b.publishedAt || 0) - (a.publishedAt || 0));
+
+        if (popPosts.length > 0) {
+          const formatted: PopularItem[] = popPosts.slice(0, 5).map((p: any) => ({
+            id: p.id,
+            title: p.title,
+            slug: p.slug || p.id,
+            imageUrl: p.thumbnail || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80",
+          }));
+
+          const merged = [...formatted];
+          for (let i = 0; i < defaultArticles.length && merged.length < 5; i++) {
+            if (!merged.some((m) => m.id === defaultArticles[i].id)) {
+              merged.push(defaultArticles[i]);
+            }
+          }
+          setArticles(merged.slice(0, 5));
+          return;
+        }
+      }
+    } catch (e) {}
+    setArticles(defaultArticles);
+  }, []);
+
+  React.useEffect(() => {
+    loadPosts();
+    window.addEventListener("wsj_posts_updated", loadPosts);
+    return () => window.removeEventListener("wsj_posts_updated", loadPosts);
+  }, [loadPosts]);
+
   return (
     <section className="w-full font-sans select-none my-2 pt-2">
       {/* Header Title */}
@@ -55,7 +100,7 @@ export const MostPopularNewsSection: React.FC = () => {
 
       {/* Popular Items List */}
       <div className="space-y-4">
-        {popularArticles.map((item, idx) => (
+        {articles.map((item, idx) => (
           <React.Fragment key={item.id}>
             <article className="flex items-start justify-between space-x-3">
               <h4 className="flex-1 font-serif font-bold text-[15px] sm:text-[16px] leading-[1.22] text-[#111111] hover:underline cursor-pointer">
@@ -76,7 +121,7 @@ export const MostPopularNewsSection: React.FC = () => {
               </Link>
             </article>
 
-            {idx < popularArticles.length - 1 && (
+            {idx < articles.length - 1 && (
               <hr className="border-t border-[#E5E0D5] my-2" />
             )}
           </React.Fragment>
