@@ -163,11 +163,7 @@ export default function SignInPage() {
         }
 
         setLoading(false);
-        const userRole = (data.user?.role || "").toLowerCase();
-        if (userRole === "writer") router.push("/writer-dashboard");
-        else if (userRole === "admin") router.push("/admin-dashboard");
-        else if (userRole === "reader") router.push("/reader-dashboard");
-        else router.push("/");
+        router.push("/");
         return;
       }
     } catch (err: any) {
@@ -185,7 +181,7 @@ export default function SignInPage() {
         passwords: ["admin123", "123456", "admin"],
         role: "admin",
         full_name: "Admin User",
-        route: "/admin-dashboard",
+        route: "/",
       },
       {
         email: "writer@gmail.com",
@@ -195,14 +191,14 @@ export default function SignInPage() {
         bio: "Journalist & Columnist",
         linkedin: "https://www.linkedin.com/in/your-profile",
         avatar_url: "",
-        route: "/writer-dashboard",
+        route: "/",
       },
       {
         email: "reader@gmail.com",
         passwords: ["reader123", "123456", "reader"],
         role: "reader",
         full_name: "Reader User",
-        route: "/reader-dashboard",
+        route: "/",
       },
     ];
 
