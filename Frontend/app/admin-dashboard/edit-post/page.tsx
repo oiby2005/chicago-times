@@ -1001,7 +1001,7 @@ export default function AdminEditPostPage() {
       readDuration: readDuration || "5 min read",
       author: authorName,
       thumbnail: thumb,
-      homepagePlacement: getAutomaticPlacement(mainCategory) || homepagePlacement,
+      homepagePlacement: homepagePlacement || getAutomaticPlacement(mainCategory) || "None (Category and Search Only)",
       newsletterBanner: newsletterBanner,
       publishedAt: Date.now(),
       views: 0,
@@ -1045,7 +1045,7 @@ export default function AdminEditPostPage() {
       { keyword: "Small Business", max: 4 },
     ];
 
-    const activePlacement = getAutomaticPlacement(mainCategory) || homepagePlacement;
+    const activePlacement = homepagePlacement || getAutomaticPlacement(mainCategory) || "None (Category and Search Only)";
 
     if (activePlacement && !activePlacement.startsWith("None")) {
       SECTION_LIMITS.forEach(({ keyword, max }) => {
@@ -1651,16 +1651,15 @@ export default function AdminEditPostPage() {
                         </div>
 
                         {/* HOMEPAGE PLACEMENT SECTION (Matching Admin Dashboard Published Posts Edit) */}
-                        <div className={`border border-[#cbd5e1] bg-[#fffdfa] rounded-2xl p-3.5 space-y-2 text-left ${getAutomaticPlacement(mainCategory) ? "opacity-60 pointer-events-none bg-slate-100" : ""}`}>
+                        <div className="border border-[#cbd5e1] bg-[#fffdfa] rounded-2xl p-3.5 space-y-2 text-left">
                           <label className="block text-[10px] font-mono font-bold text-[#ea580c] uppercase tracking-wider">
                             HOMEPAGE PLACEMENT
                           </label>
                           <div className="relative">
                             <select
-                              disabled={getAutomaticPlacement(mainCategory) !== null}
-                              value={getAutomaticPlacement(mainCategory) || homepagePlacement}
+                              value={homepagePlacement}
                               onChange={(e) => setHomepagePlacement(e.target.value)}
-                              className="w-full bg-[#fffdf0] border border-[#facc15] rounded-xl px-3.5 py-2.5 text-xs font-bold text-[#1e293b] focus:outline-none focus:border-[#eab308] cursor-pointer appearance-none pr-8 disabled:cursor-not-allowed disabled:bg-gray-100"
+                              className="w-full bg-[#fffdf0] border border-[#facc15] rounded-xl px-3.5 py-2.5 text-xs font-bold text-[#1e293b] focus:outline-none focus:border-[#eab308] cursor-pointer appearance-none pr-8"
                             >
                               <option value="None (Category and Search Only)">None (Category and Search Only)</option>
                               <option value="Home - Top News">Home - Top News</option>

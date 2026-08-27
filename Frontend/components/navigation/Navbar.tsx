@@ -310,25 +310,17 @@ export const Navbar: React.FC = () => {
           <div className="flex items-end h-[34px] overflow-x-auto no-scrollbar">
             <div className="flex items-end justify-between w-full min-w-max lg:min-w-0 h-full">
               {allCategories.map((title, index) => {
-                const isActive = activeTab === title;
                 const isFirst = index === 0;
 
                 return (
                   <div
                     key={title}
                     className="relative flex-shrink-0 flex items-end h-full"
-                    onMouseEnter={() => setActiveTab(title)}
-                    onMouseLeave={() => setActiveTab(null)}
                   >
                     <Link
                       href={getCategoryRoute(title)}
                       prefetch={false}
-                      onClick={() => setActiveTab(null)}
-                      className={`text-[13px] font-['Century_Gothic','Publica_Sans_Light','Kumbh_Sans',sans-serif] ${
-                        isActive
-                          ? "bg-[#FAF7EE] text-black font-semibold px-2 py-1 border-t border-l border-r border-[#cccccc] rounded-t-[2px] relative z-50 -mb-[1px]"
-                          : `text-[#111111] font-normal ${isFirst ? "pr-[2px] pl-0" : "px-[2px]"} pb-1.5 hover:text-black hover:underline border border-transparent`
-                      } inline-block whitespace-nowrap tracking-normal transition-all leading-none`}
+                      className={`text-[13px] font-['Century_Gothic','Publica_Sans_Light','Kumbh_Sans',sans-serif] text-[#111111] font-normal ${isFirst ? "pr-[2px] pl-0" : "px-[2px]"} pb-1.5 hover:text-black hover:underline border border-transparent inline-block whitespace-nowrap tracking-normal transition-all leading-none`}
                     >
                       {title}
                     </Link>
@@ -360,37 +352,6 @@ export const Navbar: React.FC = () => {
               </div>
             </div>
           </div>
-
-        {/* Full-Bleed Hover Mega Menu Overlay positioned directly below category bar */}
-        {activeTab && currentMenu && currentMenu.columns && currentMenu.columns.length > 0 && (
-          <div
-            className="absolute left-1/2 -translate-x-1/2 w-screen bg-[#FAF7EE] border-b border-[#EAE6DA] top-full -mt-[1px] pt-4 pb-6 z-40 shadow-sm"
-            onMouseEnter={() => setActiveTab(activeTab)}
-            onMouseLeave={() => setActiveTab(null)}
-          >
-            <Container>
-              <div className="flex flex-col items-start pl-8 md:pl-32 lg:pl-[240px]">
-                <h3 className="text-[12px] font-bold text-black font-sans tracking-tight mb-2.5">
-                  Topics
-                </h3>
-                <ul className="space-y-2">
-                  {currentMenu.columns.flatMap((col) => col.links || []).map((link) => (
-                    <li key={link.name}>
-                      <Link
-                        href={link.href}
-                        prefetch={false}
-                        onClick={() => setActiveTab(null)}
-                        className="text-[12.5px] font-['Century_Gothic','Publica_Sans_Light','Kumbh_Sans',sans-serif] text-[#444444] hover:text-black hover:underline transition-colors block leading-snug"
-                      >
-                        {link.name}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </Container>
-          </div>
-        )}
         </div>
       </nav>
     </>
