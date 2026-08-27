@@ -32,32 +32,26 @@ export const LogoHeader: React.FC = () => {
   const loadUserFromStorage = () => {
     if (typeof window === "undefined") return;
     const tabUser = sessionStorage.getItem("wsj_user");
-    const writerUser = localStorage.getItem("wsj_writer_user");
-    const adminUser = localStorage.getItem("wsj_admin_user");
-    const readerUser = localStorage.getItem("wsj_reader_user");
-    const generalUser = localStorage.getItem("wsj_user");
+    const sessionActive = sessionStorage.getItem("wsj_session_active");
 
     let parsed: any = null;
-    if (tabUser) {
+    if (tabUser && sessionActive === "true") {
       try { parsed = JSON.parse(tabUser); } catch (e) {}
-    }
-    if (!parsed && isWriterDashboard && writerUser) {
-      try { parsed = JSON.parse(writerUser); } catch (e) {}
-    }
-    if (!parsed && isAdminDashboard && adminUser) {
-      try { parsed = JSON.parse(adminUser); } catch (e) {}
-    }
-    if (!parsed && writerUser) {
-      try { parsed = JSON.parse(writerUser); } catch (e) {}
-    }
-    if (!parsed && adminUser) {
-      try { parsed = JSON.parse(adminUser); } catch (e) {}
-    }
-    if (!parsed && readerUser) {
-      try { parsed = JSON.parse(readerUser); } catch (e) {}
-    }
-    if (!parsed && generalUser) {
-      try { parsed = JSON.parse(generalUser); } catch (e) {}
+    } else if (isWriterDashboard) {
+      const writerUser = localStorage.getItem("wsj_writer_user") || localStorage.getItem("wsj_user");
+      if (writerUser) {
+        try { parsed = JSON.parse(writerUser); } catch (e) {}
+      }
+    } else if (isAdminDashboard) {
+      const adminUser = localStorage.getItem("wsj_admin_user") || localStorage.getItem("wsj_user");
+      if (adminUser) {
+        try { parsed = JSON.parse(adminUser); } catch (e) {}
+      }
+    } else if (isReaderDashboard) {
+      const readerUser = localStorage.getItem("wsj_reader_user") || localStorage.getItem("wsj_user");
+      if (readerUser) {
+        try { parsed = JSON.parse(readerUser); } catch (e) {}
+      }
     }
 
     if (parsed) {

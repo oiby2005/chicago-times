@@ -22,15 +22,20 @@ export const StickyHeaderBar: React.FC = () => {
 
   const loadUser = () => {
     if (typeof window === "undefined") return;
-    const stored = sessionStorage.getItem("wsj_user") || localStorage.getItem("wsj_user");
+    const tabUser = sessionStorage.getItem("wsj_user");
     const sessionActive = sessionStorage.getItem("wsj_session_active");
 
     let parsed: any = null;
-    if (stored) {
-      try { parsed = JSON.parse(stored); } catch (e) {}
+    if (tabUser && sessionActive === "true") {
+      try { parsed = JSON.parse(tabUser); } catch (e) {}
+    } else if (isDashboardPage) {
+      const generalUser = localStorage.getItem("wsj_user");
+      if (generalUser) {
+        try { parsed = JSON.parse(generalUser); } catch (e) {}
+      }
     }
 
-    if (parsed && (sessionActive === "true" || sessionStorage.getItem("wsj_user"))) {
+    if (parsed) {
       setCurrentUser(parsed);
     } else {
       setCurrentUser(null);
