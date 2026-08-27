@@ -45,7 +45,7 @@ export default async function DynamicCategoryPage({ params }: DynamicCategoryPag
     category === "admin-dashboard" ||
     category === "reader-dashboard"
   ) {
-    redirect("/signin");
+    return null;
   }
 
   const formatTitle = (str: string) => {

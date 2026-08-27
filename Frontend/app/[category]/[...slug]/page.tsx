@@ -36,7 +36,7 @@ export default async function SubCategoryPage({ params }: SubCategoryPageProps) 
     category === "admin-dashboard" ||
     category === "reader-dashboard"
   ) {
-    redirect("/signin");
+    return null;
   }
 
   const formatTitle = (str: string) =>
