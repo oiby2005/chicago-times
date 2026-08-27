@@ -973,7 +973,7 @@ export default function AdminEditPostPage() {
       readDuration: readDuration || "5 min read",
       author: authorName,
       thumbnail: thumb,
-      homepagePlacement: (mainCategory === "Opinion" || mainCategory === "Editorial" || mainCategory === "Editorials")
+      homepagePlacement: (mainCategory === "Opinion" || mainCategory === "Opinions" || mainCategory === "Editorial" || mainCategory === "Editorials")
         ? "Home - Opinion Section"
         : homepagePlacement,
       newsletterBanner: newsletterBanner,
@@ -1440,23 +1440,73 @@ export default function AdminEditPostPage() {
                               className="w-full bg-[#f8fafc] border border-[#cbd5e1] rounded-xl px-3.5 py-2.5 text-xs font-bold text-[#1e293b] appearance-none focus:outline-none focus:border-[#2563eb] cursor-pointer"
                             >
                               <option value="News">News</option>
+                              <option value="U.S. News">U.S. News</option>
+                              <option value="International News">International News</option>
                               <option value="Law">Law</option>
+                              <option value="Criminal Cases">Criminal Cases</option>
+                              <option value="Legal Affairs">Legal Affairs</option>
                               <option value="Politics">Politics</option>
+                              <option value="World Politics">World Politics</option>
+                              <option value="Congress">Congress</option>
+                              <option value="Elections">Elections</option>
                               <option value="Business">Business</option>
+                              <option value="Corporate News">Corporate News</option>
+                              <option value="Small Business">Small Business</option>
+                              <option value="Entrepreneurship">Entrepreneurship</option>
+                              <option value="CEOs & Executives">CEOs & Executives</option>
                               <option value="Markets & Finance">Markets & Finance</option>
+                              <option value="Stocks">Stocks</option>
+                              <option value="Currencies">Currencies</option>
+                              <option value="Banking">Banking</option>
                               <option value="Economy">Economy</option>
+                              <option value="Jobs & Employment">Jobs & Employment</option>
+                              <option value="Interest Rates">Interest Rates</option>
                               <option value="Tech">Tech</option>
+                              <option value="Artificial Intelligence">Artificial Intelligence</option>
+                              <option value="Cybersecurity">Cybersecurity</option>
+                              <option value="Innovation">Innovation</option>
                               <option value="Entertainment">Entertainment</option>
+                              <option value="Movies">Movies</option>
+                              <option value="Television">Television</option>
+                              <option value="Music">Music</option>
+                              <option value="Celebrity">Celebrity</option>
                               <option value="Arts">Arts</option>
+                              <option value="Upcoming Brands">Upcoming Brands</option>
+                              <option value="Architecture">Architecture</option>
+                              <option value="Books">Books</option>
+                              <option value="Culture">Culture</option>
                               <option value="Industries">Industries</option>
+                              <option value="Energy">Energy</option>
+                              <option value="Automotive">Automotive</option>
+                              <option value="Manufacturing">Manufacturing</option>
+                              <option value="Agriculture">Agriculture</option>
+                              <option value="Construction">Construction</option>
                               <option value="Fashion">Fashion</option>
+                              <option value="Designers">Designers</option>
+                              <option value="Jewelry">Jewelry</option>
                               <option value="Investing">Investing</option>
+                              <option value="Real Estate">Real Estate</option>
+                              <option value="Wealth Management">Wealth Management</option>
+                              <option value="Crypto">Crypto</option>
                               <option value="Health">Health</option>
+                              <option value="Medical Research">Medical Research</option>
+                              <option value="Mental Health">Mental Health</option>
                               <option value="Sports">Sports</option>
+                              <option value="Soccer">Soccer</option>
+                              <option value="Golf">Golf</option>
+                              <option value="Tennis">Tennis</option>
+                              <option value="Cricket">Cricket</option>
                               <option value="Lifestyle">Lifestyle</option>
+                              <option value="Travel">Travel</option>
+                              <option value="Food & Dining">Food & Dining</option>
+                              <option value="Cars">Cars</option>
                               <option value="Science">Science</option>
-                              <option value="Opinion">Opinion</option>
-                              <option value="Editorial">Editorial</option>
+                              <option value="Space">Space</option>
+                              <option value="Climate">Climate</option>
+                              <option value="Environment">Environment</option>
+                              <option value="Research">Research</option>
+                              <option value="Opinions">Opinions</option>
+                              <option value="Editorials">Editorials</option>
                             </select>
                             <div className="pointer-events-none absolute right-3 top-3 text-gray-500">
                               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -1552,14 +1602,14 @@ export default function AdminEditPostPage() {
                         </div>
 
                         {/* HOMEPAGE PLACEMENT SECTION (Matching Admin Dashboard Published Posts Edit) */}
-                        <div className={`border border-[#cbd5e1] bg-[#fffdfa] rounded-2xl p-3.5 space-y-2 text-left ${(mainCategory === "Opinion" || mainCategory === "Editorial" || mainCategory === "Editorials") ? "opacity-60 pointer-events-none bg-slate-100" : ""}`}>
+                        <div className={`border border-[#cbd5e1] bg-[#fffdfa] rounded-2xl p-3.5 space-y-2 text-left ${(mainCategory === "Opinion" || mainCategory === "Opinions" || mainCategory === "Editorial" || mainCategory === "Editorials") ? "opacity-60 pointer-events-none bg-slate-100" : ""}`}>
                           <label className="block text-[10px] font-mono font-bold text-[#ea580c] uppercase tracking-wider">
                             HOMEPAGE PLACEMENT
                           </label>
                           <div className="relative">
                             <select
-                              disabled={mainCategory === "Opinion" || mainCategory === "Editorial" || mainCategory === "Editorials"}
-                              value={(mainCategory === "Opinion" || mainCategory === "Editorial" || mainCategory === "Editorials") ? "Home - Opinion Section" : homepagePlacement}
+                              disabled={mainCategory === "Opinion" || mainCategory === "Opinions" || mainCategory === "Editorial" || mainCategory === "Editorials"}
+                              value={(mainCategory === "Opinion" || mainCategory === "Opinions" || mainCategory === "Editorial" || mainCategory === "Editorials") ? "Home - Opinion Section" : homepagePlacement}
                               onChange={(e) => setHomepagePlacement(e.target.value)}
                               className="w-full bg-[#fffdf0] border border-[#facc15] rounded-xl px-3.5 py-2.5 text-xs font-bold text-[#1e293b] focus:outline-none focus:border-[#eab308] cursor-pointer appearance-none pr-8 disabled:cursor-not-allowed disabled:bg-gray-100"
                             >
