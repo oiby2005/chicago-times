@@ -114,9 +114,9 @@ export default function WriterDashboard() {
         }
       } catch (e) {}
     }
-    setPosts(INITIAL_SAMPLE_POSTS);
+    setPosts([]);
     try {
-      localStorage.setItem("wsj_posts", JSON.stringify(INITIAL_SAMPLE_POSTS));
+      localStorage.setItem("wsj_posts", JSON.stringify([]));
     } catch (e) {}
   };
 
