@@ -177,30 +177,64 @@ export default function AuthorArticlesList({
 
   const [userArticles, setUserArticles] = useState<AuthorArticleItem[]>([]);
 
+  const extractText = (html: string) => {
+    if (!html) return "";
+    return html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+  };
+
   const syncUserArticles = () => {
     if (typeof window === "undefined") return;
-    const storedPostsStr = localStorage.getItem("wsj_published_posts");
-    if (storedPostsStr) {
-      try {
-        const storedPosts = JSON.parse(storedPostsStr);
-        const filtered = storedPosts.filter((p: any) => {
-          const a = (p.author || "").toLowerCase();
-          const curr = displayName.toLowerCase();
-          return a === curr || a.includes("writer");
-        });
-        setUserArticles(filtered);
-      } catch (e) {
-        console.error("Error reading wsj_published_posts:", e);
+    try {
+      let posts: any[] = [];
+      const storedPostsStr = localStorage.getItem("wsj_posts");
+      if (storedPostsStr) {
+        posts = [...posts, ...JSON.parse(storedPostsStr)];
       }
-    } else {
-      setUserArticles([]);
+      const storedPubStr = localStorage.getItem("wsj_published_posts");
+      if (storedPubStr) {
+        posts = [...posts, ...JSON.parse(storedPubStr)];
+      }
+
+      // Deduplicate published posts by ID / slug
+      const uniqueMap = new Map();
+      posts.forEach((p: any) => {
+        if (p && p.status === "Published") {
+          uniqueMap.set(String(p.id || p.slug), p);
+        }
+      });
+      const publishedPosts = Array.from(uniqueMap.values());
+
+      const formatted: AuthorArticleItem[] = publishedPosts.map((p: any) => {
+        const dateStr = p.publishedAt
+          ? new Date(p.publishedAt).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }).toUpperCase()
+          : (p.date || "AUG 30, 2026");
+        const excerptText = p.subheadline || p.cardSummary || extractText(p.bodyContent || "") || "Read the latest update...";
+        return {
+          id: String(p.id),
+          category: (p.category || "NEWS").toUpperCase(),
+          title: p.title || "Untitled Article",
+          excerpt: excerptText,
+          author: p.author || displayName,
+          date: dateStr,
+          image: p.thumbnail || "https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?auto=format&fit=crop&w=600&q=80",
+          slug: p.slug || String(p.id),
+        };
+      });
+
+      setUserArticles(formatted);
+    } catch (e) {
+      console.error("Error reading published posts in AuthorArticlesList:", e);
     }
   };
 
   React.useEffect(() => {
     syncUserArticles();
     window.addEventListener("wsj_user_updated", syncUserArticles);
-    return () => window.removeEventListener("wsj_user_updated", syncUserArticles);
+    window.addEventListener("wsj_posts_updated", syncUserArticles);
+    return () => {
+      window.removeEventListener("wsj_user_updated", syncUserArticles);
+      window.removeEventListener("wsj_posts_updated", syncUserArticles);
+    };
   }, [displayName]);
 
   const isWriterUser = (() => {

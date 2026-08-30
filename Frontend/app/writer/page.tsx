@@ -30,28 +30,28 @@ export default function WriterPage() {
     }
     setWriterName(name);
 
-    const storedPostsStr = localStorage.getItem("wsj_published_posts");
-    if (storedPostsStr) {
-      try {
-        const storedPosts = JSON.parse(storedPostsStr);
-        const filtered = storedPosts.filter((p: any) => {
-          const a = (p.author || "").toLowerCase();
-          const curr = name.toLowerCase();
-          return a === curr || a.includes("writer");
-        });
-        setHasPublishedArticles(filtered.length > 0);
-      } catch (e) {
-        setHasPublishedArticles(false);
-      }
-    } else {
-      setHasPublishedArticles(false);
-    }
+    let posts: any[] = [];
+    try {
+      const p1 = localStorage.getItem("wsj_posts");
+      if (p1) posts = [...posts, ...JSON.parse(p1)];
+    } catch (e) {}
+    try {
+      const p2 = localStorage.getItem("wsj_published_posts");
+      if (p2) posts = [...posts, ...JSON.parse(p2)];
+    } catch (e) {}
+
+    const published = posts.filter((p: any) => p && p.status === "Published");
+    setHasPublishedArticles(published.length > 0);
   };
 
   useEffect(() => {
     syncWriterData();
     window.addEventListener("wsj_user_updated", syncWriterData);
-    return () => window.removeEventListener("wsj_user_updated", syncWriterData);
+    window.addEventListener("wsj_posts_updated", syncWriterData);
+    return () => {
+      window.removeEventListener("wsj_user_updated", syncWriterData);
+      window.removeEventListener("wsj_posts_updated", syncWriterData);
+    };
   }, []);
 
   return (
