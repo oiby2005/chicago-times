@@ -12,120 +12,45 @@ interface NewsletterItem {
   description: string;
 }
 
-const newslettersList: NewsletterItem[] = [
-  {
-    id: "world",
-    title: "World",
-    frequency: "Daily",
-    description:
-      "Global affairs, conflicts, diplomacy and the international stories that move markets and minds.",
-  },
-  {
-    id: "business",
-    title: "Business",
-    frequency: "Daily",
-    description:
-      "Corporate earnings, deals, leadership moves and the strategies driving the world of business.",
-  },
-  {
-    id: "us",
-    title: "U.S.",
-    frequency: "Weekday mornings",
-    description:
-      "The biggest national headlines, policy shifts and stories shaping America — delivered before your first coffee.",
-  },
-  {
-    id: "politics",
-    title: "Politics",
-    frequency: "Weekday mornings",
-    description:
-      "Sharp coverage of Washington, elections, legislation and the power plays behind the headlines.",
-  },
-  {
-    id: "economy",
-    title: "Economy",
-    frequency: "Daily",
-    description:
-      "Macroeconomic trends, global central bank policy, labor markets and inflation analysis.",
-  },
-  {
-    id: "tech",
-    title: "Tech",
-    frequency: "Daily",
-    description:
-      "AI, big tech, startups and the innovations rewriting how we live and work.",
-  },
-  {
-    id: "markets-finance",
-    title: "Markets & Finance",
-    frequency: "Weekday mornings",
-    description:
-      "Markets, macro trends, Fed watch and financial numbers that matter — explained clearly every trading day.",
-  },
-  {
-    id: "opinion",
-    title: "Opinion",
-    frequency: "Twice a week",
-    description:
-      "Provocative columns and expert commentary on the debates that define our time.",
-  },
-  {
-    id: "free-expression",
-    title: "Free Expression",
-    frequency: "Weekly",
-    description:
-      "Perspectives on free speech, open debate, culture and civil liberties.",
-  },
-  {
-    id: "arts",
-    title: "Arts",
-    frequency: "Weekly",
-    description:
-      "Book reviews, art exhibitions, theater, film and cultural coverage.",
-  },
-  {
-    id: "lifestyle",
-    title: "Lifestyle",
-    frequency: "Weekly",
-    description:
-      "Food, wine, design, entertaining and modern luxury living.",
-  },
-  {
-    id: "real-estate",
-    title: "Real Estate",
-    frequency: "Weekly",
-    description:
-      "Residential real estate trends, luxury homes, commercial property and housing markets.",
-  },
-  {
-    id: "personal-finance",
-    title: "Personal Finance",
-    frequency: "Weekly",
-    description:
-      "Smart money advice, retirement planning, tax strategies and personal investing.",
-  },
-  {
-    id: "health",
-    title: "Health",
-    frequency: "Weekly",
-    description:
-      "The latest health news, scientific trends and medical information explained clearly.",
-  },
-  {
-    id: "style",
-    title: "Style",
-    frequency: "Weekly",
-    description:
-      "Fashion trends, grooming, luxury goods and design intelligence.",
-  },
-  {
-    id: "sports",
-    title: "Sports",
-    frequency: "Daily",
-    description:
-      "Scores, athletic analysis and the business of global sports — from the field to the boardroom.",
-  },
+const ALL_69_CATEGORIES = [
+  "News", "U.S. News", "International News",
+  "Law", "Criminal Cases", "Legal Affairs",
+  "Politics", "World Politics", "Congress", "Elections",
+  "Business", "Corporate News", "Small Business", "Entrepreneurship", "CEOs & Executives",
+  "Markets & Finance", "Stocks", "Currencies", "Banking",
+  "Economy", "Jobs & Employment", "Interest Rates",
+  "Tech", "Artificial Intelligence", "Cybersecurity", "Innovation",
+  "Entertainment", "Movies", "Television", "Music", "Celebrity",
+  "Arts", "Upcoming Brands", "Architecture", "Books", "Culture",
+  "Industries", "Energy", "Automotive", "Manufacturing", "Agriculture", "Construction",
+  "Fashion", "Designers", "Jewelry",
+  "Investing", "Stocks", "Real Estate", "Wealth Management",
+  "Crypto",
+  "Health", "Medical Research", "Mental Health",
+  "Sports", "Soccer", "Golf", "Tennis", "Cricket",
+  "Lifestyle", "Travel", "Food & Dining", "Cars",
+  "Science", "Space", "Climate", "Environment", "Research",
+  "Opinions", "Editorials"
 ];
+
+const UNIQUE_CATEGORIES = Array.from(new Set(ALL_69_CATEGORIES));
+
+const newslettersList: NewsletterItem[] = UNIQUE_CATEGORIES.map((cat, idx) => {
+  const slug = cat.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  let frequency = "Daily";
+  if (["Weekly", "Weekend", "Books", "Architecture", "Culture", "Designers", "Jewelry"].some(k => cat.includes(k))) {
+    frequency = "Weekly";
+  } else if (["U.S. News", "Politics", "Congress", "Elections", "Markets & Finance"].includes(cat)) {
+    frequency = "Weekday mornings";
+  }
+
+  return {
+    id: slug || `cat-${idx}`,
+    title: cat,
+    frequency,
+    description: `Stay informed with breaking updates, in-depth analysis, and exclusive reporting on ${cat}.`,
+  };
+});
 
 export const NewsletterSignInPage: React.FC = () => {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -204,69 +129,26 @@ export const NewsletterSignInPage: React.FC = () => {
         {
           id: "sub_1",
           email: "akramyoonos54354@gmail.com",
-          newsletters: ["US", "ECONOMY & MARKETS"],
+          newsletters: ["U.S. News", "Economy"],
           subscribedDate: "Aug 17, 2026",
-        },
-        {
-          id: "sub_2",
-          email: "circuitridergary@duck.com",
-          newsletters: [
-            "US",
-            "WORLD",
-            "POLITICS",
-            "ECONOMY & MARKETS",
-            "BUSINESS",
-            "CRYPTO",
-            "TECHNOLOGY",
-            "TRAVEL",
-            "OPINION",
-            "CEO SPOTLIGHT",
-            "SPORTS",
-            "HEALTH",
-          ],
-          subscribedDate: "Aug 14, 2026",
-        },
-        {
-          id: "sub_3",
-          email: "monlinebrands@gmail.com",
-          newsletters: ["US", "POLITICS", "SPORTS"],
-          subscribedDate: "Aug 11, 2026",
-        },
-        {
-          id: "sub_4",
-          email: "akramyoonos1433@gmail.com",
-          newsletters: ["US", "WORLD", "ECONOMY & MARKETS", "BUSINESS"],
-          subscribedDate: "Aug 10, 2026",
-        },
-        {
-          id: "sub_5",
-          email: "odulio.dylan@gmail.com",
-          newsletters: [
-            "US",
-            "WORLD",
-            "POLITICS",
-            "ECONOMY & MARKETS",
-            "BUSINESS",
-            "CRYPTO",
-            "TECHNOLOGY",
-            "TRAVEL",
-            "OPINION",
-            "CEO SPOTLIGHT",
-            "SPORTS",
-            "HEALTH",
-          ],
-          subscribedDate: "Aug 10, 2026",
         },
       ];
     }
 
-    // Filter out duplicate email if already subscribed, then prepend new entry
-    const updatedSubs = [
-      newSub,
-      ...existingSubs.filter(
-        (s: any) => s.email.toLowerCase() !== email.trim().toLowerCase()
-      ),
-    ];
+    // Check for duplicate email subscription
+    const isAlreadySubscribed = existingSubs.some(
+      (s: any) => s.email.toLowerCase() === email.trim().toLowerCase()
+    );
+
+    if (isAlreadySubscribed) {
+      setErrorMessage(
+        `Unable to subscribe: The email address "${email.trim()}" is already subscribed to our newsletters.`
+      );
+      return;
+    }
+
+    // Prepend new entry
+    const updatedSubs = [newSub, ...existingSubs];
 
     localStorage.setItem(
       "wsj_newsletter_subscribers",

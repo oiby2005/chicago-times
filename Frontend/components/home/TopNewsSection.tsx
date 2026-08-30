@@ -98,7 +98,7 @@ export const TopNewsSection: React.FC = () => {
   }, [loadTopNews]);
 
   return (
-    <div className="w-full max-h-[12cm] h-full flex flex-col justify-between font-sans select-none overflow-hidden">
+    <div className="w-full h-full flex flex-col justify-between font-sans select-none">
       {/* Section Header */}
       <div className="border-b border-dashed border-[#D6CEBF] pb-1 mb-2">
         <h2 className="font-sans font-bold text-[11.5px] tracking-wider text-[#111111] uppercase">

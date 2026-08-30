@@ -279,6 +279,7 @@ export default function AdminReviewPostPage() {
           }
 
           if (found.author) setArticleAuthor(found.author);
+          if (found.homepagePlacement) setHomepagePlacement(found.homepagePlacement);
           setReadDuration(found.readDuration || found.readTime || "5 min read");
           setIsExclusive(found.isExclusive !== undefined ? found.isExclusive : true);
 
