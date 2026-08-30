@@ -50,13 +50,14 @@ export const CeoExecsCategorySection: React.FC = () => {
       const stored = localStorage.getItem("wsj_posts");
       if (stored) {
         const posts = JSON.parse(stored);
-        const ceoPosts = posts.filter(
-          (p: any) =>
-            p.status === "Published" &&
-            (p.category === "CEOs & Executives" ||
-             p.category === "CEO & Executives" ||
-             (p.homepagePlacement && p.homepagePlacement.includes("CEOs & Executives")))
-        );
+        const ceoPosts = posts.filter((p: any) => {
+          if (p.status !== "Published") return false;
+          const placement = p.homepagePlacement || "None";
+          if (placement.includes("CEOs & Executives")) return true;
+          if (!placement.startsWith("None")) return false;
+          const cat = p.category || "";
+          return cat === "CEOs & Executives" || cat === "CEO & Executives";
+        });
 
         ceoPosts.sort((a: any, b: any) => (b.publishedAt || 0) - (a.publishedAt || 0));
 

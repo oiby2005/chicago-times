@@ -52,13 +52,14 @@ export const EditorialsSection: React.FC = () => {
       const stored = localStorage.getItem("wsj_posts");
       if (stored) {
         const posts = JSON.parse(stored);
-        const edPosts = posts.filter(
-          (p: any) =>
-            p.status === "Published" &&
-            (p.category === "Editorial" ||
-             p.category === "Editorials" ||
-             (p.homepagePlacement && p.homepagePlacement.includes("Editorial")))
-        );
+        const edPosts = posts.filter((p: any) => {
+          if (p.status !== "Published") return false;
+          const placement = p.homepagePlacement || "None";
+          if (placement.includes("Editorial")) return true;
+          if (!placement.startsWith("None")) return false;
+          const cat = p.category || "";
+          return cat === "Editorial" || cat === "Editorials";
+        });
 
         edPosts.sort((a: any, b: any) => (b.publishedAt || 0) - (a.publishedAt || 0));
 

@@ -234,12 +234,13 @@ export const EightCategoryGridSection: React.FC = () => {
       if (stored) {
         const posts = JSON.parse(stored);
         const loadCategory = (catName: string, fallback: ColumnArticle[]): ColumnArticle[] => {
-          const matched = posts.filter(
-            (p: any) =>
-              p.status === "Published" &&
-              (p.category === catName ||
-               (p.homepagePlacement && p.homepagePlacement.includes(catName)))
-          );
+          const matched = posts.filter((p: any) => {
+            if (p.status !== "Published") return false;
+            const placement = p.homepagePlacement || "None";
+            if (placement.includes(catName)) return true;
+            if (!placement.startsWith("None")) return false;
+            return p.category === catName;
+          });
           matched.sort((a: any, b: any) => (b.publishedAt || 0) - (a.publishedAt || 0));
 
           if (matched.length > 0) {

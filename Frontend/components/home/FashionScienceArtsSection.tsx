@@ -85,12 +85,13 @@ export const FashionScienceArtsSection: React.FC = () => {
       if (stored) {
         const posts = JSON.parse(stored);
         const getCategoryPosts = (keyword: string, fallback: ColumnArticle[]) => {
-          const matched = posts.filter(
-            (p: any) =>
-              p.status === "Published" &&
-              (p.category === keyword ||
-               (p.homepagePlacement && p.homepagePlacement.includes(keyword)))
-          );
+          const matched = posts.filter((p: any) => {
+            if (p.status !== "Published") return false;
+            const placement = p.homepagePlacement || "None";
+            if (placement.includes(keyword)) return true;
+            if (!placement.startsWith("None")) return false;
+            return p.category === keyword;
+          });
           matched.sort((a: any, b: any) => (b.publishedAt || 0) - (a.publishedAt || 0));
 
           if (matched.length > 0) {

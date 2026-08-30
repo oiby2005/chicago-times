@@ -33,10 +33,8 @@ const ALL_69_CATEGORIES = [
   "Opinions", "Editorials"
 ];
 
-const UNIQUE_CATEGORIES = Array.from(new Set(ALL_69_CATEGORIES));
-
-const newslettersList: NewsletterItem[] = UNIQUE_CATEGORIES.map((cat, idx) => {
-  const slug = cat.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+const newslettersList: NewsletterItem[] = ALL_69_CATEGORIES.map((cat, idx) => {
+  const slug = `${cat.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}-${idx}`;
   let frequency = "Daily";
   if (["Weekly", "Weekend", "Books", "Architecture", "Culture", "Designers", "Jewelry"].some(k => cat.includes(k))) {
     frequency = "Weekly";
@@ -45,7 +43,7 @@ const newslettersList: NewsletterItem[] = UNIQUE_CATEGORIES.map((cat, idx) => {
   }
 
   return {
-    id: slug || `cat-${idx}`,
+    id: slug,
     title: cat,
     frequency,
     description: `Stay informed with breaking updates, in-depth analysis, and exclusive reporting on ${cat}.`,

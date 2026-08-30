@@ -60,15 +60,14 @@ export const TechCategorySection: React.FC = () => {
       const stored = localStorage.getItem("wsj_posts");
       if (stored) {
         const posts = JSON.parse(stored);
-        const techPosts = posts.filter(
-          (p: any) =>
-            p.status === "Published" &&
-            (p.category === "Tech" ||
-             p.category === "Artificial Intelligence" ||
-             p.category === "Cybersecurity" ||
-             p.category === "Innovation" ||
-             (p.homepagePlacement && p.homepagePlacement.includes("Tech")))
-        );
+        const techPosts = posts.filter((p: any) => {
+          if (p.status !== "Published") return false;
+          const placement = p.homepagePlacement || "None";
+          if (placement.includes("Tech")) return true;
+          if (!placement.startsWith("None")) return false;
+          const cat = p.category || "";
+          return cat === "Tech" || cat === "Artificial Intelligence" || cat === "Cybersecurity" || cat === "Innovation";
+        });
 
         techPosts.sort((a: any, b: any) => (b.publishedAt || 0) - (a.publishedAt || 0));
 

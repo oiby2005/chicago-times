@@ -64,17 +64,14 @@ export const SportCategorySection: React.FC = () => {
       const stored = localStorage.getItem("wsj_posts");
       if (stored) {
         const posts = JSON.parse(stored);
-        const sportPosts = posts.filter(
-          (p: any) =>
-            p.status === "Published" &&
-            (p.category === "Sports" ||
-             p.category === "Sport" ||
-             p.category === "Soccer" ||
-             p.category === "Golf" ||
-             p.category === "Tennis" ||
-             p.category === "Cricket" ||
-             (p.homepagePlacement && p.homepagePlacement.includes("Sport")))
-        );
+        const sportPosts = posts.filter((p: any) => {
+          if (p.status !== "Published") return false;
+          const placement = p.homepagePlacement || "None";
+          if (placement.includes("Sport")) return true;
+          if (!placement.startsWith("None")) return false;
+          const cat = p.category || "";
+          return cat === "Sports" || cat === "Sport" || cat === "Soccer" || cat === "Golf" || cat === "Tennis" || cat === "Cricket";
+        });
 
         sportPosts.sort((a: any, b: any) => (b.publishedAt || 0) - (a.publishedAt || 0));
 

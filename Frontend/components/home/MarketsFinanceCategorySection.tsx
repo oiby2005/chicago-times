@@ -47,16 +47,14 @@ export const MarketsFinanceCategorySection: React.FC = () => {
       const stored = localStorage.getItem("wsj_posts");
       if (stored) {
         const posts = JSON.parse(stored);
-        const mfPosts = posts.filter(
-          (p: any) =>
-            p.status === "Published" &&
-            (p.category === "Markets & Finance" ||
-             p.category === "Market & Finance" ||
-             p.category === "Stocks" ||
-             p.category === "Currencies" ||
-             p.category === "Banking" ||
-             (p.homepagePlacement && p.homepagePlacement.includes("Markets & Finance")))
-        );
+        const mfPosts = posts.filter((p: any) => {
+          if (p.status !== "Published") return false;
+          const placement = p.homepagePlacement || "None";
+          if (placement.includes("Markets & Finance")) return true;
+          if (!placement.startsWith("None")) return false;
+          const cat = p.category || "";
+          return cat === "Markets & Finance" || cat === "Market & Finance" || cat === "Stocks" || cat === "Currencies" || cat === "Banking";
+        });
 
         mfPosts.sort((a: any, b: any) => (b.publishedAt || 0) - (a.publishedAt || 0));
 

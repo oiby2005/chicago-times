@@ -56,16 +56,14 @@ export const PoliticsCategorySection: React.FC = () => {
       const stored = localStorage.getItem("wsj_posts");
       if (stored) {
         const posts = JSON.parse(stored);
-        const polPosts = posts.filter(
-          (p: any) =>
-            p.status === "Published" &&
-            (p.category === "Politics" ||
-             p.category === "Law" ||
-             p.category === "U.S. News" ||
-             p.category === "Congress" ||
-             p.category === "Elections" ||
-             (p.homepagePlacement && p.homepagePlacement.includes("Politics")))
-        );
+        const polPosts = posts.filter((p: any) => {
+          if (p.status !== "Published") return false;
+          const placement = p.homepagePlacement || "None";
+          if (placement.includes("Politics")) return true;
+          if (!placement.startsWith("None")) return false;
+          const cat = p.category || "";
+          return cat === "Politics" || cat === "Law" || cat === "U.S. News" || cat === "Congress" || cat === "Elections";
+        });
 
         polPosts.sort((a: any, b: any) => (b.publishedAt || 0) - (a.publishedAt || 0));
 

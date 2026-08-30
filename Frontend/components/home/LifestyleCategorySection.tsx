@@ -58,15 +58,14 @@ export const LifestyleCategorySection: React.FC = () => {
       const stored = localStorage.getItem("wsj_posts");
       if (stored) {
         const posts = JSON.parse(stored);
-        const lifePosts = posts.filter(
-          (p: any) =>
-            p.status === "Published" &&
-            (p.category === "Lifestyle" ||
-             p.category === "Travel" ||
-             p.category === "Food & Dining" ||
-             p.category === "Cars" ||
-             (p.homepagePlacement && p.homepagePlacement.includes("Lifestyle")))
-        );
+        const lifePosts = posts.filter((p: any) => {
+          if (p.status !== "Published") return false;
+          const placement = p.homepagePlacement || "None";
+          if (placement.includes("Lifestyle")) return true;
+          if (!placement.startsWith("None")) return false;
+          const cat = p.category || "";
+          return cat === "Lifestyle" || cat === "Travel" || cat === "Food & Dining" || cat === "Cars";
+        });
 
         lifePosts.sort((a: any, b: any) => (b.publishedAt || 0) - (a.publishedAt || 0));
 

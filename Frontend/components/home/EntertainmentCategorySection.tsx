@@ -65,12 +65,13 @@ export const EntertainmentCategorySection: React.FC = () => {
       const stored = localStorage.getItem("wsj_posts");
       if (stored) {
         const posts = JSON.parse(stored);
-        const entPosts = posts.filter(
-          (p: any) =>
-            p.status === "Published" &&
-            (p.category === "Entertainment" ||
-             (p.homepagePlacement && p.homepagePlacement.includes("Entertainment")))
-        );
+        const entPosts = posts.filter((p: any) => {
+          if (p.status !== "Published") return false;
+          const placement = p.homepagePlacement || "None";
+          if (placement.includes("Entertainment")) return true;
+          if (!placement.startsWith("None")) return false;
+          return p.category === "Entertainment";
+        });
 
         entPosts.sort((a: any, b: any) => (b.publishedAt || 0) - (a.publishedAt || 0));
 

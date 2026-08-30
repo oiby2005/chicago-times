@@ -72,7 +72,32 @@ export default function ArticlePage({ params }: ArticlePageProps) {
   const bodyHtml = customPost?.bodyContent || null;
   const tags: string[] = customPost?.tags || [];
 
-  const authorObj = getAuthorForArticle(slug, authorName);
+  const staticAuthorObj = getAuthorForArticle(slug, authorName);
+  const [authorObj, setAuthorObj] = useState(staticAuthorObj);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const storedWriter = localStorage.getItem("wsj_writer_user") || sessionStorage.getItem("wsj_user") || localStorage.getItem("wsj_user");
+    if (storedWriter) {
+      try {
+        const parsed = JSON.parse(storedWriter);
+        const isWriterRole = (parsed.role || "").toLowerCase() === "writer" || (parsed.role || "").toLowerCase() === "admin";
+        const isDefaultWriter = !authorName || authorName.toLowerCase().includes("writer");
+        const matchesName = (parsed.full_name || parsed.name || "").toLowerCase() === (authorName || "").toLowerCase();
+
+        if (isWriterRole && (isDefaultWriter || matchesName)) {
+          setAuthorObj({
+            slug: "writer",
+            name: parsed.full_name || parsed.name || staticAuthorObj.name,
+            role: (parsed.role || "WRITER").toUpperCase(),
+            bio: parsed.bio || staticAuthorObj.bio,
+            image: parsed.avatar_url || parsed.image || staticAuthorObj.image,
+            linkedinUrl: parsed.linkedin || staticAuthorObj.linkedinUrl,
+          });
+        }
+      } catch (e) {}
+    }
+  }, [authorName, staticAuthorObj]);
 
   const currentArticleData = {
     id: customPost?.id || staticArticle.id || slug,
