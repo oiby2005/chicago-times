@@ -89,9 +89,46 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
       avatar_url: avatarUrl,
     };
 
-    // Save to localStorage
+    // Save to active user keys
     localStorage.setItem("wsj_user", JSON.stringify(updatedUser));
-    
+    sessionStorage.setItem("wsj_user", JSON.stringify(updatedUser));
+
+    const userRole = role.toLowerCase();
+    if (userRole === "writer" || email.toLowerCase().includes("writer")) {
+      localStorage.setItem("wsj_writer_user", JSON.stringify(updatedUser));
+      sessionStorage.setItem("wsj_writer_user", JSON.stringify(updatedUser));
+    } else if (userRole === "admin" || email.toLowerCase().includes("admin")) {
+      localStorage.setItem("wsj_admin_user", JSON.stringify(updatedUser));
+      sessionStorage.setItem("wsj_admin_user", JSON.stringify(updatedUser));
+    } else if (userRole === "reader" || email.toLowerCase().includes("reader")) {
+      localStorage.setItem("wsj_reader_user", JSON.stringify(updatedUser));
+      sessionStorage.setItem("wsj_reader_user", JSON.stringify(updatedUser));
+    }
+
+    // Persist to stored accounts list
+    try {
+      const storedAccounts = localStorage.getItem("wsj_accounts");
+      if (storedAccounts) {
+        const accounts = JSON.parse(storedAccounts);
+        const idx = accounts.findIndex((a: any) => 
+          (a.email && a.email.toLowerCase() === email.toLowerCase()) || 
+          (a.role && a.role.toLowerCase() === userRole)
+        );
+        if (idx !== -1) {
+          accounts[idx] = {
+            ...accounts[idx],
+            full_name: fullName,
+            name: fullName,
+            bio: bio,
+            linkedin: linkedin,
+            avatar_url: avatarUrl,
+            image: avatarUrl,
+          };
+          localStorage.setItem("wsj_accounts", JSON.stringify(accounts));
+        }
+      }
+    } catch (e) {}
+
     // Broadcast user update event across components
     window.dispatchEvent(new Event("wsj_user_updated"));
 

@@ -65,6 +65,25 @@ export function getAuthorBySlug(slug: string): Author {
     cleanSlug = cleanSlug.split("-and-")[0].trim();
   }
 
+  if (cleanSlug === "writer" && typeof window !== "undefined") {
+    try {
+      const storedWriterStr = localStorage.getItem("wsj_writer_user") || localStorage.getItem("wsj_user");
+      if (storedWriterStr) {
+        const u = JSON.parse(storedWriterStr);
+        if (u && (u.full_name || u.name)) {
+          return {
+            slug: "writer",
+            name: extractSingleAuthorName(u.full_name || u.name),
+            role: (u.role || "WRITER").toUpperCase(),
+            bio: u.bio !== undefined ? u.bio : authorsList[0].bio,
+            image: u.avatar_url || u.image || authorsList[0].image,
+            linkedinUrl: u.linkedin || authorsList[0].linkedinUrl,
+          };
+        }
+      }
+    } catch (e) {}
+  }
+
   if (authorsData[cleanSlug]) return authorsData[cleanSlug];
 
   const found = authorsList.find(
@@ -91,6 +110,41 @@ export function getAuthorBySlug(slug: string): Author {
 }
 
 export function getAuthorForArticle(articleSlugOrId: string, authorName?: string): Author {
+  if (typeof window !== "undefined") {
+    try {
+      const storedWriterStr = localStorage.getItem("wsj_writer_user");
+      let writerObj = storedWriterStr ? JSON.parse(storedWriterStr) : null;
+      if (!writerObj) {
+        const storedUserStr = localStorage.getItem("wsj_user");
+        if (storedUserStr) {
+          const u = JSON.parse(storedUserStr);
+          if (u && (u.role || "").toLowerCase() === "writer") writerObj = u;
+        }
+      }
+      if (!writerObj) {
+        const accountsStr = localStorage.getItem("wsj_accounts");
+        if (accountsStr) {
+          const accs = JSON.parse(accountsStr);
+          writerObj = accs.find((a: any) => (a.role || "").toLowerCase() === "writer" || a.email === "writer@gmail.com");
+        }
+      }
+      if (writerObj) {
+        const wName = writerObj.full_name || writerObj.name;
+        const wImg = writerObj.avatar_url || writerObj.image;
+        const isWriter = !authorName || authorName.toLowerCase().includes("writer") || (wName && authorName.toLowerCase() === wName.toLowerCase());
+        if (isWriter) {
+          return {
+            slug: "writer",
+            name: extractSingleAuthorName(wName || "Writer User"),
+            role: (writerObj.role || "WRITER").toUpperCase(),
+            bio: writerObj.bio !== undefined ? writerObj.bio : authorsList[0].bio,
+            image: wImg || authorsList[0].image,
+            linkedinUrl: writerObj.linkedin || authorsList[0].linkedinUrl,
+          };
+        }
+      }
+    } catch (e) {}
+  }
   if (authorName && authorName.trim()) {
     const singleAuthor = extractSingleAuthorName(authorName);
     const cleanSlug = singleAuthor.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");

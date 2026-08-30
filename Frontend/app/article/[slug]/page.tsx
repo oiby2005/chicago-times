@@ -72,32 +72,19 @@ export default function ArticlePage({ params }: ArticlePageProps) {
   const bodyHtml = customPost?.bodyContent || null;
   const tags: string[] = customPost?.tags || [];
 
-  const staticAuthorObj = getAuthorForArticle(slug, authorName);
-  const [authorObj, setAuthorObj] = useState(staticAuthorObj);
+  const [authorObj, setAuthorObj] = useState<any>(() => getAuthorForArticle(slug, authorName));
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    const storedWriter = localStorage.getItem("wsj_writer_user") || sessionStorage.getItem("wsj_user") || localStorage.getItem("wsj_user");
-    if (storedWriter) {
-      try {
-        const parsed = JSON.parse(storedWriter);
-        const isWriterRole = (parsed.role || "").toLowerCase() === "writer" || (parsed.role || "").toLowerCase() === "admin";
-        const isDefaultWriter = !authorName || authorName.toLowerCase().includes("writer");
-        const matchesName = (parsed.full_name || parsed.name || "").toLowerCase() === (authorName || "").toLowerCase();
-
-        if (isWriterRole && (isDefaultWriter || matchesName)) {
-          setAuthorObj({
-            slug: "writer",
-            name: parsed.full_name || parsed.name || staticAuthorObj.name,
-            role: (parsed.role || "WRITER").toUpperCase(),
-            bio: parsed.bio || staticAuthorObj.bio,
-            image: parsed.avatar_url || parsed.image || staticAuthorObj.image,
-            linkedinUrl: parsed.linkedin || staticAuthorObj.linkedinUrl,
-          });
-        }
-      } catch (e) {}
+    const syncAuthor = () => {
+      const updated = getAuthorForArticle(slug, authorName);
+      setAuthorObj(updated);
+    };
+    syncAuthor();
+    if (typeof window !== "undefined") {
+      window.addEventListener("wsj_user_updated", syncAuthor);
+      return () => window.removeEventListener("wsj_user_updated", syncAuthor);
     }
-  }, [authorName, staticAuthorObj]);
+  }, [slug, authorName, customPost]);
 
   const currentArticleData = {
     id: customPost?.id || staticArticle.id || slug,
