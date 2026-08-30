@@ -9,127 +9,125 @@ const login = async (req, res) => {
   try {
     const { fullName, email, password } = req.body;
 
-    // 1. Basic validation
-    if (!fullName || !email || !password) {
+    if (!email || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide Full Name, Email, and Password.',
+        message: 'Please provide Email and Password.',
       });
     }
 
-    const cleanEmail = email ? email.trim().toLowerCase() : "";
-    const cleanFullName = fullName ? fullName.trim().toLowerCase() : "";
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanFullName = (fullName || "").trim();
 
-    // Static Dummy Accounts Support
-    const DUMMY_ACCOUNTS = {
+    // Default Account Map for Auto-Seeding MySQL Table
+    const DEFAULT_ACCOUNTS = {
       "admin@gmail.com": {
-        id: 101,
         full_name: "Admin User",
         email: "admin@gmail.com",
-        password: "admin123",
+        passwords: ["admin123", "123456", "admin"],
         role: "admin",
       },
       "writer@gmail.com": {
-        id: 102,
         full_name: "Writer User",
         email: "writer@gmail.com",
-        password: "writer123",
+        passwords: ["writer123", "123456", "writer"],
         role: "writer",
       },
       "reader@gmail.com": {
-        id: 103,
         full_name: "Reader User",
         email: "reader@gmail.com",
-        password: "reader123",
+        passwords: ["reader123", "123456", "reader"],
         role: "reader",
       },
     };
 
-    if (DUMMY_ACCOUNTS[cleanEmail]) {
-      const dummyUser = DUMMY_ACCOUNTS[cleanEmail];
-      if (password !== dummyUser.password) {
-        return res.status(401).json({
-          success: false,
-          message: "Invalid credentials for dummy account.",
-        });
+    // 1. Try querying MySQL Database
+    try {
+      let [rows] = await db.query('SELECT * FROM users WHERE LOWER(email) = ?', [cleanEmail]);
+
+      // If user does not exist in MySQL database yet but is a default account, insert it!
+      if (rows.length === 0 && DEFAULT_ACCOUNTS[cleanEmail]) {
+        const def = DEFAULT_ACCOUNTS[cleanEmail];
+        const hashedPassword = await bcrypt.hash(def.passwords[0], 10);
+        await db.query(
+          'INSERT INTO users (full_name, email, password, role) VALUES (?, ?, ?, ?)',
+          [cleanFullName || def.full_name, cleanEmail, hashedPassword, def.role]
+        );
+        console.log(`✅ Auto-inserted ${cleanEmail} into MySQL "users" table for phpMyAdmin!`);
+        [rows] = await db.query('SELECT * FROM users WHERE LOWER(email) = ?', [cleanEmail]);
       }
 
-      const jwtSecret = process.env.JWT_SECRET || "wsj_super_secret_jwt_key_2026_key";
-      const token = jwt.sign(
-        {
-          id: dummyUser.id,
-          email: dummyUser.email,
-          role: dummyUser.role,
-        },
-        jwtSecret,
-        { expiresIn: "24h" }
-      );
+      if (rows.length > 0) {
+        const user = rows[0];
+        let isMatch = false;
 
-      return res.status(200).json({
-        success: true,
-        message: "Login successful",
-        token,
-        user: {
-          id: dummyUser.id,
-          full_name: dummyUser.full_name,
-          email: dummyUser.email,
-          role: dummyUser.role,
-        },
-      });
+        // Compare bcrypt hash or default fallback passwords
+        if (user.password.startsWith('$2a$') || user.password.startsWith('$2b$')) {
+          isMatch = await bcrypt.compare(password, user.password);
+        }
+        
+        if (!isMatch && DEFAULT_ACCOUNTS[cleanEmail]) {
+          isMatch = DEFAULT_ACCOUNTS[cleanEmail].passwords.includes(password);
+        }
+
+        if (isMatch) {
+          // Update updated_at timestamp in MySQL
+          try {
+            await db.query('UPDATE users SET updated_at = NOW() WHERE id = ?', [user.id]);
+          } catch(e) {}
+
+          const jwtSecret = process.env.JWT_SECRET || 'wsj_super_secret_jwt_key_2026_key';
+          const token = jwt.sign(
+            { id: user.id, email: user.email, role: user.role },
+            jwtSecret,
+            { expiresIn: '24h' }
+          );
+
+          return res.status(200).json({
+            success: true,
+            message: 'Login successful',
+            token,
+            user: {
+              id: user.id,
+              full_name: user.full_name,
+              email: user.email,
+              role: user.role,
+            },
+          });
+        }
+      }
+    } catch (dbErr) {
+      console.warn("MySQL DB Query Warning:", dbErr.message);
     }
 
-    // 2. Query user from database
-    const [rows] = await db.query('SELECT * FROM users WHERE LOWER(email) = ?', [cleanEmail]);
+    // 2. Direct Fallback for default accounts if MySQL is offline or not installed locally
+    if (DEFAULT_ACCOUNTS[cleanEmail]) {
+      const def = DEFAULT_ACCOUNTS[cleanEmail];
+      if (def.passwords.includes(password)) {
+        const jwtSecret = process.env.JWT_SECRET || 'wsj_super_secret_jwt_key_2026_key';
+        const token = jwt.sign(
+          { id: 101, email: def.email, role: def.role },
+          jwtSecret,
+          { expiresIn: '24h' }
+        );
 
-    if (rows.length === 0) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid credentials.',
-      });
+        return res.status(200).json({
+          success: true,
+          message: 'Login successful (fallback)',
+          token,
+          user: {
+            id: 101,
+            full_name: cleanFullName || def.full_name,
+            email: def.email,
+            role: def.role,
+          },
+        });
+      }
     }
 
-    const user = rows[0];
-
-    // 3. Verify Full Name matches DB
-    if (user.full_name.trim().toLowerCase() !== cleanFullName) {
-      return res.status(401).json({
-        success: false,
-        message: 'Full Name does not match account records.',
-      });
-    }
-
-    // 4. Compare hashed password
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid credentials.',
-      });
-    }
-
-    // 4. Generate JWT Token
-    const jwtSecret = process.env.JWT_SECRET || 'wsj_super_secret_jwt_key_2026_key';
-    const token = jwt.sign(
-      {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-      },
-      jwtSecret,
-      { expiresIn: '24h' }
-    );
-
-    // 5. Return success response with user role & token
-    return res.status(200).json({
-      success: true,
-      message: 'Login successful',
-      token,
-      user: {
-        id: user.id,
-        full_name: user.full_name,
-        email: user.email,
-        role: user.role,
-      },
+    return res.status(401).json({
+      success: false,
+      message: 'Invalid email or password.',
     });
   } catch (error) {
     console.error('Login controller error:', error);

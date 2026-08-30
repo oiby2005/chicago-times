@@ -122,10 +122,10 @@ export default function SignInPage() {
     const cleanEmail = email.trim().toLowerCase();
     const cleanPassword = password.trim();
 
-    // 1. Try Backend Express API Login with fast 1.2s timeout
+    // 1. Try Backend Express API Login
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 1200);
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
 
       const res = await fetch("http://localhost:5000/api/auth/login", {
         method: "POST",
