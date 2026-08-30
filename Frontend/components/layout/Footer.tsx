@@ -142,19 +142,6 @@ export const Footer: React.FC = () => {
 
   return (
     <footer className="w-full text-[#333333] font-sans select-none">
-      {/* Top White Strip for Back To Top Button */}
-      <div className="w-full bg-white border-t border-[#d4d4d4] py-2">
-        <Container className="flex justify-end">
-          <button
-            onClick={scrollToTop}
-            className="bg-[#b3b3b3] hover:bg-[#a0a0a0] text-white text-[11px] font-bold uppercase tracking-wider px-4 py-2 flex items-center space-x-1.5 transition-colors"
-            suppressHydrationWarning
-          >
-            <span>BACK TO TOP</span>
-            <span className="text-[11px] font-black">^</span>
-          </button>
-        </Container>
-      </div>
 
       {/* Band 1: Lighter Gray Header Row (Logo + Parallel English Edition + Subscribe/Sign In) */}
       <div className="w-full bg-[#f2f2f2] pt-5 pb-5">

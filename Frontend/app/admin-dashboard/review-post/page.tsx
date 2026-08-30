@@ -5,19 +5,25 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getAuthorForArticle } from "@/data/authors";
 
-const availableSubCategories = [
-  "US",
-  "World",
-  "Politics",
-  "Economy & Finance",
+const ALL_MAIN_CATEGORIES = [
+  "News", "U.S. News", "International News",
+  "Law", "Criminal Cases", "Legal Affairs",
+  "Politics", "World Politics", "Congress", "Elections",
+  "Business", "Corporate News", "Small Business", "Entrepreneurship", "CEOs & Executives",
+  "Markets & Finance", "Stocks", "Currencies", "Banking",
+  "Economy", "Jobs & Employment", "Interest Rates",
+  "Tech", "Artificial Intelligence", "Cybersecurity", "Innovation",
+  "Entertainment", "Movies", "Television", "Music", "Celebrity",
+  "Arts", "Upcoming Brands", "Architecture", "Books", "Culture",
+  "Industries", "Energy", "Automotive", "Manufacturing", "Agriculture", "Construction",
+  "Fashion", "Designers", "Jewelry",
+  "Investing", "Stocks", "Real Estate", "Wealth Management",
   "Crypto",
-  "Technology",
-  "Travel",
-  "Opinion",
-  "CFO Spotlight",
-  "Sports",
-  "Lifestyle",
-  "Real Estate",
+  "Health", "Medical Research", "Mental Health",
+  "Sports", "Soccer", "Golf", "Tennis", "Cricket",
+  "Lifestyle", "Travel", "Food & Dining", "Cars",
+  "Science", "Space", "Climate", "Environment", "Research",
+  "Opinions", "Editorials"
 ];
 
 const DEFAULT_PENDING_ARTICLES: Record<string, any> = {};
@@ -154,6 +160,10 @@ export default function AdminReviewPostPage() {
   const [bodyContent, setBodyContent] = useState("");
   const [mainCategory, setMainCategory] = useState("Business");
   const [selectedSubCategories, setSelectedSubCategories] = useState<string[]>([]);
+
+  const availableSubCategories = Array.from(new Set(ALL_MAIN_CATEGORIES)).filter(
+    (cat) => cat.toLowerCase().trim() !== (mainCategory || "").toLowerCase().trim()
+  );
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
   const [readDuration, setReadDuration] = useState("5 min read");
@@ -1526,6 +1536,7 @@ export default function AdminReviewPostPage() {
                               <option value="Designers">Designers</option>
                               <option value="Jewelry">Jewelry</option>
                               <option value="Investing">Investing</option>
+                              <option value="Stocks">Stocks</option>
                               <option value="Real Estate">Real Estate</option>
                               <option value="Wealth Management">Wealth Management</option>
                               <option value="Crypto">Crypto</option>
