@@ -63,13 +63,63 @@ const compressImageFile = (file: File, maxWidth = 800, quality = 0.7): Promise<s
   });
 };
 
+const getDynamicFallbackImage = (post: any): string => {
+  const DYNAMIC_CATEGORY_IMAGES: Record<string, string[]> = {
+    ENTERTAINMENT: [
+      "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80",
+    ],
+    SPORTS: [
+      "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?auto=format&fit=crop&w=800&q=80",
+    ],
+    BUSINESS: [
+      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=800&q=80",
+    ],
+    TECH: [
+      "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=800&q=80",
+    ],
+    POLITICS: [
+      "https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?auto=format&fit=crop&w=800&q=80",
+    ],
+    LIFESTYLE: [
+      "https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80",
+    ],
+    GENERAL: [
+      "https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1495020689067-958852a7765e?auto=format&fit=crop&w=800&q=80",
+    ]
+  };
+
+  const categoryKey = (post.category || "GENERAL").toUpperCase();
+  const pool = DYNAMIC_CATEGORY_IMAGES[categoryKey] || DYNAMIC_CATEGORY_IMAGES.GENERAL;
+  const str = (post.id || post.title || "article") + "";
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const index = Math.abs(hash) % pool.length;
+  return pool[index];
+};
+
 const safeSavePostsToStorage = (posts: any[]): boolean => {
   if (typeof window === "undefined") return false;
 
   const sanitizePost = (post: any) => {
     let thumb = post.thumbnail || "";
-    if (thumb.startsWith("data:image/") && thumb.length > 150000) {
-      thumb = "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=800&q=80";
+    if (!thumb || (thumb.startsWith("data:image/") && thumb.length > 150000) || thumb.includes("photo-1590283603385-17ffb3a7f29f")) {
+      thumb = getDynamicFallbackImage(post);
     }
     return { ...post, thumbnail: thumb };
   };
@@ -83,16 +133,17 @@ const safeSavePostsToStorage = (posts: any[]): boolean => {
     console.warn("QuotaExceededError caught while saving wsj_posts. Compacting base64 images...", err);
     try {
       const compactPosts = sanitized.map((p) => {
+        let fallbackImg = getDynamicFallbackImage(p);
         let body = p.bodyContent || "";
         body = body.replace(/src="data:image\/[^;]+;base64,[^"]+"/g, (match: string) => {
           if (match.length > 80000) {
-            return 'src="https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=800&q=80"';
+            return `src="${fallbackImg}"`;
           }
           return match;
         });
         let thumb = p.thumbnail || "";
-        if (thumb.startsWith("data:")) {
-          thumb = "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=800&q=80";
+        if (!thumb || thumb.startsWith("data:") || thumb.includes("photo-1590283603385-17ffb3a7f29f")) {
+          thumb = fallbackImg;
         }
         return {
           ...p,
@@ -105,11 +156,14 @@ const safeSavePostsToStorage = (posts: any[]): boolean => {
     } catch (e2) {
       console.error("Secondary QuotaExceededError retry:", e2);
       try {
-        const trimmed = sanitized.slice(0, 15).map((p) => ({
-          ...p,
-          bodyContent: (p.bodyContent || "").replace(/src="data:image\/[^;]+;base64,[^"]+"/g, 'src="https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=800&q=80"'),
-          thumbnail: "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=800&q=80",
-        }));
+        const trimmed = sanitized.slice(0, 15).map((p) => {
+          const fallbackImg = getDynamicFallbackImage(p);
+          return {
+            ...p,
+            bodyContent: (p.bodyContent || "").replace(/src="data:image\/[^;]+;base64,[^"]+"/g, `src="${fallbackImg}"`),
+            thumbnail: fallbackImg,
+          };
+        });
         localStorage.setItem("wsj_posts", JSON.stringify(trimmed));
         return true;
       } catch (e3) {

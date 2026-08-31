@@ -198,6 +198,75 @@ export default function AdminDashboard() {
     setSubscribers([]);
   };
 
+  // Helper to resolve unique, topic-specific thumbnails instead of duplicate fallback images
+  const resolveArticleThumbnail = (p: any): string => {
+    let thumb = p.thumbnail || p.coverImage || p.imageUrl || "";
+
+    const isGeneric =
+      !thumb ||
+      thumb.includes("photo-1590283603385-17ffb3a7f29f") ||
+      thumb.includes("hero-ai-software.jpg");
+
+    if (isGeneric && p.bodyContent) {
+      const match = p.bodyContent.match(/src=["']([^"']+)["']/);
+      if (match && match[1] && !match[1].includes("photo-1590283603385-17ffb3a7f29f")) {
+        return match[1];
+      }
+    }
+
+    if (!isGeneric && thumb) {
+      return thumb;
+    }
+
+    const DYNAMIC_CATEGORY_IMAGES: Record<string, string[]> = {
+      ENTERTAINMENT: [
+        "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80",
+      ],
+      SPORTS: [
+        "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?auto=format&fit=crop&w=800&q=80",
+      ],
+      BUSINESS: [
+        "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=800&q=80",
+      ],
+      TECH: [
+        "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=800&q=80",
+      ],
+      POLITICS: [
+        "https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?auto=format&fit=crop&w=800&q=80",
+      ],
+      LIFESTYLE: [
+        "https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80",
+      ],
+      GENERAL: [
+        "https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1495020689067-958852a7765e?auto=format&fit=crop&w=800&q=80",
+      ]
+    };
+
+    const categoryKey = (p.category || "GENERAL").toUpperCase();
+    const pool = DYNAMIC_CATEGORY_IMAGES[categoryKey] || DYNAMIC_CATEGORY_IMAGES.GENERAL;
+    const str = (p.id || p.title || "article") + "";
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const index = Math.abs(hash) % pool.length;
+    return pool[index];
+  };
+
   // Load submitted pending posts & published posts from storage & listen for live updates
   const loadPostsData = () => {
     if (typeof window === "undefined") return;
@@ -219,12 +288,7 @@ export default function AdminDashboard() {
 
         if (pending.length > 0) {
           const mappedProjects: ProjectItem[] = pending.map((p: any) => {
-            let thumb = p.thumbnail || p.coverImage;
-            if (!thumb && p.bodyContent) {
-              const match = p.bodyContent.match(/src=["']([^"']+)["']/);
-              if (match) thumb = match[1];
-            }
-            if (!thumb) thumb = "/images/hero-ai-software.jpg";
+            const thumb = resolveArticleThumbnail(p);
 
             let excerpt = p.subheadline || p.excerpt;
             if (!excerpt && p.bodyContent) {
@@ -280,7 +344,7 @@ export default function AdminDashboard() {
             author: p.author || "Writer User",
             views: p.views || 0,
             comments: 0,
-            thumbnail: p.thumbnail || "/images/hero-ai-software.jpg",
+            thumbnail: resolveArticleThumbnail(p),
           }));
 
           setPublishedPosts(mappedPubs);
