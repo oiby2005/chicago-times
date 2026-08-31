@@ -126,17 +126,6 @@ const safeSavePostsToStorage = (posts: any[]): boolean => {
 
   let sanitized = posts.map(sanitizePost);
 
-  // Sync to Backend server API asynchronously for cross-browser sync
-  try {
-    sanitized.forEach((p) => {
-      fetch("http://localhost:5000/api/posts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(p),
-      }).catch((e) => console.warn("Backend post sync warning:", e));
-    });
-  } catch (e) {}
-
   try {
     localStorage.setItem("wsj_posts", JSON.stringify(sanitized));
     return true;

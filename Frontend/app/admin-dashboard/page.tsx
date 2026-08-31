@@ -270,81 +270,67 @@ export default function AdminDashboard() {
   // Load submitted pending posts & published posts from storage & listen for live updates
   const loadPostsData = () => {
     if (typeof window === "undefined") return;
-
-    let activeWriterName = "Writer User";
-    const storedWriter = localStorage.getItem("wsj_writer_user") || localStorage.getItem("wsj_user");
-    if (storedWriter) {
-      try {
-        const p = JSON.parse(storedWriter);
-        if (p.full_name || p.name) activeWriterName = p.full_name || p.name;
-      } catch (e) {}
+    const stored = localStorage.getItem("wsj_posts");
+    if (!stored) {
+      setProjects([]);
+      setPublishedPosts([]);
+      return;
     }
+    try {
+      const parsedPosts = JSON.parse(stored);
+      if (Array.isArray(parsedPosts)) {
+        // Pending posts
+        const pending = parsedPosts.filter(
+          (p: any) =>
+            p.status?.toLowerCase() === "pending review" ||
+            p.status?.toLowerCase() === "pending"
+        );
 
-    const parseAndSetPosts = (parsedPosts: any[]) => {
-      if (!Array.isArray(parsedPosts)) return;
+        if (pending.length > 0) {
+          const mappedProjects: ProjectItem[] = pending.map((p: any) => {
+            const thumb = resolveArticleThumbnail(p);
 
-      // Pending posts
-      const pending = parsedPosts.filter(
-        (p: any) =>
-          p.status?.toLowerCase() === "pending review" ||
-          p.status?.toLowerCase() === "pending"
-      );
+            let excerpt = p.subheadline || p.excerpt;
+            if (!excerpt && p.bodyContent) {
+              excerpt =
+                p.bodyContent.replace(/<[^>]+>/g, "").slice(0, 150) + "...";
+            }
 
-      if (pending.length > 0) {
-        const mappedProjects: ProjectItem[] = pending.map((p: any) => {
-          const thumb = resolveArticleThumbnail(p);
+            return {
+              id: p.id,
+              title: p.title,
+              subheadline: p.subheadline || "",
+              excerpt: excerpt || "Submitted article pending editor review.",
+              bodyContent: p.bodyContent || "",
+              readTime: p.readDuration || p.readTime || "5 min read",
+              category: (p.category || "BUSINESS").toUpperCase(),
+              subCategories: p.subCategories || [],
+              tags: p.tags || [],
+              isExclusive: p.isExclusive,
+              cardSummary: p.cardSummary || "",
+              focusKeyword: p.focusKeyword || "",
+              seoDescription: p.seoDescription || "",
+              seoTitle: p.seoTitle || "",
+              author: p.author || "Writer User",
+              submittedDate: p.date || p.submittedDate || "Aug 18, 2026",
+              status: "PENDING",
+              thumbnail: thumb,
+            };
+          });
 
-          let excerpt = p.subheadline || p.excerpt;
-          if (!excerpt && p.bodyContent) {
-            excerpt =
-              p.bodyContent.replace(/<[^>]+>/g, "").slice(0, 150) + "...";
-          }
+          setProjects(mappedProjects);
+        } else {
+          setProjects([]);
+        }
 
-          let authorName = p.author || activeWriterName;
-          if (authorName === "Writer User" && activeWriterName !== "Writer User") {
-            authorName = activeWriterName;
-          }
-
-          return {
-            id: p.id,
-            title: p.title,
-            subheadline: p.subheadline || "",
-            excerpt: excerpt || "Submitted article pending editor review.",
-            bodyContent: p.bodyContent || "",
-            readTime: p.readDuration || p.readTime || "5 min read",
-            category: (p.category || "BUSINESS").toUpperCase(),
-            subCategories: p.subCategories || [],
-            tags: p.tags || [],
-            isExclusive: p.isExclusive,
-            cardSummary: p.cardSummary || "",
-            focusKeyword: p.focusKeyword || "",
-            seoDescription: p.seoDescription || "",
-            seoTitle: p.seoTitle || "",
-            author: authorName,
-            submittedDate: p.date || p.submittedDate || "Aug 18, 2026",
-            status: "PENDING",
-            thumbnail: thumb,
-          };
-        });
-
-        setProjects(mappedProjects);
-      } else {
-        setProjects([]);
-      }
-
-      // Published posts
-      const published = parsedPosts.filter(
-        (p: any) =>
-          p.status?.toLowerCase() === "published" ||
-          p.status?.toLowerCase() === "approved"
-      );
-      if (published.length > 0) {
-        const mappedPubs: PublishedPostItem[] = published.map((p: any) => {
-          let authorName = p.author || activeWriterName;
-          if (authorName === "Writer User" && activeWriterName !== "Writer User") {
-            authorName = activeWriterName;
-          }
-          return {
+        // Published posts
+        const published = parsedPosts.filter(
+          (p: any) =>
+            p.status?.toLowerCase() === "published" ||
+            p.status?.toLowerCase() === "approved"
+        );
+        if (published.length > 0) {
+          const mappedPubs: PublishedPostItem[] = published.map((p: any) => ({
             id: p.id,
             title: p.title,
             excerpt:
@@ -355,55 +341,20 @@ export default function AdminDashboard() {
             readTime: p.readDuration || "5 min read",
             category: (p.category || "BUSINESS").toUpperCase(),
             placement: "Main Grid",
-            author: authorName,
+            author: p.author || "Writer User",
             views: p.views || 0,
             comments: 0,
             thumbnail: resolveArticleThumbnail(p),
-          };
-        });
+          }));
 
-        setPublishedPosts(mappedPubs);
-      } else {
-        setPublishedPosts([]);
-      }
-    };
-
-    const stored = localStorage.getItem("wsj_posts");
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        parseAndSetPosts(parsed);
-      } catch (e) {}
-    }
-
-    // Cross-browser backend posts sync (Edge <-> Chrome)
-    fetch("http://localhost:5000/api/posts")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data && data.success && Array.isArray(data.posts) && data.posts.length > 0) {
-          const backendPosts = data.posts;
-          const currentStr = localStorage.getItem("wsj_posts");
-          let current: any[] = currentStr ? JSON.parse(currentStr) : [];
-          let merged = [...current];
-          let updated = false;
-
-          backendPosts.forEach((bp: any) => {
-            const idx = merged.findIndex((lp) => String(lp.id) === String(bp.id));
-            if (idx === -1) {
-              merged.unshift(bp);
-              updated = true;
-            } else {
-              merged[idx] = { ...merged[idx], ...bp };
-            }
-          });
-
-          if (updated || merged.length !== current.length) {
-            localStorage.setItem("wsj_posts", JSON.stringify(merged));
-            parseAndSetPosts(merged);
-          }
+          setPublishedPosts(mappedPubs);
+        } else {
+          setPublishedPosts([]);
         }
-      })
-      .catch((e) => {});
+      }
+    } catch (e) {
+      console.error("Error parsing wsj_posts:", e);
+    }
   };
 
   const generateArticleTextFile = (post: any): string => {

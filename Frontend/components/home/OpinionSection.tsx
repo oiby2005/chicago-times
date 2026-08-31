@@ -64,15 +64,22 @@ export const OpinionSection: React.FC = () => {
       const stored = localStorage.getItem("wsj_posts");
       if (stored) {
         const posts = JSON.parse(stored);
-        const opinionPosts = posts.filter(
-          (p: any) =>
-            p.status === "Published" &&
-            (p.category === "Opinion" ||
-             p.category === "Editorial" ||
-             p.category === "Editorials" ||
-             (p.subCategories && p.subCategories.some((s: string) => s.toLowerCase().includes("opinion"))) ||
-             (p.homepagePlacement && p.homepagePlacement.includes("Opinion")))
-        );
+        const opinionPosts = posts.filter((p: any) => {
+          if (p.status !== "Published") return false;
+          const cat = (p.category || "").toLowerCase().trim();
+          const placement = (p.homepagePlacement || "").toLowerCase();
+          const subs = (p.subCategories || []).map((s: string) => s.toLowerCase());
+
+          return (
+            cat === "opinion" ||
+            cat === "opinions" ||
+            cat === "editorial" ||
+            cat === "editorials" ||
+            subs.some((s: string) => s.includes("opinion") || s.includes("editorial")) ||
+            placement.includes("opinion") ||
+            placement.includes("editorial")
+          );
+        });
 
         opinionPosts.sort((a: any, b: any) => (b.publishedAt || 0) - (a.publishedAt || 0));
 

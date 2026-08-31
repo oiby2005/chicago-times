@@ -177,13 +177,33 @@ export default function CategoryPageTemplate({
       const stored = localStorage.getItem("wsj_posts");
       if (stored) {
         const posts = JSON.parse(stored);
-        const targetTitleLower = categoryTitle.toLowerCase();
-        const catPosts = posts.filter(
-          (p: any) =>
-            p.status === "Published" &&
-            ((p.category && p.category.toLowerCase() === targetTitleLower) ||
-             (p.subCategories && p.subCategories.some((s: string) => s.toLowerCase() === targetTitleLower)))
-        );
+        const targetTitleLower = categoryTitle.toLowerCase().trim();
+        const isOpinionPage = targetTitleLower.includes("opinion") || targetTitleLower.includes("editorial");
+
+        const catPosts = posts.filter((p: any) => {
+          if (p.status !== "Published") return false;
+          const cat = (p.category || "").toLowerCase().trim();
+          const subs = (p.subCategories || []).map((s: string) => s.toLowerCase());
+          const placement = (p.homepagePlacement || "").toLowerCase();
+
+          if (isOpinionPage) {
+            return (
+              cat === "opinion" ||
+              cat === "opinions" ||
+              cat === "editorial" ||
+              cat === "editorials" ||
+              subs.some((s: string) => s.includes("opinion") || s.includes("editorial")) ||
+              placement.includes("opinion") ||
+              placement.includes("editorial")
+            );
+          }
+
+          return (
+            cat === targetTitleLower ||
+            subs.some((s: string) => s === targetTitleLower) ||
+            placement.includes(targetTitleLower)
+          );
+        });
 
         catPosts.sort((a: any, b: any) => (b.publishedAt || 0) - (a.publishedAt || 0));
 

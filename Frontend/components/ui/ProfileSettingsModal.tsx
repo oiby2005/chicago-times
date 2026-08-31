@@ -129,15 +129,6 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
       }
     } catch (e) {}
 
-    // Persist to Backend server API for cross-browser sync
-    try {
-      fetch("http://localhost:5000/api/users/profile", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedUser),
-      }).catch((err) => console.warn("Backend user profile sync warning:", err));
-    } catch (e) {}
-
     // Broadcast user update event across components
     window.dispatchEvent(new Event("wsj_user_updated"));
 

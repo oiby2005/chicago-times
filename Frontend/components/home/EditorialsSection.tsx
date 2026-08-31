@@ -54,11 +54,11 @@ export const EditorialsSection: React.FC = () => {
         const posts = JSON.parse(stored);
         const edPosts = posts.filter((p: any) => {
           if (p.status !== "Published") return false;
-          const placement = p.homepagePlacement || "None";
-          if (placement.includes("Editorial")) return true;
-          if (!placement.startsWith("None")) return false;
-          const cat = p.category || "";
-          return cat === "Editorial" || cat === "Editorials";
+          const placement = (p.homepagePlacement || "None").toLowerCase();
+          if (placement.includes("editorial") || placement.includes("opinion")) return true;
+          if (!placement.startsWith("none")) return false;
+          const cat = (p.category || "").toLowerCase().trim();
+          return cat === "editorial" || cat === "editorials" || cat === "opinion" || cat === "opinions";
         });
 
         edPosts.sort((a: any, b: any) => (b.publishedAt || 0) - (a.publishedAt || 0));
