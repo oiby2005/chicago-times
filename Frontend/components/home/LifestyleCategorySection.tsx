@@ -10,6 +10,7 @@ interface LifeArticle {
   slug: string;
   summary?: string;
   imageUrl: string;
+  sectionTag?: string;
 }
 
 const defaultArticles: LifeArticle[] = [
@@ -19,6 +20,7 @@ const defaultArticles: LifeArticle[] = [
     slug: "chicest-stays-in-balearic-islands",
     summary: "From a boutique townhouse hotel in Menorca’s capital to a peaceful Ibiza villa with a pool, we’ve tracked down the finest spots to have on your radar",
     imageUrl: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=800&q=80",
+    sectionTag: "Travel",
   },
   {
     id: "life2",
@@ -26,6 +28,7 @@ const defaultArticles: LifeArticle[] = [
     title: "Are airport lounges worth it? Probably not, according to new study",
     slug: "are-airport-lounges-worth-it",
     imageUrl: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=600&q=80",
+    sectionTag: "Travel",
   },
   {
     id: "life3",
@@ -33,12 +36,38 @@ const defaultArticles: LifeArticle[] = [
     title: "This Ayrshire hotel’s new spa is the star turn",
     slug: "this-ayrshire-hotels-new-spa-is-star-turn",
     imageUrl: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80",
+    sectionTag: "Wellness",
   },
   {
     id: "life4",
     title: "Naples’ hotel scene has never been better. Here’s where to stay",
     slug: "naples-hotel-scene-has-never-been-better",
     imageUrl: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=600&q=80",
+    sectionTag: "Travel",
+  },
+  {
+    id: "life5",
+    categoryTag: "DRIVE",
+    title: "The 10 best electric SUVs to buy in 2026 tested",
+    slug: "10-best-electric-suvs-to-buy-in-2026",
+    imageUrl: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=600&q=80",
+    sectionTag: "Cars",
+  },
+  {
+    id: "life6",
+    categoryTag: "TRENDING",
+    title: "Why vintage watches are outperforming the stock market",
+    slug: "why-vintage-watches-outperforming-stock-market",
+    imageUrl: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=600&q=80",
+    sectionTag: "Style",
+  },
+  {
+    id: "life7",
+    categoryTag: "GASTRONOMY",
+    title: "The Michelin-starred secret hiding in the heart of Florence",
+    slug: "michelin-starred-secret-hiding-in-florence",
+    imageUrl: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=600&q=80",
+    sectionTag: "Food & Dining",
   },
 ];
 
@@ -70,21 +99,22 @@ export const LifestyleCategorySection: React.FC = () => {
         lifePosts.sort((a: any, b: any) => (b.publishedAt || 0) - (a.publishedAt || 0));
 
         if (lifePosts.length > 0) {
-          const formatted: LifeArticle[] = lifePosts.slice(0, 4).map((p: any) => ({
+          const formatted: LifeArticle[] = lifePosts.slice(0, 7).map((p: any) => ({
             id: p.id,
             title: p.title,
             slug: p.slug || p.id,
             summary: p.subheadline || extractText(p.bodyContent) || "",
             imageUrl: p.thumbnail || "https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=800&q=80",
+            sectionTag: p.subCategories?.[0] || "Lifestyle",
           }));
 
           const merged = [...formatted];
-          for (let i = 0; i < defaultArticles.length && merged.length < 4; i++) {
+          for (let i = 0; i < defaultArticles.length && merged.length < 7; i++) {
             if (!merged.some((m) => m.id === defaultArticles[i].id)) {
               merged.push(defaultArticles[i]);
             }
           }
-          setArticles(merged.slice(0, 4));
+          setArticles(merged.slice(0, 7));
           return;
         }
       }
@@ -101,7 +131,11 @@ export const LifestyleCategorySection: React.FC = () => {
   const heroItem = articles[0] || defaultArticles[0];
   const miniItem1 = articles[1] || defaultArticles[1];
   const miniItem2 = articles[2] || defaultArticles[2];
+
   const sidebarItem1 = articles[3] || defaultArticles[3];
+  const sidebarItem2 = articles[4] || defaultArticles[4];
+  const sidebarItem3 = articles[5] || defaultArticles[5];
+  const sidebarItem4 = articles[6] || defaultArticles[6];
 
   return (
     <div className="w-full font-sans select-none pt-2 pb-4 my-0">
@@ -127,6 +161,13 @@ export const LifestyleCategorySection: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-8 gap-4 pb-4 border-b border-dashed border-[#CCCCCC]">
             {/* Left Headline */}
             <div className="md:col-span-4 flex flex-col justify-start">
+              {heroItem.categoryTag && (
+                <div className="mb-1">
+                  <span className="font-sans font-bold text-[11px] tracking-wider text-[#4A2E80] uppercase">
+                    {heroItem.categoryTag}
+                  </span>
+                </div>
+              )}
               <h3 className="font-serif font-bold text-[26px] sm:text-[30px] leading-[1.12] text-[#111111] hover:underline cursor-pointer mb-2">
                 <Link href={`/article/${heroItem.slug}`}>
                   {heroItem.title}
@@ -137,6 +178,11 @@ export const LifestyleCategorySection: React.FC = () => {
                   {heroItem.summary}
                 </p>
               )}
+              <div className="mt-1">
+                <span className="font-sans font-bold text-[12px] text-[#111111]">
+                  {heroItem.sectionTag || "Travel"}
+                </span>
+              </div>
             </div>
 
             {/* Right Large Hero Image */}
@@ -183,6 +229,9 @@ export const LifestyleCategorySection: React.FC = () => {
                     </Link>
                   </h4>
                 </div>
+                <span className="font-sans font-bold text-[12px] text-[#111111]">
+                  {miniItem1.sectionTag || "Travel"}
+                </span>
               </div>
             </div>
 
@@ -213,31 +262,144 @@ export const LifestyleCategorySection: React.FC = () => {
                     </Link>
                   </h4>
                 </div>
+                <span className="font-sans font-bold text-[12px] text-[#111111]">
+                  {miniItem2.sectionTag || "Wellness"}
+                </span>
               </div>
             </div>
           </div>
 
         </div>
 
-        {/* RIGHT SIDEBAR STORIES AREA */}
-        <div className="lg:col-span-4 pl-0 lg:pl-4 flex flex-col justify-between pt-4 lg:pt-0 h-full">
-          <article className="pb-3 mb-3 border-b border-dashed border-[#CCCCCC]">
-            <Link
-              href={`/article/${sidebarItem1.slug}`}
-              className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 mb-2 group"
-            >
-              <img
-                src={sidebarItem1.imageUrl}
-                alt={sidebarItem1.title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-            </Link>
-            <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-2">
-              <Link href={`/article/${sidebarItem1.slug}`}>
-                {sidebarItem1.title}
-              </Link>
-            </h4>
-          </article>
+        {/* RIGHT SIDEBAR STORIES AREA (2x2 Grid of 4 Articles matching Sport section) */}
+        <div className="lg:col-span-4 pl-0 lg:pl-4 pt-4 lg:pt-0">
+          <div className="grid grid-cols-2 gap-x-3 gap-y-4">
+            
+            {/* Top-Left (Item 1 of sidebar) */}
+            <article className="pr-2 pb-3 border-r border-b border-dashed border-[#CCCCCC] flex flex-col justify-between">
+              <div>
+                <Link
+                  href={`/article/${sidebarItem1.slug}`}
+                  className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 mb-2 group"
+                >
+                  <img
+                    src={sidebarItem1.imageUrl}
+                    alt={sidebarItem1.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                </Link>
+                {sidebarItem1.categoryTag && (
+                  <div className="mb-1">
+                    <span className="font-sans font-bold text-[10px] tracking-wider text-[#4A2E80] uppercase">
+                      {sidebarItem1.categoryTag}
+                    </span>
+                  </div>
+                )}
+                <h4 className="font-serif font-bold text-[14px] sm:text-[15px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-2">
+                  <Link href={`/article/${sidebarItem1.slug}`}>
+                    {sidebarItem1.title}
+                  </Link>
+                </h4>
+              </div>
+              <span className="font-sans font-bold text-[11px] text-[#111111] mt-1">
+                {sidebarItem1.sectionTag || "Travel"}
+              </span>
+            </article>
+
+            {/* Top-Right (Item 2 of sidebar) */}
+            <article className="pl-1 pb-3 border-b border-dashed border-[#CCCCCC] flex flex-col justify-between">
+              <div>
+                <Link
+                  href={`/article/${sidebarItem2.slug}`}
+                  className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 mb-2 group"
+                >
+                  <img
+                    src={sidebarItem2.imageUrl}
+                    alt={sidebarItem2.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                </Link>
+                {sidebarItem2.categoryTag && (
+                  <div className="mb-1">
+                    <span className="font-sans font-bold text-[10px] tracking-wider text-[#4A2E80] uppercase">
+                      {sidebarItem2.categoryTag}
+                    </span>
+                  </div>
+                )}
+                <h4 className="font-serif font-bold text-[14px] sm:text-[15px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-2">
+                  <Link href={`/article/${sidebarItem2.slug}`}>
+                    {sidebarItem2.title}
+                  </Link>
+                </h4>
+              </div>
+              <span className="font-sans font-bold text-[11px] text-[#111111] mt-1">
+                {sidebarItem2.sectionTag || "Cars"}
+              </span>
+            </article>
+
+            {/* Bottom-Left (Item 3 of sidebar) */}
+            <article className="pr-2 pt-1 border-r border-dashed border-[#CCCCCC] flex flex-col justify-between">
+              <div>
+                <Link
+                  href={`/article/${sidebarItem3.slug}`}
+                  className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 mb-2 group"
+                >
+                  <img
+                    src={sidebarItem3.imageUrl}
+                    alt={sidebarItem3.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                </Link>
+                {sidebarItem3.categoryTag && (
+                  <div className="mb-1">
+                    <span className="font-sans font-bold text-[10px] tracking-wider text-[#4A2E80] uppercase">
+                      {sidebarItem3.categoryTag}
+                    </span>
+                  </div>
+                )}
+                <h4 className="font-serif font-bold text-[14px] sm:text-[15px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-2">
+                  <Link href={`/article/${sidebarItem3.slug}`}>
+                    {sidebarItem3.title}
+                  </Link>
+                </h4>
+              </div>
+              <span className="font-sans font-bold text-[11px] text-[#111111] mt-1">
+                {sidebarItem3.sectionTag || "Style"}
+              </span>
+            </article>
+
+            {/* Bottom-Right (Item 4 of sidebar) */}
+            <article className="pl-1 pt-1 flex flex-col justify-between">
+              <div>
+                <Link
+                  href={`/article/${sidebarItem4.slug}`}
+                  className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 mb-2 group"
+                >
+                  <img
+                    src={sidebarItem4.imageUrl}
+                    alt={sidebarItem4.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                </Link>
+                {sidebarItem4.categoryTag && (
+                  <div className="mb-1">
+                    <span className="font-sans font-bold text-[10px] tracking-wider text-[#4A2E80] uppercase">
+                      {sidebarItem4.categoryTag}
+                    </span>
+                  </div>
+                )}
+                <h4 className="font-serif font-bold text-[14px] sm:text-[15px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-2">
+                  <Link href={`/article/${sidebarItem4.slug}`}>
+                    {sidebarItem4.title}
+                  </Link>
+                </h4>
+              </div>
+              <span className="font-sans font-bold text-[11px] text-[#111111] mt-1">
+                {sidebarItem4.sectionTag || "Food & Dining"}
+              </span>
+            </article>
+
+          </div>
         </div>
 
       </div>
