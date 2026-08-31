@@ -110,14 +110,38 @@ export default function WriterDashboard() {
         const parsed: PostItem[] = JSON.parse(storedPosts);
         if (parsed && Array.isArray(parsed)) {
           setPosts(parsed);
-          return;
         }
       } catch (e) {}
     }
-    setPosts([]);
-    try {
-      localStorage.setItem("wsj_posts", JSON.stringify([]));
-    } catch (e) {}
+
+    // Fetch from Backend server API for cross-browser sync (Edge <-> Chrome)
+    fetch("http://localhost:5000/api/posts")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.success && Array.isArray(data.posts) && data.posts.length > 0) {
+          const backendPosts = data.posts;
+          const currentStr = localStorage.getItem("wsj_posts");
+          let current: PostItem[] = currentStr ? JSON.parse(currentStr) : [];
+          let merged = [...current];
+          let updated = false;
+
+          backendPosts.forEach((bp: any) => {
+            const idx = merged.findIndex((lp) => String(lp.id) === String(bp.id));
+            if (idx === -1) {
+              merged.unshift(bp);
+              updated = true;
+            } else {
+              merged[idx] = { ...merged[idx], ...bp };
+            }
+          });
+
+          if (updated || merged.length !== current.length) {
+            localStorage.setItem("wsj_posts", JSON.stringify(merged));
+            setPosts(merged);
+          }
+        }
+      })
+      .catch((e) => {});
   };
 
   useEffect(() => {
@@ -130,7 +154,11 @@ export default function WriterDashboard() {
       }
     }
     window.addEventListener("wsj_posts_updated", loadPosts);
-    return () => window.removeEventListener("wsj_posts_updated", loadPosts);
+    window.addEventListener("wsj_user_updated", loadPosts);
+    return () => {
+      window.removeEventListener("wsj_posts_updated", loadPosts);
+      window.removeEventListener("wsj_user_updated", loadPosts);
+    };
   }, []);
 
   const handleMoveToTrash = (id: string, e?: React.MouseEvent) => {
