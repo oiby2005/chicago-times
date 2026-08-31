@@ -20,7 +20,7 @@ const defaultArticles: SportArticle[] = [
     title: "Returning Robinson’s excellence ensures Stokes is not missed",
     slug: "returning-robinsons-excellence",
     summary: "Headingley (day one of five): Root guides England to 112 for two in reply to Pakistan’s 171 after five wickets each for Robinson and Tongue",
-    imageUrl: "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=800&q=80",
+    imageUrl: "/images/world/england_cricket.jpg",
     sectionTag: "Cricket",
   },
   {
@@ -35,7 +35,7 @@ const defaultArticles: SportArticle[] = [
     categoryTag: "COMMENT | MATTHEW SYED",
     title: "Poor old Warner — forever the victim, never the culprit",
     slug: "poor-old-warner-forever-the-victim",
-    imageUrl: "/images/world/england_cricket.jpg",
+    imageUrl: "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=600&q=80",
     sectionTag: "Cricket",
   },
   {
@@ -45,6 +45,29 @@ const defaultArticles: SportArticle[] = [
     slug: "root-ditches-tinkering-on-day-of-sharp-decisive-captaincy",
     imageUrl: "https://images.unsplash.com/photo-1531415074968-036ba1b575da?auto=format&fit=crop&w=600&q=80",
     sectionTag: "Cricket",
+  },
+  {
+    id: "sp5",
+    categoryTag: "WINDOW WATCH",
+    title: "United submit £65m bid for Brighton’s Baleba as Jones nears Inter move",
+    slug: "united-submit-65m-bid-for-brightons-baleba",
+    imageUrl: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=600&q=80",
+    sectionTag: "Football",
+  },
+  {
+    id: "sp6",
+    categoryTag: "TOM KERSHAW",
+    title: "Cocaine ban does not mean the end for Kyrgios in sport that consumes stars",
+    slug: "cocaine-ban-does-not-mean-end-for-kyrgios",
+    imageUrl: "https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?auto=format&fit=crop&w=600&q=80",
+    sectionTag: "Tennis",
+  },
+  {
+    id: "sp7",
+    title: "‘Off grid’ UK athletics coach in Moroccan jail for sexually assaulting minor",
+    slug: "off-grid-uk-athletics-coach-in-moroccan-jail",
+    imageUrl: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=600&q=80",
+    sectionTag: "Athletics",
   },
 ];
 
@@ -76,7 +99,7 @@ export const SportCategorySection: React.FC = () => {
         sportPosts.sort((a: any, b: any) => (b.publishedAt || 0) - (a.publishedAt || 0));
 
         if (sportPosts.length > 0) {
-          const formatted: SportArticle[] = sportPosts.slice(0, 4).map((p: any) => ({
+          const formatted: SportArticle[] = sportPosts.slice(0, 7).map((p: any) => ({
             id: p.id,
             title: p.title,
             slug: p.slug || p.id,
@@ -86,12 +109,12 @@ export const SportCategorySection: React.FC = () => {
           }));
 
           const merged = [...formatted];
-          for (let i = 0; i < defaultArticles.length && merged.length < 4; i++) {
+          for (let i = 0; i < defaultArticles.length && merged.length < 7; i++) {
             if (!merged.some((m) => m.id === defaultArticles[i].id)) {
               merged.push(defaultArticles[i]);
             }
           }
-          setArticles(merged.slice(0, 4));
+          setArticles(merged.slice(0, 7));
           return;
         }
       }
@@ -108,7 +131,11 @@ export const SportCategorySection: React.FC = () => {
   const heroItem = articles[0] || defaultArticles[0];
   const miniItem1 = articles[1] || defaultArticles[1];
   const miniItem2 = articles[2] || defaultArticles[2];
+  
   const sidebarItem1 = articles[3] || defaultArticles[3];
+  const sidebarItem2 = articles[4] || defaultArticles[4];
+  const sidebarItem3 = articles[5] || defaultArticles[5];
+  const sidebarItem4 = articles[6] || defaultArticles[6];
 
   return (
     <div className="w-full font-sans select-none pt-2 pb-4 my-0">
@@ -153,7 +180,7 @@ export const SportCategorySection: React.FC = () => {
               )}
               <div className="mt-1">
                 <span className="font-sans font-bold text-[12px] text-[#111111]">
-                  {heroItem.sectionTag || "Sports"}
+                  {heroItem.sectionTag || "Cricket"}
                 </span>
               </div>
             </div>
@@ -188,7 +215,7 @@ export const SportCategorySection: React.FC = () => {
                 />
               </Link>
               <div className="flex flex-col justify-between flex-1">
-                <h4 className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-2">
+                <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-2">
                   <Link href={`/article/${miniItem1.slug}`}>
                     {miniItem1.title}
                   </Link>
@@ -220,7 +247,7 @@ export const SportCategorySection: React.FC = () => {
                       </span>
                     </div>
                   )}
-                  <h4 className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-2">
+                  <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-2">
                     <Link href={`/article/${miniItem2.slug}`}>
                       {miniItem2.title}
                     </Link>
@@ -235,35 +262,135 @@ export const SportCategorySection: React.FC = () => {
 
         </div>
 
-        {/* RIGHT SIDEBAR STORIES AREA (Position 4) */}
-        <div className="lg:col-span-4 pl-0 lg:pl-4 flex flex-col justify-between pt-4 lg:pt-0 h-full">
-          <article className="pb-3 mb-3 border-b border-dashed border-[#CCCCCC]">
-            <Link
-              href={`/article/${sidebarItem1.slug}`}
-              className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 mb-2 group"
-            >
-              <img
-                src={sidebarItem1.imageUrl}
-                alt={sidebarItem1.title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-            </Link>
-            {sidebarItem1.categoryTag && (
-              <div className="mb-1">
-                <span className="font-sans font-bold text-[10px] tracking-wider text-[#1b7538] uppercase">
-                  {sidebarItem1.categoryTag}
-                </span>
+        {/* RIGHT SIDEBAR STORIES AREA (2x2 Grid of 4 Articles matching Image 1) */}
+        <div className="lg:col-span-4 pl-0 lg:pl-4 pt-4 lg:pt-0">
+          <div className="grid grid-cols-2 gap-x-3 gap-y-4">
+            
+            {/* Top-Left (Item 1 of sidebar) */}
+            <article className="pr-2 pb-3 border-r border-b border-dashed border-[#CCCCCC] flex flex-col justify-between">
+              <div>
+                <Link
+                  href={`/article/${sidebarItem1.slug}`}
+                  className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 mb-2 group"
+                >
+                  <img
+                    src={sidebarItem1.imageUrl}
+                    alt={sidebarItem1.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                </Link>
+                {sidebarItem1.categoryTag && (
+                  <div className="mb-1">
+                    <span className="font-sans font-bold text-[10px] tracking-wider text-[#1b7538] uppercase">
+                      {sidebarItem1.categoryTag}
+                    </span>
+                  </div>
+                )}
+                <h4 className="font-serif font-bold text-[14px] sm:text-[15px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-2">
+                  <Link href={`/article/${sidebarItem1.slug}`}>
+                    {sidebarItem1.title}
+                  </Link>
+                </h4>
               </div>
-            )}
-            <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-2">
-              <Link href={`/article/${sidebarItem1.slug}`}>
-                {sidebarItem1.title}
-              </Link>
-            </h4>
-            <span className="font-sans font-bold text-[12px] text-[#111111]">
-              {sidebarItem1.sectionTag || "Sports"}
-            </span>
-          </article>
+              <span className="font-sans font-bold text-[11px] text-[#111111] mt-1">
+                {sidebarItem1.sectionTag || "Cricket"}
+              </span>
+            </article>
+
+            {/* Top-Right (Item 2 of sidebar) */}
+            <article className="pl-1 pb-3 border-b border-dashed border-[#CCCCCC] flex flex-col justify-between">
+              <div>
+                <Link
+                  href={`/article/${sidebarItem2.slug}`}
+                  className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 mb-2 group"
+                >
+                  <img
+                    src={sidebarItem2.imageUrl}
+                    alt={sidebarItem2.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                </Link>
+                {sidebarItem2.categoryTag && (
+                  <div className="mb-1">
+                    <span className="font-sans font-bold text-[10px] tracking-wider text-[#1b7538] uppercase">
+                      {sidebarItem2.categoryTag}
+                    </span>
+                  </div>
+                )}
+                <h4 className="font-serif font-bold text-[14px] sm:text-[15px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-2">
+                  <Link href={`/article/${sidebarItem2.slug}`}>
+                    {sidebarItem2.title}
+                  </Link>
+                </h4>
+              </div>
+              <span className="font-sans font-bold text-[11px] text-[#111111] mt-1">
+                {sidebarItem2.sectionTag || "Football"}
+              </span>
+            </article>
+
+            {/* Bottom-Left (Item 3 of sidebar) */}
+            <article className="pr-2 pt-1 border-r border-dashed border-[#CCCCCC] flex flex-col justify-between">
+              <div>
+                <Link
+                  href={`/article/${sidebarItem3.slug}`}
+                  className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 mb-2 group"
+                >
+                  <img
+                    src={sidebarItem3.imageUrl}
+                    alt={sidebarItem3.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                </Link>
+                {sidebarItem3.categoryTag && (
+                  <div className="mb-1">
+                    <span className="font-sans font-bold text-[10px] tracking-wider text-[#1b7538] uppercase">
+                      {sidebarItem3.categoryTag}
+                    </span>
+                  </div>
+                )}
+                <h4 className="font-serif font-bold text-[14px] sm:text-[15px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-2">
+                  <Link href={`/article/${sidebarItem3.slug}`}>
+                    {sidebarItem3.title}
+                  </Link>
+                </h4>
+              </div>
+              <span className="font-sans font-bold text-[11px] text-[#111111] mt-1">
+                {sidebarItem3.sectionTag || "Tennis"}
+              </span>
+            </article>
+
+            {/* Bottom-Right (Item 4 of sidebar) */}
+            <article className="pl-1 pt-1 flex flex-col justify-between">
+              <div>
+                <Link
+                  href={`/article/${sidebarItem4.slug}`}
+                  className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 mb-2 group"
+                >
+                  <img
+                    src={sidebarItem4.imageUrl}
+                    alt={sidebarItem4.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                </Link>
+                {sidebarItem4.categoryTag && (
+                  <div className="mb-1">
+                    <span className="font-sans font-bold text-[10px] tracking-wider text-[#1b7538] uppercase">
+                      {sidebarItem4.categoryTag}
+                    </span>
+                  </div>
+                )}
+                <h4 className="font-serif font-bold text-[14px] sm:text-[15px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-2">
+                  <Link href={`/article/${sidebarItem4.slug}`}>
+                    {sidebarItem4.title}
+                  </Link>
+                </h4>
+              </div>
+              <span className="font-sans font-bold text-[11px] text-[#111111] mt-1">
+                {sidebarItem4.sectionTag || "Athletics"}
+              </span>
+            </article>
+
+          </div>
         </div>
 
       </div>
