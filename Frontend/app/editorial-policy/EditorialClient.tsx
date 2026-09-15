@@ -37,9 +37,11 @@ const TOC_ITEMS: TocItem[] = [
 
 export default function EditorialClient() {
   const [activeSection, setActiveSection] = useState<string>("our-commitment");
+  const [isTocOpen, setIsTocOpen] = useState<boolean>(false);
 
   const scrollToSection = (id: string) => {
     setActiveSection(id);
+    setIsTocOpen(false);
     const element = document.getElementById(id);
     if (element) {
       const yOffset = -100;
@@ -83,14 +85,33 @@ export default function EditorialClient() {
               {/* ==================== LEFT SIDEBAR: STICKY TABLE OF CONTENTS (4 of 12 cols ~ 33%) ==================== */}
               <div className="lg:col-span-4 sticky top-20 z-10 self-start w-full">
                 <div className="bg-white border border-[#E2DDD0] p-4 sm:p-5 shadow-xs">
-                  <div className="flex items-center space-x-2 pb-3 mb-3 border-b border-[#E5E0D3]">
-                    <span className="text-[#990000] text-[16px]">🖋️</span>
-                    <h3 className="font-serif font-bold text-[15px] uppercase tracking-wider text-[#111111]">
-                      POLICY SECTIONS
-                    </h3>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsTocOpen(!isTocOpen)}
+                    className={`w-full flex items-center justify-between text-left lg:pb-3 lg:mb-3 lg:border-b lg:border-[#E5E0D3] ${
+                      isTocOpen ? "pb-3 mb-3 border-b border-[#E5E0D3]" : ""
+                    }`}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <span className="text-[#990000] text-[16px]">🖋️</span>
+                      <h3 className="font-serif font-bold text-[15px] uppercase tracking-wider text-[#111111]">
+                        POLICY SECTIONS
+                      </h3>
+                    </div>
+                    <div className="flex items-center space-x-1 lg:hidden text-[#990000] font-sans text-xs font-bold">
+                      <span>{isTocOpen ? "Hide" : "Show"}</span>
+                      <svg
+                        className={`w-4 h-4 transition-transform duration-200 ${isTocOpen ? "rotate-180" : ""}`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </button>
 
-                  <nav className="space-y-0.5">
+                  <nav className={`space-y-0.5 ${isTocOpen ? "block" : "hidden lg:block"}`}>
                     {TOC_ITEMS.map((item) => {
                       const isActive = activeSection === item.id;
                       return (
