@@ -18,7 +18,7 @@ const opinionArticles: OpinionArticle[] = [
     author: "JAMES TARANTO",
     title: "Justice Samuel Alito: ‘Practical Originalism’ and Its Facile Critics",
     slug: "justice-samuel-alito-practical-originalism",
-    imageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?fm=webp&fit=crop&w=150&q=80",
     isCircularImage: true,
   },
   {
@@ -26,7 +26,7 @@ const opinionArticles: OpinionArticle[] = [
     author: "THE EDITORIAL BOARD",
     title: "The Federal Reserve Status Quo vs. Kevin Warsh",
     slug: "federal-reserve-status-quo-vs-kevin-warsh",
-    imageUrl: "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=150&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1560250097-0b93528c311a?fm=webp&fit=crop&w=150&q=80",
     isCircularImage: false,
   },
   {
@@ -34,7 +34,7 @@ const opinionArticles: OpinionArticle[] = [
     author: "THE EDITORIAL BOARD",
     title: "America’s Low-Hire, Low-Fire Labor Market",
     slug: "americas-low-hire-low-fire-labor-market",
-    imageUrl: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=150&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?fm=webp&fit=crop&w=150&q=80",
     isCircularImage: false,
   },
   {
@@ -42,7 +42,7 @@ const opinionArticles: OpinionArticle[] = [
     author: "THE EDITORIAL BOARD",
     title: "The Saudis Spurn the Abraham Accords",
     slug: "saudis-spurn-abraham-accords",
-    imageUrl: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=150&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?fm=webp&fit=crop&w=150&q=80",
     isCircularImage: false,
   },
   {
@@ -67,18 +67,17 @@ export const OpinionSection: React.FC = () => {
         const opinionPosts = posts.filter((p: any) => {
           if (p.status !== "Published") return false;
           const cat = (p.category || "").toLowerCase().trim();
-          const placement = (p.homepagePlacement || "").toLowerCase();
-          const subs = (p.subCategories || []).map((s: string) => s.toLowerCase());
+          const placement = (p.homepagePlacement || "None").toLowerCase().trim();
 
-          return (
-            cat === "opinion" ||
-            cat === "opinions" ||
-            cat === "editorial" ||
-            cat === "editorials" ||
-            subs.some((s: string) => s.includes("opinion") || s.includes("editorial")) ||
-            placement.includes("opinion") ||
-            placement.includes("editorial")
-          );
+          // Strictly exclude Editorial articles from Opinion section!
+          if (cat === "editorial" || cat === "editorials" || placement.includes("editorial")) return false;
+
+          // If homepage placement is chosen except None / Home - Opinion Section (e.g. Top News, In Depth, A+ Main), do NOT display in homepage Opinion section!
+          if (!placement.startsWith("none") && !placement.includes("opinion section")) {
+            return false;
+          }
+
+          return cat === "opinion" || cat === "opinions" || placement.includes("opinion section");
         });
 
         opinionPosts.sort((a: any, b: any) => (b.publishedAt || 0) - (a.publishedAt || 0));
@@ -89,7 +88,7 @@ export const OpinionSection: React.FC = () => {
             author: (p.author || "BY WRITER").toUpperCase(),
             title: p.title,
             slug: p.slug || p.id,
-            imageUrl: p.thumbnail || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80",
+            imageUrl: p.thumbnail || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?fm=webp&fit=crop&w=150&q=80",
             isCircularImage: true,
           }));
 
@@ -118,7 +117,9 @@ export const OpinionSection: React.FC = () => {
       {/* Section Header */}
       <div className="pb-1 mb-1">
         <h2 className="font-serif font-bold text-[21px] sm:text-[22px] text-[#8b6f37] leading-none">
-          Opinion
+          <Link href="/opinion" className="hover:underline">
+            Opinion
+          </Link>
         </h2>
       </div>
 

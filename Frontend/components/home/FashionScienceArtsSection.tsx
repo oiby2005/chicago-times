@@ -15,19 +15,19 @@ const defaultFashion: ColumnArticle[] = [
     id: "fas1",
     title: "Why Slow Job Growth Doesn’t Mean the Labor Market Is in Trouble",
     slug: "why-slow-job-growth-doesnt-mean-labor-market-trouble",
-    imageUrl: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=600&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?fm=webp&fit=crop&w=600&q=80",
   },
   {
     id: "fas2",
     title: "Week Ahead for FX, Bonds: U.S. Inflation Data in Focus",
     slug: "week-ahead-for-fx-bonds",
-    imageUrl: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=600&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?fm=webp&fit=crop&w=600&q=80",
   },
   {
     id: "fas3",
     title: "U.S. Lost 23,000 Jobs in July, While Employment Growth Slowed",
     slug: "us-lost-23000-jobs-in-july",
-    imageUrl: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=600&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?fm=webp&fit=crop&w=600&q=80",
   },
 ];
 
@@ -36,19 +36,19 @@ const defaultScience: ColumnArticle[] = [
     id: "sci1",
     title: "NYC’s Pied-à-Terre Owners Hunt for Creative Ways to Dodge New Tax",
     slug: "nycs-pied-a-terre-owners-hunt-creative-ways-tax",
-    imageUrl: "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=600&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1613977257363-707ba9348227?fm=webp&fit=crop&w=600&q=80",
   },
   {
     id: "sci2",
     title: "The D.C. Home Market Gets a Billionaire Bump",
     slug: "dc-home-market-gets-billionaire-bump",
-    imageUrl: "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=600&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1613977257363-707ba9348227?fm=webp&fit=crop&w=600&q=80",
   },
   {
     id: "sci3",
     title: "House of the Week: Built Off-Site and Assembled On-Site",
     slug: "house-of-the-week-built-off-site",
-    imageUrl: "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=600&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1613977257363-707ba9348227?fm=webp&fit=crop&w=600&q=80",
   },
 ];
 
@@ -57,19 +57,19 @@ const defaultArts: ColumnArticle[] = [
     id: "art1",
     title: "Horse Racing’s Triple Crown May No Longer Be Worth Chasing",
     slug: "horse-racings-triple-crown-may-no-longer-be-worth-chasing",
-    imageUrl: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=600&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?fm=webp&fit=crop&w=600&q=80",
   },
   {
     id: "art2",
     title: "The ‘King of Soccer’ Went Rogue and Nearly Lost His FIFA Empire",
     slug: "the-king-of-soccer-went-rogue",
-    imageUrl: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=600&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?fm=webp&fit=crop&w=600&q=80",
   },
   {
     id: "art3",
     title: "He’s Known as Big Dumper, but This Catcher Can Hit",
     slug: "hes-known-as-big-dumper-but-this",
-    imageUrl: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=600&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?fm=webp&fit=crop&w=600&q=80",
   },
 ];
 

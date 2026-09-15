@@ -44,8 +44,8 @@ export const HomeSecondarySections: React.FC = () => {
                     <div className="text-[11px] font-sans font-extrabold leading-tight">
                       Briefing
                     </div>
-                    <div className="text-[12px] font-serif font-black tracking-widest text-white border-t border-gray-600 pt-0.5 mt-0.5">
-                      WSJ
+                    <div className="text-[10px] font-serif font-bold tracking-widest text-white border-t border-gray-600 pt-0.5 mt-0.5 uppercase">
+                      Times Chicago
                     </div>
                   </div>
                 </div>
@@ -172,9 +172,9 @@ export const HomeSecondarySections: React.FC = () => {
             {/* Right Sidebar Column (Span 4) */}
             <div className="md:col-span-4 space-y-5">
               {/* Empty Banner for MarketViews Advertisement */}
-              <AdPlaceholder width="w-full" height="h-[250px]" resolution="300 × 250" />
+              <AdPlaceholder slotId="hp_slot_5" width="w-full max-w-[300px]" height="h-[320px]" resolution="300 × 320" />
 
-              {/* Tip Submission Box (Matching Screenshot 2 Exactly) */}
+              {/* Tip Submission Box */}
               <div className="border border-black bg-white p-4 flex items-center space-x-3 rounded-xs shadow-2xs">
                 <div className="text-2xl text-black">✉</div>
                 <div className="space-y-0.5">
@@ -190,18 +190,18 @@ export const HomeSecondarySections: React.FC = () => {
                 </div>
               </div>
 
-              {/* Grey Advertisement Box Filling Remaining Sidebar Space */}
-              <AdPlaceholder width="w-full" height="h-[180px]" resolution="300 × 180" />
+              {/* Grey Advertisement Box */}
+              <AdPlaceholder slotId="hp_slot_4" width="w-full max-w-[300px]" height="h-[150px]" resolution="300 × 150" />
             </div>
           </div>
         </div>
 
         {/* ================================================================= */}
-        {/* SECTION 2: SPECIAL OFFER PROMO & WSJ OPINION (Screenshot 2)       */}
+        {/* SECTION 2: SPECIAL OFFER PROMO & TIMES CHICAGO OPINION              */}
         {/* ================================================================= */}
         <div className="py-8">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
-            {/* Special Offer Banner Box (Span 8 with scoped top black border) */}
+            {/* Special Offer Banner Box */}
             <div className="md:col-span-8 border-t-2 border-black pt-4">
               <div className="bg-[#fbfbfb] border border-[#d4d4d4] p-8 text-center space-y-4 rounded-xs">
                 <h2 className="font-serif font-black text-3xl sm:text-4xl text-black">
@@ -209,11 +209,11 @@ export const HomeSecondarySections: React.FC = () => {
                 </h2>
               <div className="flex items-center justify-center space-x-2 text-xs text-gray-500 font-sans font-bold uppercase tracking-wider">
                 <span>—————</span>
-                <span>WSJ PROMOTION</span>
+                <span>TIMES CHICAGO PROMOTION</span>
                 <span>—————</span>
               </div>
               <p className="text-xs sm:text-sm font-sans text-gray-700 max-w-md mx-auto">
-                Award-winning coverage on breaking news and today's top stories that impact you.
+                Award-winning coverage on breaking news and today&apos;s top stories that impact you.
               </p>
               <div>
                 <button className="bg-[#007cba] hover:bg-[#006996] text-white font-bold text-sm px-6 py-2.5 rounded-xs transition-colors">
@@ -221,20 +221,20 @@ export const HomeSecondarySections: React.FC = () => {
                 </button>
               </div>
               <div className="pt-2">
-                <span className="font-serif font-black text-sm tracking-wider text-black block">
-                  THE WALL STREET JOURNAL.
+                <span className="font-serif font-bold text-sm tracking-wider text-black block uppercase">
+                  TIMES CHICAGO
                 </span>
                 <span className="text-[9px] font-sans text-gray-500 uppercase tracking-widest block">
-                  IT'S YOUR BUSINESS
+                  IT&apos;S YOUR BUSINESS
                 </span>
               </div>
               </div>
             </div>
 
-            {/* WSJ Opinion | Free Expression Sidebar (Span 4) */}
+            {/* Times Chicago Opinion | Free Expression Sidebar (Span 4) */}
             <div className="md:col-span-4 border border-[#4a6b7c] rounded-xs overflow-hidden">
               <div className="bg-[#4a6b7c] text-white px-4 py-2.5 font-sans font-bold text-sm">
-                WSJ Opinion | Free Expression
+                Times Chicago Opinion | Free Expression
               </div>
               <div className="p-4 bg-[#f4f8fa] space-y-4 text-xs">
                 {/* Opinion 1 */}
@@ -301,7 +301,7 @@ export const HomeSecondarySections: React.FC = () => {
         </div>
 
         {/* ================================================================= */}
-        {/* SECTION 3: FASHION & THE WHATNOT APP EXPERIENCE (Screenshot)      */}
+        {/* SECTION 3: FASHION & THE WHATNOT APP EXPERIENCE                  */}
         {/* ================================================================= */}
         <div className="py-8 border-t border-[#e2e2e2]">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
@@ -319,7 +319,7 @@ export const HomeSecondarySections: React.FC = () => {
                   <Link href={`/article/${art["how-family-flower-farm-became-essential-chanel"]?.slug || "how-family-flower-farm-became-essential-chanel"}`}>
                     <div className="w-full aspect-[16/10] overflow-hidden rounded-xs bg-gray-100 relative group cursor-pointer">
                       <img
-                        src="https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?auto=format&fit=crop&w=800&q=80"
+                        src="https://images.unsplash.com/photo-1500651230702-0e2d8a49d4ad?fm=webp&fit=crop&w=800&q=80"
                         alt="Flower Farm Chanel No. 5"
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
@@ -333,7 +333,7 @@ export const HomeSecondarySections: React.FC = () => {
 
                   <div className="space-y-1">
                     <span className="text-[10px] font-sans font-bold text-[#666666] tracking-wider uppercase">
-                      WSJ. MAGAZINE
+                      TIMES CHICAGO MAGAZINE
                     </span>
                     <Link href={`/article/${art["how-family-flower-farm-became-essential-chanel"]?.slug || "how-family-flower-farm-became-essential-chanel"}`}>
                       <h4 className="font-serif font-bold text-xl text-black leading-tight hover:underline cursor-pointer">
@@ -348,7 +348,7 @@ export const HomeSecondarySections: React.FC = () => {
                     </div>
 
                     {/* Grey Advertisement Box Below Chanel Story */}
-                    <AdPlaceholder width="w-full" height="h-[100px]" resolution="300 × 100" />
+                    <AdPlaceholder slotId="hp_slot_4" width="w-full max-w-[300px]" height="h-[150px]" resolution="300 × 150" />
                   </div>
                 </div>
 
@@ -365,7 +365,7 @@ export const HomeSecondarySections: React.FC = () => {
                     <Link href={`/article/${art["live-shopping-app-where-some-people-bid-broke"]?.slug || "live-shopping-app-where-some-people-bid-broke"}`}>
                       <div className="w-full aspect-[16/10] overflow-hidden rounded-xs bg-gray-100 cursor-pointer">
                         <img
-                          src="https://images.unsplash.com/photo-1587825140708-dfaf72ae4b04?auto=format&fit=crop&w=600&q=80"
+                          src="https://images.unsplash.com/photo-1587825140708-dfaf72ae4b04?fm=webp&fit=crop&w=600&q=80"
                           alt="Whatnot Live Shopping App"
                           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                         />
@@ -399,7 +399,7 @@ export const HomeSecondarySections: React.FC = () => {
               </div>
             </div>
 
-            {/* Most Popular News Sidebar with Real Images (Span 4, Screenshot 1) */}
+            {/* Most Popular News Sidebar */}
             <div className="md:col-span-4 space-y-4">
               <div className="border-b border-[#e2e2e2] pb-1 mb-2">
                 <h3 className="font-serif font-bold text-xl text-black">
@@ -408,7 +408,7 @@ export const HomeSecondarySections: React.FC = () => {
               </div>
 
               <div className="space-y-4">
-                {/* Popular 1: Harvard Appalachia Woman */}
+                {/* Popular 1 */}
                 <div className="flex justify-between items-start space-x-3 pb-3 border-b border-[#e2e2e2]">
                   <Link href={`/article/${art["escaped-teen-marriage-appalachia-harvard"]?.slug || "escaped-teen-marriage-appalachia-harvard"}`}>
                     <h5 className="font-serif font-bold text-sm text-black leading-tight hover:underline cursor-pointer flex-1">
@@ -416,13 +416,13 @@ export const HomeSecondarySections: React.FC = () => {
                     </h5>
                   </Link>
                   <img
-                    src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=140&q=80"
+                    src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?fm=webp&fit=crop&w=140&q=80"
                     alt="Appalachia Harvard"
                     className="w-14 h-14 object-cover rounded-xs shrink-0"
                   />
                 </div>
 
-                {/* Popular 2: Burger King */}
+                {/* Popular 2 */}
                 <div className="flex justify-between items-start space-x-3 pb-3 border-b border-[#e2e2e2]">
                   <Link href={`/article/${art["burger-king-whopper-fast-food-wars"]?.slug || "burger-king-whopper-fast-food-wars"}`}>
                     <h5 className="font-serif font-bold text-sm text-black leading-tight hover:underline cursor-pointer flex-1">
@@ -430,13 +430,13 @@ export const HomeSecondarySections: React.FC = () => {
                     </h5>
                   </Link>
                   <img
-                    src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=140&q=80"
+                    src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?fm=webp&fit=crop&w=140&q=80"
                     alt="Burger King"
                     className="w-14 h-14 object-cover rounded-xs shrink-0"
                   />
                 </div>
 
-                {/* Popular 3: Airlines ICE / Putin NATO */}
+                {/* Popular 3 */}
                 <div className="flex justify-between items-start space-x-3 pb-3 border-b border-[#e2e2e2]">
                   <div className="flex-1 space-y-1">
                     <span className="inline-block border border-black px-1.5 py-0.5 text-[9px] font-bold font-sans uppercase tracking-wider text-black">
@@ -449,13 +449,13 @@ export const HomeSecondarySections: React.FC = () => {
                     </Link>
                   </div>
                   <img
-                    src="https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=140&q=80"
+                    src="https://images.unsplash.com/photo-1541872703-74c5e44368f9?fm=webp&fit=crop&w=140&q=80"
                     alt="NATO Intel"
                     className="w-14 h-14 object-cover rounded-xs shrink-0"
                   />
                 </div>
 
-                {/* Popular 4: Amazon Data Center */}
+                {/* Popular 4 */}
                 <div className="flex justify-between items-start space-x-3 pb-3 border-b border-[#e2e2e2]">
                   <Link href={`/article/${art["how-amazon-built-data-center-california"]?.slug || "how-amazon-built-data-center-california"}`}>
                     <h5 className="font-serif font-bold text-sm text-black leading-tight hover:underline cursor-pointer flex-1">
@@ -463,13 +463,13 @@ export const HomeSecondarySections: React.FC = () => {
                     </h5>
                   </Link>
                   <img
-                    src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=140&q=80"
+                    src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?fm=webp&fit=crop&w=140&q=80"
                     alt="Amazon Data Center"
                     className="w-14 h-14 object-cover rounded-xs shrink-0"
                   />
                 </div>
 
-                {/* Popular 5: China Export Engine */}
+                {/* Popular 5 */}
                 <div className="flex justify-between items-start space-x-3 pb-3">
                   <Link href={`/article/${art["chinas-new-export-engine-supplying-factories"]?.slug || "chinas-new-export-engine-supplying-factories"}`}>
                     <h5 className="font-serif font-bold text-sm text-black leading-tight hover:underline cursor-pointer flex-1">
@@ -477,25 +477,25 @@ export const HomeSecondarySections: React.FC = () => {
                     </h5>
                   </Link>
                   <img
-                    src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=140&q=80"
+                    src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?fm=webp&fit=crop&w=140&q=80"
                     alt="China Export Engine"
                     className="w-14 h-14 object-cover rounded-xs shrink-0"
                   />
                 </div>
               </div>
 
-              {/* Grey Advertisement Box Below Most Popular News */}
-              <AdPlaceholder width="w-full" height="h-[140px]" resolution="300 × 140" />
+              {/* Grey Advertisement Box */}
+              <AdPlaceholder slotId="hp_slot_4" width="w-full max-w-[300px]" height="h-[150px]" resolution="300 × 150" />
             </div>
           </div>
         </div>
 
         {/* ================================================================= */}
-        {/* SECTION 4: POLITICS & POLYMARKET WIDGET (Screenshot 2)            */}
+        {/* SECTION 4: POLITICS & POLYMARKET WIDGET                           */}
         {/* ================================================================= */}
         <div className="py-8 border-t border-[#e2e2e2]">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
-            {/* Politics Section Main Feed (Span 8 - Enlarged Font Sizes) */}
+            {/* Politics Section Main Feed */}
             <div className="md:col-span-8 space-y-6">
               <div className="border-t-2 border-black pt-1 mb-2">
                 <h3 className="font-serif font-bold text-2xl text-black">
@@ -503,9 +503,9 @@ export const HomeSecondarySections: React.FC = () => {
                 </h3>
               </div>
 
-              {/* 3-Grid Articles with Larger Typography */}
+              {/* 3-Grid Articles */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                {/* Politics 1: Trump Leak Probe */}
+                {/* Politics 1 */}
                 <div className="space-y-2.5">
                   <Link href={`/article/${art["trump-orders-leak-probe-media-coverage-munitions"]?.slug || "trump-orders-leak-probe-media-coverage-munitions"}`}>
                     <div className="w-full aspect-[4/3] overflow-hidden rounded-xs bg-gray-100 cursor-pointer">
@@ -527,13 +527,11 @@ export const HomeSecondarySections: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Politics Coursiv Advertisement Card matching Image 1 */}
+                {/* Coursiv Advertisement Card */}
                 <div className="bg-[#f4f5f7] border border-[#e5e7eb] rounded-xs p-3.5 space-y-2.5 select-none">
-                  {/* Image with blue Ad overlay badge */}
                   <div className="relative w-full aspect-[4/3] bg-gray-200 rounded-xs overflow-hidden">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=600&q=80"
+                      src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?fm=webp&fit=crop&w=600&q=80"
                       alt="Coursiv AI Work Team"
                       className="w-full h-full object-cover"
                     />
@@ -542,23 +540,20 @@ export const HomeSecondarySections: React.FC = () => {
                     </span>
                   </div>
 
-                  {/* Brand Name */}
                   <div className="font-sans font-bold text-[16px] text-[#0284c7] leading-none pt-0.5">
                     Coursiv
                   </div>
 
-                  {/* Main Chinese Headline */}
                   <h4 className="font-sans font-black text-[18px] text-[#111111] leading-tight">
                     用AI更聪明地工作
                   </h4>
 
-                  {/* Subtitle */}
                   <p className="font-sans text-[13.5px] text-[#555555] leading-normal font-normal">
                     用热门AI技能提升你的职业
                   </p>
                 </div>
 
-                {/* Politics 3: Fauci Legal Trouble */}
+                {/* Politics 3 */}
                 <div className="space-y-2.5">
                   <Link href={`/article/${art["fauci-legal-trouble-contempt-vote"]?.slug || "fauci-legal-trouble-contempt-vote"}`}>
                     <h4 className="font-serif font-bold text-lg sm:text-xl text-black leading-snug hover:underline cursor-pointer">
@@ -572,7 +567,7 @@ export const HomeSecondarySections: React.FC = () => {
                     💬 {art["fauci-legal-trouble-contempt-vote"]?.commentCount || 698}
                   </div>
 
-                  {/* Sub item: Max Miller */}
+                  {/* Sub item */}
                   <div className="pt-3 border-t border-[#e2e2e2] space-y-1.5">
                     <span className="inline-block border border-black px-1.5 py-0.5 text-[9px] font-bold font-sans uppercase tracking-wider text-black">
                       EXCLUSIVE
@@ -592,15 +587,15 @@ export const HomeSecondarySections: React.FC = () => {
                 </div>
               </div>
 
-              {/* Grey Advertisement Bar Below Politics Main Feed */}
-              <AdPlaceholder width="w-full" height="h-[120px]" resolution="728 × 120" />
+              {/* Grey Advertisement Bar */}
+              <AdPlaceholder slotId="hp_slot_6" width="w-full max-w-[970px]" height="h-[180px]" resolution="970 × 180" />
             </div>
 
-            {/* Polymarket Partner Widget & Advertisement Sidebar (Span 4, Screenshot 2) */}
+            {/* Polymarket Partner Widget */}
             <div className="md:col-span-4 space-y-4">
               <div className="border border-[#e2e2e2] bg-[#fcfcfc] p-4 rounded-xs space-y-3">
                 <div className="text-[10px] font-sans font-bold text-gray-500 uppercase tracking-wider flex items-center justify-between border-b border-gray-200 pb-2">
-                  <span>Polymarket | A Dow Jones partner</span>
+                  <span>Polymarket | Times Chicago partner</span>
                   <span>ⓘ</span>
                 </div>
                 <h4 className="font-bold text-xs text-black">
@@ -626,7 +621,6 @@ export const HomeSecondarySections: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* SVG Chart Graphic */}
                   <div className="w-full h-20 pt-2">
                     <svg className="w-full h-full" viewBox="0 0 200 60">
                       <path
@@ -655,8 +649,8 @@ export const HomeSecondarySections: React.FC = () => {
                 </div>
               </div>
 
-              {/* Grey Advertisement Box Below Polymarket Widget */}
-              <AdPlaceholder width="w-full" height="h-[180px]" resolution="300 × 180" />
+              {/* Grey Advertisement Box */}
+              <AdPlaceholder slotId="hp_slot_4" width="w-full max-w-[300px]" height="h-[150px]" resolution="300 × 150" />
             </div>
           </div>
         </div>

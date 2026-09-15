@@ -58,6 +58,107 @@
   font-stretch: condensed;
 }
 
+@font-face {
+  font-family: 'Reserve Condensed Roman';
+  src: local('Reserve Condensed Roman'),
+       local('ReserveCondensed-Roman'),
+       local('Reserve Condensed'),
+       local('Escrow Condensed'),
+       local('Escrow Display Condensed');
+  font-style: normal;
+}
+
+/* Exact WSJ Article Body Typography matching Image 2 (Exchange, Georgia, serif) for text paragraphs only */
+.editor-body-text,
+.editor-body-text p,
+.editor-body-text span:not(figure span):not(.image-caption):not(.image-credit),
+.editor-body-text div:not(figure):not(figure div),
+.editor-reserve-font,
+.editor-reserve-font p,
+.article-body-text,
+.article-body-text p,
+.article-body-content,
+.article-body-content p,
+.preview-body-text,
+.preview-body-text p {
+  font-family: Exchange, Georgia, 'Source Serif 4', var(--font-sourceserif), serif !important;
+  font-size: inherit !important;
+  line-height: 1.75 !important;
+  font-weight: 400 !important;
+  letter-spacing: normal !important;
+  font-stretch: normal !important;
+  color: #1a1a1a !important;
+}
+
+.editor-body-text strong,
+.editor-body-text strong *,
+.editor-body-text b,
+.editor-body-text b *,
+.editor-body-text .font-bold,
+.editor-reserve-font strong,
+.editor-reserve-font strong *,
+.editor-reserve-font b,
+.editor-reserve-font b *,
+.editor-reserve-font .font-bold,
+.article-body-text strong,
+.article-body-text strong *,
+.article-body-text b,
+.article-body-text b *,
+.article-body-text .font-bold,
+.article-body-content strong,
+.article-body-content strong *,
+.article-body-content b,
+.article-body-content b *,
+.article-body-content .font-bold,
+.preview-body-text strong,
+.preview-body-text strong *,
+.preview-body-text b,
+.preview-body-text b *,
+.preview-body-text .font-bold {
+  font-weight: 700 !important;
+  font-size: inherit !important;
+  font-family: Exchange, Georgia, 'Source Serif 4', var(--font-sourceserif), serif !important;
+}
+
+/* Dedicated Image Caption & Photo Credit Styling matching reference image */
+figure div,
+figcaption div {
+  font-family: var(--font-sans), 'Publica Sans Light', sans-serif !important;
+}
+
+figure div span:first-child,
+.editor-body-text figure div span:first-child,
+.preview-body-text figure div span:first-child,
+.article-body-text figure div span:first-child,
+.article-body-content figure div span:first-child,
+.image-caption,
+figcaption span:first-child {
+  font-family: Retina, var(--font-sans), 'Publica Sans Light', sans-serif !important;
+  font-size: 11px !important;
+  font-style: italic !important;
+  font-weight: 400 !important;
+  line-height: 1.4 !important;
+  color: #64748b !important;
+  letter-spacing: normal !important;
+}
+
+figure div span:last-child,
+.editor-body-text figure div span:last-child,
+.preview-body-text figure div span:last-child,
+.article-body-text figure div span:last-child,
+.article-body-content figure div span:last-child,
+.image-credit,
+figcaption span:last-child {
+  font-family: Retina, "Retina Bold", var(--font-sans), monospace, sans-serif !important;
+  font-size: 10px !important;
+  font-style: normal !important;
+  font-weight: 700 !important;
+  line-height: 1.4 !important;
+  color: #64748b !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.04em !important;
+}
+
 /* Universal Article Title Typography matching Preview Title cleanly without transform glitches */
 .font-encorpada-headline, 
 .font-kepler-headline, 
@@ -101,6 +202,35 @@ body.signin-page *,
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Line clamp utility classes */
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-4 {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 /* Retina Bold Micro-Typography Utility */

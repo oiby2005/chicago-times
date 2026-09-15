@@ -16,7 +16,7 @@ export const HomeRealEstateInsights: React.FC = () => {
           <div className="md:col-span-8 space-y-6">
             {/* 1. ADVERTISEMENT SECTION */}
             <div className="border-t-2 border-black pt-3">
-              <AdPlaceholder width="w-full" height="h-[120px]" resolution="728 × 90" />
+              <AdPlaceholder slotId="hp_slot_3" width="w-full max-w-[970px]" height="h-[120px]" resolution="970 × 120" />
             </div>
 
             {/* 2. REAL ESTATE INSIGHTS SECTION (Confined to Span 8, NOT 100% full width) */}
@@ -83,7 +83,7 @@ export const HomeRealEstateInsights: React.FC = () => {
 
               {/* Grey Advertisement Box Below Real Estate Insights */}
               <div className="mt-6">
-                <AdPlaceholder width="w-full" height="h-[160px]" resolution="300 × 250" />
+                <AdPlaceholder slotId="hp_slot_5" width="w-full max-w-[300px]" height="h-[320px]" resolution="300 × 320" />
               </div>
             </div>
           </div>

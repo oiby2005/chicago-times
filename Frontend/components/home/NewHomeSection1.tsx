@@ -35,6 +35,9 @@ import MarketsFinanceCategorySection from "@/components/home/MarketsFinanceCateg
 import EightCategoryGridSection from "@/components/home/EightCategoryGridSection";
 
 export default function NewHomeSection1() {
+  const [activePodcastCount, setActivePodcastCount] = React.useState<number>(1);
+  const isPodcastSticky = activePodcastCount < 3;
+
   return (
     <section className="w-full bg-white text-[#111111] pt-0 pb-6 select-none">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-0 mb-6">
@@ -185,7 +188,7 @@ export default function NewHomeSection1() {
       </div>
 
       {/* ==================== ROW 13: MAIN VIDEO & FASHION/SCIENCE/ARTS (LEFT 9 COLS) + AD 07 & PODCAST (RIGHT 3 COLS) ==================== */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 pt-2 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 pt-2 items-stretch relative">
         {/* Left 9 Cols: Main Video Section -> Fashion, Science, Arts 3-col Section */}
         <div className="col-span-12 lg:col-span-9 pr-0 lg:pr-[0.4cm] border-r border-solid border-[#CCCCCC]">
           <MainVideoSection />
@@ -195,11 +198,13 @@ export default function NewHomeSection1() {
           </div>
         </div>
 
-        {/* Right 3 Cols: Ad 07 -> Podcast Section */}
-        <div className="col-span-12 lg:col-span-3 pl-0 lg:pl-[0.4cm] flex flex-col justify-start">
-          <Ad7Section />
-          <div className="mt-4">
-            <PodcastSection />
+        {/* Right 3 Cols: Ad 07 -> Podcast Section (Sticky when active podcasts < 3, static when >= 3) */}
+        <div className="col-span-12 lg:col-span-3 pl-0 lg:pl-[0.4cm] relative h-full">
+          <div className={isPodcastSticky ? "sticky top-20 z-10 self-start w-full" : "relative z-10 self-start w-full"}>
+            <Ad7Section />
+            <div className="mt-4">
+              <PodcastSection onActiveCountChange={(count) => setActivePodcastCount(count)} />
+            </div>
           </div>
         </div>
       </div>

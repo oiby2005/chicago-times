@@ -154,7 +154,7 @@ export const HomeCategoryGrid: React.FC = () => {
 
             {/* Right Sidebar MarketViews AdPlaceholder */}
             <div className="md:col-span-3">
-              <AdPlaceholder width="w-full" height="h-[250px]" resolution="300 × 250" />
+              <AdPlaceholder slotId="hp_slot_4" width="w-full max-w-[300px]" height="h-[150px]" resolution="300 × 150" />
             </div>
           </div>
         </div>
@@ -174,7 +174,7 @@ export const HomeCategoryGrid: React.FC = () => {
               <SkeletonColumn title="CFO" />
             </div>
             <div className="md:col-span-3">
-              <AdPlaceholder width="w-full" height="h-[250px]" resolution="300 × 250" />
+              <AdPlaceholder slotId="hp_slot_5" width="w-full" height="h-[320px]" resolution="300 × 320" />
             </div>
           </div>
         </div>
@@ -192,7 +192,7 @@ export const HomeCategoryGrid: React.FC = () => {
               <SkeletonColumn title="Logistics Report" />
             </div>
             <div className="md:col-span-3">
-              <AdPlaceholder width="w-full" height="h-[250px]" resolution="300 × 250" />
+              <AdPlaceholder slotId="hp_slot_5" width="w-full" height="h-[320px]" resolution="300 × 320" />
             </div>
           </div>
         </div>
@@ -212,7 +212,7 @@ export const HomeCategoryGrid: React.FC = () => {
               <SkeletonColumn title="Barron's" />
             </div>
             <div className="md:col-span-3">
-              <AdPlaceholder width="w-full" height="h-[500px]" resolution="300 × 500" />
+              <AdPlaceholder slotId="hp_slot_7" width="w-full" height="h-[320px]" resolution="300 × 320" />
             </div>
           </div>
         </div>
@@ -232,7 +232,7 @@ export const HomeCategoryGrid: React.FC = () => {
               <SkeletonColumn title="Investor's Business Daily" />
             </div>
             <div className="md:col-span-3">
-              <AdPlaceholder width="w-full" height="h-[500px]" resolution="300 × 500" />
+              <AdPlaceholder slotId="hp_slot_7" width="w-full" height="h-[320px]" resolution="300 × 320" />
             </div>
           </div>
         </div>

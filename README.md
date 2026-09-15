@@ -76,7 +76,8 @@ Before running the application, make sure your computer has:
 | Role | Email | Password | Dashboard Route |
 | :--- | :--- | :--- | :--- |
 | **Admin** | `admin@gmail.com` | `admin123` | `/admin-dashboard` |
-| **Writer** | `writer@gmail.com` | `writer123` | `/writer-dashboard` |
+| **Writer (Default)** | `writer@gmail.com` | `writer123` | `/writer-dashboard` |
+| **Writer (New)** | `writer1@gmail.com` | `writer456` | `/writer-dashboard` |
 | **Reader** | `reader@gmail.com` | `reader123` | `/reader-dashboard` |
 
 ---

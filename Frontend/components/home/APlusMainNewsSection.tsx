@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { getRelativeTime } from "@/lib/relativeTime";
 
 interface APlusMainNewsSectionProps {
   category?: string;
@@ -18,7 +19,7 @@ export const APlusMainNewsSection: React.FC<APlusMainNewsSectionProps> = ({
   title = "The Suspected Gangster Causing Headaches for Kushner’s Albania Deal",
   slug = "suspected-gangster-headaches-kushner-albania-deal",
   summary = "Villagers say they warned Trump's son-in-law their beachfront land was stolen by Artur Shehu, who now faces drug-related charges, which he denies.",
-  imageUrl = "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=1200&q=80",
+  imageUrl = "https://images.unsplash.com/photo-1544717305-2782549b5136?fm=webp&fit=crop&w=1200&q=80",
   commentsCount = "101",
   readTime = "8 min read",
 }) => {
@@ -64,7 +65,7 @@ export const APlusMainNewsSection: React.FC<APlusMainNewsSectionProps> = ({
                 : summary),
             imageUrl: topPost.thumbnail || imageUrl,
             commentsCount: topPost.commentsCount || "0",
-            readTime: topPost.readDuration || topPost.readTime || readTime,
+            readTime: `${getRelativeTime(topPost.publishedAt, topPost.date)} • ${topPost.readDuration || topPost.readTime || readTime}`,
           });
           return;
         }

@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import { getRelativeTime } from "@/lib/relativeTime";
 
 interface TopNewsArticle {
   id: string;
@@ -58,10 +59,13 @@ export const TopNewsSection: React.FC = () => {
             p.homepagePlacement.includes("Top News")
         );
 
-        // Sort by publishedAt descending (newest published first)
-        topNewsPosts.sort((a: any, b: any) => (b.publishedAt || 0) - (a.publishedAt || 0));
+        topNewsPosts.sort(
+          (a: any, b: any) =>
+            (Number(b.publishedAt) || 0) - (Number(a.publishedAt) || 0)
+        );
 
         if (topNewsPosts.length > 0) {
+
           const formatted: TopNewsArticle[] = topNewsPosts.slice(0, 3).map((p: any) => ({
             id: p.id,
             title: p.title,
@@ -73,7 +77,7 @@ export const TopNewsSection: React.FC = () => {
                 ? p.bodyContent.replace(/<[^>]+>/g, " ").trim().slice(0, 120) + "..."
                 : ""),
             commentsCount: p.commentsCount || "0",
-            readTime: p.readDuration || p.readTime || "5 min read",
+            readTime: `${getRelativeTime(p.publishedAt, p.date)} • ${p.readDuration || p.readTime || "5 min read"}`,
           }));
 
           // Fill with fallback defaults if less than 3

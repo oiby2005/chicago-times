@@ -21,26 +21,26 @@ export const SpecialOfferPage: React.FC = () => {
             <span className="font-bold text-black">$3 USD Per Month</span>
           </h1>
           <p className="font-sans text-lg sm:text-xl text-[#333333] font-normal">
-            Choose your WSJ Subscription
+            Choose your Times Chicago Subscription
           </p>
         </div>
 
         {/* Subscription Plan Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch mb-8">
-          {/* CARD 1: WSJ Digital */}
+          {/* CARD 1: Times Chicago Digital */}
           <div className="bg-white border border-[#e2e2e2] rounded-xs shadow-xs p-6 sm:p-8 flex flex-col justify-between text-center select-none">
             <div>
               {/* Card Title */}
               <h2 className="font-sans font-bold text-xl text-black mb-5">
-                WSJ Digital
+                Times Chicago Digital
               </h2>
 
               {/* Logo Graphic */}
               <div className="h-12 flex items-center justify-center mb-6">
                 <img
-                  src="/images/wsj-masthead.svg"
-                  alt="The Wall Street Journal"
-                  className="h-5 sm:h-6 w-auto object-contain"
+                  src="/images/design-reference/Times Chicago.svg"
+                  alt="Times Chicago"
+                  className="h-6 sm:h-7 w-auto object-contain"
                 />
               </div>
 
@@ -78,7 +78,7 @@ export const SpecialOfferPage: React.FC = () => {
                   <span className="text-[#007cba] font-bold text-sm leading-none mt-0.5">
                     ✓
                   </span>
-                  <span>Unlimited access on WSJ.com and in the WSJ app</span>
+                  <span>Unlimited access on Times Chicago website and mobile apps</span>
                 </li>
                 <li className="flex items-start space-x-2">
                   <span className="text-[#007cba] font-bold text-sm leading-none mt-0.5">
@@ -90,36 +90,36 @@ export const SpecialOfferPage: React.FC = () => {
                   <span className="text-[#007cba] font-bold text-sm leading-none mt-0.5">
                     ✓
                   </span>
-                  <span>Audio versions of WSJ articles</span>
+                  <span>Audio versions of Times Chicago articles</span>
                 </li>
               </ul>
             </div>
           </div>
 
-          {/* CARD 2: WSJ Digital Bundle */}
+          {/* CARD 2: Times Chicago Digital Bundle */}
           <div className="bg-white border border-[#e2e2e2] rounded-xs shadow-xs p-6 sm:p-8 flex flex-col justify-between text-center select-none">
             <div>
               {/* Card Title */}
               <h2 className="font-sans font-bold text-xl text-black mb-5">
-                WSJ Digital Bundle
+                Times Chicago Digital Bundle
               </h2>
 
               {/* Stacked Logos Graphic */}
               <div className="h-12 flex flex-col items-center justify-center space-y-1 mb-6">
                 <img
-                  src="/images/wsj-masthead.svg"
-                  alt="The Wall Street Journal"
-                  className="h-4 sm:h-4.5 w-auto object-contain"
+                  src="/images/design-reference/Times Chicago.svg"
+                  alt="Times Chicago"
+                  className="h-5 sm:h-5.5 w-auto object-contain"
                 />
                 <span className="text-gray-400 font-sans text-[11px] leading-none">
                   +
                 </span>
                 <div className="flex items-center space-x-2 text-xs">
                   <span className="font-serif font-black tracking-wider text-black text-[12px] uppercase">
-                    BARRON&apos;S
+                    BUSINESS &amp; FINANCE
                   </span>
                   <span className="font-sans font-black italic text-[#008a00] text-[12px]">
-                    MarketWatch
+                    MARKETS
                   </span>
                 </div>
               </div>
@@ -149,7 +149,7 @@ export const SpecialOfferPage: React.FC = () => {
 
               {/* Features Heading */}
               <h3 className="font-sans font-bold text-xs text-black mb-4">
-                Includes a WSJ Digital Subscription:
+                Includes a Times Chicago Digital Subscription:
               </h3>
 
               {/* Feature Bullets List 1 */}
@@ -158,7 +158,7 @@ export const SpecialOfferPage: React.FC = () => {
                   <span className="text-[#007cba] font-bold text-sm leading-none mt-0.5">
                     ✓
                   </span>
-                  <span>Unlimited access on WSJ.com and in the WSJ app</span>
+                  <span>Unlimited access on Times Chicago site &amp; apps</span>
                 </li>
                 <li className="flex items-start space-x-2">
                   <span className="text-[#007cba] font-bold text-sm leading-none mt-0.5">
@@ -170,7 +170,7 @@ export const SpecialOfferPage: React.FC = () => {
                   <span className="text-[#007cba] font-bold text-sm leading-none mt-0.5">
                     ✓
                   </span>
-                  <span>Audio versions of WSJ articles</span>
+                  <span>Audio versions of Times Chicago articles</span>
                 </li>
               </ul>
 
@@ -186,29 +186,21 @@ export const SpecialOfferPage: React.FC = () => {
                     ✓
                   </span>
                   <span>
-                    Unlimited access on Barrons.com and Marketwatch.com
+                    Full premium access to all Times Chicago digital editions
                   </span>
                 </li>
                 <li className="flex items-start space-x-2">
                   <span className="text-[#007cba] font-bold text-sm leading-none mt-0.5">
                     ✓
                   </span>
-                  <span>The Barron&apos;s and MarketWatch apps</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <span className="text-[#007cba] font-bold text-sm leading-none mt-0.5">
-                    ✓
-                  </span>
-                  <span>
-                    Access to all three publications with a single account
-                  </span>
+                  <span>Times Chicago mobile apps and breaking alerts</span>
                 </li>
                 <li className="flex items-start space-x-2">
                   <span className="text-[#007cba] font-bold text-sm leading-none mt-0.5">
                     ✓
                   </span>
                   <span>
-                    Live events with journalists from all three publications
+                    Access all features with a single unified account
                   </span>
                 </li>
                 <li className="flex items-start space-x-2">
@@ -216,8 +208,15 @@ export const SpecialOfferPage: React.FC = () => {
                     ✓
                   </span>
                   <span>
-                    Personal finance advice, stock picks, and news, all in one
-                    subscription
+                    Live events with journalists and guest columnists
+                  </span>
+                </li>
+                <li className="flex items-start space-x-2">
+                  <span className="text-[#007cba] font-bold text-sm leading-none mt-0.5">
+                    ✓
+                  </span>
+                  <span>
+                    Personal finance advice, market trends, and reporting
                   </span>
                 </li>
               </ul>

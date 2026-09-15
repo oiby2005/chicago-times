@@ -11,7 +11,26 @@ interface TechArticle {
   summary: string;
   imageUrl?: string;
   commentsCount?: number;
+  publishedAt?: number | string;
 }
+
+const formatTimeAgo = (timestamp?: number | string): string => {
+  if (!timestamp) return "2 hours ago";
+  const now = Date.now();
+  const time = typeof timestamp === "string" ? new Date(timestamp).getTime() : timestamp;
+  if (isNaN(time) || time <= 0) return "2 hours ago";
+  const diffMs = Math.max(0, now - time);
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  if (diffHours < 1) {
+    const diffMins = Math.max(1, Math.floor(diffMs / (1000 * 60)));
+    return `${diffMins} min${diffMins > 1 ? "s" : ""} ago`;
+  }
+  if (diffHours < 24) {
+    return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
+  }
+  const diffDays = Math.floor(diffHours / 24);
+  return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
+};
 
 const defaultArticles: TechArticle[] = [
   {
@@ -20,13 +39,15 @@ const defaultArticles: TechArticle[] = [
     title: "Spanish Border Chaos Is an Illusion: Europe’s Borders Are Finally Working",
     slug: "spanish-border-chaos-is-an-illusion",
     summary: "Images of 72,000 migrants stampeding into Ceuta looked like a security collapse. In reality it revealed Europe’s much harder line on immigration.",
-    imageUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?fm=webp&fit=crop&w=800&q=80",
+    publishedAt: Date.now() - 3 * 3600 * 1000,
   },
   {
     id: "tech2",
     title: "EU’s Internal Borders Start to Harden as Dispute Grows Over Migrants",
     slug: "eus-internal-borders-start-to-harden",
     summary: "Spain introduced new border checks on arrivals from Italy, as a migration dispute between the countries escalated into a tit-for-tat.",
+    publishedAt: Date.now() - 5 * 3600 * 1000,
   },
   {
     id: "tech3",
@@ -34,6 +55,7 @@ const defaultArticles: TechArticle[] = [
     slug: "russias-hottest-startup-sanctions-evasion",
     summary: "Founded less than two years ago, A7 says it handles nearly 20% of payments in Russian foreign trade, or more than $100 billion annually.",
     commentsCount: 39,
+    publishedAt: Date.now() - 7 * 3600 * 1000,
   },
   {
     id: "tech4",
@@ -41,6 +63,7 @@ const defaultArticles: TechArticle[] = [
     slug: "us-intel-links-russia-explosive-drone",
     summary: "American intelligence had already suggested Putin could test NATO’s resolve with a limited incursion in the coming years.",
     commentsCount: 231,
+    publishedAt: Date.now() - 10 * 3600 * 1000,
   },
 ];
 
@@ -77,7 +100,8 @@ export const TechCategorySection: React.FC = () => {
             title: p.title,
             slug: p.slug || p.id,
             summary: p.subheadline || extractText(p.bodyContent) || "",
-            imageUrl: p.thumbnail || "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80",
+            imageUrl: p.thumbnail || "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?fm=webp&fit=crop&w=800&q=80",
+            publishedAt: p.publishedAt,
           }));
 
           const merged = [...formatted];
@@ -158,6 +182,9 @@ export const TechCategorySection: React.FC = () => {
               {heroItem.summary}
             </p>
           )}
+          <span className="font-mono text-[11px] text-[#666666] mt-1 block">
+            {formatTimeAgo(heroItem.publishedAt)}
+          </span>
         </div>
 
         {/* RIGHT STORIES AREA */}
@@ -174,6 +201,9 @@ export const TechCategorySection: React.FC = () => {
                 {side1.summary}
               </p>
             )}
+            <span className="font-mono text-[11px] text-[#666666] mt-1 block">
+              {formatTimeAgo(side1.publishedAt)}
+            </span>
           </article>
 
           {/* Story 2 */}
@@ -194,6 +224,9 @@ export const TechCategorySection: React.FC = () => {
                 <span>{side2.commentsCount}</span>
               </div>
             )}
+            <span className="font-mono text-[11px] text-[#666666] mt-1 block">
+              {formatTimeAgo(side2.publishedAt)}
+            </span>
           </article>
 
           {/* Story 3 */}
@@ -214,6 +247,9 @@ export const TechCategorySection: React.FC = () => {
                 <span>{side3.commentsCount}</span>
               </div>
             )}
+            <span className="font-mono text-[11px] text-[#666666] mt-1 block">
+              {formatTimeAgo(side3.publishedAt)}
+            </span>
           </article>
         </div>
       </div>

@@ -25,11 +25,24 @@ export default function BookmarkButton({ article, variant = "inline" }: Bookmark
     if (typeof window !== "undefined" && slugOrId) {
       const checkBookmarkState = () => {
         try {
+          let currentEmail = "";
+          const userStr = sessionStorage.getItem("wsj_user") || localStorage.getItem("wsj_user");
+          if (userStr) {
+            try {
+              const parsed = JSON.parse(userStr);
+              if (parsed && parsed.email) currentEmail = parsed.email.toLowerCase().trim();
+            } catch (e) {}
+          }
+
           const raw = localStorage.getItem("wsj_saved_articles");
           if (raw) {
             const list = JSON.parse(raw);
             if (Array.isArray(list)) {
-              const exists = list.some((item: any) => item.slug === slugOrId || item.id === slugOrId);
+              const exists = list.some((item: any) => {
+                const itemEmail = (item.user_email || item.userEmail || "").toLowerCase().trim();
+                const matchSlug = item.slug === slugOrId || item.id === slugOrId;
+                return matchSlug && itemEmail === currentEmail;
+              });
               setIsBookmarked(exists);
             }
           } else {
@@ -53,31 +66,63 @@ export default function BookmarkButton({ article, variant = "inline" }: Bookmark
     if (typeof window === "undefined" || !slugOrId) return;
 
     try {
+      let currentEmail = "reader@gmail.com";
+      const tabUserStr = sessionStorage.getItem("wsj_user") || localStorage.getItem("wsj_user");
+      if (tabUserStr) {
+        try {
+          const parsed = JSON.parse(tabUserStr);
+          if (parsed && parsed.email) currentEmail = parsed.email.toLowerCase().trim();
+        } catch (e) {}
+      }
+
       const raw = localStorage.getItem("wsj_saved_articles");
       let list: any[] = raw ? JSON.parse(raw) : [];
       if (!Array.isArray(list)) list = [];
 
-      const index = list.findIndex((item: any) => item.slug === slugOrId || item.id === slugOrId);
+      const index = list.findIndex((item: any) => {
+        const itemEmail = (item.user_email || item.userEmail || "").toLowerCase().trim();
+        const matchSlug = item.slug === slugOrId || item.id === slugOrId;
+        return matchSlug && itemEmail === currentEmail;
+      });
 
       if (index >= 0) {
+        // Article already saved for this user -> Unsave/remove it
         list.splice(index, 1);
         setIsBookmarked(false);
+
+        // Delete from backend API for this user
+        fetch(`http://localhost:5000/api/saved-articles?email=${encodeURIComponent(currentEmail)}&articleId=${encodeURIComponent(slugOrId)}`, {
+          method: "DELETE",
+        }).catch(() => {});
       } else {
+        // Article not saved for this user -> Save it
         const articleToSave = {
           id: article.id || slugOrId,
           slug: article.slug || slugOrId,
           title: article.title || "Untitled Article",
           deck: article.deck || "",
           category: (article.category || "WORLD").toUpperCase(),
-          date: article.date || "Aug 16, 2026",
-          author: article.author ? (article.author.toUpperCase().startsWith("BY ") ? article.author.toUpperCase() : `BY ${article.author.toUpperCase()}`) : "BY DYLAN CANDICE ODULIO",
-          image: article.image || "https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?auto=format&fit=crop&w=1200&q=80",
+          date: article.date || new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+          author: article.author ? (article.author.toUpperCase().startsWith("BY ") ? article.author.toUpperCase() : `BY ${article.author.toUpperCase()}`) : "BY TIMES CHICAGO STAFF",
+          image: article.image || "https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?fm=webp&fit=crop&w=1200&q=80",
+          user_email: currentEmail,
+          savedAt: Date.now(),
         };
         list.unshift(articleToSave);
         setIsBookmarked(true);
+
+        // Save to backend API
+        fetch("http://localhost:5000/api/saved-articles", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify([articleToSave]),
+        }).catch(() => {});
       }
 
       localStorage.setItem("wsj_saved_articles", JSON.stringify(list));
+      const userList = list.filter((i: any) => (i.user_email || i.userEmail || "").toLowerCase().trim() === currentEmail);
+      localStorage.setItem(`wsj_saved_articles_${currentEmail}`, JSON.stringify(userList));
+
       window.dispatchEvent(new Event("wsj_saved_articles_updated"));
     } catch (e) {}
   };

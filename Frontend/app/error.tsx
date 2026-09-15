@@ -13,6 +13,10 @@ export default function GlobalErrorPage({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  React.useEffect(() => {
+    console.error("Global Error Page caught error:", error);
+  }, [error]);
+
   return (
     <main className="min-h-screen bg-white text-[#111111] font-sans flex flex-col justify-between">
       <div>
@@ -21,7 +25,7 @@ export default function GlobalErrorPage({
           <div className="max-w-md mx-auto space-y-6">
             <h1 className="font-serif text-5xl font-bold text-black">Something went wrong</h1>
             <p className="font-serif text-sm text-[#666666] leading-relaxed">
-              An unexpected error occurred. Please try refreshing or return home.
+              An unexpected error occurred: {error?.message || "Unknown error"}
             </p>
             <div className="pt-4 flex justify-center gap-4">
               <button

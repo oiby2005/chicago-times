@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Container from "@/components/layout/Container";
 import WSJLogo from "@/components/ui/WSJLogo";
+import { getUserRoleUrl } from "@/data/authors";
 
 export default function SignInPage() {
   const router = useRouter();
@@ -30,38 +31,189 @@ export default function SignInPage() {
     };
   }, []);
 
-  // Lockout countdown timer & persistence check
-  useEffect(() => {
-    const checkLockoutState = () => {
-      if (typeof window === "undefined") return;
+  const handleGoogleResponse = async (payloadOrResponse: any) => {
+    let email = "";
+    let full_name = "";
+    let avatar_url = "";
+    let credential = "";
 
-      const storedLockout = localStorage.getItem("wsj_lockout_until");
-      if (storedLockout) {
-        const lockoutTime = parseInt(storedLockout, 10);
-        const now = Date.now();
-        if (lockoutTime > now) {
-          const diffSec = Math.ceil((lockoutTime - now) / 1000);
-          setRemainingSeconds(diffSec);
+    if (payloadOrResponse?.googleProfile) {
+      email = payloadOrResponse.googleProfile.email;
+      full_name = payloadOrResponse.googleProfile.name || payloadOrResponse.googleProfile.given_name;
+      avatar_url = payloadOrResponse.googleProfile.picture;
+    } else if (payloadOrResponse?.credential) {
+      credential = payloadOrResponse.credential;
+      const parts = credential.split(".");
+      if (parts.length === 3) {
+        try {
+          const parsed = JSON.parse(atob(parts[1].replace(/-/g, "+").replace(/_/g, "/")));
+          email = parsed.email;
+          full_name = parsed.name || parsed.given_name;
+          avatar_url = parsed.picture;
+        } catch (e) {}
+      }
+    } else if (payloadOrResponse?.email) {
+      email = payloadOrResponse.email;
+      full_name = payloadOrResponse.name || payloadOrResponse.full_name;
+      avatar_url = payloadOrResponse.picture || payloadOrResponse.avatar_url;
+    }
+
+    if (!email) return;
+    setLoading(true);
+    setError("");
+
+    try {
+      // 1. Call Backend Google Auth API
+      const res = await fetch("http://localhost:5000/api/auth/google", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          credential,
+          email,
+          full_name,
+          avatar_url,
+        }),
+      }).catch(() => null);
+
+      if (res && res.ok) {
+        const data = await res.json();
+        if (data.success && data.user) {
+          const user = data.user;
+          const token = data.token;
+
+          localStorage.setItem("wsj_user", JSON.stringify(user));
+          if (token) localStorage.setItem("wsj_token", token);
+          sessionStorage.setItem("wsj_user", JSON.stringify(user));
+
+          const profilesMap = JSON.parse(localStorage.getItem("wsj_users_by_email") || "{}");
+          profilesMap[user.email.toLowerCase().trim()] = user;
+          localStorage.setItem("wsj_users_by_email", JSON.stringify(profilesMap));
+
+          const targetUrl = getUserRoleUrl(user.role);
+          router.push(targetUrl);
           return;
-        } else {
-          // Lockout expired
-          localStorage.removeItem("wsj_lockout_until");
-          localStorage.removeItem("wsj_failed_attempts");
-          setRemainingSeconds(0);
-          setFailedAttempts(0);
-        }
-      } else {
-        const storedAttempts = localStorage.getItem("wsj_failed_attempts");
-        if (storedAttempts) {
-          setFailedAttempts(parseInt(storedAttempts, 10));
         }
       }
-    };
 
-    checkLockoutState();
-    const interval = setInterval(checkLockoutState, 1000);
-    return () => clearInterval(interval);
+      // 2. Local fallback if backend is unreachable
+      if (email) {
+        const emailClean = email.toLowerCase().trim();
+        const isAdmin = ["akramyoonos006@gmail.com", "geethliyanage979@gmail.com", "timeschicago17@gmail.com"].includes(emailClean);
+        const googleUser = {
+          id: Date.now(),
+          full_name: full_name || emailClean.split("@")[0],
+          email: emailClean,
+          role: isAdmin ? "admin" : "reader",
+          avatar_url: avatar_url || "",
+          is_default_admin: isAdmin,
+        };
+
+        localStorage.setItem("wsj_user", JSON.stringify(googleUser));
+        sessionStorage.setItem("wsj_user", JSON.stringify(googleUser));
+        const profilesMap = JSON.parse(localStorage.getItem("wsj_users_by_email") || "{}");
+        profilesMap[emailClean] = googleUser;
+        localStorage.setItem("wsj_users_by_email", JSON.stringify(profilesMap));
+
+        const targetUrl = getUserRoleUrl(googleUser.role);
+        router.push(targetUrl);
+      }
+    } catch (err) {
+      console.error("Google login error:", err);
+      setError("Google authentication failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "139107732083-k4s03eq18ad4dqimilq4u6t7f0viqh0m.apps.googleusercontent.com";
+    if (typeof window !== "undefined") {
+      // Check for access_token hash from OAuth popup redirect
+      if (window.location.hash.includes("access_token=")) {
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const accessToken = hashParams.get("access_token");
+        if (accessToken) {
+          window.history.replaceState(null, "", window.location.pathname);
+          fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          })
+            .then((r) => r.json())
+            .then((googleProfile) => {
+              if (googleProfile.email) {
+                handleGoogleResponse({ googleProfile });
+              }
+            })
+            .catch(() => {});
+        }
+      }
+
+      const scriptId = "google-jssdk";
+      if (!document.getElementById(scriptId)) {
+        const script = document.createElement("script");
+        script.id = scriptId;
+        script.src = "https://accounts.google.com/gsi/client";
+        script.async = true;
+        script.defer = true;
+        script.onload = () => {
+          if ((window as any).google?.accounts?.id) {
+            (window as any).google.accounts.id.initialize({
+              client_id: googleClientId,
+              callback: handleGoogleResponse,
+            });
+          }
+        };
+        document.body.appendChild(script);
+      } else if ((window as any).google?.accounts?.id) {
+        (window as any).google.accounts.id.initialize({
+          client_id: googleClientId,
+          callback: handleGoogleResponse,
+        });
+      }
+    }
   }, []);
+
+  const handleGoogleClick = () => {
+    const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "139107732083-k4s03eq18ad4dqimilq4u6t7f0viqh0m.apps.googleusercontent.com";
+    if (typeof window !== "undefined") {
+      if ((window as any).google?.accounts?.oauth2) {
+        const tokenClient = (window as any).google.accounts.oauth2.initTokenClient({
+          client_id: googleClientId,
+          scope: "email profile openid",
+          prompt: "select_account",
+          callback: async (tokenResponse: any) => {
+            if (tokenResponse && tokenResponse.access_token) {
+              setLoading(true);
+              try {
+                const res = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+                  headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+                });
+                if (res.ok) {
+                  const googleProfile = await res.json();
+                  await handleGoogleResponse({ googleProfile });
+                }
+              } catch (e) {
+                setError("Google authentication failed. Please try again.");
+                setLoading(false);
+              }
+            }
+          },
+        });
+        tokenClient.requestAccessToken();
+        return;
+      }
+
+      // Direct centered OAuth Popup Modal matching Image 2
+      const redirectUri = window.location.origin + "/signin";
+      const oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&redirect_uri=${encodeURIComponent(
+        redirectUri
+      )}&response_type=token&scope=email%20profile%20openid&prompt=select_account`;
+      const width = 520;
+      const height = 650;
+      const left = window.screenX + (window.outerWidth - width) / 2;
+      const top = window.screenY + (window.outerHeight - height) / 2;
+      window.open(oauthUrl, "google_oauth_popup", `width=${width},height=${height},left=${left},top=${top}`);
+    }
+  };
 
   const formatLockoutTime = (totalSec: number) => {
     const mins = Math.floor(totalSec / 60);
@@ -122,20 +274,13 @@ export default function SignInPage() {
     const cleanEmail = email.trim().toLowerCase();
     const cleanPassword = password.trim();
 
-    // 1. Try Backend Express API Login
+    // Active MySQL Backend API Login
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
-
       const res = await fetch("http://localhost:5000/api/auth/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ fullName: fullName || "User", email: cleanEmail, password: cleanPassword }),
-        signal: controller.signal,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: cleanEmail, password: cleanPassword }),
       });
-      clearTimeout(timeoutId);
 
       const data = await res.json();
 
@@ -144,122 +289,39 @@ export default function SignInPage() {
           const userStr = JSON.stringify(data.user);
           sessionStorage.setItem("wsj_session_active", "true");
           sessionStorage.setItem("wsj_user", userStr);
+          sessionStorage.setItem("wsj_token", data.token || "jwt_active_token");
+          
           localStorage.removeItem("wsj_logged_out");
           localStorage.removeItem("wsj_failed_attempts");
           localStorage.removeItem("wsj_lockout_until");
-          localStorage.setItem("wsj_token", data.token || "dummy_token");
-          localStorage.setItem("wsj_user", userStr);
+          localStorage.removeItem("wsj_user");
+          localStorage.removeItem("wsj_admin_user");
+          localStorage.removeItem("wsj_writer_user");
+          localStorage.removeItem("wsj_reader_user");
 
-          const role = (data.user?.role || "").toLowerCase();
-          if (role === "writer") {
-            localStorage.setItem("wsj_writer_user", userStr);
-          } else if (role === "admin") {
-            localStorage.setItem("wsj_admin_user", userStr);
-          } else if (role === "reader") {
-            localStorage.setItem("wsj_reader_user", userStr);
-          }
+          try {
+            const map = JSON.parse(localStorage.getItem("wsj_users_by_email") || "{}");
+            map[cleanEmail] = data.user;
+            localStorage.setItem("wsj_users_by_email", JSON.stringify(map));
+          } catch (e) {}
 
           window.dispatchEvent(new Event("wsj_user_updated"));
         }
 
         setLoading(false);
-        router.push("/");
+        router.push(getUserRoleUrl(data.user));
+        return;
+      } else {
+        setLoading(false);
+        setError(data.message || "Invalid email or password.");
+        handleFailedAttempt();
         return;
       }
     } catch (err: any) {
-      if (err?.name === "AbortError") {
-        console.warn("Backend Express login request timed out after 8s");
-      } else {
-        console.warn("Backend Express server fetch error:", err?.message || err);
-      }
-    }
-
-    // 2. Strict static credentials check - accepts common password variations!
-    const ALLOWED_ACCOUNTS = [
-      {
-        email: "admin@gmail.com",
-        passwords: ["admin123", "123456", "admin"],
-        role: "admin",
-        full_name: "Admin User",
-        route: "/",
-      },
-      {
-        email: "writer@gmail.com",
-        passwords: ["writer123", "123456", "writer"],
-        role: "writer",
-        full_name: "Writer User",
-        bio: "Journalist & Columnist",
-        linkedin: "https://www.linkedin.com/in/your-profile",
-        avatar_url: "",
-        route: "/",
-      },
-      {
-        email: "reader@gmail.com",
-        passwords: ["reader123", "123456", "reader"],
-        role: "reader",
-        full_name: "Reader User",
-        route: "/",
-      },
-    ];
-
-    const matchedAccount = ALLOWED_ACCOUNTS.find(
-      (acc) => acc.email === cleanEmail && acc.passwords.includes(cleanPassword)
-    );
-
-    if (matchedAccount) {
-      let userData: any = {
-        id: "usr_" + matchedAccount.role + "_" + Date.now(),
-        full_name: matchedAccount.full_name,
-        email: matchedAccount.email,
-        role: matchedAccount.role,
-        bio: (matchedAccount as any).bio || "",
-        linkedin: (matchedAccount as any).linkedin || "",
-        avatar_url: (matchedAccount as any).avatar_url || "",
-      };
-
-      if (typeof window !== "undefined") {
-        const existingStr = localStorage.getItem("wsj_user");
-        if (existingStr) {
-          try {
-            const existing = JSON.parse(existingStr);
-            if (existing.email === matchedAccount.email) {
-              userData = {
-                ...userData,
-                ...existing,
-                role: matchedAccount.role,
-              };
-            }
-          } catch (e) {}
-        }
-
-        const userStr = JSON.stringify(userData);
-        sessionStorage.setItem("wsj_session_active", "true");
-        sessionStorage.setItem("wsj_user", userStr);
-        localStorage.removeItem("wsj_logged_out");
-        localStorage.removeItem("wsj_failed_attempts");
-        localStorage.removeItem("wsj_lockout_until");
-        localStorage.setItem("wsj_token", `dummy_token_${matchedAccount.role}_2026`);
-        localStorage.setItem("wsj_user", userStr);
-
-        if (matchedAccount.role === "writer") {
-          localStorage.setItem("wsj_writer_user", userStr);
-        } else if (matchedAccount.role === "admin") {
-          localStorage.setItem("wsj_admin_user", userStr);
-        } else if (matchedAccount.role === "reader") {
-          localStorage.setItem("wsj_reader_user", userStr);
-        }
-
-        window.dispatchEvent(new Event("wsj_user_updated"));
-      }
-
       setLoading(false);
-      router.push(matchedAccount.route);
+      setError("Database connection failed. Please ensure MySQL is started in XAMPP.");
       return;
     }
-
-    // 3. ANY other email/password (e.g. qwerty@gmail.com) MUST BE REJECTED & COUNTED AS FAILED ATTEMPT!
-    setLoading(false);
-    handleFailedAttempt();
   };
 
   const toggleMode = () => {
@@ -308,7 +370,7 @@ export default function SignInPage() {
                   {isSignUp ? "Account Created Successfully!" : "Signed In Successfully!"}
                 </h3>
                 <p className="text-xs sm:text-sm text-gray-600 font-sans">
-                  Welcome to WSJ{fullName ? `, ${fullName}` : ""}.
+                  Welcome to Times Chicago{fullName ? `, ${fullName}` : ""}.
                 </p>
                 <button
                   onClick={() => setSubmitted(false)}
@@ -328,6 +390,7 @@ export default function SignInPage() {
                 {/* Top Social Auth Button (Google) */}
                 <button
                   type="button"
+                  onClick={handleGoogleClick}
                   disabled={isLockedOut}
                   suppressHydrationWarning
                   className={`w-full bg-white hover:bg-gray-50 text-gray-800 border border-[#e2e2e2] rounded-lg font-sans text-xs sm:text-sm font-medium py-2 sm:py-2.5 px-3 flex items-center justify-center space-x-2 transition-colors shadow-2xs ${
@@ -527,19 +590,14 @@ export default function SignInPage() {
                     : "SIGN IN"}
                 </button>
 
-                {/* Bottom Red Link to Toggle Mode */}
+                {/* Bottom Red Link to Toggle to Sign Up */}
                 <div className="text-center pt-0.5">
-                  <button
-                    type="button"
-                    disabled={isLockedOut}
-                    suppressHydrationWarning
-                    onClick={toggleMode}
-                    className="text-[11px] sm:text-sm font-sans font-bold text-[#8b0000] hover:underline cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  <Link
+                    href="/signup"
+                    className="text-[11px] sm:text-sm font-sans font-bold text-[#8b0000] hover:underline cursor-pointer"
                   >
-                    {isSignUp
-                      ? "Already registered? Sign in instead"
-                      : "New to The Wall Street Journal? Create secure account"}
-                  </button>
+                    Need an account? Register here
+                  </Link>
                 </div>
               </form>
             )}

@@ -41,7 +41,21 @@ export const metadata: Metadata = {
   icons: {
     icon: "/images/design-reference/Fav Icon.jpg",
   },
+  openGraph: {
+    title: "Breaking News, US News, World News, Politics, Business & Technology | Times Chicago",
+    description: "Times Chicago delivers breaking news, US and world news, politics, business, economy, technology, crypto, travel, sports, health, opinion and CEO spotlight.",
+    images: [{ url: "/images/design-reference/website-thumbnail.jpg", alt: "Times Chicago" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Breaking News, US News, World News, Politics, Business & Technology | Times Chicago",
+    description: "Times Chicago delivers breaking news, US and world news, politics, business, economy, technology, crypto, travel, sports, health, opinion and CEO spotlight.",
+    images: ["/images/design-reference/website-thumbnail.jpg"],
+  },
 };
+
+import WebpGlobalInterceptor from "@/components/ui/WebpGlobalInterceptor";
+import GlobalDataSync from "@/components/ui/GlobalDataSync";
 
 export default function RootLayout({
   children,
@@ -51,6 +65,8 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${playfair.variable} ${sourceSerif.variable} ${inter.variable} ${bodoni.variable} ${kumbh.variable}`} suppressHydrationWarning>
       <body className="min-h-screen bg-white font-sans text-[#111111] antialiased flex flex-col" suppressHydrationWarning>
+        <WebpGlobalInterceptor />
+        <GlobalDataSync />
         {children}
       </body>
     </html>

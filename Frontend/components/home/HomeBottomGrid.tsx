@@ -22,7 +22,7 @@ export const HomeBottomGrid: React.FC = () => {
             <div className="md:col-span-5 space-y-4 border-b md:border-b-0 md:border-r border-[#e2e2e2] md:pr-6">
               <div className="border-t-2 border-black pt-2 flex items-center justify-between">
                 <h3 className="font-serif font-bold text-xl text-black">
-                  Business & Finance
+                  Business &amp; Finance
                 </h3>
                 <a href="#" className="text-xs font-sans font-bold text-black hover:underline">
                   View All
@@ -61,7 +61,7 @@ export const HomeBottomGrid: React.FC = () => {
               {/* Sub Link */}
               <div className="pl-2 border-l-2 border-black">
                 <span className="text-[12px] font-bold text-black hover:underline block leading-snug cursor-pointer">
-                  • Heard on the Street | This Fashion IPO's Growth Story Looks Flimsy
+                  • Heard on the Street | This Fashion IPO&apos;s Growth Story Looks Flimsy
                 </span>
               </div>
             </div>
@@ -119,13 +119,13 @@ export const HomeBottomGrid: React.FC = () => {
 
             {/* Column 3: Buy Side & Most Popular Opinion (Span 3.5) */}
             <div className="md:col-span-4 space-y-3">
-              {/* WSJ Buy Side Header Box */}
+              {/* Times Chicago Buy Side Header Box */}
               <div className="border border-[#c5d8e2] bg-[#f5f9fb] p-2.5 rounded-xs space-y-2">
                 <div className="text-sm font-serif font-black text-[#1e4d58]">
-                  WSJ | Buy Side
+                  Times Chicago | Buy Side
                 </div>
                 <p className="text-[10.5px] text-gray-500 font-sans leading-tight">
-                  Reviews and recommendations, independent of The Wall Street Journal newsroom.
+                  Reviews and recommendations, independent of Times Chicago newsroom.
                 </p>
                 <div className="space-y-2 text-xs">
                   <div className="border-t border-[#d8e5ec] pt-2">
@@ -175,13 +175,13 @@ export const HomeBottomGrid: React.FC = () => {
                   </div>
                   <div className="flex justify-between items-start space-x-2 border-b border-[#e2e2e2] pb-2">
                     <span className="font-serif font-bold text-black leading-snug">
-                      El-Sayed's Deflected Bigotry
+                      El-Sayed&apos;s Deflected Bigotry
                     </span>
                     <div className="w-10 h-10 bg-gray-300 rounded shrink-0" />
                   </div>
                   <div className="flex justify-between items-start space-x-2 border-b border-[#e2e2e2] pb-2">
                     <span className="font-serif font-bold text-black leading-snug">
-                      Socialism Is Here—and It's Serious
+                      Socialism Is Here—and It&apos;s Serious
                     </span>
                     <div className="w-10 h-10 bg-gray-300 rounded shrink-0" />
                   </div>
@@ -238,7 +238,7 @@ export const HomeBottomGrid: React.FC = () => {
 
               <div className="pl-2 border-l-2 border-black">
                 <span className="text-[12px] font-bold text-black hover:underline block leading-snug cursor-pointer">
-                  • Black Professor's Resignation Over Plagiarism Probe Puts Cambridge in Spotlight
+                  • Black Professor&apos;s Resignation Over Plagiarism Probe Puts Cambridge in Spotlight
                 </span>
               </div>
             </div>
@@ -310,7 +310,7 @@ export const HomeBottomGrid: React.FC = () => {
               <div className="space-y-3 text-xs">
                 <div className="flex justify-between items-start space-x-2 border-b border-[#e2e2e2] pb-3">
                   <h5 className="font-serif font-bold text-black leading-tight hover:underline cursor-pointer">
-                    How FIFA's $20 Billion Private-Equity Plan Nearly Broke Soccer
+                    How FIFA&apos;s $20 Billion Private-Equity Plan Nearly Broke Soccer
                   </h5>
                   <div className="w-12 h-10 bg-blue-900 rounded shrink-0 flex items-center justify-center text-white text-xs">
                     ▶
@@ -318,7 +318,7 @@ export const HomeBottomGrid: React.FC = () => {
                 </div>
                 <div className="flex justify-between items-start space-x-2 border-b border-[#e2e2e2] pb-3">
                   <h5 className="font-serif font-bold text-black leading-tight hover:underline cursor-pointer">
-                    Inside the Pacific Wargames Watched by America's Adversaries
+                    Inside the Pacific Wargames Watched by America&apos;s Adversaries
                   </h5>
                   <div className="w-12 h-10 bg-gray-800 rounded shrink-0 flex items-center justify-center text-white text-xs">
                     ▶
@@ -326,7 +326,7 @@ export const HomeBottomGrid: React.FC = () => {
                 </div>
                 <div className="flex justify-between items-start space-x-2 border-b border-[#e2e2e2] pb-3">
                   <h5 className="font-serif font-bold text-black leading-tight hover:underline cursor-pointer">
-                    Pizza Hut Lost in the U.S. Now It's Selling for $2.7B.
+                    Pizza Hut Lost in the U.S. Now It&apos;s Selling for $2.7B.
                   </h5>
                   <div className="w-12 h-10 bg-red-800 rounded shrink-0 flex items-center justify-center text-white text-xs">
                     ▶
@@ -351,7 +351,7 @@ export const HomeBottomGrid: React.FC = () => {
               </div>
 
               {/* Grey Advertisement Box Below Recommended Videos */}
-              <AdPlaceholder width="w-full" height="h-[160px]" resolution="300 × 160" />
+              <AdPlaceholder slotId="hp_slot_5" width="w-full max-w-[300px]" height="h-[320px]" resolution="300 × 320" />
             </div>
           </div>
         </div>
@@ -361,15 +361,15 @@ export const HomeBottomGrid: React.FC = () => {
         {/* ================================================================= */}
         <div className="pt-3 pb-2 border-t border-[#e2e2e2]">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
-            {/* WSJ Buy Side 3 Cards Grid (Span 8 - Enlarged Font Sizes) */}
+            {/* Times Chicago Buy Side 3 Cards Grid (Span 8 - Enlarged Font Sizes) */}
             <div className="md:col-span-8 space-y-4">
               <div className="border-t-2 border-[#1e4d58] pt-2 flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <span className="font-serif font-bold text-2xl text-[#1e4d58]">
-                    WSJ Buy Side
+                    Times Chicago Buy Side
                   </span>
                   <span className="text-xs sm:text-sm text-gray-600 font-sans">
-                    Reviews and recommendations, independent of WSJ newsroom.
+                    Reviews and recommendations, independent of Times Chicago newsroom.
                   </span>
                 </div>
                 <a href="#" className="text-xs sm:text-sm font-sans font-bold text-[#1e4d58] hover:underline">
@@ -424,15 +424,15 @@ export const HomeBottomGrid: React.FC = () => {
                 </div>
               </div>
 
-              {/* Grey Advertisement Bar Below WSJ Buy Side */}
-              <AdPlaceholder width="w-full" height="h-[120px]" resolution="728 × 120" />
+              {/* Grey Advertisement Bar Below Times Chicago Buy Side */}
+              <AdPlaceholder slotId="hp_slot_6" width="w-full max-w-[970px]" height="h-[180px]" resolution="970 × 180" />
             </div>
 
             {/* Journal Reports Sidebar (Span 4 - Enlarged Font Sizes) */}
             <div className="md:col-span-4 space-y-4">
               <div className="border-t-2 border-black pt-2 flex items-center justify-between">
                 <h3 className="font-serif font-bold text-2xl text-black">
-                  Journal Reports
+                  Times Chicago Reports
                 </h3>
                 <a href="#" className="text-xs sm:text-sm font-sans font-bold text-black hover:underline">
                   View All
@@ -490,8 +490,8 @@ export const HomeBottomGrid: React.FC = () => {
                   <span>🔊</span>
                   <span>Click for Sound</span>
                 </div>
-                <div className="absolute top-4 right-4 z-10 font-serif font-black text-white text-xl">
-                  WSJ
+                <div className="absolute top-4 right-4 z-10 font-serif font-bold text-white text-sm tracking-widest uppercase">
+                  Times Chicago
                 </div>
 
                 {/* Captions Text */}
@@ -509,7 +509,7 @@ export const HomeBottomGrid: React.FC = () => {
                     <span className="absolute bottom-1 left-1 bg-black/80 text-[10px] px-1 rounded">▶ 10:22</span>
                   </div>
                   <h5 className="font-serif font-bold text-xs text-[#007cba] leading-tight hover:underline">
-                    Inside the Pacific Wargames Watched by America's Adversaries
+                    Inside the Pacific Wargames Watched by America&apos;s Adversaries
                   </h5>
                 </div>
 
@@ -535,7 +535,7 @@ export const HomeBottomGrid: React.FC = () => {
 
             {/* Right Sidebar Ad Placeholder (Span 4) */}
             <div className="md:col-span-4 space-y-4">
-              <AdPlaceholder width="w-full" height="h-[600px]" resolution="300 × 600" />
+              <AdPlaceholder slotId="hp_slot_7" width="w-full max-w-[300px]" height="h-[320px]" resolution="300 × 320" />
             </div>
           </div>
         </div>

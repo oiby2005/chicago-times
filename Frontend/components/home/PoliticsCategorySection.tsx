@@ -9,7 +9,26 @@ interface PolArticle {
   slug: string;
   summary: string;
   imageUrl?: string;
+  publishedAt?: number | string;
 }
+
+const formatTimeAgo = (timestamp?: number | string): string => {
+  if (!timestamp) return "2 hours ago";
+  const now = Date.now();
+  const time = typeof timestamp === "string" ? new Date(timestamp).getTime() : timestamp;
+  if (isNaN(time) || time <= 0) return "2 hours ago";
+  const diffMs = Math.max(0, now - time);
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  if (diffHours < 1) {
+    const diffMins = Math.max(1, Math.floor(diffMs / (1000 * 60)));
+    return `${diffMins} min${diffMins > 1 ? "s" : ""} ago`;
+  }
+  if (diffHours < 24) {
+    return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
+  }
+  const diffDays = Math.floor(diffHours / 24);
+  return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
+};
 
 const defaultArticles: PolArticle[] = [
   {
@@ -17,26 +36,30 @@ const defaultArticles: PolArticle[] = [
     title: "Hegseth Strips Security Clearance From Biden’s Air Force Secretary",
     slug: "hegseth-strips-security-clearance-biden-air-force-secretary",
     summary: "Frank Kendall, accused of leaking sensitive information, is the latest former defense official to lose access to classified information.",
-    imageUrl: "https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?auto=format&fit=crop&w=600&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?fm=webp&fit=crop&w=600&q=80",
+    publishedAt: Date.now() - 2 * 3600 * 1000,
   },
   {
     id: "pol2",
     title: "Senate Committees Prepare Key Confirmation Hearings Following Recess",
     slug: "senate-committees-prepare-key-confirmation-hearings",
     summary: "Lawmakers return to Washington with a packed schedule of high-stakes hearings and policy debates.",
-    imageUrl: "https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?auto=format&fit=crop&w=600&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?fm=webp&fit=crop&w=600&q=80",
+    publishedAt: Date.now() - 4 * 3600 * 1000,
   },
   {
     id: "pol3",
     title: "Trump Showed Up at a Rally With Lustrous Locks. The Memes Won’t Stop.",
     slug: "trump-showed-up-at-rally-with-lustrous-locks",
     summary: "The president’s hair looked more voluminous at an event in Las Vegas, and the internet was quick to respond.",
+    publishedAt: Date.now() - 7 * 3600 * 1000,
   },
   {
     id: "pol4",
     title: "Trump Revives Attempt to Fire Fed Governor Lisa Cook",
     slug: "trump-revives-attempt-to-fire-fed-governor-lisa-cook",
     summary: "The move, outlined in a White House letter to Cook this week, follows a Supreme Court ruling in June that blocked an earlier attempt.",
+    publishedAt: Date.now() - 11 * 3600 * 1000,
   },
 ];
 
@@ -73,7 +96,8 @@ export const PoliticsCategorySection: React.FC = () => {
             title: p.title,
             slug: p.slug || p.id,
             summary: p.subheadline || extractText(p.bodyContent) || "",
-            imageUrl: p.thumbnail || "https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?auto=format&fit=crop&w=600&q=80",
+            imageUrl: p.thumbnail || "https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?fm=webp&fit=crop&w=600&q=80",
+            publishedAt: p.publishedAt,
           }));
 
           const merged = [...formatted];
@@ -141,6 +165,9 @@ export const PoliticsCategorySection: React.FC = () => {
               {col1.summary}
             </p>
           )}
+          <span className="font-mono text-[11px] text-[#666666] mt-1 block">
+            {formatTimeAgo(col1.publishedAt)}
+          </span>
         </article>
 
         {/* COLUMN 2 */}
@@ -170,6 +197,9 @@ export const PoliticsCategorySection: React.FC = () => {
               {col2.summary}
             </p>
           )}
+          <span className="font-mono text-[11px] text-[#666666] mt-1 block">
+            {formatTimeAgo(col2.publishedAt)}
+          </span>
         </article>
 
         {/* COLUMN 3 */}
@@ -186,6 +216,9 @@ export const PoliticsCategorySection: React.FC = () => {
                 {col3Top.summary}
               </p>
             )}
+            <span className="font-mono text-[11px] text-[#666666] mt-1 block">
+              {formatTimeAgo(col3Top.publishedAt)}
+            </span>
           </article>
 
           {/* Bottom Story */}
@@ -200,6 +233,9 @@ export const PoliticsCategorySection: React.FC = () => {
                 {col3Bottom.summary}
               </p>
             )}
+            <span className="font-mono text-[11px] text-[#666666] mt-1 block">
+              {formatTimeAgo(col3Bottom.publishedAt)}
+            </span>
           </article>
         </div>
       </div>

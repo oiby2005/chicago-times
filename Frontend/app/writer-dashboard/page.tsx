@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import ProfileSettingsModal, { UserProfile } from "@/components/ui/ProfileSettingsModal";
+import { getAuthorSlugForUser } from "@/data/authors";
 
 interface PostItem {
   id: string;
@@ -64,6 +65,31 @@ export default function WriterDashboard() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
 
+  const [deleteConfirmModal, setDeleteConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    confirmText?: string;
+    onConfirm: () => void;
+  } | null>(null);
+
+  const confirmDeletePermanently = (post: PostItem, e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    setDeleteConfirmModal({
+      isOpen: true,
+      title: "Permanently Delete Article",
+      message: `Are you sure you want to permanently delete "${post.title}"? This action cannot be undone.`,
+      confirmText: "Delete Permanently",
+      onConfirm: () => {
+        handleDeletePermanently(post.id);
+        setDeleteConfirmModal(null);
+      },
+    });
+  };
+
   // New post form state
   const [newTitle, setNewTitle] = useState("");
   const [newCategory, setNewCategory] = useState("Business");
@@ -102,22 +128,42 @@ export default function WriterDashboard() {
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const loadPosts = () => {
+  const loadPosts = async () => {
     if (typeof window === "undefined") return;
-    const storedPosts = localStorage.getItem("wsj_posts");
-    if (storedPosts) {
-      try {
+
+    let localPosts: PostItem[] = [];
+    try {
+      const storedPosts = localStorage.getItem("wsj_posts");
+      if (storedPosts) {
         const parsed: PostItem[] = JSON.parse(storedPosts);
         if (parsed && Array.isArray(parsed)) {
-          setPosts(parsed);
-          return;
+          localPosts = parsed;
         }
-      } catch (e) {}
-    }
-    setPosts([]);
-    try {
-      localStorage.setItem("wsj_posts", JSON.stringify([]));
+      }
     } catch (e) {}
+
+    try {
+      const res = await fetch("http://localhost:5000/api/posts");
+      if (res.ok) {
+        const data = await res.json();
+        const postsArray = Array.isArray(data) ? data : (data && data.posts && Array.isArray(data.posts) ? data.posts : []);
+        if (postsArray.length > 0) {
+          const serverIds = new Set(postsArray.map((p: any) => String(p.id)));
+          const unsavedLocalDrafts = localPosts.filter((p) => !serverIds.has(String(p.id)) && String(p.id).startsWith("post_"));
+          const merged = [...postsArray, ...unsavedLocalDrafts];
+          localStorage.setItem("wsj_posts", JSON.stringify(merged));
+          localPosts = merged;
+        }
+      }
+    } catch (e) {}
+
+    localPosts.sort((a: any, b: any) => {
+      const timeA = a.publishedAt || (a.id && !isNaN(Number(a.id)) ? Number(a.id) : 0);
+      const timeB = b.publishedAt || (b.id && !isNaN(Number(b.id)) ? Number(b.id) : 0);
+      return timeB - timeA;
+    });
+
+    setPosts(localPosts);
   };
 
   useEffect(() => {
@@ -133,73 +179,150 @@ export default function WriterDashboard() {
     return () => window.removeEventListener("wsj_posts_updated", loadPosts);
   }, []);
 
-  const handleMoveToTrash = (id: string, e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    setPosts((prevPosts) => {
-      const updated = prevPosts.map((p) => {
-        if (p.id === id) {
+  const handleMoveToTrash = async (id: string, e?: React.SyntheticEvent) => {
+    if (e) {
+      e.stopPropagation();
+    }
+    const targetId = String(id);
+
+    setPosts((prevPosts) =>
+      prevPosts.map((p) => {
+        if (String(p.id) === targetId) {
+          const currentStatus = p.status;
+          const origStatus = currentStatus !== "Trash" ? currentStatus : (p.previousStatus || "Drafts");
           return {
             ...p,
-            previousStatus: p.status === "Trash" ? "Drafts" : (p.status as any),
+            previousStatus: origStatus,
             status: "Trash" as const,
           };
         }
         return p;
-      });
-      localStorage.setItem("wsj_posts", JSON.stringify(updated));
-      window.dispatchEvent(new Event("wsj_posts_updated"));
-      return updated;
-    });
+      })
+    );
+
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem("wsj_posts");
+        const allPosts: PostItem[] = stored ? JSON.parse(stored) : [];
+        const updatedLocal = allPosts.map((p) => {
+          if (String(p.id) === targetId) {
+            const currentStatus = p.status;
+            const origStatus = currentStatus !== "Trash" ? currentStatus : (p.previousStatus || "Drafts");
+            return {
+              ...p,
+              previousStatus: origStatus,
+              status: "Trash" as const,
+            };
+          }
+          return p;
+        });
+        localStorage.setItem("wsj_posts", JSON.stringify(updatedLocal));
+
+        fetch("http://localhost:5000/api/posts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updatedLocal),
+        }).catch(() => null);
+      } catch (err) {}
+    }
   };
 
-  const handleRestoreFromTrash = (id: string, e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    setPosts((prevPosts) => {
-      const updated = prevPosts.map((p) => {
-        if (p.id === id) {
+  const handleRestoreFromTrash = async (id: string, e?: React.SyntheticEvent) => {
+    if (e) {
+      e.stopPropagation();
+    }
+    const targetId = String(id);
+
+    setPosts((prevPosts) =>
+      prevPosts.map((p) => {
+        if (String(p.id) === targetId) {
           return {
             ...p,
             status: (p.previousStatus || "Drafts") as any,
           };
         }
         return p;
-      });
-      localStorage.setItem("wsj_posts", JSON.stringify(updated));
-      return updated;
-    });
+      })
+    );
+
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem("wsj_posts");
+        const allPosts: PostItem[] = stored ? JSON.parse(stored) : [];
+        const updatedLocal = allPosts.map((p) => {
+          if (String(p.id) === targetId) {
+            return {
+              ...p,
+              status: (p.previousStatus || "Drafts") as any,
+            };
+          }
+          return p;
+        });
+        localStorage.setItem("wsj_posts", JSON.stringify(updatedLocal));
+
+        fetch("http://localhost:5000/api/posts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updatedLocal),
+        }).catch(() => null);
+      } catch (err) {}
+    }
   };
 
-  const handleDeletePermanently = (id: string, e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    setPosts((prevPosts) => {
-      const updated = prevPosts.filter((p) => p.id !== id);
-      localStorage.setItem("wsj_posts", JSON.stringify(updated));
-      return updated;
-    });
+  const handleDeletePermanently = async (id: string, e?: React.SyntheticEvent) => {
+    if (e) {
+      e.stopPropagation();
+    }
+    const targetId = String(id);
+
+    setPosts((prevPosts) => prevPosts.filter((p) => String(p.id) !== targetId));
+
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem("wsj_posts");
+        const allPosts: PostItem[] = stored ? JSON.parse(stored) : [];
+        const updatedLocal = allPosts.filter((p) => String(p.id) !== targetId);
+        localStorage.setItem("wsj_posts", JSON.stringify(updatedLocal));
+
+        await fetch(`http://localhost:5000/api/posts/${encodeURIComponent(targetId)}`, {
+          method: "DELETE",
+        }).catch(() => null);
+      } catch (err) {}
+    }
   };
 
   useEffect(() => {
-    const loadUser = () => {
+    const loadUser = async () => {
       const tabUser = sessionStorage.getItem("wsj_user");
-      const writerUser = localStorage.getItem("wsj_writer_user");
-      const adminUser = localStorage.getItem("wsj_admin_user");
-      const generalUser = localStorage.getItem("wsj_user");
 
       let parsed: any = null;
       if (tabUser) {
         try { parsed = JSON.parse(tabUser); } catch (e) {}
       }
-      if (!parsed && writerUser) {
-        try { parsed = JSON.parse(writerUser); } catch (e) {}
-      }
-      if (!parsed && adminUser) {
-        try { parsed = JSON.parse(adminUser); } catch (e) {}
-      }
-      if (!parsed && generalUser) {
-        try { parsed = JSON.parse(generalUser); } catch (e) {}
-      }
 
-      if (parsed) {
+      if (parsed && parsed.email) {
+        const cleanEmail = parsed.email.toLowerCase().trim();
+        const userRole = (parsed.role || "").toLowerCase();
+        if (userRole === "admin") {
+          router.push("/admin-dashboard");
+          return;
+        }
+        if (userRole === "reader") {
+          router.push("/reader-dashboard");
+          return;
+        }
+
+        try {
+          const res = await fetch(`http://localhost:5000/api/users/${encodeURIComponent(cleanEmail)}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.success && data.user) {
+              parsed = { ...parsed, ...data.user };
+              sessionStorage.setItem("wsj_user", JSON.stringify(parsed));
+            }
+          }
+        } catch (e) {}
+
         setCurrentUser(parsed);
       } else {
         router.push("/signin");
@@ -211,20 +334,62 @@ export default function WriterDashboard() {
     return () => window.removeEventListener("wsj_user_updated", loadUser);
   }, [router]);
 
-  const getTabCount = (tab: string) => {
-    return posts.filter((p) => p.status === tab).length;
-  };
-
   const displayName = currentUser?.full_name || "";
   const displayEmail = currentUser?.email || "";
   const avatarLetter = displayName.charAt(0).toUpperCase();
 
-  const filteredPosts = posts.filter(
-    (p) =>
-      p.status === activeTab &&
-      (p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.category.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  const writerEmailLower = (currentUser?.email || "").toLowerCase().trim();
+
+  // Accounts are strictly isolated by EMAIL (not by name).
+  // Different writers can have the same name (e.g. Oshidi), but their accounts remain completely separate based on email.
+  const writerOwnedPosts = posts.filter((p: any) => {
+    if (!writerEmailLower) return false;
+    const pEmail = (p.authorEmail || "").toLowerCase().trim();
+    const pAuthor = (p.author || "").toLowerCase().trim();
+
+    // 1. Direct email match (Primary & 100% authoritative)
+    if (pEmail) {
+      return pEmail === writerEmailLower;
+    }
+
+    // 2. Strict fallbacks if authorEmail is missing on legacy posts
+    if (writerEmailLower === "writer1@gmail.com") {
+      return pAuthor === "writer1";
+    }
+    if (writerEmailLower === "writer@gmail.com") {
+      return pAuthor !== "writer1";
+    }
+    return false;
+  });
+
+  const matchesTab = (postStatus: string, tab: string) => {
+    const normPost = (postStatus || "").trim().toLowerCase();
+    const normTab = (tab || "").trim().toLowerCase();
+    if (normTab === "drafts" || normTab === "draft") {
+      return normPost === "drafts" || normPost === "draft";
+    }
+    if (normTab === "pending review" || normTab === "pending") {
+      return normPost === "pending review" || normPost === "pending";
+    }
+    return normPost === normTab;
+  };
+
+  const getTabCount = (tab: string) => {
+    return writerOwnedPosts.filter((p) => matchesTab(p.status, tab)).length;
+  };
+
+  const filteredPosts = writerOwnedPosts
+    .filter(
+      (p) =>
+        matchesTab(p.status, activeTab) &&
+        (p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          p.category.toLowerCase().includes(searchQuery.toLowerCase()))
+    )
+    .sort((a: any, b: any) => {
+      const timeA = a.publishedAt || (a.id && !isNaN(Number(a.id)) ? Number(a.id) : 0);
+      const timeB = b.publishedAt || (b.id && !isNaN(Number(b.id)) ? Number(b.id) : 0);
+      return timeB - timeA;
+    });
 
   if (!currentUser) {
     return null;
@@ -302,7 +467,7 @@ export default function WriterDashboard() {
                 </div>
                 <div className="py-1">
                   <Link
-                    href="/writer"
+                    href={getAuthorSlugForUser(currentUser)}
                     onClick={() => setShowDropdown(false)}
                     className="w-full flex items-center space-x-3 px-4 py-2.5 text-xs font-bold text-blue-700 hover:bg-blue-50 transition-colors text-left"
                   >
@@ -511,14 +676,14 @@ export default function WriterDashboard() {
                               </button>
                               <button
                                 type="button"
-                                onClick={(e) => handleDeletePermanently(post.id, e)}
+                                onClick={(e) => confirmDeletePermanently(post, e)}
                                 className="text-[#0f172a] hover:text-red-600 transition-colors cursor-pointer"
                               >
                                 Delete
                               </button>
                             </div>
                           ) : (
-                            <div className="inline-flex items-center justify-end space-x-1.5 sm:space-x-2 whitespace-nowrap">
+                            <div className="inline-flex items-center justify-end space-x-2.5 sm:space-x-3 whitespace-nowrap">
                               <button
                                 type="button"
                                 onClick={() => router.push(`/writer-dashboard/create-post?id=${post.id}`)}
@@ -529,10 +694,10 @@ export default function WriterDashboard() {
                               <button
                                 type="button"
                                 onClick={(e) => handleMoveToTrash(post.id, e)}
-                                className="text-gray-400 hover:text-red-600 transition-colors cursor-pointer p-0.5"
-                                title="Move to Trash"
+                                className="text-gray-400 hover:text-red-600 active:text-red-700 transition-colors cursor-pointer p-1.5 rounded-md hover:bg-red-50 active:bg-red-100"
+                                aria-label="Move to Trash"
                               >
-                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                <svg className="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                 </svg>
                               </button>
@@ -684,6 +849,47 @@ export default function WriterDashboard() {
         currentUser={currentUser}
         onSave={(updated) => setCurrentUser(updated)}
       />
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirmModal && deleteConfirmModal.isOpen && (
+        <div className="fixed inset-0 z-[99999] bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+                <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-slate-900 font-serif">
+                  {deleteConfirmModal.title}
+                </h3>
+                <p className="text-sm text-slate-600 mt-2 leading-relaxed">
+                  {deleteConfirmModal.message}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setDeleteConfirmModal(null)}
+                className="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  deleteConfirmModal.onConfirm();
+                }}
+                className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors shadow-sm cursor-pointer"
+              >
+                {deleteConfirmModal.confirmText || "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

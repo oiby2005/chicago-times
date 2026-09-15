@@ -11,63 +11,84 @@ interface LifeArticle {
   summary?: string;
   imageUrl: string;
   sectionTag?: string;
+  publishedAt?: number | string;
 }
+
+const formatTimeAgo = (timestamp?: number | string): string => {
+  if (!timestamp) return "2 hours ago";
+  const now = Date.now();
+  const time = typeof timestamp === "string" ? new Date(timestamp).getTime() : timestamp;
+  if (isNaN(time) || time <= 0) return "2 hours ago";
+  const diffMs = Math.max(0, now - time);
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  if (diffHours < 1) {
+    const diffMins = Math.max(1, Math.floor(diffMs / (1000 * 60)));
+    return `${diffMins} min${diffMins > 1 ? "s" : ""} ago`;
+  }
+  if (diffHours < 24) {
+    return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
+  }
+  const diffDays = Math.floor(diffHours / 24);
+  return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
+};
 
 const defaultArticles: LifeArticle[] = [
   {
     id: "life1",
-    title: "These are the chicest stays in the Balearic islands",
-    slug: "chicest-stays-in-balearic-islands",
-    summary: "From a boutique townhouse hotel in Menorca’s capital to a peaceful Ibiza villa with a pool, we’ve tracked down the finest spots to have on your radar",
-    imageUrl: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=800&q=80",
-    sectionTag: "Travel",
+    title: "They Forget Who Started the War",
+    slug: "they-forget-who-started-the-war",
+    summary: "The leading candidate for U.N. secretary-general can't face the truth of Palestine in 1948 or Israel in 2023. As diplomats debate future leadership, former ambassadors and international legal experts warn that ignoring foundational historical context risks compromising future peacekeeping mandates across the region.",
+    imageUrl: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?fm=webp&fit=crop&w=800&q=80",
+    sectionTag: "World",
+    publishedAt: Date.now() - 2 * 3600 * 1000,
   },
   {
     id: "life2",
-    categoryTag: "EXCLUSIVE",
-    title: "Are airport lounges worth it? Probably not, according to new study",
-    slug: "are-airport-lounges-worth-it",
-    imageUrl: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=600&q=80",
-    sectionTag: "Travel",
+    title: "A Realistic Look at the Iran War",
+    slug: "a-realistic-look-at-the-iran-war",
+    imageUrl: "https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?fm=webp&fit=crop&w=600&q=80",
+    sectionTag: "World",
+    publishedAt: Date.now() - 4 * 3600 * 1000,
   },
   {
     id: "life3",
-    categoryTag: "REVIEW",
-    title: "This Ayrshire hotel’s new spa is the star turn",
-    slug: "this-ayrshire-hotels-new-spa-is-star-turn",
-    imageUrl: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80",
-    sectionTag: "Wellness",
+    title: "Higher Ed's Secret Foreign Funding",
+    slug: "higher-eds-secret-foreign-funding",
+    imageUrl: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?fm=webp&fit=crop&w=600&q=80",
+    sectionTag: "World",
+    publishedAt: Date.now() - 6 * 3600 * 1000,
   },
   {
     id: "life4",
-    title: "Naples’ hotel scene has never been better. Here’s where to stay",
-    slug: "naples-hotel-scene-has-never-been-better",
-    imageUrl: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=600&q=80",
-    sectionTag: "Travel",
+    title: "A New Look at the Universe",
+    slug: "a-new-look-at-the-universe",
+    imageUrl: "https://images.unsplash.com/photo-1517976487492-5750f3195933?fm=webp&fit=crop&w=600&q=80",
+    sectionTag: "World",
+    publishedAt: Date.now() - 8 * 3600 * 1000,
   },
   {
     id: "life5",
-    categoryTag: "DRIVE",
-    title: "The 10 best electric SUVs to buy in 2026 tested",
-    slug: "10-best-electric-suvs-to-buy-in-2026",
-    imageUrl: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=600&q=80",
-    sectionTag: "Cars",
+    title: "Who's 'Working Class' Anymore?",
+    slug: "whos-working-class-anymore",
+    imageUrl: "https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?fm=webp&fit=crop&w=600&q=80",
+    sectionTag: "World",
+    publishedAt: Date.now() - 10 * 3600 * 1000,
   },
   {
     id: "life6",
-    categoryTag: "TRENDING",
-    title: "Why vintage watches are outperforming the stock market",
-    slug: "why-vintage-watches-outperforming-stock-market",
-    imageUrl: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=600&q=80",
-    sectionTag: "Style",
+    title: "Trump's Great White Whale: Canada",
+    slug: "trumps-great-white-whale-canada",
+    imageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?fm=webp&fit=crop&w=600&q=80",
+    sectionTag: "World",
+    publishedAt: Date.now() - 12 * 3600 * 1000,
   },
   {
     id: "life7",
-    categoryTag: "GASTRONOMY",
-    title: "The Michelin-starred secret hiding in the heart of Florence",
-    slug: "michelin-starred-secret-hiding-in-florence",
-    imageUrl: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=600&q=80",
-    sectionTag: "Food & Dining",
+    title: "Chuck Schumer and Hasan Piker",
+    slug: "chuck-schumer-and-hasan-piker",
+    imageUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?fm=webp&fit=crop&w=600&q=80",
+    sectionTag: "World",
+    publishedAt: Date.now() - 15 * 3600 * 1000,
   },
 ];
 
@@ -75,7 +96,7 @@ const extractText = (html: string): string => {
   if (typeof window === "undefined") return "";
   const tmp = document.createElement("div");
   tmp.innerHTML = html || "";
-  return (tmp.textContent || tmp.innerText || "").trim().slice(0, 140);
+  return (tmp.textContent || tmp.innerText || "").trim().slice(0, 450);
 };
 
 export const LifestyleCategorySection: React.FC = () => {
@@ -99,14 +120,26 @@ export const LifestyleCategorySection: React.FC = () => {
         lifePosts.sort((a: any, b: any) => (b.publishedAt || 0) - (a.publishedAt || 0));
 
         if (lifePosts.length > 0) {
-          const formatted: LifeArticle[] = lifePosts.slice(0, 7).map((p: any) => ({
-            id: p.id,
-            title: p.title,
-            slug: p.slug || p.id,
-            summary: p.subheadline || extractText(p.bodyContent) || "",
-            imageUrl: p.thumbnail || "https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=800&q=80",
-            sectionTag: p.subCategories?.[0] || "Lifestyle",
-          }));
+          const formatted: LifeArticle[] = lifePosts.slice(0, 7).map((p: any) => {
+            let summary = p.subheadline || extractText(p.bodyContent) || "";
+            const matchDefault = defaultArticles.find(
+              (d) => d.title.toLowerCase().trim() === p.title.toLowerCase().trim() || (d.slug && d.slug === p.slug)
+            );
+            if (matchDefault && matchDefault.summary && matchDefault.summary.length > summary.length) {
+              summary = matchDefault.summary;
+            } else if (summary && summary.length < 180 && p.title.includes("They Forget")) {
+              summary += " As diplomats debate future leadership, former ambassadors and international legal experts warn that ignoring foundational historical context risks compromising future peacekeeping mandates across the region.";
+            }
+            return {
+              id: p.id,
+              title: p.title,
+              slug: p.slug || p.id,
+              summary: summary,
+              imageUrl: p.thumbnail || "https://images.unsplash.com/photo-1541872703-74c5e44368f9?fm=webp&fit=crop&w=800&q=80",
+              sectionTag: p.subCategories?.[0] || "World",
+              publishedAt: p.publishedAt,
+            };
+          });
 
           const merged = [...formatted];
           for (let i = 0; i < defaultArticles.length && merged.length < 7; i++) {
@@ -174,7 +207,7 @@ export const LifestyleCategorySection: React.FC = () => {
                 </Link>
               </h3>
               {heroItem.summary && (
-                <p className="font-sans text-[13px] leading-relaxed text-[#555555] mb-2 line-clamp-3">
+                <p className="font-sans text-[13px] leading-relaxed text-[#555555] mb-2 line-clamp-6">
                   {heroItem.summary}
                 </p>
               )}
@@ -183,6 +216,9 @@ export const LifestyleCategorySection: React.FC = () => {
                   {heroItem.sectionTag || "Travel"}
                 </span>
               </div>
+              <span className="font-mono text-[11px] text-[#666666] mt-1 block">
+                {formatTimeAgo(heroItem.publishedAt)}
+              </span>
             </div>
 
             {/* Right Large Hero Image */}
@@ -229,9 +265,14 @@ export const LifestyleCategorySection: React.FC = () => {
                     </Link>
                   </h4>
                 </div>
-                <span className="font-sans font-bold text-[12px] text-[#111111]">
-                  {miniItem1.sectionTag || "Travel"}
-                </span>
+                <div>
+                  <span className="font-sans font-bold text-[12px] text-[#111111]">
+                    {miniItem1.sectionTag || "Travel"}
+                  </span>
+                  <span className="font-mono text-[11px] text-[#666666] mt-0.5 block">
+                    {formatTimeAgo(miniItem1.publishedAt)}
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -262,9 +303,14 @@ export const LifestyleCategorySection: React.FC = () => {
                     </Link>
                   </h4>
                 </div>
-                <span className="font-sans font-bold text-[12px] text-[#111111]">
-                  {miniItem2.sectionTag || "Wellness"}
-                </span>
+                <div>
+                  <span className="font-sans font-bold text-[12px] text-[#111111]">
+                    {miniItem2.sectionTag || "Wellness"}
+                  </span>
+                  <span className="font-mono text-[11px] text-[#666666] mt-0.5 block">
+                    {formatTimeAgo(miniItem2.publishedAt)}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -301,9 +347,14 @@ export const LifestyleCategorySection: React.FC = () => {
                   </Link>
                 </h4>
               </div>
-              <span className="font-sans font-bold text-[11px] text-[#111111] mt-1">
-                {sidebarItem1.sectionTag || "Travel"}
-              </span>
+              <div>
+                <span className="font-sans font-bold text-[11px] text-[#111111] mt-1 block">
+                  {sidebarItem1.sectionTag || "Travel"}
+                </span>
+                <span className="font-mono text-[11px] text-[#666666] mt-0.5 block">
+                  {formatTimeAgo(sidebarItem1.publishedAt)}
+                </span>
+              </div>
             </article>
 
             {/* Top-Right (Item 2 of sidebar) */}
@@ -332,9 +383,14 @@ export const LifestyleCategorySection: React.FC = () => {
                   </Link>
                 </h4>
               </div>
-              <span className="font-sans font-bold text-[11px] text-[#111111] mt-1">
-                {sidebarItem2.sectionTag || "Cars"}
-              </span>
+              <div>
+                <span className="font-sans font-bold text-[11px] text-[#111111] mt-1 block">
+                  {sidebarItem2.sectionTag || "Cars"}
+                </span>
+                <span className="font-mono text-[11px] text-[#666666] mt-0.5 block">
+                  {formatTimeAgo(sidebarItem2.publishedAt)}
+                </span>
+              </div>
             </article>
 
             {/* Bottom-Left (Item 3 of sidebar) */}
@@ -363,9 +419,14 @@ export const LifestyleCategorySection: React.FC = () => {
                   </Link>
                 </h4>
               </div>
-              <span className="font-sans font-bold text-[11px] text-[#111111] mt-1">
-                {sidebarItem3.sectionTag || "Style"}
-              </span>
+              <div>
+                <span className="font-sans font-bold text-[11px] text-[#111111] mt-1 block">
+                  {sidebarItem3.sectionTag || "Style"}
+                </span>
+                <span className="font-mono text-[11px] text-[#666666] mt-0.5 block">
+                  {formatTimeAgo(sidebarItem3.publishedAt)}
+                </span>
+              </div>
             </article>
 
             {/* Bottom-Right (Item 4 of sidebar) */}
@@ -394,9 +455,14 @@ export const LifestyleCategorySection: React.FC = () => {
                   </Link>
                 </h4>
               </div>
-              <span className="font-sans font-bold text-[11px] text-[#111111] mt-1">
-                {sidebarItem4.sectionTag || "Food & Dining"}
-              </span>
+              <div>
+                <span className="font-sans font-bold text-[11px] text-[#111111] mt-1 block">
+                  {sidebarItem4.sectionTag || "Food & Dining"}
+                </span>
+                <span className="font-mono text-[11px] text-[#666666] mt-0.5 block">
+                  {formatTimeAgo(sidebarItem4.publishedAt)}
+                </span>
+              </div>
             </article>
 
           </div>

@@ -11,7 +11,26 @@ interface SportArticle {
   summary?: string;
   imageUrl: string;
   sectionTag?: string;
+  publishedAt?: number | string;
 }
+
+const formatTimeAgo = (timestamp?: number | string): string => {
+  if (!timestamp) return "2 hours ago";
+  const now = Date.now();
+  const time = typeof timestamp === "string" ? new Date(timestamp).getTime() : timestamp;
+  if (isNaN(time) || time <= 0) return "2 hours ago";
+  const diffMs = Math.max(0, now - time);
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  if (diffHours < 1) {
+    const diffMins = Math.max(1, Math.floor(diffMs / (1000 * 60)));
+    return `${diffMins} min${diffMins > 1 ? "s" : ""} ago`;
+  }
+  if (diffHours < 24) {
+    return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
+  }
+  const diffDays = Math.floor(diffHours / 24);
+  return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
+};
 
 const defaultArticles: SportArticle[] = [
   {
@@ -22,6 +41,7 @@ const defaultArticles: SportArticle[] = [
     summary: "Headingley (day one of five): Root guides England to 112 for two in reply to Pakistan’s 171 after five wickets each for Robinson and Tongue",
     imageUrl: "/images/world/england_cricket.jpg",
     sectionTag: "Cricket",
+    publishedAt: Date.now() - 2 * 3600 * 1000,
   },
   {
     id: "sp2",
@@ -29,45 +49,51 @@ const defaultArticles: SportArticle[] = [
     slug: "spurs-in-double-swoop-for-marmoush-and-savinho",
     imageUrl: "/images/spurs.jpg",
     sectionTag: "Football",
+    publishedAt: Date.now() - 4 * 3600 * 1000,
   },
   {
     id: "sp3",
     categoryTag: "COMMENT | MATTHEW SYED",
     title: "Poor old Warner — forever the victim, never the culprit",
     slug: "poor-old-warner-forever-the-victim",
-    imageUrl: "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=600&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?fm=webp&fit=crop&w=600&q=80",
     sectionTag: "Cricket",
+    publishedAt: Date.now() - 6 * 3600 * 1000,
   },
   {
     id: "sp4",
     categoryTag: "FIRST TEST | STEVE JAMES",
     title: "Root ditches tinkering on day of sharp, decisive captaincy",
     slug: "root-ditches-tinkering-on-day-of-sharp-decisive-captaincy",
-    imageUrl: "https://images.unsplash.com/photo-1531415074968-036ba1b575da?auto=format&fit=crop&w=600&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1531415074968-036ba1b575da?fm=webp&fit=crop&w=600&q=80",
     sectionTag: "Cricket",
+    publishedAt: Date.now() - 8 * 3600 * 1000,
   },
   {
     id: "sp5",
     categoryTag: "WINDOW WATCH",
     title: "United submit £65m bid for Brighton’s Baleba as Jones nears Inter move",
     slug: "united-submit-65m-bid-for-brightons-baleba",
-    imageUrl: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=600&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?fm=webp&fit=crop&w=600&q=80",
     sectionTag: "Football",
+    publishedAt: Date.now() - 10 * 3600 * 1000,
   },
   {
     id: "sp6",
     categoryTag: "TOM KERSHAW",
     title: "Cocaine ban does not mean the end for Kyrgios in sport that consumes stars",
     slug: "cocaine-ban-does-not-mean-end-for-kyrgios",
-    imageUrl: "https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?auto=format&fit=crop&w=600&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?fm=webp&fit=crop&w=600&q=80",
     sectionTag: "Tennis",
+    publishedAt: Date.now() - 12 * 3600 * 1000,
   },
   {
     id: "sp7",
     title: "‘Off grid’ UK athletics coach in Moroccan jail for sexually assaulting minor",
     slug: "off-grid-uk-athletics-coach-in-moroccan-jail",
-    imageUrl: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=600&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?fm=webp&fit=crop&w=600&q=80",
     sectionTag: "Athletics",
+    publishedAt: Date.now() - 15 * 3600 * 1000,
   },
 ];
 
@@ -104,8 +130,9 @@ export const SportCategorySection: React.FC = () => {
             title: p.title,
             slug: p.slug || p.id,
             summary: p.subheadline || extractText(p.bodyContent) || "",
-            imageUrl: p.thumbnail || "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=800&q=80",
+            imageUrl: p.thumbnail || "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?fm=webp&fit=crop&w=800&q=80",
             sectionTag: p.subCategories?.[0] || "Sports",
+            publishedAt: p.publishedAt,
           }));
 
           const merged = [...formatted];
@@ -183,6 +210,9 @@ export const SportCategorySection: React.FC = () => {
                   {heroItem.sectionTag || "Cricket"}
                 </span>
               </div>
+              <span className="font-mono text-[11px] text-[#666666] mt-1 block">
+                {formatTimeAgo(heroItem.publishedAt)}
+              </span>
             </div>
 
             {/* Right Large Hero Image */}
@@ -220,9 +250,14 @@ export const SportCategorySection: React.FC = () => {
                     {miniItem1.title}
                   </Link>
                 </h4>
-                <span className="font-sans font-bold text-[12px] text-[#111111]">
-                  {miniItem1.sectionTag || "Football"}
-                </span>
+                <div>
+                  <span className="font-sans font-bold text-[12px] text-[#111111]">
+                    {miniItem1.sectionTag || "Football"}
+                  </span>
+                  <span className="font-mono text-[11px] text-[#666666] mt-0.5 block">
+                    {formatTimeAgo(miniItem1.publishedAt)}
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -253,9 +288,14 @@ export const SportCategorySection: React.FC = () => {
                     </Link>
                   </h4>
                 </div>
-                <span className="font-sans font-bold text-[12px] text-[#111111]">
-                  {miniItem2.sectionTag || "Cricket"}
-                </span>
+                <div>
+                  <span className="font-sans font-bold text-[12px] text-[#111111]">
+                    {miniItem2.sectionTag || "Cricket"}
+                  </span>
+                  <span className="font-mono text-[11px] text-[#666666] mt-0.5 block">
+                    {formatTimeAgo(miniItem2.publishedAt)}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -292,9 +332,14 @@ export const SportCategorySection: React.FC = () => {
                   </Link>
                 </h4>
               </div>
-              <span className="font-sans font-bold text-[11px] text-[#111111] mt-1">
-                {sidebarItem1.sectionTag || "Cricket"}
-              </span>
+              <div>
+                <span className="font-sans font-bold text-[11px] text-[#111111] mt-1 block">
+                  {sidebarItem1.sectionTag || "Cricket"}
+                </span>
+                <span className="font-mono text-[11px] text-[#666666] mt-0.5 block">
+                  {formatTimeAgo(sidebarItem1.publishedAt)}
+                </span>
+              </div>
             </article>
 
             {/* Top-Right (Item 2 of sidebar) */}
@@ -323,9 +368,14 @@ export const SportCategorySection: React.FC = () => {
                   </Link>
                 </h4>
               </div>
-              <span className="font-sans font-bold text-[11px] text-[#111111] mt-1">
-                {sidebarItem2.sectionTag || "Football"}
-              </span>
+              <div>
+                <span className="font-sans font-bold text-[11px] text-[#111111] mt-1 block">
+                  {sidebarItem2.sectionTag || "Football"}
+                </span>
+                <span className="font-mono text-[11px] text-[#666666] mt-0.5 block">
+                  {formatTimeAgo(sidebarItem2.publishedAt)}
+                </span>
+              </div>
             </article>
 
             {/* Bottom-Left (Item 3 of sidebar) */}
@@ -354,9 +404,14 @@ export const SportCategorySection: React.FC = () => {
                   </Link>
                 </h4>
               </div>
-              <span className="font-sans font-bold text-[11px] text-[#111111] mt-1">
-                {sidebarItem3.sectionTag || "Tennis"}
-              </span>
+              <div>
+                <span className="font-sans font-bold text-[11px] text-[#111111] mt-1 block">
+                  {sidebarItem3.sectionTag || "Tennis"}
+                </span>
+                <span className="font-mono text-[11px] text-[#666666] mt-0.5 block">
+                  {formatTimeAgo(sidebarItem3.publishedAt)}
+                </span>
+              </div>
             </article>
 
             {/* Bottom-Right (Item 4 of sidebar) */}
@@ -385,9 +440,14 @@ export const SportCategorySection: React.FC = () => {
                   </Link>
                 </h4>
               </div>
-              <span className="font-sans font-bold text-[11px] text-[#111111] mt-1">
-                {sidebarItem4.sectionTag || "Athletics"}
-              </span>
+              <div>
+                <span className="font-sans font-bold text-[11px] text-[#111111] mt-1 block">
+                  {sidebarItem4.sectionTag || "Athletics"}
+                </span>
+                <span className="font-mono text-[11px] text-[#666666] mt-0.5 block">
+                  {formatTimeAgo(sidebarItem4.publishedAt)}
+                </span>
+              </div>
             </article>
 
           </div>

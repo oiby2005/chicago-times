@@ -57,7 +57,7 @@ interface MoreFromWsjSectionProps {
 }
 
 export default function MoreFromWsjSection({
-  title = "MORE FROM THE WALL STREET JOURNAL",
+  title = "MORE FROM TIMES CHICAGO",
 }: MoreFromWsjSectionProps) {
   return (
     <section className="w-full pt-8 mt-10 border-t border-[#111111] select-none">

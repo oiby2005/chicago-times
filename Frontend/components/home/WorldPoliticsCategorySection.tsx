@@ -16,26 +16,26 @@ const defaultArticles: WorldPoliticsArticle[] = [
     id: "wp1",
     title: "Check your helicopters, Greece tells pilots after honeymoon crash",
     slug: "check-your-helicopters-greece-tells-pilots-after-honeymoon-crash",
-    imageUrl: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=600&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?fm=webp&fit=crop&w=600&q=80",
   },
   {
     id: "wp2",
     title: "Lawrence of Arabia’s anger at being ‘banned’ from travel abroad",
     slug: "lawrence-of-arabias-anger-at-being-banned-from-travel-abroad",
-    imageUrl: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=600&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?fm=webp&fit=crop&w=600&q=80",
   },
   {
     id: "wp3",
     title: "By gum, NHS’s AI phone system struggles with Yorkshire accents",
     slug: "by-gum-nhs-ai-phone-system-struggles-with-yorkshire-accents",
-    imageUrl: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=600&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?fm=webp&fit=crop&w=600&q=80",
   },
   {
     id: "wp4",
     categoryTag: "THE TIMES DIARY",
     title: "Minister literally doesn’t care if you say less or fewer",
     slug: "minister-literally-doesnt-care-if-you-say-less-or-fewer",
-    imageUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=600&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?fm=webp&fit=crop&w=600&q=80",
   },
 ];
 
@@ -63,7 +63,7 @@ export const WorldPoliticsCategorySection: React.FC = () => {
             id: p.id,
             title: p.title,
             slug: p.slug || p.id,
-            imageUrl: p.thumbnail || "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=600&q=80",
+            imageUrl: p.thumbnail || "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?fm=webp&fit=crop&w=600&q=80",
           }));
 
           const merged = [...formatted];
@@ -88,6 +88,14 @@ export const WorldPoliticsCategorySection: React.FC = () => {
 
   return (
     <div className="w-full font-sans select-none pb-2 my-0">
+      {/* Section Header */}
+      <div className="flex items-center space-x-2 pb-3 mb-4 border-b border-dashed border-[#CCCCCC]">
+        <h2 className="font-serif font-bold text-[24px] sm:text-[28px] text-[#111111] tracking-tight">
+          <Link href="/world-politics" className="hover:underline">
+            World Politics
+          </Link>
+        </h2>
+      </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[0.4cm]">
         {articles.map((art) => (
           <article

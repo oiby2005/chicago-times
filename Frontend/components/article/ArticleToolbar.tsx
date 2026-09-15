@@ -2,17 +2,23 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import ShareCardModal from "@/components/article/ShareCardModal";
 
 interface ArticleToolbarProps {
   commentCount?: number;
   listenTime?: string;
+  articleTitle?: string;
+  articleUrl?: string;
 }
 
 export const ArticleToolbar: React.FC<ArticleToolbarProps> = ({
   commentCount = 181,
   listenTime = "2 min",
+  articleTitle = "Article",
+  articleUrl,
 }) => {
   const [isSticky, setIsSticky] = useState(false);
+  const [isShareOpen, setIsShareOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -35,11 +41,23 @@ export const ArticleToolbar: React.FC<ArticleToolbarProps> = ({
         {/* Left Action Toolbar Icons (Screenshot 3) */}
         <div className="flex items-center space-x-6 text-xs text-[#444444] font-sans">
           {/* Share */}
-          <button className="flex items-center space-x-1 hover:text-black transition-colors" title="Share">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 100-5.367 3 3 0 000 5.367zm0 11.367a3 3 0 100-5.367 3 3 0 000 5.367z" />
-            </svg>
-          </button>
+          <div className="relative">
+            <button
+              onClick={() => setIsShareOpen(!isShareOpen)}
+              className="flex items-center space-x-1 hover:text-black transition-colors cursor-pointer"
+              title="Share"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 100-5.367 3 3 0 000 5.367zm0 11.367a3 3 0 100-5.367 3 3 0 000 5.367z" />
+              </svg>
+            </button>
+            <ShareCardModal
+              isOpen={isShareOpen}
+              onClose={() => setIsShareOpen(false)}
+              title={articleTitle}
+              url={articleUrl}
+            />
+          </div>
 
           {/* Text Size */}
           <button className="flex items-center space-x-1 hover:text-black font-semibold text-sm transition-colors" title="Text size">
@@ -74,7 +92,7 @@ export const ArticleToolbar: React.FC<ArticleToolbarProps> = ({
             href="/"
             className="hidden sm:inline-block font-serif font-black text-sm text-black tracking-tight hover:underline"
           >
-            THE WALL STREET JOURNAL.
+            TIMES CHICAGO
           </Link>
           <button className="bg-[#007cba] hover:bg-[#006996] text-white text-[11.5px] font-bold px-3 py-1 rounded-xs transition-colors">
             Subscribe

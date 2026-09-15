@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import AdPlaceholder from "@/components/ui/AdPlaceholder";
 
 interface Ad7SectionProps {
   className?: string;
@@ -9,11 +10,7 @@ interface Ad7SectionProps {
 export const Ad7Section: React.FC<Ad7SectionProps> = ({ className = "" }) => {
   return (
     <div className={`w-full font-sans select-none my-0 ${className}`}>
-      <div className="w-full aspect-square bg-[#E8E3D7] flex items-center justify-center text-center p-4">
-        <span className="font-sans font-medium text-3xl sm:text-4xl text-[#111111] tracking-tight">
-          Ad 07
-        </span>
-      </div>
+      <AdPlaceholder slotId="hp_slot_7" width="w-full" height="h-[320px]" resolution="300 × 320" />
     </div>
   );
 };

@@ -102,7 +102,7 @@ const baseArticles: ArticleItem[] = [
       "For decades, surveys consistently showed younger generations becoming less religious than their parents. Yet in recent years, churches across the United States, France, the United Kingdom and...",
     author: "BY SAMUEL MAURICIO PATIÑO FUENTES",
     date: "AUG 06, 2026",
-    image: "https://images.unsplash.com/photo-1548625149-fc4a29cf7092?auto=format&fit=crop&w=400&q=80",
+    image: "https://images.unsplash.com/photo-1548625149-fc4a29cf7092?fm=webp&fit=crop&w=400&q=80",
   },
 ];
 
@@ -288,8 +288,8 @@ export default function WorldPart2Section() {
             </div>
           </div>
           {/* Sidebar Ad Placeholders with Resolution Display */}
-          <AdPlaceholder width="w-full" height="h-[250px]" resolution="300 × 250" />
-          <AdPlaceholder width="w-full" height="h-[600px]" resolution="300 × 600" />
+          <AdPlaceholder slotId="cat_slot_1" width="w-full" height="h-[250px]" resolution="300 × 250" />
+          <AdPlaceholder slotId="cat_slot_2" width="w-full" height="h-[600px]" resolution="300 × 600" />
         </aside>
       </div>
     </section>

@@ -14,7 +14,7 @@ export const HomeMainGrid: React.FC = () => {
       <Container>
         {/* Top Leaderboard Advertisement Banner */}
         <div className="w-full flex justify-center mb-6">
-          <AdPlaceholder width="w-[728px] max-w-full" height="h-[90px]" resolution="728 × 90" />
+          <AdPlaceholder slotId="hp_slot_2" width="w-full max-w-[970px]" height="h-[175px]" resolution="970 × 175" />
         </div>
 
         {/* Main 3-Column Grid Layout */}
@@ -280,7 +280,7 @@ export const HomeMainGrid: React.FC = () => {
               {/* Opinion 1 */}
               <div className="flex items-start space-x-3 pb-3 border-b border-[#e2e2e2]">
                 <img
-                  src="https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=140&q=80"
+                  src="https://images.unsplash.com/photo-1541872703-74c5e44368f9?fm=webp&fit=crop&w=140&q=80"
                   alt="Opinion thumbnail"
                   className="w-16 h-16 sm:w-18 sm:h-18 object-cover rounded-xs shrink-0"
                 />
@@ -299,7 +299,7 @@ export const HomeMainGrid: React.FC = () => {
               {/* Opinion 2 */}
               <div className="flex items-start space-x-3 pb-3 border-b border-[#e2e2e2]">
                 <img
-                  src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=140&q=80"
+                  src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?fm=webp&fit=crop&w=140&q=80"
                   alt="Opinion thumbnail"
                   className="w-16 h-16 sm:w-18 sm:h-18 object-cover rounded-xs shrink-0"
                 />
@@ -318,7 +318,7 @@ export const HomeMainGrid: React.FC = () => {
               {/* Opinion 3 */}
               <div className="flex items-start space-x-3 pb-3 border-b border-[#e2e2e2]">
                 <img
-                  src="https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?auto=format&fit=crop&w=140&q=80"
+                  src="https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?fm=webp&fit=crop&w=140&q=80"
                   alt="Opinion thumbnail"
                   className="w-16 h-16 sm:w-18 sm:h-18 object-cover rounded-xs shrink-0"
                 />
@@ -337,7 +337,7 @@ export const HomeMainGrid: React.FC = () => {
               {/* Opinion 4 */}
               <div className="flex items-start space-x-3 pb-3 border-b border-[#e2e2e2]">
                 <img
-                  src="https://images.unsplash.com/photo-1579532537598-459ecdaf39cc?auto=format&fit=crop&w=140&q=80"
+                  src="https://images.unsplash.com/photo-1579532537598-459ecdaf39cc?fm=webp&fit=crop&w=140&q=80"
                   alt="Opinion thumbnail"
                   className="w-16 h-16 sm:w-18 sm:h-18 object-cover rounded-xs shrink-0"
                 />
@@ -356,7 +356,7 @@ export const HomeMainGrid: React.FC = () => {
               {/* Opinion 5 */}
               <div className="flex items-start space-x-3 pb-3 border-b border-[#e2e2e2]">
                 <img
-                  src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=140&q=80"
+                  src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?fm=webp&fit=crop&w=140&q=80"
                   alt="Opinion thumbnail"
                   className="w-16 h-16 sm:w-18 sm:h-18 object-cover rounded-xs shrink-0"
                 />
@@ -375,7 +375,7 @@ export const HomeMainGrid: React.FC = () => {
               {/* Opinion 6 */}
               <div className="flex items-start space-x-3 pb-1">
                 <img
-                  src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=140&q=80"
+                  src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?fm=webp&fit=crop&w=140&q=80"
                   alt="Opinion thumbnail"
                   className="w-16 h-16 sm:w-18 sm:h-18 object-cover rounded-xs shrink-0"
                 />
@@ -414,7 +414,7 @@ export const HomeMainGrid: React.FC = () => {
 
             {/* Right Sidebar AdPlaceholder */}
             <div className="w-full flex justify-center pt-2">
-              <AdPlaceholder width="w-full max-w-[300px]" height="h-[250px]" resolution="300 × 250" />
+              <AdPlaceholder slotId="hp_slot_5" width="w-full max-w-[300px]" height="h-[320px]" resolution="300 × 320" />
             </div>
           </div>
         </div>

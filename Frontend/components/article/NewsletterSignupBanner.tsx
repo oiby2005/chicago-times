@@ -6,10 +6,36 @@ export default function NewsletterSignupBanner() {
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (email) {
       setSubscribed(true);
+      const cleanEmail = email.trim();
+
+      try {
+        await fetch("http://localhost:5000/api/newsletter", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: cleanEmail }),
+        });
+      } catch (err) {}
+
+      try {
+        const stored = localStorage.getItem("wsj_newsletter_subscribers");
+        const list = stored ? JSON.parse(stored) : [];
+        if (!list.some((s: any) => (typeof s === "string" ? s : s.email).toLowerCase() === cleanEmail.toLowerCase())) {
+          list.unshift({
+            id: "sub_" + Date.now(),
+            email: cleanEmail,
+            newsletters: ["US", "WORLD", "BUSINESS"],
+            subscribedDate: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+          });
+          localStorage.setItem("wsj_newsletter_subscribers", JSON.stringify(list));
+        }
+      } catch (e) {}
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("wsj_newsletter_updated"));
+      }
     }
   };
 
@@ -17,7 +43,7 @@ export default function NewsletterSignupBanner() {
     <div className="w-full border-y border-[#e5e7eb] py-6 my-8 clear-both flow-root">
       {/* Title / Heading */}
       <h3 className="font-serif font-bold text-xl sm:text-2xl text-[#b8860b] leading-tight">
-        Wall Street Journal Fast Start — Let the best of news come to you
+        Times Chicago Fast Start — Let the best of news come to you
       </h3>
 
       {/* Subtitle */}
@@ -28,7 +54,7 @@ export default function NewsletterSignupBanner() {
       {/* Form or Success State */}
       {subscribed ? (
         <div className="bg-[#fefce8] border border-[#fef08a] text-[#854d0e] px-4 py-3 rounded-xs text-sm font-semibold">
-          Thank you for subscribing to Wall Street Journal Fast Start!
+          Thank you for subscribing to Times Chicago Fast Start!
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 max-w-xl">

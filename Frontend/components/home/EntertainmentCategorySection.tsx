@@ -11,7 +11,26 @@ interface EntArticle {
   summary?: string;
   imageUrl: string;
   sectionTag?: string;
+  publishedAt?: number | string;
 }
+
+const formatTimeAgo = (timestamp?: number | string): string => {
+  if (!timestamp) return "2 hours ago";
+  const now = Date.now();
+  const time = typeof timestamp === "string" ? new Date(timestamp).getTime() : timestamp;
+  if (isNaN(time) || time <= 0) return "2 hours ago";
+  const diffMs = Math.max(0, now - time);
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  if (diffHours < 1) {
+    const diffMins = Math.max(1, Math.floor(diffMs / (1000 * 60)));
+    return `${diffMins} min${diffMins > 1 ? "s" : ""} ago`;
+  }
+  if (diffHours < 24) {
+    return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
+  }
+  const diffDays = Math.floor(diffHours / 24);
+  return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
+};
 
 const defaultArticles: EntArticle[] = [
   {
@@ -20,56 +39,63 @@ const defaultArticles: EntArticle[] = [
     title: "The new faces of The Grand Tour: We have Jeremy Clarkson’s blessing",
     slug: "the-new-faces-of-the-grand-tour",
     summary: "Francis Bourgeois, Thomas Holland and James Engelsman are taking the wheel of the hit car show. They say they’re not trying to replace the original three amigos",
-    imageUrl: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?fm=webp&fit=crop&w=800&q=80",
     sectionTag: "TV & Radio",
+    publishedAt: Date.now() - 2 * 3600 * 1000,
   },
   {
     id: "ent2",
     categoryTag: "REVIEW | FIRST NIGHT",
     title: "Abigail’s Party — Tamzin Outhwaite makes Beverly her own",
     slug: "abigails-party-tamzin-outhwaite",
-    imageUrl: "https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?auto=format&fit=crop&w=600&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?fm=webp&fit=crop&w=600&q=80",
     sectionTag: "Theatre & Dance",
+    publishedAt: Date.now() - 4 * 3600 * 1000,
   },
   {
     id: "ent3",
     categoryTag: "NEW | REVIEW | SOCIETY",
     title: "Why have men gone off the rails? They can’t make an honest living",
     slug: "why-have-men-gone-off-the-rails",
-    imageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?fm=webp&fit=crop&w=600&q=80",
     sectionTag: "Books",
+    publishedAt: Date.now() - 6 * 3600 * 1000,
   },
   {
     id: "ent4",
     categoryTag: "REVIEW",
     title: "The £1m secret hiding in a French garden shed... and what happened next",
     slug: "the-1m-secret-hiding-in-a-french-garden-shed",
-    imageUrl: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=600&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?fm=webp&fit=crop&w=600&q=80",
     sectionTag: "TV & Radio",
+    publishedAt: Date.now() - 8 * 3600 * 1000,
   },
   {
     id: "ent5",
     categoryTag: "CINEMA",
     title: "Christopher Nolan’s next cinematic epic officially set for 2026 release",
     slug: "christopher-nolans-next-cinematic-epic-2026",
-    imageUrl: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=600&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?fm=webp&fit=crop&w=600&q=80",
     sectionTag: "Film",
+    publishedAt: Date.now() - 10 * 3600 * 1000,
   },
   {
     id: "ent6",
     categoryTag: "CONCERT REVIEW",
     title: "Pop music’s new icon takes center stage at sold-out O2 Arena",
     slug: "pop-musics-new-icon-takes-center-stage-o2-arena",
-    imageUrl: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=600&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?fm=webp&fit=crop&w=600&q=80",
     sectionTag: "Music",
+    publishedAt: Date.now() - 12 * 3600 * 1000,
   },
   {
     id: "ent7",
     categoryTag: "AUTUMN READS",
     title: "The 10 must-read books of autumn that everyone will be talking about",
     slug: "the-10-must-read-books-of-autumn",
-    imageUrl: "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?auto=format&fit=crop&w=600&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?fm=webp&fit=crop&w=600&q=80",
     sectionTag: "Books",
+    publishedAt: Date.now() - 15 * 3600 * 1000,
   },
 ];
 
@@ -105,8 +131,9 @@ export const EntertainmentCategorySection: React.FC = () => {
             title: p.title,
             slug: p.slug || p.id,
             summary: p.subheadline || extractText(p.bodyContent) || "",
-            imageUrl: p.thumbnail || "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80",
+            imageUrl: p.thumbnail || "https://images.unsplash.com/photo-1503376780353-7e6692767b70?fm=webp&fit=crop&w=800&q=80",
             sectionTag: p.subCategories?.[0] || "Entertainment",
+            publishedAt: p.publishedAt,
           }));
 
           const merged = [...formatted];
@@ -142,7 +169,7 @@ export const EntertainmentCategorySection: React.FC = () => {
       {/* Section Header with dashed line BELOW the Entertainment text */}
       <div className="flex items-center space-x-2 pb-3 mb-4 border-b border-dashed border-[#CCCCCC]">
         <h2 className="font-serif font-bold text-[26px] sm:text-[30px] text-[#b82e2e] tracking-tight">
-          <Link href="/arts" className="hover:underline">
+          <Link href="/entertainment" className="hover:underline">
             Entertainment
           </Link>
         </h2>
@@ -183,6 +210,9 @@ export const EntertainmentCategorySection: React.FC = () => {
                   {heroItem.sectionTag || "TV & Radio"}
                 </span>
               </div>
+              <span className="font-mono text-[11px] text-[#666666] mt-1 block">
+                {formatTimeAgo(heroItem.publishedAt)}
+              </span>
             </div>
 
             {/* Right Large Hero Image */}
@@ -229,9 +259,14 @@ export const EntertainmentCategorySection: React.FC = () => {
                     </Link>
                   </h4>
                 </div>
-                <span className="font-sans font-bold text-[12px] text-[#111111]">
-                  {miniItem1.sectionTag || "Theatre & Dance"}
-                </span>
+                <div>
+                  <span className="font-sans font-bold text-[12px] text-[#111111]">
+                    {miniItem1.sectionTag || "Theatre & Dance"}
+                  </span>
+                  <span className="font-mono text-[11px] text-[#666666] mt-0.5 block">
+                    {formatTimeAgo(miniItem1.publishedAt)}
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -262,9 +297,14 @@ export const EntertainmentCategorySection: React.FC = () => {
                     </Link>
                   </h4>
                 </div>
-                <span className="font-sans font-bold text-[12px] text-[#111111]">
-                  {miniItem2.sectionTag || "Books"}
-                </span>
+                <div>
+                  <span className="font-sans font-bold text-[12px] text-[#111111]">
+                    {miniItem2.sectionTag || "Books"}
+                  </span>
+                  <span className="font-mono text-[11px] text-[#666666] mt-0.5 block">
+                    {formatTimeAgo(miniItem2.publishedAt)}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -301,9 +341,14 @@ export const EntertainmentCategorySection: React.FC = () => {
                   </Link>
                 </h4>
               </div>
-              <span className="font-sans font-bold text-[11px] text-[#111111] mt-1">
-                {sidebarItem1.sectionTag || "TV & Radio"}
-              </span>
+              <div>
+                <span className="font-sans font-bold text-[11px] text-[#111111] mt-1 block">
+                  {sidebarItem1.sectionTag || "TV & Radio"}
+                </span>
+                <span className="font-mono text-[11px] text-[#666666] mt-0.5 block">
+                  {formatTimeAgo(sidebarItem1.publishedAt)}
+                </span>
+              </div>
             </article>
 
             {/* Top-Right (Item 2 of sidebar) */}
@@ -332,9 +377,14 @@ export const EntertainmentCategorySection: React.FC = () => {
                   </Link>
                 </h4>
               </div>
-              <span className="font-sans font-bold text-[11px] text-[#111111] mt-1">
-                {sidebarItem2.sectionTag || "Film"}
-              </span>
+              <div>
+                <span className="font-sans font-bold text-[11px] text-[#111111] mt-1 block">
+                  {sidebarItem2.sectionTag || "Film"}
+                </span>
+                <span className="font-mono text-[11px] text-[#666666] mt-0.5 block">
+                  {formatTimeAgo(sidebarItem2.publishedAt)}
+                </span>
+              </div>
             </article>
 
             {/* Bottom-Left (Item 3 of sidebar) */}
@@ -363,9 +413,14 @@ export const EntertainmentCategorySection: React.FC = () => {
                   </Link>
                 </h4>
               </div>
-              <span className="font-sans font-bold text-[11px] text-[#111111] mt-1">
-                {sidebarItem3.sectionTag || "Music"}
-              </span>
+              <div>
+                <span className="font-sans font-bold text-[11px] text-[#111111] mt-1 block">
+                  {sidebarItem3.sectionTag || "Music"}
+                </span>
+                <span className="font-mono text-[11px] text-[#666666] mt-0.5 block">
+                  {formatTimeAgo(sidebarItem3.publishedAt)}
+                </span>
+              </div>
             </article>
 
             {/* Bottom-Right (Item 4 of sidebar) */}
@@ -394,9 +449,14 @@ export const EntertainmentCategorySection: React.FC = () => {
                   </Link>
                 </h4>
               </div>
-              <span className="font-sans font-bold text-[11px] text-[#111111] mt-1">
-                {sidebarItem4.sectionTag || "Books"}
-              </span>
+              <div>
+                <span className="font-sans font-bold text-[11px] text-[#111111] mt-1 block">
+                  {sidebarItem4.sectionTag || "Books"}
+                </span>
+                <span className="font-mono text-[11px] text-[#666666] mt-0.5 block">
+                  {formatTimeAgo(sidebarItem4.publishedAt)}
+                </span>
+              </div>
             </article>
 
           </div>

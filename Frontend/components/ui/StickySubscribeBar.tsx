@@ -12,8 +12,8 @@ export const StickySubscribeBar: React.FC = () => {
       <div className="max-w-[1280px] mx-auto flex items-center justify-between">
         {/* Left Icon */}
         <div className="flex items-center space-x-2">
-          <span className="font-serif font-black text-lg text-black tracking-tighter">
-            WSJ
+          <span className="font-serif font-bold text-sm sm:text-base text-black tracking-tight uppercase">
+            Times Chicago
           </span>
         </div>
 

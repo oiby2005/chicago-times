@@ -11,7 +11,26 @@ interface EditorialArticle {
   hasFollowButton?: boolean;
   slug: string;
   imageUrl: string;
+  publishedAt?: number | string;
 }
+
+const formatTimeAgo = (timestamp?: number | string): string => {
+  if (!timestamp) return "2 hours ago";
+  const now = Date.now();
+  const time = typeof timestamp === "string" ? new Date(timestamp).getTime() : timestamp;
+  if (isNaN(time) || time <= 0) return "2 hours ago";
+  const diffMs = Math.max(0, now - time);
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  if (diffHours < 1) {
+    const diffMins = Math.max(1, Math.floor(diffMs / (1000 * 60)));
+    return `${diffMins} min${diffMins > 1 ? "s" : ""} ago`;
+  }
+  if (diffHours < 24) {
+    return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
+  }
+  const diffDays = Math.floor(diffHours / 24);
+  return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
+};
 
 const defaultArticles: EditorialArticle[] = [
   {
@@ -21,7 +40,8 @@ const defaultArticles: EditorialArticle[] = [
     date: "Aug. 7",
     hasFollowButton: true,
     slug: "trump-should-worry-about-10-year-itch",
-    imageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?fm=webp&fit=crop&w=300&q=80",
+    publishedAt: Date.now() - 3 * 3600 * 1000,
   },
   {
     id: "ed2",
@@ -30,7 +50,8 @@ const defaultArticles: EditorialArticle[] = [
     date: "Aug. 7",
     hasFollowButton: true,
     slug: "gawking-at-ariana-grande-isnt-noble",
-    imageUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?fm=webp&fit=crop&w=300&q=80",
+    publishedAt: Date.now() - 6 * 3600 * 1000,
   },
   {
     id: "ed3",
@@ -39,7 +60,8 @@ const defaultArticles: EditorialArticle[] = [
     date: "Aug. 7",
     hasFollowButton: false,
     slug: "no-day-at-the-beach",
-    imageUrl: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=300&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?fm=webp&fit=crop&w=300&q=80",
+    publishedAt: Date.now() - 9 * 3600 * 1000,
   },
 ];
 
@@ -55,10 +77,14 @@ export const EditorialsSection: React.FC = () => {
         const edPosts = posts.filter((p: any) => {
           if (p.status !== "Published") return false;
           const placement = (p.homepagePlacement || "None").toLowerCase();
-          if (placement.includes("editorial") || placement.includes("opinion")) return true;
-          if (!placement.startsWith("none")) return false;
           const cat = (p.category || "").toLowerCase().trim();
-          return cat === "editorial" || cat === "editorials" || cat === "opinion" || cat === "opinions";
+
+          // Strictly exclude Opinion articles from Editorial section!
+          if (cat === "opinion" || cat === "opinions" || placement.includes("opinion section")) return false;
+
+          if (placement.includes("editorial") || placement.includes("editorials")) return true;
+          if (!placement.startsWith("none")) return false;
+          return cat === "editorial" || cat === "editorials";
         });
 
         edPosts.sort((a: any, b: any) => (b.publishedAt || 0) - (a.publishedAt || 0));
@@ -71,7 +97,8 @@ export const EditorialsSection: React.FC = () => {
             date: p.date || "Today",
             hasFollowButton: true,
             slug: p.slug || p.id,
-            imageUrl: p.thumbnail || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80",
+            imageUrl: p.thumbnail || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?fm=webp&fit=crop&w=300&q=80",
+            publishedAt: p.publishedAt,
           }));
 
           const merged = [...formatted];
@@ -99,7 +126,13 @@ export const EditorialsSection: React.FC = () => {
       {/* Header Banner */}
       <div className="bg-[#43646B] text-white px-3.5 py-3 flex items-center">
         <h3 className="font-sans font-bold text-[15px] sm:text-[16px] tracking-tight">
-          WSJ Opinion <span className="font-normal mx-0.5">|</span> Free Expression
+          <Link href="/opinion" className="hover:underline">
+            Times Chicago Opinion
+          </Link>
+          <span className="font-normal mx-1">|</span>
+          <Link href="/editorials" className="hover:underline">
+            Free Expression
+          </Link>
         </h3>
       </div>
 
@@ -117,16 +150,15 @@ export const EditorialsSection: React.FC = () => {
                 
                 <div className="flex items-center flex-wrap gap-1.5 font-sans text-[12px] text-[#444444] mb-1">
                   <span>By {art.author}</span>
-                  {art.hasFollowButton && (
-                    <button className="bg-[#43646B] text-white font-sans font-bold text-[10.5px] rounded px-2.5 py-0.5 hover:bg-[#344F55] transition-colors cursor-pointer">
-                      Follow
-                    </button>
-                  )}
                 </div>
 
                 <div className="font-sans text-[11px] text-[#777777]">
                   {art.date}
                 </div>
+
+                <span className="font-mono text-[11px] text-[#666666] mt-1 block">
+                  {formatTimeAgo(art.publishedAt)}
+                </span>
               </div>
 
               {/* Square Thumbnail */}
@@ -149,7 +181,7 @@ export const EditorialsSection: React.FC = () => {
         {/* Bottom CTA Button */}
         <div className="pt-2">
           <Link
-            href="/opinion"
+            href="/editorials"
             className="block w-full bg-[#43646B] text-white font-sans font-bold text-[13.5px] sm:text-[14px] py-2.5 text-center rounded-none hover:bg-[#344F55] transition-colors"
           >
             Go to Free Expression

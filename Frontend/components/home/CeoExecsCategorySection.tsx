@@ -17,27 +17,27 @@ const defaultArticles: CeoArticle[] = [
     categoryTag: "SHOPPING",
     title: "The workwear brands that mean business",
     slug: "the-workwear-brands-that-mean-business",
-    imageUrl: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=600&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?fm=webp&fit=crop&w=600&q=80",
   },
   {
     id: "ceo2",
     categoryTag: "NEWSLETTER",
     title: "Sign up for the Times LUXX newsletter",
     slug: "sign-up-for-the-times-luxx-newsletter",
-    imageUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?fm=webp&fit=crop&w=600&q=80",
   },
   {
     id: "ceo3",
     categoryTag: "SHOPPING",
     title: "The poshest prams to shop now",
     slug: "the-poshest-prams-to-shop-now",
-    imageUrl: "https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&w=600&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1519689680058-324335c77eba?fm=webp&fit=crop&w=600&q=80",
   },
   {
     id: "ceo4",
     title: "What your posh cycling gear says about you",
     slug: "what-your-posh-cycling-gear-says-about-you",
-    imageUrl: "https://images.unsplash.com/photo-1541625602330-2277a4c46182?auto=format&fit=crop&w=600&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1541625602330-2277a4c46182?fm=webp&fit=crop&w=600&q=80",
   },
 ];
 
@@ -66,7 +66,7 @@ export const CeoExecsCategorySection: React.FC = () => {
             id: p.id,
             title: p.title,
             slug: p.slug || p.id,
-            imageUrl: p.thumbnail || "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=600&q=80",
+            imageUrl: p.thumbnail || "https://images.unsplash.com/photo-1541872703-74c5e44368f9?fm=webp&fit=crop&w=600&q=80",
           }));
 
           const merged = [...formatted];

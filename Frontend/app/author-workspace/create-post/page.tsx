@@ -3,6 +3,8 @@
 import React, { useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ALL_69_SUBCATEGORIES } from "@/data/subCategories";
+import { convertFileToWebP } from "@/lib/webpConverter";
 
 const ALL_MAIN_CATEGORIES = [
   "News", "U.S. News", "International News",
@@ -50,7 +52,7 @@ const compressImageFile = (file: File, maxWidth = 800, quality = 0.7): Promise<s
         const ctx = canvas.getContext("2d");
         if (ctx) {
           ctx.drawImage(img, 0, 0, width, height);
-          resolve(canvas.toDataURL("image/jpeg", quality));
+          resolve(canvas.toDataURL("image/webp", quality));
         } else {
           resolve(src);
         }
@@ -66,39 +68,39 @@ const compressImageFile = (file: File, maxWidth = 800, quality = 0.7): Promise<s
 const getDynamicFallbackImage = (post: any): string => {
   const DYNAMIC_CATEGORY_IMAGES: Record<string, string[]> = {
     ENTERTAINMENT: [
-      "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?fm=webp&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?fm=webp&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?fm=webp&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?fm=webp&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1503376780353-7e6692767b70?fm=webp&fit=crop&w=800&q=80",
     ],
     SPORTS: [
-      "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?fm=webp&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?fm=webp&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?fm=webp&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?fm=webp&fit=crop&w=800&q=80",
     ],
     BUSINESS: [
-      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?fm=webp&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1507679799987-c73779587ccf?fm=webp&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?fm=webp&fit=crop&w=800&q=80",
     ],
     TECH: [
-      "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1518770660439-4636190af475?fm=webp&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?fm=webp&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1531297484001-80022131f5a1?fm=webp&fit=crop&w=800&q=80",
     ],
     POLITICS: [
-      "https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?fm=webp&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?fm=webp&fit=crop&w=800&q=80",
     ],
     LIFESTYLE: [
-      "https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1571896349842-33c89424de2d?fm=webp&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1566073771259-6a8506099945?fm=webp&fit=crop&w=800&q=80",
     ],
     GENERAL: [
-      "https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1495020689067-958852a7765e?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1504711434969-e33886168f5c?fm=webp&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1495020689067-958852a7765e?fm=webp&fit=crop&w=800&q=80",
     ]
   };
 
@@ -128,6 +130,13 @@ const safeSavePostsToStorage = (posts: any[]): boolean => {
 
   try {
     localStorage.setItem("wsj_posts", JSON.stringify(sanitized));
+    try {
+      fetch("http://localhost:5000/api/posts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(sanitized),
+      }).catch(() => {});
+    } catch (e) {}
     return true;
   } catch (err) {
     console.warn("QuotaExceededError caught while saving wsj_posts. Compacting base64 images...", err);
@@ -187,10 +196,19 @@ export default function CreateNewPostPage() {
   const [bodyContent, setBodyContent] = useState("");
   const [mainCategory, setMainCategory] = useState("Business");
   const [selectedSubCategories, setSelectedSubCategories] = useState<string[]>([]);
+  const [subCatSearch, setSubCatSearch] = useState("");
 
-  const availableSubCategories = Array.from(new Set(ALL_MAIN_CATEGORIES)).filter(
-    (cat) => cat.toLowerCase().trim() !== (mainCategory || "").toLowerCase().trim()
+  const availableSubCategories = ALL_69_SUBCATEGORIES.filter(
+    (item) => item.toLowerCase().trim() !== (mainCategory || "").toLowerCase().trim()
   );
+
+  const filteredSubCategories = React.useMemo(() => {
+    const query = subCatSearch.trim().toLowerCase();
+    if (!query) return availableSubCategories;
+    return availableSubCategories.filter((subCat) =>
+      subCat.toLowerCase().includes(query)
+    );
+  }, [availableSubCategories, subCatSearch]);
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
   const [readDuration, setReadDuration] = useState("5 min read");
@@ -255,19 +273,27 @@ export default function CreateNewPostPage() {
   React.useEffect(() => {
     if (typeof window !== "undefined") {
       try {
-        const storedUser = sessionStorage.getItem("wsj_user") || localStorage.getItem("wsj_user");
+        const storedUser = sessionStorage.getItem("wsj_user");
         if (storedUser) {
-          const parsed = JSON.parse(storedUser);
-          if (parsed && (parsed.name || parsed.username || parsed.email)) {
-            setCurrentUser(parsed);
+          let parsed = JSON.parse(storedUser);
+          if (parsed && (parsed.email || parsed.full_name || parsed.name)) {
+            const userEmail = (parsed.email || "writer@gmail.com").toLowerCase().trim();
+            try {
+              const map = JSON.parse(localStorage.getItem("wsj_users_by_email") || "{}");
+              const savedForEmail = map[userEmail];
+              if (savedForEmail) {
+                parsed = { ...parsed, ...savedForEmail };
+              }
+            } catch (e) {}
+            setCurrentUser({ ...parsed, email: userEmail });
           } else {
-            setCurrentUser({ name: "Writer User", role: "writer" });
+            setCurrentUser({ full_name: "Writer User", name: "Writer User", email: "writer@gmail.com", role: "writer" });
           }
         } else {
-          setCurrentUser({ name: "Writer User", role: "writer" });
+          setCurrentUser({ full_name: "Writer User", name: "Writer User", email: "writer@gmail.com", role: "writer" });
         }
       } catch (e) {
-        setCurrentUser({ name: "Writer User", role: "writer" });
+        setCurrentUser({ full_name: "Writer User", name: "Writer User", email: "writer@gmail.com", role: "writer" });
       }
 
       try {
@@ -286,7 +312,7 @@ export default function CreateNewPostPage() {
               if (loadedContent) {
                 const sanitizedContent = loadedContent.replace(
                   /src="blob:[^"]*"/g,
-                  'src="https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=800&q=80"'
+                  'src="https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?fm=webp&fit=crop&w=800&q=80"'
                 );
                 setBodyContent(sanitizedContent);
                 if (editorRef.current) {
@@ -294,7 +320,12 @@ export default function CreateNewPostPage() {
                 }
               }
               if (found.category) setMainCategory(found.category);
-              if (found.subCategories) setSelectedSubCategories(found.subCategories);
+              if (found.subCategories && Array.isArray(found.subCategories)) {
+                const validSubs = found.subCategories.filter((s: string) => ALL_69_SUBCATEGORIES.includes(s));
+                setSelectedSubCategories(validSubs.slice(0, 5));
+              } else {
+                setSelectedSubCategories([]);
+              }
               if (found.tags) setTags(found.tags);
               if (found.readDuration) setReadDuration(found.readDuration);
             }
@@ -313,9 +344,9 @@ export default function CreateNewPostPage() {
     }
   }, [bodyContent]);
 
-  const authorName = currentUser?.full_name || currentUser?.name || currentUser?.username || "Writer User";
+  const authorName = currentUser?.full_name || currentUser?.name || currentUser?.username || (currentUser?.email === "writer1@gmail.com" ? "writer1" : "Writer User");
   const authorInitial = authorName.charAt(0).toUpperCase();
-  const authorImage = currentUser?.avatar_url || currentUser?.avatar || currentUser?.profileImage || currentUser?.image || getAuthorForArticle("", authorName)?.image || "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80";
+  const authorImage = currentUser?.avatar_url || currentUser?.avatar || currentUser?.profileImage || currentUser?.image || getAuthorForArticle("", authorName)?.image || "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?fm=webp&fit=crop&w=300&q=80";
 
   const handleToggleBlockquote = () => {
     if (!editorRef.current) return;
@@ -417,6 +448,100 @@ export default function CreateNewPostPage() {
     setBodyContent(editorRef.current.innerHTML);
   };
 
+  const cleanAndNormalizeHtml = (rawHtml: string): string => {
+    if (typeof window === "undefined") return rawHtml;
+    try {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(rawHtml, "text/html");
+
+      const fontTags = doc.querySelectorAll("font");
+      fontTags.forEach((font) => {
+        const span = doc.createElement("span");
+        span.innerHTML = font.innerHTML;
+        font.parentNode?.replaceChild(span, font);
+      });
+
+      const allEls = doc.querySelectorAll("*");
+      allEls.forEach((el) => {
+        if (el instanceof HTMLElement) {
+          const tagName = el.tagName.toUpperCase();
+          const isInsideFigure = !!el.closest("figure");
+          // Strip inline styles from text elements only, preserving figure, figure children (caption, credit, div, span), img, and links
+          if (tagName !== "FIGURE" && tagName !== "FIGCAPTION" && !isInsideFigure && tagName !== "IMG" && tagName !== "A") {
+            el.removeAttribute("style");
+          }
+        }
+      });
+
+      const paragraphs = doc.querySelectorAll("p");
+      paragraphs.forEach((p) => {
+        if (p.children.length === 1) {
+          const firstChild = p.firstElementChild;
+          if (firstChild && (firstChild.tagName === "STRONG" || firstChild.tagName === "B")) {
+            if (firstChild.textContent?.trim() === p.textContent?.trim()) {
+              p.innerHTML = firstChild.innerHTML;
+            }
+          }
+        }
+      });
+
+      return doc.body.innerHTML;
+    } catch (e) {
+      return rawHtml;
+    }
+  };
+
+  const sanitizeEditorRefElements = (container: HTMLElement) => {
+    const els = container.querySelectorAll<HTMLElement>("*");
+    els.forEach((el) => {
+      const tagName = el.tagName.toUpperCase();
+      const isInsideFigure = !!el.closest("figure");
+      if (tagName !== "FIGURE" && tagName !== "FIGCAPTION" && !isInsideFigure && tagName !== "IMG" && tagName !== "A") {
+        el.removeAttribute("style");
+      }
+    });
+
+    const paragraphs = container.querySelectorAll("p");
+    paragraphs.forEach((p) => {
+      if (p.children.length === 1) {
+        const firstChild = p.firstElementChild;
+        if (firstChild && (firstChild.tagName === "STRONG" || firstChild.tagName === "B")) {
+          if (firstChild.textContent?.trim() === p.textContent?.trim()) {
+            p.innerHTML = firstChild.innerHTML;
+          }
+        }
+      }
+    });
+  };
+
+  const handleEditorPaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const clipboardData = e.clipboardData;
+    const pastedHtml = clipboardData.getData("text/html");
+    const pastedText = clipboardData.getData("text/plain");
+
+    let contentToInsert = "";
+    if (pastedHtml && pastedHtml.trim()) {
+      contentToInsert = cleanAndNormalizeHtml(pastedHtml);
+    } else if (pastedText) {
+      const paragraphs = pastedText.split(/\r?\n\r?\n/).filter((p) => p.trim());
+      if (paragraphs.length > 0) {
+        contentToInsert = paragraphs.map((p) => `<p>${p.replace(/\r?\n/g, "<br>")}</p>`).join("");
+      } else {
+        contentToInsert = `<p>${pastedText}</p>`;
+      }
+    }
+
+    if (contentToInsert) {
+      document.execCommand("insertHTML", false, contentToInsert);
+    }
+
+    if (editorRef.current) {
+      sanitizeEditorRefElements(editorRef.current);
+      setBodyContent(editorRef.current.innerHTML);
+    }
+  };
+
   const execCommand = (command: string, value: string = "") => {
     if (editorRef.current) {
       editorRef.current.focus();
@@ -511,15 +636,11 @@ export default function CreateNewPostPage() {
     const input = document.createElement("input");
     input.type = "file";
     input.accept = "image/*";
-    input.onchange = (e: any) => {
+    input.onchange = async (e: any) => {
       const file = e.target.files?.[0];
       if (file) {
-        const reader = new FileReader();
-        reader.onload = (re: any) => {
-          const imgUrl = re.target?.result as string;
-          execCommand("insertImage", imgUrl);
-        };
-        reader.readAsDataURL(file);
+        const webpUrl = await convertFileToWebP(file);
+        execCommand("insertImage", webpUrl || URL.createObjectURL(file));
       }
     };
     input.click();
@@ -838,7 +959,7 @@ export default function CreateNewPostPage() {
       finalUrl = await compressImageFile(modalImageFile, 800, 0.7);
     }
     if (!finalUrl || finalUrl.startsWith("blob:")) {
-      finalUrl = "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=800&q=80";
+      finalUrl = "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?fm=webp&fit=crop&w=800&q=80";
     }
 
     let exactWidthStyle = "width: 450px; max-width: 100%;";
@@ -846,9 +967,9 @@ export default function CreateNewPostPage() {
     if (modalImageSize.includes("450px")) exactWidthStyle = "width: 450px; max-width: 100%;";
     if (modalImageSize.includes("100%")) exactWidthStyle = "width: 100%;";
 
-    const captionHtml = modalImageCaption ? `<span style="font-size: 11px; font-style: italic; color: #475569; margin-right: 12px;">${modalImageCaption}</span>` : "";
+    const captionHtml = modalImageCaption ? `<span class="image-caption" style="font-size: 11px; font-style: italic; color: #64748b; margin-right: 12px;">${modalImageCaption}</span>` : "";
     const creditText = modalImageCredit ? (modalImageCredit.toUpperCase().startsWith("PHOTO:") ? modalImageCredit.toUpperCase() : `(PHOTO: ${modalImageCredit.toUpperCase()})`) : "";
-    const creditHtml = creditText ? `<span style="font-size: 10px; font-family: monospace; color: #64748b; text-transform: uppercase; margin-left: auto; text-align: right;">${creditText}</span>` : "";
+    const creditHtml = creditText ? `<span class="image-credit" style="font-size: 10px; font-weight: bold; font-family: monospace, sans-serif; color: #64748b; text-transform: uppercase; margin-left: auto; text-align: right;">${creditText}</span>` : "";
 
     let figureStyle = "";
     if (modalImageAlign.startsWith("Left")) {
@@ -1104,6 +1225,7 @@ export default function CreateNewPostPage() {
       date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
       readDuration: readDuration || "15 min read",
       author: authorName,
+      authorEmail: currentUser?.email || "",
       isExclusive: isExclusive,
       cardSummary: cardSummary,
       focusKeyword: focusKeyword,
@@ -1128,11 +1250,20 @@ export default function CreateNewPostPage() {
     safeSavePostsToStorage(existingPosts);
     window.dispatchEvent(new Event("wsj_posts_updated"));
 
+    // POST to Express Backend API & MySQL Database
+    try {
+      await fetch("http://localhost:5000/api/posts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newDraftPost),
+      });
+    } catch (err) {}
+
     setStatusMessage(null);
     if (typeof window !== "undefined") {
-      window.location.href = "/writer-dashboard";
+      window.location.href = "/writer-dashboard?tab=Drafts";
     } else {
-      router.push("/writer-dashboard");
+      router.push("/writer-dashboard?tab=Drafts");
     }
   };
 
@@ -1173,7 +1304,7 @@ export default function CreateNewPostPage() {
       if (match) thumb = match[1];
     }
     if (!thumb) {
-      thumb = "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=800&q=80";
+      thumb = "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?fm=webp&fit=crop&w=800&q=80";
     }
 
     const targetId = editingPostId || Date.now().toString();
@@ -1190,6 +1321,7 @@ export default function CreateNewPostPage() {
       date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
       readDuration: readDuration || "15 min read",
       author: authorName,
+      authorEmail: currentUser?.email || "writer@gmail.com",
       thumbnail: thumb,
       isExclusive: isExclusive,
       cardSummary: cardSummary,
@@ -1215,6 +1347,15 @@ export default function CreateNewPostPage() {
     safeSavePostsToStorage(existingPosts);
     window.dispatchEvent(new Event("wsj_posts_updated"));
 
+    // POST to Express Backend API & MySQL Database
+    try {
+      await fetch("http://localhost:5000/api/posts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newPendingPost),
+      });
+    } catch (err) {}
+
     setStatusMessage(null);
     if (typeof window !== "undefined") {
       window.location.href = "/writer-dashboard?tab=Pending review";
@@ -1233,14 +1374,14 @@ export default function CreateNewPostPage() {
         {/* ================================================================= */}
         {/* TOP NAVBAR                                                       */}
         {/* ================================================================= */}
-        <header suppressHydrationWarning className="bg-[#0b132b] border-b border-[#1e293b] h-auto min-h-[56px] sm:min-h-[2cm] px-3 sm:px-8 py-2.5 sm:py-0 flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 sticky top-0 z-40 shadow-md select-none">
+        <header suppressHydrationWarning className="bg-[#0b132b] border-b border-[#1e293b] h-auto min-h-[56px] px-3 sm:px-8 py-2.5 sm:py-0 flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 sticky top-0 z-40 shadow-md select-none">
           {/* Left Side: Cancel Button, Divider, Headline Status */}
           <div className="flex items-center space-x-2 sm:space-x-3">
             <button
               onClick={() => router.push("/writer-dashboard")}
               className="flex items-center space-x-1 sm:space-x-1.5 text-[#94a3b8] hover:text-white font-sans text-[11px] sm:text-xs uppercase tracking-wider font-extrabold transition-colors cursor-pointer"
             >
-              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <svg width="16" height="16" className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#94a3b8]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
               </svg>
               <span>CANCEL</span>
@@ -1248,7 +1389,7 @@ export default function CreateNewPostPage() {
 
             <span className="text-[#334155] font-light">|</span>
 
-            <span className="text-[#94a3b8] text-[10px] sm:text-xs font-mono font-extrabold uppercase tracking-widest truncate max-w-[120px] xs:max-w-[200px] sm:max-w-[400px]">
+            <span className="text-[#94a3b8] text-[10px] sm:text-xs font-mono font-extrabold uppercase tracking-widest truncate max-w-[150px] sm:max-w-[400px]">
               {editingPostId
                 ? `Drafting: ${headline.trim() || "Untitled Draft"}`
                 : `NEW ${mainCategory.toUpperCase()} HEADLINE`}
@@ -1261,9 +1402,9 @@ export default function CreateNewPostPage() {
             <button
               type="button"
               onClick={() => setShowPreviewModal(true)}
-              className="border border-[#334155] bg-[#1e293b]/80 hover:bg-[#1e293b] text-white font-sans font-extrabold text-[8.5px] xs:text-[9.5px] sm:text-xs h-6.5 sm:h-8 px-1.5 xs:px-2.5 sm:px-3 rounded-[4px] sm:rounded-[6px] flex items-center justify-center space-x-1 sm:space-x-1.5 transition-all cursor-pointer shadow-2xs whitespace-nowrap shrink-0"
+              className="border border-[#334155] bg-[#1e293b]/80 hover:bg-[#1e293b] text-white font-sans font-extrabold text-[10px] sm:text-xs h-7 sm:h-8 px-2.5 sm:px-3 rounded-[6px] flex items-center justify-center space-x-1.5 transition-all cursor-pointer shadow-sm whitespace-nowrap shrink-0"
             >
-              <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#94a3b8] shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <svg width="14" height="14" className="w-3.5 h-3.5 text-[#94a3b8] shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
               </svg>
@@ -1275,19 +1416,19 @@ export default function CreateNewPostPage() {
               type="button"
               onClick={handleSaveDraft}
               disabled={isSavingDraft || isSubmittingReview}
-              className={`border border-[#334155] bg-[#1e293b]/80 text-white font-sans font-extrabold text-[8.5px] xs:text-[9.5px] sm:text-xs h-6.5 sm:h-8 px-1.5 xs:px-2.5 sm:px-3 rounded-[4px] sm:rounded-[6px] flex items-center justify-center space-x-1 sm:space-x-1.5 transition-all shadow-2xs whitespace-nowrap shrink-0 ${
+              className={`border border-[#334155] bg-[#1e293b]/80 text-white font-sans font-extrabold text-[10px] sm:text-xs h-7 sm:h-8 px-2.5 sm:px-3 rounded-[6px] flex items-center justify-center space-x-1.5 transition-all shadow-sm whitespace-nowrap shrink-0 ${
                 isSavingDraft || isSubmittingReview
                   ? "opacity-60 cursor-not-allowed"
                   : "hover:bg-[#1e293b] cursor-pointer"
               }`}
             >
               {isSavingDraft ? (
-                <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#94a3b8] animate-spin shrink-0" viewBox="0 0 24 24" fill="none">
+                <svg width="14" height="14" className="w-3.5 h-3.5 text-[#94a3b8] animate-spin shrink-0" viewBox="0 0 24 24" fill="none">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
               ) : (
-                <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#94a3b8] shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <svg width="14" height="14" className="w-3.5 h-3.5 text-[#94a3b8] shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M8 4H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V8l-4-4H8z" />
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16 4v4H8V4m0 16v-6h8v6" />
                 </svg>
@@ -1302,19 +1443,19 @@ export default function CreateNewPostPage() {
               type="button"
               onClick={handleSubmitForReview}
               disabled={isSavingDraft || isSubmittingReview}
-              className={`bg-[#ea580c] text-white font-sans font-extrabold text-[8.5px] xs:text-[9.5px] sm:text-xs h-6.5 sm:h-8 px-1.5 xs:px-2.5 sm:px-3 rounded-[4px] sm:rounded-[6px] flex items-center justify-center space-x-1 sm:space-x-1.5 transition-all shadow-sm whitespace-nowrap shrink-0 ${
+              className={`bg-[#ea580c] text-white font-sans font-extrabold text-[10px] sm:text-xs h-7 sm:h-8 px-2.5 sm:px-3 rounded-[6px] flex items-center justify-center space-x-1.5 transition-all shadow-sm whitespace-nowrap shrink-0 ${
                 isSavingDraft || isSubmittingReview
                   ? "opacity-60 cursor-not-allowed"
                   : "hover:bg-[#c2410c] cursor-pointer hover:shadow-md"
               }`}
             >
               {isSubmittingReview ? (
-                <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white animate-spin shrink-0" viewBox="0 0 24 24" fill="none">
+                <svg width="14" height="14" className="w-3.5 h-3.5 text-white animate-spin shrink-0" viewBox="0 0 24 24" fill="none">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
               ) : (
-                <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white transform rotate-45 -mt-0.5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+                <svg width="14" height="14" className="w-3.5 h-3.5 text-white transform rotate-45 -mt-0.5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                 </svg>
               )}
@@ -1334,18 +1475,18 @@ export default function CreateNewPostPage() {
             {/* ==================== LEFT COLUMN: EDITOR CANVAS ==================== */}
             <div className="w-full lg:flex-1 max-w-[840px]">
               {/* Main Article Paper Editor Card with Integrated Top Toolbar */}
-              <div className="bg-white border border-[#e2e8f0] rounded-2xl p-3.5 sm:p-6 min-h-[320px] sm:min-h-[480px] lg:min-h-[640px] h-auto shadow-2xs space-y-5 sm:space-y-6 overflow-visible">
+              <div className="bg-white border border-[#e2e8f0] rounded-2xl p-3.5 sm:p-6 min-h-[320px] sm:min-h-[480px] lg:min-h-[640px] h-auto shadow-sm space-y-5 sm:space-y-6 overflow-visible">
                 
-                {/* Integrated Rich Text Editor Formatting Toolbar matching Image 1 */}
-                <div className="bg-[#f8fafc] border border-[#e2e8f0] rounded-xl p-2 sm:p-2.5 flex items-center justify-start space-x-2 sm:space-x-3 shadow-2xs overflow-x-auto no-scrollbar font-sans text-xs">
+                {/* Integrated Rich Text Editor Formatting Toolbar */}
+                <div className="bg-[#f8fafc] border border-[#e2e8f0] rounded-xl p-2 sm:p-2.5 flex items-center justify-start space-x-2 sm:space-x-3 shadow-sm overflow-x-auto no-scrollbar font-sans text-xs">
                   <div className="flex items-center space-x-2 sm:space-x-3 text-gray-700">
                     <button type="button" onClick={() => execCommand("undo")} className="p-1.5 hover:bg-gray-200/60 rounded text-gray-600 transition-colors cursor-pointer" title="Undo">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <svg width="16" height="16" className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
                       </svg>
                     </button>
                     <button type="button" onClick={() => execCommand("redo")} className="p-1.5 hover:bg-gray-200/60 rounded text-gray-600 transition-colors cursor-pointer" title="Redo">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <svg width="16" height="16" className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M21 10H11a8 8 0 00-8 8v2m18-10l-6 6m6-6l-6-6" />
                       </svg>
                     </button>
@@ -1361,13 +1502,13 @@ export default function CreateNewPostPage() {
                     </button>
                     <span className="text-gray-300 font-light">|</span>
                     <button type="button" onClick={handleInsertLink} className="p-1.5 hover:bg-gray-200/60 rounded text-gray-600 transition-colors cursor-pointer" title="Hyperlink">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <svg width="16" height="16" className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                       </svg>
                     </button>
-                    {/* Unordered List Icon: Bullet dots + horizontal lines matching Image 2 */}
+                    {/* Unordered List Icon */}
                     <button type="button" onClick={() => execCommand("insertUnorderedList")} className="p-1.5 hover:bg-gray-200/60 rounded text-gray-700 transition-colors cursor-pointer" title="Unordered Bullet List">
-                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                      <svg width="16" height="16" className="w-4 h-4 text-gray-700" fill="currentColor" viewBox="0 0 24 24">
                         <circle cx="4" cy="6" r="2" />
                         <circle cx="4" cy="12" r="2" />
                         <circle cx="4" cy="18" r="2" />
@@ -1377,9 +1518,9 @@ export default function CreateNewPostPage() {
                       </svg>
                     </button>
 
-                    {/* Ordered List Icon: Numbers 1 and 2 + horizontal lines matching Image 2 */}
+                    {/* Ordered List Icon */}
                     <button type="button" onClick={() => execCommand("insertOrderedList")} className="p-1.5 hover:bg-gray-200/60 rounded text-gray-700 transition-colors cursor-pointer" title="Ordered Numbered List">
-                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                      <svg width="16" height="16" className="w-4 h-4 text-gray-700" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M3 4.5h2v6H4V6H3V4.5zM3 13.5h3v1.5H4.5v1H6V19.5H3v-1.5h1.5v-1H3v-2z" />
                         <rect x="9" y="5" width="12" height="2" rx="1" />
                         <rect x="9" y="11" width="12" height="2" rx="1" />
@@ -1395,7 +1536,7 @@ export default function CreateNewPostPage() {
                     </button>
                     <span className="text-gray-300 font-light">|</span>
 
-                    {/* Font Size Increasing (A▲) & Decreasing (A▼) Icon Buttons (Matching B, I, U style without borders) */}
+                    {/* Font Size Buttons */}
                     <button
                       type="button"
                       onClick={() => changeSelectedFontSize(1)}
@@ -1419,13 +1560,13 @@ export default function CreateNewPostPage() {
                     <span className="text-gray-300 font-light">|</span>
                   </div>
 
-                  {/* Insert Image Orange Outline Button immediately following divider */}
+                  {/* Insert Image Button */}
                   <button
                     type="button"
                     onClick={handleOpenImageModal}
                     className="border border-[#ffedd5] bg-[#fff7ed] hover:bg-[#ffedd5] text-[#ea580c] font-bold text-[11px] px-3 py-1.5 rounded-lg flex items-center space-x-1.5 transition-colors cursor-pointer shrink-0"
                   >
-                    <svg className="w-4 h-4 text-[#ea580c]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <svg width="16" height="16" className="w-4 h-4 text-[#ea580c]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                     <span className="uppercase tracking-wider font-extrabold">INSERT IMAGE</span>
@@ -1459,9 +1600,10 @@ export default function CreateNewPostPage() {
                     contentEditable
                     suppressContentEditableWarning
                     onInput={(e: any) => setBodyContent(e.currentTarget.innerHTML)}
+                    onPaste={handleEditorPaste}
                     onClick={handleEditorClick}
                     style={{ fontSize: `${editorFontSize}px` }}
-                    className="w-full min-h-[380px] h-auto flow-root outline-none text-[#1a1a1a] leading-[1.75] font-serif empty:before:content-[attr(data-placeholder)] empty:before:text-[#cbd5e1] empty:before:pointer-events-none [&_p]:mb-5 [&_p]:leading-[1.75] [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:my-2 [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:my-2 [&_blockquote]:border-l-[5px] [&_blockquote]:border-[#ea580c] [&_blockquote]:bg-[#f8fafc] [&_blockquote]:py-3.5 [&_blockquote]:px-5 [&_blockquote]:my-3 [&_blockquote]:rounded-r-md [&_blockquote]:italic [&_blockquote]:text-[#334155] [&_blockquote]:flow-root [&_pre]:bg-[#f1f5f9] [&_pre]:border-none [&_pre]:outline-none [&_pre]:p-5 [&_pre]:rounded-xl [&_pre]:italic [&_pre]:text-[#334155] [&_pre]:text-base [&_pre]:my-4 [&_pre]:max-w-full [&_pre]:box-border [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_pre]:flow-root [&_a]:text-[#2563eb] [&_a]:underline [&_img]:max-w-full [&_img]:rounded-xl [&_img]:cursor-grab [&_img:active]:cursor-grabbing [&_figure]:cursor-grab [&_figure:active]:cursor-grabbing [&_img]:hover:ring-2 [&_img]:hover:ring-[#2563eb] transition-all duration-150 touch-pan-y"
+                    className="w-full min-h-[380px] h-auto flow-root outline-none text-[#1a1a1a] leading-[1.75] font-normal editor-body-text editor-reserve-font empty:before:content-[attr(data-placeholder)] empty:before:text-[#cbd5e1] empty:before:pointer-events-none [&_p]:mb-5 [&_p]:leading-[1.75] [&_p]:font-normal [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:my-2 [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:my-2 [&_blockquote]:border-l-[5px] [&_blockquote]:border-[#ea580c] [&_blockquote]:bg-[#f8fafc] [&_blockquote]:py-3.5 [&_blockquote]:px-5 [&_blockquote]:my-3 [&_blockquote]:rounded-r-md [&_blockquote]:italic [&_blockquote]:text-[#334155] [&_blockquote]:flow-root [&_pre]:bg-[#f1f5f9] [&_pre]:border-none [&_pre]:outline-none [&_pre]:p-5 [&_pre]:rounded-xl [&_pre]:italic [&_pre]:text-[#334155] [&_pre]:text-base [&_pre]:my-4 [&_pre]:max-w-full [&_pre]:box-border [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_pre]:flow-root [&_a]:text-[#2563eb] [&_a]:underline [&_img]:max-w-full [&_img]:rounded-xl [&_img]:cursor-grab [&_img:active]:cursor-grabbing [&_figure]:cursor-grab [&_figure:active]:cursor-grabbing [&_img]:hover:ring-2 [&_img]:hover:ring-[#2563eb] transition-all duration-150 touch-pan-y"
                     data-placeholder="Start writing or type / for plugins"
                   />
 
@@ -1833,75 +1975,98 @@ export default function CreateNewPostPage() {
                           </div>
                         </div>
 
-                        {/* 2. SELECT SUB-CATEGORIES (OPTIONAL, MAX 5) matching Image 1 */}
+                        {/* 2. SELECT SUB-CATEGORIES (OPTIONAL, MAX 5) WITH SEARCH BAR */}
                         <div className="space-y-1.5">
                           <label className="block text-[10.5px] font-mono font-bold text-[#94a3b8] uppercase tracking-wider">
                             SELECT SUB-CATEGORIES (OPTIONAL, MAX 5)
                           </label>
-                          <div className="relative bg-[#f8fafc] border border-[#e2e8f0] rounded-2xl p-3.5">
-                            {/* Scrollable Container */}
+
+                          {/* Subcategory Search Input Bar */}
+                          <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                              </svg>
+                            </div>
+                            <input
+                              type="text"
+                              value={subCatSearch}
+                              onChange={(e) => setSubCatSearch(e.target.value)}
+                              placeholder="Search sub-categories..."
+                              className="w-full pl-8 pr-8 py-2 bg-white border border-[#cbd5e1] rounded-xl text-xs text-[#1e293b] placeholder-gray-400 focus:outline-none focus:border-[#ea580c] focus:ring-1 focus:ring-[#ea580c] transition-all"
+                            />
+                            {subCatSearch && (
+                              <button
+                                type="button"
+                                onClick={() => setSubCatSearch("")}
+                                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 text-xs font-bold"
+                              >
+                                ✕
+                              </button>
+                            )}
+                          </div>
+
+                          {/* Currently Selected Subcategory Pills */}
+                          {selectedSubCategories.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5 pt-0.5">
+                              {selectedSubCategories.map((subCat) => (
+                                <span
+                                  key={subCat}
+                                  onClick={() => handleSubCategoryToggle(subCat)}
+                                  className="bg-[#ea580c] text-white text-[10.5px] font-sans font-semibold px-2.5 py-0.5 rounded-lg flex items-center space-x-1 cursor-pointer hover:bg-[#c2410c] transition-colors"
+                                  title="Click to remove"
+                                >
+                                  <span>{subCat}</span>
+                                  <span className="text-[9px] font-bold">✕</span>
+                                </span>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Scrollable Container with filtered list */}
+                          <div className="relative bg-[#f8fafc] border border-[#e2e8f0] rounded-2xl p-3.5 pr-2">
                             <div
                               id="subcat-scroll-container"
-                              className="max-h-none sm:max-h-[145px] overflow-visible sm:overflow-y-auto font-sans text-xs space-y-2.5 sm:pr-4 scroll-smooth"
+                              className="max-h-none sm:max-h-[145px] overflow-x-hidden sm:overflow-y-auto font-sans text-xs sm:pr-2 scroll-smooth"
                               style={{
                                 scrollbarWidth: "thin",
                                 scrollbarColor: "#ea580c #f1f5f9",
                               }}
                             >
-                              <div className="grid grid-cols-2 gap-x-3 gap-y-2.5">
-                                {availableSubCategories.map((subCat) => {
-                                  const isChecked = selectedSubCategories.includes(subCat);
-                                  const isDisabled = !isChecked && selectedSubCategories.length >= 5;
-                                  return (
-                                    <label
-                                      key={subCat}
-                                      className={`flex items-center space-x-2 truncate transition-opacity ${
-                                        isChecked
-                                          ? "text-[#1e293b] font-bold cursor-pointer"
-                                          : isDisabled
-                                          ? "text-[#cbd5e1] opacity-35 cursor-not-allowed pointer-events-none"
-                                          : "text-[#475569] font-medium hover:text-black cursor-pointer"
-                                      }`}
-                                    >
-                                      <input
-                                        type="checkbox"
-                                        checked={isChecked}
-                                        disabled={isDisabled}
-                                        onChange={() => handleSubCategoryToggle(subCat)}
-                                        className="w-4 h-4 accent-[#ea580c] rounded border-gray-300 focus:ring-0 cursor-pointer disabled:cursor-not-allowed"
-                                      />
-                                      <span className="truncate text-[12px]">{subCat}</span>
-                                    </label>
-                                  );
-                                })}
-                              </div>
+                              {filteredSubCategories.length === 0 ? (
+                                <div className="py-4 text-center text-xs text-gray-500 font-sans italic">
+                                  No sub-categories match "{subCatSearch}"
+                                </div>
+                              ) : (
+                                <div className="grid grid-cols-2 gap-x-6 gap-y-2.5">
+                                  {filteredSubCategories.map((subCat) => {
+                                    const isChecked = selectedSubCategories.includes(subCat);
+                                    const isDisabled = !isChecked && selectedSubCategories.length >= 5;
+                                    return (
+                                      <label
+                                        key={subCat}
+                                        className={`flex items-center space-x-1.5 whitespace-nowrap transition-opacity ${
+                                          isChecked
+                                            ? "text-[#1e293b] font-bold cursor-pointer"
+                                            : isDisabled
+                                            ? "text-[#cbd5e1] opacity-35 cursor-not-allowed pointer-events-none"
+                                            : "text-[#475569] font-medium hover:text-black cursor-pointer"
+                                        }`}
+                                      >
+                                        <input
+                                          type="checkbox"
+                                          checked={isChecked}
+                                          disabled={isDisabled}
+                                          onChange={() => handleSubCategoryToggle(subCat)}
+                                          className="w-3.5 h-3.5 accent-[#ea580c] rounded border-gray-300 focus:ring-0 cursor-pointer disabled:cursor-not-allowed shrink-0"
+                                        />
+                                        <span className="text-[10px] font-sans whitespace-nowrap">{subCat}</span>
+                                      </label>
+                                    );
+                                  })}
+                                </div>
+                              )}
                             </div>
-
-                            {/* Top Scroll Arrow ▲ */}
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const el = document.getElementById("subcat-scroll-container");
-                                if (el) el.scrollTop -= 50;
-                              }}
-                              className="absolute top-2 right-2 text-[#64748b] hover:text-black text-[10px] p-0.5 hidden sm:block"
-                              title="Scroll Up"
-                            >
-                              ▲
-                            </button>
-
-                            {/* Bottom Scroll Arrow ▼ */}
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const el = document.getElementById("subcat-scroll-container");
-                                if (el) el.scrollTop += 50;
-                              }}
-                              className="absolute bottom-2 right-2 text-[#64748b] hover:text-black text-[10px] p-0.5 hidden sm:block"
-                              title="Scroll Down"
-                            >
-                              ▼
-                            </button>
                           </div>
 
                           <div className="text-[10px] font-mono font-bold text-[#94a3b8] tracking-wider pt-0.5 uppercase">
@@ -1914,7 +2079,7 @@ export default function CreateNewPostPage() {
                           <label className="block text-[10.5px] font-mono font-bold text-[#94a3b8] uppercase tracking-wider">
                             TAGS
                           </label>
-                          <div className="bg-white border-2 border-[#ea580c] rounded-2xl p-3.5 space-y-3 shadow-2xs">
+                          <div className="bg-white border-2 border-[#ea580c] rounded-2xl p-3.5 space-y-3 shadow-sm">
                             {/* Render Active Dark Navy Tag Pills matching Image 2 */}
                             {tags.length > 0 && (
                               <div className="flex flex-wrap gap-2">
@@ -1922,7 +2087,7 @@ export default function CreateNewPostPage() {
                                   <span
                                     key={tag}
                                     onClick={() => handleRemoveTag(tag)}
-                                    className="bg-[#0b132b] text-white text-[11px] font-mono font-extrabold px-3 py-1.5 rounded-xl flex items-center space-x-1.5 cursor-pointer hover:bg-[#1e293b] transition-all shadow-xs"
+                                    className="bg-[#0b132b] text-white text-[11px] font-mono font-extrabold px-3 py-1.5 rounded-xl flex items-center space-x-1.5 cursor-pointer hover:bg-[#1e293b] transition-all shadow-sm"
                                     title="Click to remove tag"
                                   >
                                     <span>#{tag.toUpperCase()}</span>
@@ -1967,7 +2132,7 @@ export default function CreateNewPostPage() {
                           <button
                             type="button"
                             onClick={handleAutoGenerateSEO}
-                            className="w-full bg-[#f97316] hover:bg-[#ea580c] text-white font-sans font-extrabold text-xs py-3 px-4 rounded-xl flex items-center justify-center space-x-2 transition-all cursor-pointer shadow-xs uppercase tracking-wider"
+                            className="w-full bg-[#f97316] hover:bg-[#ea580c] text-white font-sans font-extrabold text-xs py-3 px-4 rounded-xl flex items-center justify-center space-x-2 transition-all cursor-pointer shadow-sm uppercase tracking-wider"
                           >
                             <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
@@ -2315,7 +2480,7 @@ export default function CreateNewPostPage() {
                   return (
                     <div
                       style={{ fontSize: fontSizePixel }}
-                      className={`${fontSizeClass} flow-root text-[#1a1a1a] leading-[1.75] font-serif space-y-5 [&_p]:mb-5 [&_p]:leading-[1.75] [&_img]:rounded-xl [&_img]:max-w-full [&_blockquote]:border-l-[5px] [&_blockquote]:border-[#ea580c] [&_blockquote]:bg-[#f8fafc] [&_blockquote]:py-3.5 [&_blockquote]:px-5 [&_blockquote]:my-3 [&_blockquote]:rounded-r-md [&_blockquote]:italic [&_blockquote]:text-[#334155] [&_blockquote]:flow-root [&_pre]:bg-[#f1f5f9] [&_pre]:border-none [&_pre]:outline-none [&_pre]:p-5 [&_pre]:rounded-xl [&_pre]:italic [&_pre]:text-[#334155] [&_pre]:text-base [&_pre]:my-4 [&_pre]:max-w-full [&_pre]:box-border [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_pre]:flow-root transition-all duration-150`}
+                      className={`preview-body-text editor-body-text ${fontSizeClass} flow-root text-[#1a1a1a] leading-[1.75] font-serif space-y-5 [&_p]:mb-5 [&_p]:leading-[1.75] [&_img]:rounded-xl [&_img]:max-w-full [&_blockquote]:border-l-[5px] [&_blockquote]:border-[#ea580c] [&_blockquote]:bg-[#f8fafc] [&_blockquote]:py-3.5 [&_blockquote]:px-5 [&_blockquote]:my-3 [&_blockquote]:rounded-r-md [&_blockquote]:italic [&_blockquote]:text-[#334155] [&_blockquote]:flow-root [&_pre]:bg-[#f1f5f9] [&_pre]:border-none [&_pre]:outline-none [&_pre]:p-5 [&_pre]:rounded-xl [&_pre]:italic [&_pre]:text-[#334155] [&_pre]:text-base [&_pre]:my-4 [&_pre]:max-w-full [&_pre]:box-border [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_pre]:flow-root transition-all duration-150`}
                       dangerouslySetInnerHTML={{ __html: bodyContent }}
                     />
                   );

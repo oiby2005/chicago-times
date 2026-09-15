@@ -7,7 +7,7 @@ import Container from "@/components/layout/Container";
 import Navbar, { getCategoryRoute } from "@/components/navigation/Navbar";
 import SearchOverlay from "@/components/search/SearchOverlay";
 import SpecialOfferPopover from "@/components/navigation/SpecialOfferPopover";
-import { UserProfile } from "@/components/ui/ProfileSettingsModal";
+import { getAuthorBySlug } from "@/data/authors";
 
 export const StickyHeaderBar: React.FC = () => {
   const [isSticky, setIsSticky] = useState(false);
@@ -32,6 +32,23 @@ export const StickyHeaderBar: React.FC = () => {
       const generalUser = localStorage.getItem("wsj_user");
       if (generalUser) {
         try { parsed = JSON.parse(generalUser); } catch (e) {}
+      }
+    }
+
+    if (!parsed && pathname) {
+      const match = pathname.match(/^\/(writer|admin|reader)\/([^/]+)/i);
+      if (match) {
+        const role = match[1].toLowerCase();
+        const slug = match[2];
+        const authorObj = getAuthorBySlug(slug);
+        parsed = {
+          id: authorObj?.id || slug,
+          full_name: authorObj?.name || slug.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" "),
+          email: authorObj?.email || `${slug}@gmail.com`,
+          role: role,
+          bio: authorObj?.bio || "",
+          avatar_url: authorObj?.avatarUrl || "",
+        };
       }
     }
 

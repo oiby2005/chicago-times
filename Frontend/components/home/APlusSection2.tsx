@@ -16,7 +16,7 @@ const defaultHero: APlus2Article = {
   title: "The gorgeous (and tourist-free) Adriatic islands with a royal link",
   slug: "the-gorgeous-tourist-free-adriatic-islands",
   summary: "Croatia’s Zadar archipelago is a heavenly place — Edward VIII and Wallis Simpson were fans, and this luxe hotel on Dugi Otok is the perfect base",
-  imageUrl: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1000&q=80",
+  imageUrl: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?fm=webp&fit=crop&w=1000&q=80",
 };
 
 const extractText = (html: string): string => {
@@ -51,7 +51,7 @@ export const APlusSection2: React.FC = () => {
             title: match.title,
             slug: match.slug || match.id,
             summary: match.subheadline || extractText(match.bodyContent) || "",
-            imageUrl: match.thumbnail || "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1000&q=80",
+            imageUrl: match.thumbnail || "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?fm=webp&fit=crop&w=1000&q=80",
           });
           return;
         }

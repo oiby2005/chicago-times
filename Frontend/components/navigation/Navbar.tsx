@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Container from "@/components/layout/Container";
 import SearchOverlay from "@/components/search/SearchOverlay";
 
@@ -25,12 +26,12 @@ interface CategoryMegaMenu {
 const megaMenuData: Record<string, CategoryMegaMenu> = {
   News: {
     title: "News",
-    href: "/world",
+    href: "/news",
     columns: [
       {
         links: [
-          { name: "U.S. News", href: "/world/us" },
-          { name: "International News", href: "/world/international" },
+          { name: "U.S. News", href: "/news/us-news" },
+          { name: "International News", href: "/news/international-news" },
         ],
       },
     ],
@@ -41,8 +42,8 @@ const megaMenuData: Record<string, CategoryMegaMenu> = {
     columns: [
       {
         links: [
-          { name: "Criminal Cases", href: "/law/criminal" },
-          { name: "Legal Affairs", href: "/law/affairs" },
+          { name: "Criminal Cases", href: "/law/criminal-cases" },
+          { name: "Legal Affairs", href: "/law/legal-affairs" },
         ],
       },
     ],
@@ -53,7 +54,7 @@ const megaMenuData: Record<string, CategoryMegaMenu> = {
     columns: [
       {
         links: [
-          { name: "World Politics", href: "/politics/world" },
+          { name: "World Politics", href: "/politics/world-politics" },
           { name: "Congress", href: "/politics/congress" },
           { name: "Elections", href: "/politics/elections" },
         ],
@@ -66,10 +67,10 @@ const megaMenuData: Record<string, CategoryMegaMenu> = {
     columns: [
       {
         links: [
-          { name: "Corporate News", href: "/business/corporate" },
+          { name: "Corporate News", href: "/business/corporate-news" },
           { name: "Small Business", href: "/business/small-business" },
           { name: "Entrepreneurship", href: "/business/entrepreneurship" },
-          { name: "CEOs & Executives", href: "/business/ceos" },
+          { name: "CEOs & Executives", href: "/business/ceos-and-executives" },
         ],
       },
     ],
@@ -93,8 +94,8 @@ const megaMenuData: Record<string, CategoryMegaMenu> = {
     columns: [
       {
         links: [
-          { name: "Jobs & Employment", href: "/economy/jobs" },
-          { name: "Interest Rates", href: "/economy/rates" },
+          { name: "Jobs & Employment", href: "/economy/jobs-employment" },
+          { name: "Interest Rates", href: "/economy/interest-rates" },
         ],
       },
     ],
@@ -105,7 +106,7 @@ const megaMenuData: Record<string, CategoryMegaMenu> = {
     columns: [
       {
         links: [
-          { name: "Artificial Intelligence", href: "/tech/ai" },
+          { name: "Artificial Intelligence", href: "/tech/artificial-intelligence" },
           { name: "Cybersecurity", href: "/tech/cybersecurity" },
           { name: "Innovation", href: "/tech/innovation" },
         ],
@@ -132,7 +133,7 @@ const megaMenuData: Record<string, CategoryMegaMenu> = {
     columns: [
       {
         links: [
-          { name: "Upcoming Brands", href: "/arts/brands" },
+          { name: "Upcoming Brands", href: "/arts/upcoming-brands" },
           { name: "Architecture", href: "/arts/architecture" },
           { name: "Books", href: "/arts/books" },
           { name: "Culture", href: "/arts/culture" },
@@ -290,8 +291,12 @@ export function getCategoryRoute(title: string): string {
 }
 
 export const Navbar: React.FC = () => {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<string | null>(null);
+  const [hoveredOffsetLeft, setHoveredOffsetLeft] = useState<number>(0);
+  const [hoveredWidth, setHoveredWidth] = useState<number>(0);
   const [isSearchOverlayOpen, setIsSearchOverlayOpen] = useState(false);
+  const tabRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const currentMenu = activeTab ? megaMenuData[activeTab] : null;
 
@@ -305,22 +310,36 @@ export const Navbar: React.FC = () => {
       <nav
         className="w-full bg-white border-b border-[#EAE6DA] relative z-30 font-sans shadow-2xs"
         aria-label="Category Navigation"
+        onMouseLeave={() => setActiveTab(null)}
       >
         <div className="w-full max-w-[1280px] mx-auto px-2 relative">
           <div className="flex items-end h-[34px] overflow-x-auto no-scrollbar">
             <div className="flex items-end justify-between w-full min-w-max lg:min-w-0 h-full">
-              {allCategories.map((title, index) => {
-                const isFirst = index === 0;
+              {allCategories.map((title) => {
+                const isHovered = activeTab === title;
 
                 return (
                   <div
                     key={title}
+                    ref={(el) => { tabRefs.current[title] = el; }}
+                    onMouseEnter={() => {
+                      setActiveTab(title);
+                      const currentTabEl = tabRefs.current[title];
+                      if (currentTabEl) {
+                        setHoveredOffsetLeft(currentTabEl.offsetLeft);
+                        setHoveredWidth(currentTabEl.offsetWidth);
+                      }
+                    }}
                     className="relative flex-shrink-0 flex items-end h-full"
                   >
                     <Link
                       href={getCategoryRoute(title)}
                       prefetch={false}
-                      className={`text-[13px] font-['Century_Gothic','Publica_Sans_Light','Kumbh_Sans',sans-serif] text-[#111111] font-normal ${isFirst ? "pr-[2px] pl-0" : "px-[2px]"} pb-1.5 hover:text-black hover:underline border border-transparent inline-block whitespace-nowrap tracking-normal transition-all leading-none`}
+                      className={`text-[13px] font-['Century_Gothic','Publica_Sans_Light','Kumbh_Sans',sans-serif] px-2.5 pb-1.5 pt-1 border transition-all whitespace-nowrap leading-none ${
+                        isHovered
+                          ? "bg-[#f9f9f8] text-[#111111] font-bold border-[#dcd6cd] border-b-transparent rounded-t-sm z-50 relative -mb-[1px]"
+                          : "text-[#111111] font-normal border-transparent hover:text-[#990000]"
+                      }`}
                     >
                       {title}
                     </Link>
@@ -329,11 +348,11 @@ export const Navbar: React.FC = () => {
               })}
 
               {/* Integrated Search Icon */}
-              <div className="flex items-center flex-shrink-0 relative z-50 pb-1.5">
-                <Link
-                  href="/search"
+              <div className="flex items-center flex-shrink-0 relative z-50 pb-1.5 px-2">
+                <button
+                  onClick={() => router.push("/search")}
                   aria-label="Search"
-                  className="py-1 pl-1 text-[#444444] hover:text-black transition-colors focus:outline-none cursor-pointer"
+                  className="py-1 text-[#444444] hover:text-black transition-colors focus:outline-none cursor-pointer"
                 >
                   <svg
                     className="w-3.5 h-3.5"
@@ -348,11 +367,50 @@ export const Navbar: React.FC = () => {
                       d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                     />
                   </svg>
-                </Link>
+                </button>
               </div>
             </div>
           </div>
         </div>
+
+        {/* Category Sub-Categories 100% Viewport Full-Width Hover Dropdown Panel */}
+        {currentMenu && currentMenu.columns && currentMenu.columns.length > 0 && currentMenu.columns[0]?.links && currentMenu.columns[0].links.length > 0 && (
+          <div
+            onMouseEnter={() => setActiveTab(activeTab)}
+            onMouseLeave={() => setActiveTab(null)}
+            className="absolute left-0 right-0 w-full top-[34px] bg-[#f9f9f8] border-b border-t border-[#dcd6cd] shadow-lg z-40 py-5 min-h-[180px] transition-all duration-150 animate-fadeIn"
+          >
+            <div className="w-full max-w-[1280px] mx-auto px-2 relative">
+              {/* Seamless patch div: erases the top border line ONLY directly underneath the hovered tab */}
+              {activeTab && hoveredWidth > 0 && (
+                <div
+                  className="absolute -top-[21px] bg-[#f9f9f8] h-[3px] z-50 transition-all duration-150"
+                  style={{
+                    left: `${hoveredOffsetLeft}px`,
+                    width: `${hoveredWidth}px`,
+                  }}
+                />
+              )}
+
+              <div
+                className="transition-all duration-150"
+                style={{ paddingLeft: `${hoveredOffsetLeft}px` }}
+              >
+                <div className="flex flex-col space-y-2 min-w-[200px] max-w-[280px]">
+                  {currentMenu.columns[0]?.links?.map((link) => (
+                    <Link
+                      key={link.name}
+                      href={link.href}
+                      className="block text-[13.5px] font-sans text-[#333333] hover:text-[#990000] hover:underline transition-colors py-0.5"
+                    >
+                      {link.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </nav>
     </>
   );

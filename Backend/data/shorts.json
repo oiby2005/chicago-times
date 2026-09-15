@@ -1,0 +1,100 @@
+{
+  "recommended": [
+    {
+      "id": "recommended_slot_1",
+      "slotNumber": 1,
+      "videoUrl": "https://www.instagram.com/reel/DdEzx4aRVpB/?utm_source=ig_web_copy_link&stkn=NTc4MTIwNjQ2YQ==",
+      "platform": "Instagram shorts",
+      "title": "Red Bull Bike on Instagram: \"still wrapping our heads around this one ‍\n\nIf you haven’t watched @brandonsemenuk, @frix.frix, @kade_2000 and @r_doggystyles in Parallel III yet, don‘t waste any time and hit that link in bio. \n\n#mtb #freeride #biking #mountainbiking #bikelife\"",
+      "thumbnailUrl": "https://f005.backblazeb2.com/file/timeschicago/cover_images/cover_1789090772215_1789090772513.jpg",
+      "duration": "0:45",
+      "status": "Active",
+      "subTab": "recommended",
+      "createdAt": "2026-09-11T01:28:12.000Z"
+    },
+    {
+      "id": "recommended_slot_2",
+      "slotNumber": 2,
+      "videoUrl": "https://www.facebook.com/reel/1638383828074517",
+      "platform": "Instagram shorts",
+      "title": "Tristan Harris, co-founder of the Center for Humane Technology, weighs in on artificial intelligence and how worried people should be about rapid advancements. | CBS Evening News",
+      "thumbnailUrl": "https://f005.backblazeb2.com/file/timeschicago/cover_images/cover_1789090852267_1789090852346.jpg",
+      "duration": "0:45",
+      "status": "Active",
+      "createdAt": "2026-09-11T01:42:41.348Z"
+    },
+    {
+      "id": "recommended_slot_3",
+      "slotNumber": 3,
+      "videoUrl": "https://rumble.com/v7fbkby-a-russian-drone-hit-leipzig-and-left-its-passport-behind.html?e9s=src_v1_news%2Csrc_v1_hp_rs",
+      "platform": "Rumble Video",
+      "title": "A 'Russian' Drone Hit Leipzig And Left Its Passport Behind",
+      "thumbnailUrl": "https://f005.backblazeb2.com/file/timeschicago/cover_images/cover_1789090776027_1789090777381.jpg",
+      "duration": "31:47",
+      "status": "Active",
+      "subTab": "recommended",
+      "createdAt": "2026-09-11T01:28:12.000Z"
+    },
+    {
+      "id": "recommended_slot_4",
+      "slotNumber": 4,
+      "videoUrl": "https://www.youtube.com/shorts/4eG5uEay0J4",
+      "platform": "YouTube Shorts",
+      "title": "Apple unveils new foldable iPhone. #BBCNews",
+      "thumbnailUrl": "https://f005.backblazeb2.com/file/timeschicago/cover_images/cover_1789090779192_1789090779347.jpg",
+      "duration": "1:00",
+      "status": "Active",
+      "subTab": "recommended",
+      "createdAt": "2026-09-11T01:28:12.000Z"
+    },
+    {
+      "id": "recommended_slot_5",
+      "slotNumber": 5,
+      "videoUrl": "https://www.youtube.com/shorts/DISPbVb2zf8",
+      "platform": "YouTube Shorts",
+      "title": "BBC drops Drag Race UK after eight series. #DragRaceUK #RuPaul #BBCNews",
+      "thumbnailUrl": "https://f005.backblazeb2.com/file/timeschicago/cover_images/cover_1789090780471_1789090780537.jpg",
+      "duration": "0:43",
+      "status": "Active",
+      "subTab": "recommended",
+      "createdAt": "2026-09-11T01:28:12.000Z"
+    }
+  ],
+  "podcast": [
+    {
+      "id": "podcast_slot_1",
+      "slotNumber": 1,
+      "videoUrl": "https://podcasts.apple.com/us/podcast/liv-golfs-%245-billion-path-to-bankruptcy/id1578096201?i=1000789339748",
+      "platform": "Apple Podcasts",
+      "title": "LIV Golf’s $5 Billion Path to Bankruptcy",
+      "thumbnailUrl": "https://f005.backblazeb2.com/file/timeschicago/cover_images/cover_1789447199597_1789447201098.jpg",
+      "duration": "16:24",
+      "status": "Active",
+      "subTab": "podcast",
+      "createdAt": "2026-09-15T05:19:52.000Z"
+    },
+    {
+      "id": "podcast_2",
+      "slotNumber": 2,
+      "videoUrl": "https://podcasts.apple.com/us/podcast/haitians-live-in-a-dual-state-in-ohio-right-now/id73330715?i=1000789109676",
+      "platform": "Apple Podcasts",
+      "title": "Haitians Live in a Dual State in Ohio Right Now",
+      "thumbnailUrl": "https://f005.backblazeb2.com/file/timeschicago/cover_images/cover_1789449163659_1789449165556.jpg",
+      "duration": "50:21",
+      "status": "Active",
+      "createdAt": "2026-09-15T05:21:15.351Z"
+    },
+    {
+      "id": "podcast_3",
+      "slotNumber": 3,
+      "videoUrl": "https://podcasts.apple.com/us/podcast/25-years-later-new-9-11-accusations/id1355180130?i=1000789023408",
+      "platform": "Apple Podcasts",
+      "title": "25 Years Later, New 9/11 Accusations",
+      "thumbnailUrl": "https://f005.backblazeb2.com/file/timeschicago/cover_images/cover_1789449250862_1789449252079.jpg",
+      "duration": "28:25",
+      "status": "Active",
+      "subTab": "podcast",
+      "createdAt": "2026-09-15T05:19:52.000Z"
+    }
+  ]
+}

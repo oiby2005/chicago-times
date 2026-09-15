@@ -2,6 +2,7 @@
 
 import React, { useState, useRef } from "react";
 import Link from "next/link";
+import { getRelativeTime } from "@/lib/relativeTime";
 
 export interface AuthorArticleItem {
   id: string;
@@ -112,7 +113,7 @@ const baseAuthorArticlesData: AuthorArticleItem[] = [
     excerpt: "Joe Biden's health has taken a more serious turn. In an interview with the BBC on Friday, August 7, 2026, Hunter Biden said his father's prostate cancer has spread further, including to his bones...",
     author: "writer",
     date: "AUG 09, 2026",
-    image: "https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?auto=format&fit=crop&w=600&q=80",
+    image: "https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?fm=webp&fit=crop&w=600&q=80",
     slug: "biden-cancer-disease-spread-further",
   },
   {
@@ -122,7 +123,7 @@ const baseAuthorArticlesData: AuthorArticleItem[] = [
     excerpt: "As trade relations evolve, major global manufacturers are accelerating investments across Vietnam, Indonesia, and the Philippines, altering regional economic balances...",
     author: "writer",
     date: "AUG 05, 2026",
-    image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&q=80",
+    image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?fm=webp&fit=crop&w=600&q=80",
     slug: "global-supply-chains-southeast-asia",
   },
   {
@@ -132,7 +133,7 @@ const baseAuthorArticlesData: AuthorArticleItem[] = [
     excerpt: "From California to Dublin, local energy authorities are struggling to meet the electrical demands of next-generation artificial intelligence computing infrastructure...",
     author: "writer",
     date: "AUG 04, 2026",
-    image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=600&q=80",
+    image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?fm=webp&fit=crop&w=600&q=80",
     slug: "battle-for-ai-data-centers-power-grids",
   },
 ];
@@ -141,10 +142,12 @@ import { extractSingleAuthorName } from "@/data/authors";
 
 interface AuthorArticlesListProps {
   authorName?: string;
+  authorEmail?: string;
 }
 
 export default function AuthorArticlesList({
   authorName = "writer",
+  authorEmail = "",
 }: AuthorArticlesListProps) {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [displayName, setDisplayName] = useState<string>(extractSingleAuthorName(authorName));
@@ -152,20 +155,6 @@ export default function AuthorArticlesList({
 
   const syncAuthorName = () => {
     if (typeof window === "undefined") return;
-    const storedUserStr = localStorage.getItem("wsj_user");
-    if (storedUserStr) {
-      try {
-        const storedUser = JSON.parse(storedUserStr);
-        const storedNameLower = (storedUser.full_name || storedUser.name || "").toLowerCase();
-        const authorNameLower = authorName.toLowerCase();
-        if (storedUser.full_name && (authorNameLower === "writer" || authorNameLower === "writer user" || storedNameLower === authorNameLower)) {
-          setDisplayName(extractSingleAuthorName(storedUser.full_name).toUpperCase());
-          return;
-        }
-      } catch (e) {
-        console.error("Error reading author name from wsj_user:", e);
-      }
-    }
     setDisplayName(extractSingleAuthorName(authorName).toUpperCase());
   };
 
@@ -182,7 +171,7 @@ export default function AuthorArticlesList({
     return html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
   };
 
-  const syncUserArticles = () => {
+  const syncUserArticles = async () => {
     if (typeof window === "undefined") return;
     try {
       let posts: any[] = [];
@@ -195,19 +184,53 @@ export default function AuthorArticlesList({
         posts = [...posts, ...JSON.parse(storedPubStr)];
       }
 
+      // Fetch from API for cross-browser sync
+      try {
+        const res = await fetch("http://localhost:5000/api/posts");
+        if (res.ok) {
+          const data = await res.json();
+          const remoteArray = Array.isArray(data) ? data : (data && Array.isArray(data.posts) ? data.posts : []);
+          posts = [...posts, ...remoteArray];
+        }
+      } catch (e) {}
+
       // Deduplicate published posts by ID / slug
       const uniqueMap = new Map();
       posts.forEach((p: any) => {
-        if (p && p.status === "Published") {
+        if (p && (p.status === "Published" || p.status === "APPROVED")) {
           uniqueMap.set(String(p.id || p.slug), p);
         }
       });
       const publishedPosts = Array.from(uniqueMap.values());
 
-      const formatted: AuthorArticleItem[] = publishedPosts.map((p: any) => {
-        const dateStr = p.publishedAt
-          ? new Date(p.publishedAt).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }).toUpperCase()
-          : (p.date || "AUG 30, 2026");
+      const targetEmail = (authorEmail || "").toLowerCase().trim();
+      const targetNameLower = (displayName || authorName || "").toLowerCase().trim();
+
+      const filteredByAuthor = publishedPosts.filter((p: any) => {
+        if (!p) return false;
+        const pStatus = (p.status || "").toLowerCase();
+        if (pStatus !== "published" && pStatus !== "approved") return false;
+
+        const pEmail = (p.authorEmail || "").toLowerCase().trim();
+        const pAuthor = (p.author || "").toLowerCase().trim();
+
+        // 1. Strict filtering for writer1 (writer1@gmail.com)
+        if (targetEmail === "writer1@gmail.com" || targetNameLower === "writer1") {
+          return pEmail === "writer1@gmail.com" || pAuthor === "writer1";
+        }
+
+        // 2. Strict filtering for primary writer (writer@gmail.com)
+        if (targetEmail === "writer@gmail.com" || targetNameLower === "writer" || targetNameLower === "writer user") {
+          return pEmail === "writer@gmail.com" || (!pEmail && pAuthor !== "writer1");
+        }
+
+        // 3. Direct email or exact name match for other authors
+        if (pEmail && targetEmail) return pEmail === targetEmail;
+        return pAuthor === targetNameLower;
+      });
+
+      const formatted: AuthorArticleItem[] = filteredByAuthor.map((p: any) => {
+        const dateStr = getRelativeTime(p.publishedAt, p.date).toUpperCase();
         const excerptText = p.subheadline || p.cardSummary || extractText(p.bodyContent || "") || "Read the latest update...";
         return {
           id: String(p.id),
@@ -216,7 +239,7 @@ export default function AuthorArticlesList({
           excerpt: excerptText,
           author: p.author || displayName,
           date: dateStr,
-          image: p.thumbnail || "https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?auto=format&fit=crop&w=600&q=80",
+          image: p.thumbnail || "https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?fm=webp&fit=crop&w=600&q=80",
           slug: p.slug || String(p.id),
         };
       });
@@ -235,57 +258,30 @@ export default function AuthorArticlesList({
       window.removeEventListener("wsj_user_updated", syncUserArticles);
       window.removeEventListener("wsj_posts_updated", syncUserArticles);
     };
-  }, [displayName]);
+  }, [displayName, authorEmail]);
 
   const isWriterUser = (() => {
-    if (typeof window === "undefined") return authorName.toLowerCase().includes("writer");
-    
-    const pathname = window.location.pathname;
-    if (pathname === "/writer" || pathname.startsWith("/author/writer")) {
-      return true;
-    }
-
-    const storedUserStr = localStorage.getItem("wsj_user");
-    if (storedUserStr) {
-      try {
-        const storedUser = JSON.parse(storedUserStr);
-        const userRole = (storedUser.role || "").toLowerCase();
-        const storedName = (storedUser.full_name || storedUser.name || "").toLowerCase();
-        const currAuthor = authorName.toLowerCase();
-
-        if (userRole === "writer" && (currAuthor === storedName || currAuthor === "writer" || currAuthor === "writer user")) {
-          return true;
-        }
-      } catch (e) {}
-    }
-
-    return authorName.toLowerCase() === "writer" || authorName.toLowerCase() === "writer user";
+    const targetEmail = (authorEmail || "").toLowerCase().trim();
+    if (targetEmail.includes("writer")) return true;
+    const authorLower = authorName.toLowerCase();
+    return authorLower === "writer" || authorLower === "writer1" || authorLower === "writer user";
   })();
 
-  // For staff writers, use baseAuthorArticlesData with 11 pages
-  // For Writer User, check wsj_published_posts
-  const getArticlesForPage = (page: number) => {
-    if (!isWriterUser) {
-      const shift = (page - 1) % baseAuthorArticlesData.length;
-      return [
-        ...baseAuthorArticlesData.slice(shift),
-        ...baseAuthorArticlesData.slice(0, shift),
-      ];
-    }
-    return userArticles;
-  };
+  // For staff writers, use baseAuthorArticlesData
+  // For Writer Users, use userArticles strictly
+  const PAGE_SIZE = 10;
+  const allArticlesList = isWriterUser ? userArticles : baseAuthorArticlesData;
+  const totalPages = Math.max(1, Math.ceil(allArticlesList.length / PAGE_SIZE));
+  const activeArticles = allArticlesList.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   const handlePageChange = (newPage: number) => {
-    const maxPages = isWriterUser ? Math.max(1, userArticles.length) : 11;
-    if (newPage >= 1 && newPage <= maxPages) {
+    if (newPage >= 1 && newPage <= totalPages) {
       setCurrentPage(newPage);
       topRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   };
 
-  const activeArticles = getArticlesForPage(currentPage);
   const showEmptyState = isWriterUser && userArticles.length === 0;
-  const totalPages = isWriterUser ? 1 : 11;
 
   return (
     <div ref={topRef} className="w-full select-none">

@@ -4,6 +4,12 @@ import StickyHeaderBar from "@/components/navigation/StickyHeaderBar";
 import NewHomeBody from "@/components/home/NewHomeBody";
 import StickySubscribeBar from "@/components/ui/StickySubscribeBar";
 import Footer from "@/components/layout/Footer";
+import { getLinkPreviewMetadata } from "@/lib/linkPreview";
+
+export const metadata = getLinkPreviewMetadata({
+  type: "homepage",
+  urlPath: "/",
+});
 
 export default function Home() {
   return (

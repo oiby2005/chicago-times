@@ -22,12 +22,12 @@ export const SpecialOfferAccordion: React.FC = () => {
       content: (
         <div className="space-y-3 text-xs text-[#555555] font-sans leading-relaxed">
           <p>
-            Looking for print delivery or corporate access? We offer tailored subscription plans including WSJ Print Edition delivery, WSJ Classic, Corporate & Academic group access, and Student memberships.
+            Looking for print delivery or corporate access? We offer tailored subscription plans including Times Chicago Print Edition delivery, Times Chicago Classic, Corporate &amp; Academic group access, and Student memberships.
           </p>
           <ul className="list-disc pl-5 space-y-1 text-[#444444]">
-            <li>WSJ Print + Digital Bundle — Daily home delivery plus unlimited digital access.</li>
-            <li>Student & Educator Discounts — Special rates available with valid educational credentials.</li>
-            <li>Corporate & Enterprise Licensing — Scalable access for teams and organizations.</li>
+            <li>Times Chicago Print + Digital Bundle — Daily home delivery plus unlimited digital access.</li>
+            <li>Student &amp; Educator Discounts — Special rates available with valid educational credentials.</li>
+            <li>Corporate &amp; Enterprise Licensing — Scalable access for teams and organizations.</li>
           </ul>
         </div>
       ),
@@ -50,9 +50,9 @@ export const SpecialOfferAccordion: React.FC = () => {
             </p>
           </div>
           <div>
-            <h4 className="font-bold text-[#222222] mb-1">What is included in the WSJ Digital Bundle?</h4>
+            <h4 className="font-bold text-[#222222] mb-1">What is included in the Times Chicago Digital Bundle?</h4>
             <p>
-              The WSJ Digital Bundle grants full, unlimited access to WSJ.com, Barrons.com, and Marketwatch.com, along with their mobile apps and exclusive subscriber events.
+              The Times Chicago Digital Bundle grants full, unlimited access to Times Chicago digital platforms, along with mobile apps and exclusive subscriber events.
             </p>
           </div>
         </div>
@@ -67,7 +67,7 @@ export const SpecialOfferAccordion: React.FC = () => {
             Offer valid for new subscribers only. Offer cannot be combined with any other offer or promotion. Subscription will automatically renew monthly after the introductory rate period ends at the then-prevailing standard rate.
           </p>
           <p>
-            Sales tax may apply. Subscriptions are non-refundable and subject to the Dow Jones Subscriber Agreement and Terms of Use.
+            Sales tax may apply. Subscriptions are non-refundable and subject to the Times Chicago Subscriber Agreement and Terms of Use.
           </p>
         </div>
       ),
@@ -76,7 +76,7 @@ export const SpecialOfferAccordion: React.FC = () => {
 
   return (
     <div className="w-full bg-white border border-[#e2e2e2] rounded-xs shadow-xs overflow-hidden select-none">
-      {items.map((item, idx) => {
+      {items.map((item) => {
         const isOpen = openId === item.id;
 
         return (

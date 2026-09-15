@@ -3,485 +3,264 @@
 import React from "react";
 import Container from "@/components/layout/Container";
 
-const newsColumnLeft = [
-  "Live Coverage",
-  "Business",
-  "Politics",
-  "Tech",
-  "Arts and Culture",
-  "Real Estate",
-  "Health",
-  "Sports",
-  "Science",
-  "Middle East",
-  "Policy",
-  "Investing",
-  "Taxes",
-  "Obituaries",
+// NEWS Column 1 (8 items max)
+const newsLinksCol1 = [
+  { name: "News", href: "/news" },
+  { name: "Law", href: "/law" },
+  { name: "Politics", href: "/politics" },
+  { name: "Business", href: "/business" },
+  { name: "Markets & Finance", href: "/markets-finance" },
+  { name: "Economy", href: "/economy" },
+  { name: "Tech", href: "/tech" },
+  { name: "Entertainment", href: "/entertainment" },
 ];
 
-const newsColumnRight = [
-  "World",
-  "U.S.",
-  "Economy",
-  "Finance",
-  "Lifestyle",
-  "Personal Finance",
-  "Style",
-  "China",
-  "Ukraine",
-  "Elections",
-  "Trade",
-  "Earnings",
-  "AI",
+// NEWS Column 2 (8 items max)
+const newsLinksCol2 = [
+  { name: "Arts", href: "/arts" },
+  { name: "Industries", href: "/industries" },
+  { name: "Fashion", href: "/fashion" },
+  { name: "Investing", href: "/investing" },
+  { name: "Health", href: "/health" },
+  { name: "Sports", href: "/sports" },
+  { name: "Lifestyle", href: "/lifestyle" },
+  { name: "Science", href: "/science" },
 ];
 
-const marketsLinks = [
-  "Stocks",
-  "Bonds",
-  "Money Rates",
-  "DJIA",
-  "S&P 500",
-  "Nasdaq",
+// FEATURED Column 1 (8 items max - Small Business under CEO & Executives)
+const featuredLinksCol1 = [
+  { name: "Editorials", href: "/editorials" },
+  { name: "Opinions", href: "/opinion" },
+  { name: "U.S. News", href: "/news/us-news" },
+  { name: "International News", href: "/news/international-news" },
+  { name: "World Politics", href: "/politics/world-politics" },
+  { name: "Corporate News", href: "/business/corporate-news" },
+  { name: "CEO & Executives", href: "/business/ceos-and-executives" },
+  { name: "Small Business", href: "/business/small-business" },
 ];
 
-const opinionLinks = [
-  "Opinion & Reviews",
-  "Film Review",
-  "Television Review",
-  "Bookshelf",
-  "Music Review",
-  "What to Watch",
-  "Art Review",
+// FEATURED Column 2 (6 items)
+const featuredLinksCol2 = [
+  { name: "Artificial Intelligence", href: "/tech/artificial-intelligence" },
+  { name: "Innovation", href: "/tech/innovation" },
+  { name: "Stocks", href: "/markets-finance/stocks" },
+  { name: "Real Estate", href: "/investing/real-estate" },
+  { name: "Crypto", href: "/investing/crypto" },
+  { name: "Space", href: "/science/space" },
 ];
 
-const membershipLinks = [
-  "Subscription Options",
-  "Corporate Subscriptions",
-  "WSJ Higher Education Program",
-  "WSJ High School Program",
-  "Public Library Program",
-  "Dow Jones Events",
-  "Commercial Partnerships",
-  "WSJ Leadership Institute",
+// ABOUT Column (8 items max)
+const aboutLinks = [
+  { name: "About us", href: "/about-us" },
+  { name: "Contact us", href: "/contact-us" },
+  { name: "Terms & Conditions", href: "/terms-and-conditions" },
+  { name: "Privacy Policy", href: "/privacy-policy" },
+  { name: "Cookie Policy", href: "/cookie-policy" },
+  { name: "Editorial Policy", href: "/editorial-policy" },
+  { name: "Advertise with us", href: "/advertise-with-us" },
+  { name: "RSS Feed", href: "/newsletter" },
 ];
 
-const customerServiceLinks = [
-  "Customer Center",
-  "Contact Us",
-  "Cancel My Subscription",
-];
-
-const adsLinks = [
-  "Advertise",
-  "Commercial Real Estate Ads",
-  "Place a Classified Ad",
-  "Sell Your Business",
-  "Sell Your Home",
-  "Recruitment & Career Ads",
-  "Digital Self Service",
-];
-
-const toolsLinks = [
-  "Newsletters & Alerts",
-  "Topics",
-  "Podcasts",
-  "Video Center",
-  "Watchlist",
-  "Latest News",
-];
-
-const moreLinks = [
-  "About Us",
-  "Content Partnerships",
-  "Corrections",
-  "Jobs at WSJ",
-  "News Archive",
-  "Register for Free",
-  "Reprints & Licensing",
-  "Buy Issues",
-  "WSJ Shop",
-  "Dow Jones Press Room",
-  "Dow Jones Smart Money",
-];
-
-const dowJonesProductsRow1 = [
-  "Barron's",
-  "Dow Jones Newswires",
-  "Factiva",
-  "Financial News",
-  "Mansion Global",
-  "MarketWatch",
-  "Risk & Compliance",
-];
-
-const dowJonesProductsRow2 = [
-  "WSJ | Buy Side",
-  "WSJ Pro",
-  "WSJ Video",
-  "WSJ Wine",
-  "The Times",
-];
-
-const legalLinks = [
-  "Privacy Notice",
-  "Cookie Notice",
-  "Copyright Policy",
-  "Legal Policies",
-  "Terms of Use",
-  "Your Ad Choices",
-  "Accessibility",
+// EDITIONS Column (5 items)
+const editionsLinks = [
+  { name: "United States", href: "/" },
+  { name: "Australia", href: "/news" },
+  { name: "India", href: "/news" },
+  { name: "Singapore", href: "/news" },
+  { name: "United Kingdom", href: "/news" },
 ];
 
 export const Footer: React.FC = () => {
-  const scrollToTop = () => {
-    if (typeof window !== "undefined") {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  };
-
   return (
-    <footer className="w-full text-[#333333] font-sans select-none">
+    <footer className="w-full bg-[#FAF7EE] text-[#111111] border-t border-[#EAE6DA] font-sans select-none pt-10 pb-8">
+      <Container>
+        {/* Multi-Column Grid (Max 8 items per list, split into columns) */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-6 pb-10">
+          {/* Column 1: NEWS (Part 1) */}
+          <div>
+            <h3 className="font-bold text-xs uppercase tracking-wider text-[#111111] mb-4">
+              NEWS
+            </h3>
+            <ul className="space-y-2.5 text-xs text-[#444444]">
+              {newsLinksCol1.map((item) => (
+                <li key={item.name}>
+                  <a href={item.href} className="hover:text-[#00558c] transition-colors block">
+                    {item.name}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-      {/* Band 1: Lighter Gray Header Row (Logo + Parallel English Edition + Subscribe/Sign In) */}
-      <div className="w-full bg-[#f2f2f2] pt-5 pb-5">
-        <Container>
-          <div className="flex flex-wrap items-center justify-between">
-            <div>
-              <div className="flex items-center space-x-6">
-                <a href="/" className="inline-block">
-                  <img
-                    src="/images/design-reference/Times Chicago.svg"
-                    alt="Times Chicago"
-                    className="h-6 sm:h-7 w-auto object-contain block -ml-3 sm:-ml-3.5"
-                  />
+          {/* Column 2: NEWS (Part 2 - Continuation without duplicate heading) */}
+          <div>
+            <div className="h-4 mb-4 hidden sm:block" aria-hidden="true" />
+            <ul className="space-y-2.5 text-xs text-[#444444]">
+              {newsLinksCol2.map((item) => (
+                <li key={item.name}>
+                  <a href={item.href} className="hover:text-[#00558c] transition-colors block">
+                    {item.name}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Column 3: FEATURED (Part 1) */}
+          <div>
+            <h3 className="font-bold text-xs uppercase tracking-wider text-[#111111] mb-4">
+              FEATURED
+            </h3>
+            <ul className="space-y-2.5 text-xs text-[#444444]">
+              {featuredLinksCol1.map((item) => (
+                <li key={item.name}>
+                  <a href={item.href} className="hover:text-[#00558c] transition-colors block">
+                    {item.name}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Column 4: FEATURED (Part 2 - Continuation without duplicate heading) */}
+          <div>
+            <div className="h-4 mb-4 hidden sm:block" aria-hidden="true" />
+            <ul className="space-y-2.5 text-xs text-[#444444]">
+              {featuredLinksCol2.map((item) => (
+                <li key={item.name}>
+                  <a href={item.href} className="hover:text-[#00558c] transition-colors block">
+                    {item.name}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Column 5: ABOUT */}
+          <div>
+            <h3 className="font-bold text-xs uppercase tracking-wider text-[#111111] mb-4">
+              ABOUT
+            </h3>
+            <ul className="space-y-2.5 text-xs text-[#444444]">
+              {aboutLinks.map((item) => (
+                <li key={item.name}>
+                  <a href={item.href} className="hover:text-[#00558c] transition-colors block">
+                    {item.name}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Column 6: EDITIONS */}
+          <div>
+            <h3 className="font-bold text-xs uppercase tracking-wider text-[#111111] mb-4">
+              EDITIONS
+            </h3>
+            <ul className="space-y-2.5 text-xs text-[#444444]">
+              {editionsLinks.map((item) => (
+                <li key={item.name}>
+                  <a href={item.href} className="hover:text-[#00558c] transition-colors block text-[#111111] font-medium">
+                    {item.name}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Column 7: FOLLOW US */}
+          <div>
+            <h3 className="font-bold text-xs uppercase tracking-wider text-[#111111] mb-4">
+              FOLLOW US
+            </h3>
+            <ul className="space-y-3 text-xs text-[#444444]">
+              <li>
+                <a
+                  href="https://www.facebook.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center space-x-2.5 hover:text-[#00558c] transition-colors"
+                >
+                  <svg className="w-4 h-4 text-gray-600 fill-current" viewBox="0 0 24 24">
+                    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+                  </svg>
+                  <span>Facebook</span>
                 </a>
-                <div className="hidden sm:flex items-center space-x-1 text-[12px] text-[#444444] cursor-pointer hover:underline">
-                  <span>English Edition</span>
-                  <span className="text-[10px]">▼</span>
-                </div>
-              </div>
-              <p className="text-[11px] font-bold text-[#333333] font-sans mt-0.5 pl-0.5">
-                a Dow Jones company
-              </p>
-            </div>
-
-            <div className="flex items-center space-x-6 text-[12.5px] font-bold text-black mt-3 sm:mt-0">
-              <a href="#" className="hover:underline">
-                Subscribe Now
-              </a>
-              <a href="#" className="hover:underline">
-                Sign In
-              </a>
-            </div>
+              </li>
+              <li>
+                <a
+                  href="https://www.linkedin.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center space-x-2.5 hover:text-[#00558c] transition-colors"
+                >
+                  <svg className="w-4 h-4 text-gray-600 fill-current" viewBox="0 0 24 24">
+                    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2z" />
+                    <circle cx="4" cy="4" r="2" />
+                  </svg>
+                  <span>LinkedIn</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.instagram.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center space-x-2.5 hover:text-[#00558c] transition-colors"
+                >
+                  <svg className="w-4 h-4 text-gray-600 fill-none stroke-current stroke-2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+                  </svg>
+                  <span>Instagram</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://rumble.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center space-x-2.5 hover:text-[#00558c] transition-colors"
+                >
+                  <div className="w-4 h-4 rounded-full bg-[#85c441] flex items-center justify-center flex-shrink-0">
+                    <svg className="w-2.5 h-2.5 text-white fill-current ml-0.5" viewBox="0 0 24 24">
+                      <polygon points="5 3 19 12 5 21 5 3" />
+                    </svg>
+                  </div>
+                  <span>Rumble</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/newsletter"
+                  className="flex items-center space-x-2.5 hover:text-[#00558c] transition-colors"
+                >
+                  <svg className="w-4 h-4 text-gray-600 fill-none stroke-current stroke-2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                    <polyline points="22,6 12,13 2,6" />
+                  </svg>
+                  <span>Newsletter</span>
+                </a>
+              </li>
+            </ul>
           </div>
-        </Container>
-      </div>
+        </div>
 
-      {/* Band 2: Slightly Darker Gray Multi-Column Links & Social Icons Section */}
-      <div className="w-full bg-[#e8e8e8] pt-6 pb-6">
-        <Container>
-          {/* Multi-Column Links Section */}
-          <div className="pb-6 overflow-x-auto no-scrollbar">
-            <div className="min-w-[980px] grid grid-cols-12 gap-0 text-[11.5px]">
-              {/* Column 1: News (Span 3) */}
-              <div className="col-span-3 pr-4 border-r border-[#d4d4d4]">
-                <h4 className="font-bold text-black text-[12px] mb-2.5">News</h4>
-                <div className="grid grid-cols-2 gap-x-2">
-                  <ul className="space-y-1.5">
-                    {newsColumnLeft.map((item) => (
-                      <li key={item}>
-                        <a
-                          href="#"
-                          className="text-[#444444] hover:text-black hover:underline block leading-snug"
-                        >
-                          {item}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                  <ul className="space-y-1.5">
-                    {newsColumnRight.map((item) => (
-                      <li key={item}>
-                        <a
-                          href="#"
-                          className="text-[#444444] hover:text-black hover:underline block leading-snug"
-                        >
-                          {item}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-
-              {/* Column 2: Markets (Span 1) */}
-              <div className="col-span-1 px-4 border-r border-[#d4d4d4]">
-                <h4 className="font-bold text-black text-[12px] mb-2.5">
-                  Markets
-                </h4>
-                <ul className="space-y-1.5">
-                  {marketsLinks.map((item) => (
-                    <li key={item}>
-                      <a
-                        href="#"
-                        className="text-[#444444] hover:text-black hover:underline block leading-snug"
-                      >
-                        {item}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Column 3: Opinion (Span 1) */}
-              <div className="col-span-1 px-4 border-r border-[#d4d4d4]">
-                <h4 className="font-bold text-black text-[12px] mb-2.5">
-                  Opinion
-                </h4>
-                <ul className="space-y-1.5">
-                  {opinionLinks.map((item) => (
-                    <li key={item}>
-                      <a
-                        href="#"
-                        className="text-[#444444] hover:text-black hover:underline block leading-snug"
-                      >
-                        {item}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Column 4: WSJ Membership (Span 2) */}
-              <div className="col-span-2 px-4 border-r border-[#d4d4d4]">
-                <h4 className="font-bold text-black text-[12px] mb-2.5">
-                  WSJ Membership
-                </h4>
-                <ul className="space-y-1.5">
-                  {membershipLinks.map((item) => (
-                    <li key={item}>
-                      <a
-                        href="#"
-                        className="text-[#444444] hover:text-black hover:underline block leading-snug"
-                      >
-                        {item}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Column 5: Customer Service & Ads & Tools (Span 3: 3 sub-columns) */}
-              <div className="col-span-3 grid grid-cols-3 gap-0 px-4 border-r border-[#d4d4d4]">
-                {/* Customer Service */}
-                <div className="pr-2 border-r border-[#d4d4d4]">
-                  <h4 className="font-bold text-black text-[12px] mb-2.5">
-                    Customer Service
-                  </h4>
-                  <ul className="space-y-1.5">
-                    {customerServiceLinks.map((item) => (
-                      <li key={item}>
-                        <a
-                          href="#"
-                          className="text-[#444444] hover:text-black hover:underline block leading-snug"
-                        >
-                          {item}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* Ads */}
-                <div className="px-2 border-r border-[#d4d4d4]">
-                  <h4 className="font-bold text-black text-[12px] mb-2.5">Ads</h4>
-                  <ul className="space-y-1.5">
-                    {adsLinks.map((item) => (
-                      <li key={item}>
-                        <a
-                          href="#"
-                          className="text-[#444444] hover:text-black hover:underline block leading-snug"
-                        >
-                          {item}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* Tools & Features */}
-                <div className="pl-2">
-                  <h4 className="font-bold text-black text-[12px] mb-2.5 whitespace-nowrap">
-                    Tools & Features
-                  </h4>
-                  <ul className="space-y-1.5">
-                    {toolsLinks.map((item) => (
-                      <li key={item}>
-                        <a
-                          href="#"
-                          className="text-[#444444] hover:text-black hover:underline block leading-snug"
-                        >
-                          {item}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-
-              {/* Column 6: More (Span 2) */}
-              <div className="col-span-2 pl-4">
-                <h4 className="font-bold text-black text-[12px] mb-2.5">More</h4>
-                <ul className="space-y-1.5">
-                  {moreLinks.map((item) => (
-                    <li key={item}>
-                      <a
-                        href="#"
-                        className="text-[#444444] hover:text-black hover:underline block leading-snug"
-                      >
-                        {item}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          {/* Social Icons & App Store Badges Row */}
-          <div className="pt-4 flex items-center justify-center space-x-3">
-            {/* Facebook */}
-            <a
-              href="#"
-              className="w-7 h-7 rounded-full bg-[#333333] hover:bg-black text-white flex items-center justify-center text-xs transition-colors"
-              aria-label="Facebook"
-            >
-              f
-            </a>
-            {/* X / Twitter */}
-            <a
-              href="#"
-              className="w-7 h-7 rounded-full bg-[#333333] hover:bg-black text-white flex items-center justify-center text-xs transition-colors font-bold"
-              aria-label="X"
-            >
-              𝕏
-            </a>
-            {/* Instagram */}
-            <a
-              href="#"
-              className="w-7 h-7 rounded-full bg-[#333333] hover:bg-black text-white flex items-center justify-center text-xs transition-colors"
-              aria-label="Instagram"
-            >
-              📷
-            </a>
-            {/* YouTube */}
-            <a
-              href="#"
-              className="w-7 h-7 rounded-full bg-[#333333] hover:bg-black text-white flex items-center justify-center text-xs transition-colors"
-              aria-label="YouTube"
-            >
-              ▶
-            </a>
-            {/* Podcast */}
-            <a
-              href="#"
-              className="w-7 h-7 rounded-full bg-[#333333] hover:bg-black text-white flex items-center justify-center text-xs transition-colors"
-              aria-label="Podcast"
-            >
-              🎙
-            </a>
-            {/* Snapchat */}
-            <a
-              href="#"
-              className="w-7 h-7 rounded-full bg-[#333333] hover:bg-black text-white flex items-center justify-center text-xs transition-colors"
-              aria-label="Snapchat"
-            >
-              👻
-            </a>
-
-            {/* Google Play & App Store Badges */}
-            <div className="flex items-center space-x-2 pl-3">
-              <button className="bg-black text-white px-2.5 py-1 rounded text-[10px] font-sans flex items-center space-x-1" suppressHydrationWarning>
-                <span className="text-[12px]">▶</span>
-                <div className="text-left leading-none">
-                  <span className="text-[7px] uppercase block text-gray-400">
-                    GET IT ON
-                  </span>
-                  <span className="font-bold text-[10px]">Google Play</span>
-                </div>
-              </button>
-              <button className="bg-black text-white px-2.5 py-1 rounded text-[10px] font-sans flex items-center space-x-1" suppressHydrationWarning>
-                <span className="text-[12px]"></span>
-                <div className="text-left leading-none">
-                  <span className="text-[7px] uppercase block text-gray-400">
-                    Download on the
-                  </span>
-                  <span className="font-bold text-[10px]">App Store</span>
-                </div>
-              </button>
-            </div>
-          </div>
-        </Container>
-      </div>
-
-      {/* Band 3: Lighter Gray Dow Jones Products Band */}
-      <div className="w-full bg-[#f2f2f2] py-5">
-        <Container>
-          <div className="text-center text-[11.5px] space-y-1.5">
-            <div className="flex flex-wrap items-center justify-center gap-x-2 text-[#444444]">
-              <span className="font-bold text-black">Dow Jones Products</span>
-              <span className="text-[#999999]">|</span>
-              {dowJonesProductsRow1.map((item, idx) => (
-                <React.Fragment key={item}>
-                  <a href="#" className="hover:text-black hover:underline">
-                    {item}
-                  </a>
-                  {idx < dowJonesProductsRow1.length - 1 && (
-                    <span className="text-[#cccccc]">|</span>
-                  )}
-                </React.Fragment>
-              ))}
-            </div>
-
-            <div className="flex flex-wrap items-center justify-center gap-x-2 text-[#444444]">
-              {dowJonesProductsRow2.map((item, idx) => (
-                <React.Fragment key={item}>
-                  <a href="#" className="hover:text-black hover:underline">
-                    {item}
-                  </a>
-                  {idx < dowJonesProductsRow2.length - 1 && (
-                    <span className="text-[#cccccc]">|</span>
-                  )}
-                </React.Fragment>
-              ))}
-            </div>
-          </div>
-        </Container>
-      </div>
-
-      {/* Band 4: Bottom Legal & Copyright Band */}
-      <div className="w-full bg-[#e8e8e8] py-5">
-        <Container>
-          <div className="text-center text-[11px] text-[#555555] space-y-2">
-            <div className="flex flex-wrap items-center justify-center gap-x-3">
-              {legalLinks.map((link, idx) => (
-                <React.Fragment key={link}>
-                  <a href="#" className="hover:text-black hover:underline">
-                    {link}
-                  </a>
-                  {idx < legalLinks.length - 1 && (
-                    <span className="text-[#cccccc]">|</span>
-                  )}
-                </React.Fragment>
-              ))}
-            </div>
-            <p className="text-[#666666] font-sans">
-              Copyright ©2026 Dow Jones & Company, Inc. All Rights Reserved.
-            </p>
-          </div>
-        </Container>
-      </div>
+        {/* Bottom Section with Divider, Centered Logo, and Copyright Notice */}
+        <div className="border-t border-[#EAE6DA] pt-8 pb-4 text-center">
+          <a href="/" className="inline-block mb-3">
+            <img
+              src="/images/design-reference/Times Chicago.svg"
+              alt="Times Chicago"
+              className="h-8 sm:h-9 w-auto mx-auto object-contain"
+            />
+          </a>
+          <p className="text-[11px] text-[#666666] font-sans">
+            © Copyright 2026 Times Chicago Media LLC. All Rights Reserved. All standard legal notices apply.
+          </p>
+        </div>
+      </Container>
     </footer>
   );
 };

@@ -84,7 +84,7 @@ export default function NewHomeSection4() {
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80"
+                      src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?fm=webp&fit=crop&w=800&q=80"
                       alt="Restaurant Interior"
                       className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                     />
@@ -123,7 +123,7 @@ export default function NewHomeSection4() {
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src="https://images.unsplash.com/photo-1508614589041-895b88991e3e?auto=format&fit=crop&w=600&q=80"
+                      src="https://images.unsplash.com/photo-1508614589041-895b88991e3e?fm=webp&fit=crop&w=600&q=80"
                       alt="Minnesota Water Tower"
                       className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                     />
@@ -186,7 +186,7 @@ export default function NewHomeSection4() {
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src="https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?auto=format&fit=crop&w=600&q=80"
+                      src="https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?fm=webp&fit=crop&w=600&q=80"
                       alt="Air Force Secretary Frank Kendall"
                       className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                     />
@@ -220,7 +220,7 @@ export default function NewHomeSection4() {
 
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=600&q=80"
+                      src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?fm=webp&fit=crop&w=600&q=80"
                       alt="AI Skill Course Graphic"
                       className="w-full h-full object-cover"
                     />
@@ -301,7 +301,7 @@ export default function NewHomeSection4() {
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src="https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=800&q=80"
+                      src="https://images.unsplash.com/photo-1584622650111-993a426fbf0a?fm=webp&fit=crop&w=800&q=80"
                       alt="Spa Bathroom in Desert"
                       className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                     />
@@ -341,7 +341,7 @@ export default function NewHomeSection4() {
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80"
+                      src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?fm=webp&fit=crop&w=600&q=80"
                       alt="Emilee Hackney portrait"
                       className="w-full h-full object-cover grayscale hover:scale-105 transition-transform duration-300"
                     />
@@ -412,7 +412,7 @@ export default function NewHomeSection4() {
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src="https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=800&q=80"
+                      src="https://images.unsplash.com/photo-1544717305-2782549b5136?fm=webp&fit=crop&w=800&q=80"
                       alt="Spanish Border Fence Patrol"
                       className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                     />
@@ -613,7 +613,7 @@ export default function NewHomeSection4() {
               {/* Video Thumbnail Background */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="https://images.unsplash.com/photo-1508614589041-895b88991e3e?auto=format&fit=crop&w=1200&q=80"
+                src="https://images.unsplash.com/photo-1508614589041-895b88991e3e?fm=webp&fit=crop&w=1200&q=80"
                 alt="Naval Aircraft Carrier Fleet"
                 className="w-full h-full object-cover opacity-90 group-hover/mainvid:scale-105 transition-transform duration-300"
               />
@@ -629,11 +629,6 @@ export default function NewHomeSection4() {
                 </svg>
                 <span>{isMutedMainVideo ? "Click for Sound" : "Mute Sound"}</span>
               </button>
-
-              {/* Top-Right WSJ Watermark */}
-              <span className="absolute top-3 right-4 text-white/80 font-serif font-bold text-[15px] tracking-wider pointer-events-none">
-                WSJ
-              </span>
 
               {/* Bottom Video Controls Overlay Bar */}
               <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-3 flex items-center justify-between text-white z-10">
@@ -711,7 +706,7 @@ export default function NewHomeSection4() {
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src="https://images.unsplash.com/photo-1508614589041-895b88991e3e?auto=format&fit=crop&w=600&q=80"
+                    src="https://images.unsplash.com/photo-1508614589041-895b88991e3e?fm=webp&fit=crop&w=600&q=80"
                     alt="Pacific Wargames Host"
                     className="w-full h-full object-cover group-hover/v1:scale-105 transition-transform duration-300 opacity-90"
                   />
@@ -741,7 +736,7 @@ export default function NewHomeSection4() {
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src="https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=600&q=80"
+                    src="https://images.unsplash.com/photo-1544717305-2782549b5136?fm=webp&fit=crop&w=600&q=80"
                     alt="Gaza Peace Deal Personnel"
                     className="w-full h-full object-cover group-hover/v2:scale-105 transition-transform duration-300 opacity-90"
                   />
@@ -771,7 +766,7 @@ export default function NewHomeSection4() {
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=600&q=80"
+                    src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?fm=webp&fit=crop&w=600&q=80"
                     alt="Democratic Socialists Midterms"
                     className="w-full h-full object-cover group-hover/v3:scale-105 transition-transform duration-300 opacity-90"
                   />
@@ -820,7 +815,7 @@ export default function NewHomeSection4() {
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src="https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=600&q=80"
+                      src="https://images.unsplash.com/photo-1541872703-74c5e44368f9?fm=webp&fit=crop&w=600&q=80"
                       alt="Job seekers in line"
                       className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                     />
@@ -868,7 +863,7 @@ export default function NewHomeSection4() {
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=600&q=80"
+                      src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?fm=webp&fit=crop&w=600&q=80"
                       alt="NYC Skyscrapers"
                       className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                     />
@@ -916,7 +911,7 @@ export default function NewHomeSection4() {
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src="https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=600&q=80"
+                      src="https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?fm=webp&fit=crop&w=600&q=80"
                       alt="Horse Racing Triple Crown"
                       className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                     />
@@ -960,7 +955,7 @@ export default function NewHomeSection4() {
                 <article className="pb-3 border-b border-gray-200">
                   <Link href="/article/retail-giants-turn-to-ai-pricing" className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 border border-gray-200 mb-2.5">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&w=600&q=80" alt="Retail storefront" className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+                    <img src="https://images.unsplash.com/photo-1578575437130-527eed3abbec?fm=webp&fit=crop&w=600&q=80" alt="Retail storefront" className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
                   </Link>
                   <h4 className="font-serif font-bold text-[17px] xl:text-[18px] leading-[1.22] text-[#111111] hover:underline cursor-pointer">
                     <Link href="/article/retail-giants-turn-to-ai-pricing">Retail Giants Turn to AI for Next-Gen Pricing Strategies</Link>
@@ -986,7 +981,7 @@ export default function NewHomeSection4() {
                 <article className="pb-3 border-b border-gray-200">
                   <Link href="/article/central-banks-cautious-rate-cuts" className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 border border-gray-200 mb-2.5">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=600&q=80" alt="Trading floor" className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+                    <img src="https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?fm=webp&fit=crop&w=600&q=80" alt="Trading floor" className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
                   </Link>
                   <h4 className="font-serif font-bold text-[17px] xl:text-[18px] leading-[1.22] text-[#111111] hover:underline cursor-pointer">
                     <Link href="/article/central-banks-cautious-rate-cuts">Central Banks Signal Cautious Approach to Future Interest Rate Cuts</Link>
@@ -1012,7 +1007,7 @@ export default function NewHomeSection4() {
                 <article className="pb-3 border-b border-gray-200">
                   <Link href="/article/cloud-providers-race-microchips" className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 border border-gray-200 mb-2.5">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=600&q=80" alt="Server microchips" className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+                    <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?fm=webp&fit=crop&w=600&q=80" alt="Server microchips" className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
                   </Link>
                   <h4 className="font-serif font-bold text-[17px] xl:text-[18px] leading-[1.22] text-[#111111] hover:underline cursor-pointer">
                     <Link href="/article/cloud-providers-race-microchips">Cloud Providers Race to Secure Advanced AI Microchips</Link>
@@ -1043,7 +1038,7 @@ export default function NewHomeSection4() {
                 <article className="pb-3 border-b border-gray-200">
                   <Link href="/article/hidden-costs-economic-policy" className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 border border-gray-200 mb-2.5">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=600&q=80" alt="Capital building" className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+                    <img src="https://images.unsplash.com/photo-1541872703-74c5e44368f9?fm=webp&fit=crop&w=600&q=80" alt="Capital building" className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
                   </Link>
                   <h4 className="font-serif font-bold text-[17px] xl:text-[18px] leading-[1.22] text-[#111111] hover:underline cursor-pointer">
                     <Link href="/article/hidden-costs-economic-policy">The Hidden Costs of Modern Economic Policy Frameworks</Link>
@@ -1072,7 +1067,7 @@ export default function NewHomeSection4() {
 
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=600&q=80"
+                      src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?fm=webp&fit=crop&w=600&q=80"
                       alt="AI Skill Course Graphic"
                       className="w-full h-full object-cover"
                     />
@@ -1100,7 +1095,7 @@ export default function NewHomeSection4() {
                 <article className="pb-3 border-b border-gray-200">
                   <Link href="/article/smart-strategies-high-yield-savings" className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 border border-gray-200 mb-2.5">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&w=600&q=80" alt="Logistics cargo" className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+                    <img src="https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?fm=webp&fit=crop&w=600&q=80" alt="Logistics cargo" className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
                   </Link>
                   <h4 className="font-serif font-bold text-[17px] xl:text-[18px] leading-[1.22] text-[#111111] hover:underline cursor-pointer">
                     <Link href="/article/smart-strategies-high-yield-savings">Smart Strategies for Navigating High-Yield Cargo Networks</Link>
@@ -1131,7 +1126,7 @@ export default function NewHomeSection4() {
                 <article className="pb-3 border-b border-gray-200">
                   <Link href="/article/revival-timeless-craftsmanship-luxury-fashion" className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 border border-gray-200 mb-2.5">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?auto=format&fit=crop&w=600&q=80" alt="Elections campaign" className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+                    <img src="https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?fm=webp&fit=crop&w=600&q=80" alt="Elections campaign" className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
                   </Link>
                   <h4 className="font-serif font-bold text-[17px] xl:text-[18px] leading-[1.22] text-[#111111] hover:underline cursor-pointer">
                     <Link href="/article/revival-timeless-craftsmanship-luxury-fashion">Key Senate Races Highlight Shifting Voter Demographics</Link>
@@ -1157,7 +1152,7 @@ export default function NewHomeSection4() {
                 <article className="pb-3 border-b border-gray-200">
                   <Link href="/article/landmark-museum-retrospective-exhibition" className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 border border-gray-200 mb-2.5">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=600&q=80" alt="Stock market analysis" className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+                    <img src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?fm=webp&fit=crop&w=600&q=80" alt="Stock market analysis" className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
                   </Link>
                   <h4 className="font-serif font-bold text-[17px] xl:text-[18px] leading-[1.22] text-[#111111] hover:underline cursor-pointer">
                     <Link href="/article/landmark-museum-retrospective-exhibition">Why Tech Stocks Are Overvalued Ahead of Earnings Season</Link>
@@ -1183,7 +1178,7 @@ export default function NewHomeSection4() {
                 <article className="pb-3 border-b border-gray-200">
                   <Link href="/article/research-highlights-daily-sleep-routines" className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 border border-gray-200 mb-2.5">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=600&q=80" alt="Barron's financial report" className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+                    <img src="https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?fm=webp&fit=crop&w=600&q=80" alt="Barron's financial report" className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
                   </Link>
                   <h4 className="font-serif font-bold text-[17px] xl:text-[18px] leading-[1.22] text-[#111111] hover:underline cursor-pointer">
                     <Link href="/article/research-highlights-daily-sleep-routines">Barron’s Top 10 Stock Picks for Long-Term Portfolio Growth</Link>
@@ -1214,7 +1209,7 @@ export default function NewHomeSection4() {
                 <article className="pb-3 border-b border-gray-200">
                   <Link href="/article/infrastructure-projects-accelerate-transit" className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 border border-gray-200 mb-2.5">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=600&q=80" alt="MarketWatch ticker" className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+                    <img src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?fm=webp&fit=crop&w=600&q=80" alt="MarketWatch ticker" className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
                   </Link>
                   <h4 className="font-serif font-bold text-[17px] xl:text-[18px] leading-[1.22] text-[#111111] hover:underline cursor-pointer">
                     <Link href="/article/infrastructure-projects-accelerate-transit">MarketWatch: Dow Futures Rise Ahead of Key Economic Indicators</Link>
@@ -1240,7 +1235,7 @@ export default function NewHomeSection4() {
                 <article className="pb-3 border-b border-gray-200">
                   <Link href="/article/international-summit-maritime-security" className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 border border-gray-200 mb-2.5">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=600&q=80" alt="Mansion Global luxury home" className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+                    <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?fm=webp&fit=crop&w=600&q=80" alt="Mansion Global luxury home" className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
                   </Link>
                   <h4 className="font-serif font-bold text-[17px] xl:text-[18px] leading-[1.22] text-[#111111] hover:underline cursor-pointer">
                     <Link href="/article/international-summit-maritime-security">Inside a $45 Million Waterfront Estate in Miami Beach</Link>
@@ -1266,7 +1261,7 @@ export default function NewHomeSection4() {
                 <article className="pb-3 border-b border-gray-200">
                   <Link href="/article/offshore-wind-farms-expand-energy-grid" className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 border border-gray-200 mb-2.5">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=600&q=80" alt="Investor's Business Daily chart" className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+                    <img src="https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?fm=webp&fit=crop&w=600&q=80" alt="Investor's Business Daily chart" className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
                   </Link>
                   <h4 className="font-serif font-bold text-[17px] xl:text-[18px] leading-[1.22] text-[#111111] hover:underline cursor-pointer">
                     <Link href="/article/offshore-wind-farms-expand-energy-grid">IBD 50 Top-Performing Growth Stocks Outperform Market Averages</Link>
@@ -1286,9 +1281,8 @@ export default function NewHomeSection4() {
             </div>
           </div>
 
-          {/* Empty Banner for Dianomi Advertisement */}
           <div className="border-t border-black pt-3 mt-8 pb-4">
-            <AdPlaceholder width="w-full" height="h-[120px]" resolution="728 × 90" />
+            <AdPlaceholder slotId="hp_slot_3" width="w-full max-w-[970px]" height="h-[120px]" resolution="970 × 120" />
           </div>
 
           {/* ==================== REAL ESTATE INSIGHTS MODULE (realtor.com) (Matching Screenshot) ==================== */}
@@ -1310,7 +1304,7 @@ export default function NewHomeSection4() {
               <div className="flex items-start gap-3">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src="https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?auto=format&fit=crop&w=200&q=80"
+                  src="https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?fm=webp&fit=crop&w=200&q=80"
                   alt="Elizabeth Warren hearing"
                   className="w-[65px] h-[48px] object-cover border border-gray-200 shrink-0"
                 />
@@ -1323,7 +1317,7 @@ export default function NewHomeSection4() {
               <div className="flex items-start gap-3">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80"
+                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?fm=webp&fit=crop&w=200&q=80"
                   alt="Ali Larter portrait"
                   className="w-[65px] h-[48px] object-cover border border-gray-200 shrink-0"
                 />
@@ -1336,7 +1330,7 @@ export default function NewHomeSection4() {
               <div className="flex items-start gap-3">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=200&q=80"
+                  src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?fm=webp&fit=crop&w=200&q=80"
                   alt="UK City Skyline"
                   className="w-[65px] h-[48px] object-cover border border-gray-200 shrink-0"
                 />
@@ -1349,7 +1343,7 @@ export default function NewHomeSection4() {
               <div className="flex items-start gap-3">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src="https://images.unsplash.com/photo-1547887537-6158d64c35b3?auto=format&fit=crop&w=200&q=80"
+                  src="https://images.unsplash.com/photo-1547887537-6158d64c35b3?fm=webp&fit=crop&w=200&q=80"
                   alt="Carly Simon portrait"
                   className="w-[65px] h-[48px] object-cover border border-gray-200 shrink-0"
                 />
@@ -1362,7 +1356,7 @@ export default function NewHomeSection4() {
               <div className="flex items-start gap-3">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=200&q=80"
+                  src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?fm=webp&fit=crop&w=200&q=80"
                   alt="House on money stack"
                   className="w-[65px] h-[48px] object-cover border border-gray-200 shrink-0"
                 />
@@ -1375,7 +1369,7 @@ export default function NewHomeSection4() {
               <div className="flex items-start gap-3">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=200&q=80"
+                  src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?fm=webp&fit=crop&w=200&q=80"
                   alt="Donald Trump Jr portrait"
                   className="w-[65px] h-[48px] object-cover border border-gray-200 shrink-0"
                 />
@@ -1440,7 +1434,7 @@ export default function NewHomeSection4() {
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src="https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?auto=format&fit=crop&w=300&q=80"
+                      src="https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?fm=webp&fit=crop&w=300&q=80"
                       alt="Trump Should Worry About a 10-Year Itch"
                       className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                     />
@@ -1485,7 +1479,7 @@ export default function NewHomeSection4() {
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80"
+                      src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?fm=webp&fit=crop&w=300&q=80"
                       alt="Gawking at Ariana Grande Isn't Noble"
                       className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                     />
@@ -1519,7 +1513,7 @@ export default function NewHomeSection4() {
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=300&q=80"
+                      src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?fm=webp&fit=crop&w=300&q=80"
                       alt="No Day at the Beach"
                       className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                     />
@@ -1530,7 +1524,7 @@ export default function NewHomeSection4() {
               {/* Go to Free Expression CTA Button */}
               <div className="pt-2">
                 <Link
-                  href="/free-expression"
+                  href="/editorials"
                   className="w-full bg-[#426a79] hover:bg-[#345763] text-white font-sans font-bold text-[13.5px] py-2.5 rounded-none text-center block transition-colors shadow-2xs select-none"
                 >
                   Go to Free Expression
@@ -1561,7 +1555,7 @@ export default function NewHomeSection4() {
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=300&q=80"
+                    src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?fm=webp&fit=crop&w=300&q=80"
                     alt="This Summer's Hottest Arm Candy"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
@@ -1581,7 +1575,7 @@ export default function NewHomeSection4() {
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=300&q=80"
+                    src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?fm=webp&fit=crop&w=300&q=80"
                     alt="Move 37 AI Moment"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
@@ -1601,7 +1595,7 @@ export default function NewHomeSection4() {
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src="https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=300&q=80"
+                    src="https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?fm=webp&fit=crop&w=300&q=80"
                     alt="Lost Civilization Baffling Experts"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
@@ -1621,7 +1615,7 @@ export default function NewHomeSection4() {
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=300&q=80"
+                    src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?fm=webp&fit=crop&w=300&q=80"
                     alt="Connecticut or Florida Tax Bill"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
@@ -1641,7 +1635,7 @@ export default function NewHomeSection4() {
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src="https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=300&q=80"
+                    src="https://images.unsplash.com/photo-1544717305-2782549b5136?fm=webp&fit=crop&w=300&q=80"
                     alt="Iran Sees Opening in Gulf"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
@@ -1844,7 +1838,7 @@ export default function NewHomeSection4() {
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src="https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?auto=format&fit=crop&w=300&q=80"
+                    src="https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?fm=webp&fit=crop&w=300&q=80"
                     alt="Tim Walz Has Hit the Wall"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
@@ -1864,7 +1858,7 @@ export default function NewHomeSection4() {
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src="https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=300&q=80"
+                    src="https://images.unsplash.com/photo-1589829545856-d10d557cf95f?fm=webp&fit=crop&w=300&q=80"
                     alt="Justice Samuel Alito"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
@@ -1884,7 +1878,7 @@ export default function NewHomeSection4() {
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src="https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=300&q=80"
+                    src="https://images.unsplash.com/photo-1541872703-74c5e44368f9?fm=webp&fit=crop&w=300&q=80"
                     alt="The Saudis Spurn the Abraham Accords"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
@@ -1904,7 +1898,7 @@ export default function NewHomeSection4() {
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=300&q=80"
+                    src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?fm=webp&fit=crop&w=300&q=80"
                     alt="Federal Reserve Status Quo vs Kevin Warsh"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
@@ -1953,7 +1947,7 @@ export default function NewHomeSection4() {
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src="https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=300&q=80"
+                    src="https://images.unsplash.com/photo-1513104890138-7c749659a591?fm=webp&fit=crop&w=300&q=80"
                     alt="Pizza Hut Storefront"
                     className="w-full h-full object-cover group-hover/vid:scale-105 transition-transform duration-300 opacity-90"
                   />
@@ -1979,7 +1973,7 @@ export default function NewHomeSection4() {
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src="https://images.unsplash.com/photo-1547887537-6158d64c35b3?auto=format&fit=crop&w=300&q=80"
+                    src="https://images.unsplash.com/photo-1547887537-6158d64c35b3?fm=webp&fit=crop&w=300&q=80"
                     alt="Flower Farm Chanel No. 5"
                     className="w-full h-full object-cover group-hover/vid:scale-105 transition-transform duration-300 opacity-90"
                   />
@@ -2005,7 +1999,7 @@ export default function NewHomeSection4() {
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src="https://images.unsplash.com/photo-1508614589041-895b88991e3e?auto=format&fit=crop&w=300&q=80"
+                    src="https://images.unsplash.com/photo-1508614589041-895b88991e3e?fm=webp&fit=crop&w=300&q=80"
                     alt="Pacific Wargames"
                     className="w-full h-full object-cover group-hover/vid:scale-105 transition-transform duration-300 opacity-90"
                   />
@@ -2031,7 +2025,7 @@ export default function NewHomeSection4() {
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=300&q=80"
+                    src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?fm=webp&fit=crop&w=300&q=80"
                     alt="WSJ Opinion Hits and Misses"
                     className="w-full h-full object-cover group-hover/vid:scale-105 transition-transform duration-300 opacity-90"
                   />
@@ -2057,7 +2051,7 @@ export default function NewHomeSection4() {
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src="https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=300&q=80"
+                    src="https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?fm=webp&fit=crop&w=300&q=80"
                     alt="The Evolution of Modern Motorsports"
                     className="w-full h-full object-cover group-hover/vid:scale-105 transition-transform duration-300 opacity-90"
                   />
@@ -2095,7 +2089,7 @@ export default function NewHomeSection4() {
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src="https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&w=600&q=80"
+                  src="https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?fm=webp&fit=crop&w=600&q=80"
                   alt="Mental Tricks Make Us Better With Money"
                   className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                 />
@@ -2135,8 +2129,8 @@ export default function NewHomeSection4() {
           {/* ==================== STICKY BOTTOM ADVERTISEMENT & FLOATING VIDEO MODULE ==================== */}
           <div className="sticky top-20 z-20 mt-8 space-y-4 pt-2">
             
-            {/* Empty Banner below Refinancing Article */}
-            <AdPlaceholder width="w-full" height="h-[250px]" resolution="300 × 250" />
+            {/* Banner below Refinancing Article */}
+            <AdPlaceholder slotId="hp_slot_2" width="w-full max-w-[970px]" height="h-[175px]" resolution="970 × 175" />
 
             {/* Floating Video Player Card */}
             {showStickyVideo && (
@@ -2145,7 +2139,7 @@ export default function NewHomeSection4() {
                 <div className="relative aspect-[16/10] bg-black overflow-hidden group/vid">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src="https://images.unsplash.com/photo-1508614589041-895b88991e3e?auto=format&fit=crop&w=600&q=80"
+                    src="https://images.unsplash.com/photo-1508614589041-895b88991e3e?fm=webp&fit=crop&w=600&q=80"
                     alt="Pacific Wargames Video Preview"
                     className="w-full h-full object-cover opacity-90 group-hover/vid:scale-105 transition-transform duration-300"
                   />
@@ -2161,11 +2155,6 @@ export default function NewHomeSection4() {
                     </svg>
                     <span>{isMutedVideo ? "Click for Sound" : "Mute Sound"}</span>
                   </button>
-
-                  {/* Top-Right WSJ Watermark */}
-                  <span className="absolute top-2 right-3 text-white/80 font-serif font-bold text-[12px] tracking-wider pointer-events-none">
-                    WSJ
-                  </span>
 
                   {/* Video Captions Subtitle Overlay */}
                   <div className="absolute bottom-2 inset-x-0 text-center px-2">

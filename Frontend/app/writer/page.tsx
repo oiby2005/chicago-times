@@ -10,25 +10,16 @@ import AuthorArticlesList from "@/components/author/AuthorArticlesList";
 import MostReadSidebar from "@/components/author/MostReadSidebar";
 import LouisVuittonAdBanner from "@/components/author/LouisVuittonAdBanner";
 
+import { defaultWritersMap, getAuthorBySlug } from "@/data/authors";
+
 export default function WriterPage() {
-  const [writerName, setWriterName] = useState<string>("Writer User");
+  const [writerAuthor, setWriterAuthor] = useState(getAuthorBySlug("writer"));
   const [hasPublishedArticles, setHasPublishedArticles] = useState<boolean>(false);
 
   const syncWriterData = () => {
     if (typeof window === "undefined") return;
-    const storedUserStr = localStorage.getItem("wsj_user");
-    let name = "Writer User";
-    if (storedUserStr) {
-      try {
-        const storedUser = JSON.parse(storedUserStr);
-        if (storedUser.full_name) {
-          name = storedUser.full_name;
-        }
-      } catch (e) {
-        console.error("Error reading writer name:", e);
-      }
-    }
-    setWriterName(name);
+    const author = getAuthorBySlug("writer");
+    setWriterAuthor(author);
 
     let posts: any[] = [];
     try {
@@ -40,7 +31,7 @@ export default function WriterPage() {
       if (p2) posts = [...posts, ...JSON.parse(p2)];
     } catch (e) {}
 
-    const published = posts.filter((p: any) => p && p.status === "Published");
+    const published = posts.filter((p: any) => p && p.status === "Published" && (p.authorEmail === "writer@gmail.com" || !p.authorEmail));
     setHasPublishedArticles(published.length > 0);
   };
 
@@ -63,15 +54,15 @@ export default function WriterPage() {
 
         {/* Writer Page Body */}
         <div className="article-body">
-          {/* Section 1: Writer Profile Header (reactively synced with Profile Settings) */}
-          <AuthorHeader />
+          {/* Section 1: Writer Profile Header */}
+          <AuthorHeader author={writerAuthor} />
 
           {/* Section 2: Main Articles List & Top Right Sidebar */}
           <Container className="py-8">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
               {/* Left Column: Author Articles List (Span 8) */}
               <div className="lg:col-span-8">
-                <AuthorArticlesList authorName={writerName.toUpperCase()} />
+                <AuthorArticlesList authorName={writerAuthor.name.toUpperCase()} authorEmail="writer@gmail.com" />
               </div>
 
               {/* Right Column: Top Right Sidebar with Louis Vuitton Ad Banner */}

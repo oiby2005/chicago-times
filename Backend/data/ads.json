@@ -1,0 +1,122 @@
+[
+  {
+    "id": "author_slot_1",
+    "slotName": "Writer Page ad 1",
+    "dimension": "300x250",
+    "placementGroup": "Author",
+    "description": "Displayed inside the sidebar of writer and author profile pages.",
+    "active": true,
+    "actionType": "Internal Promoted Article",
+    "targetUrl": "https://www.wsj.com/",
+    "selectedArticleSlug": "1788609863929",
+    "imageUrl": "https://f005.backblazeb2.com/file/timeschicago/ads/ad_author_slot_1_1789033222192.jpeg"
+  },
+  {
+    "id": "cat_slot_1",
+    "slotName": "Category Page ad 1",
+    "dimension": "300x250",
+    "placementGroup": "Category",
+    "description": "Displayed at the top banner of all category listing pages.",
+    "active": true,
+    "actionType": "External Link (URL)",
+    "targetUrl": "https://www.recipetineats.com/french-fries/",
+    "selectedArticleSlug": "",
+    "imageUrl": "https://f005.backblazeb2.com/file/timeschicago/ads/ad_cat_slot_1_1789033153712.jpeg"
+  },
+  {
+    "id": "cat_slot_2",
+    "slotName": "Category Page ad 2",
+    "dimension": "300x600",
+    "placementGroup": "Category",
+    "description": "Displayed inside the right sidebar of all category pages.",
+    "active": true,
+    "actionType": "Internal Promoted Article",
+    "targetUrl": "https://www.wsj.com/news/business",
+    "selectedArticleSlug": "1788611443381",
+    "imageUrl": "https://f005.backblazeb2.com/file/timeschicago/ads/ad_cat_slot_2_1789033196169.jpeg"
+  },
+  {
+    "id": "hp_slot_1",
+    "slotName": "Homepage ad 1",
+    "dimension": "300x300",
+    "placementGroup": "Homepage",
+    "description": "Displayed horizontally at the top of the homepage below main navigation.",
+    "active": true,
+    "actionType": "External Link (URL)",
+    "targetUrl": "https://burgerking.lk/",
+    "selectedArticleSlug": "1788608833709",
+    "imageUrl": "https://f005.backblazeb2.com/file/timeschicago/ads/ad_hp_slot_1_1789032960864.jpeg"
+  },
+  {
+    "id": "hp_slot_2",
+    "slotName": "Homepage ad 2",
+    "dimension": "970x175",
+    "placementGroup": "Homepage",
+    "description": "Displayed horizontally near the bottom of the homepage between Tech/Sports and CEO Spotlight/Travel rows.",
+    "active": true,
+    "actionType": "Internal Promoted Article",
+    "targetUrl": "https://www.top-scholarships.com/",
+    "selectedArticleSlug": "1788613654374",
+    "imageUrl": "https://f005.backblazeb2.com/file/timeschicago/ads/ad_hp_slot_2_1789032994365.jpeg"
+  },
+  {
+    "id": "hp_slot_3",
+    "slotName": "Homepage ad 3",
+    "dimension": "970x120",
+    "placementGroup": "Homepage",
+    "description": "Displayed inside the right-hand column of the primary homepage grid.",
+    "active": true,
+    "actionType": "External Link (URL)",
+    "targetUrl": "https://burleys.lk/",
+    "selectedArticleSlug": "",
+    "imageUrl": "https://f005.backblazeb2.com/file/timeschicago/ads/ad_hp_slot_3_1789033015705.jpeg"
+  },
+  {
+    "id": "hp_slot_4",
+    "slotName": "Homepage ad 4",
+    "dimension": "300x150",
+    "placementGroup": "Homepage",
+    "description": "Displayed inside the right hand column of the Tertiary Grid (below the Contributor section).",
+    "active": true,
+    "actionType": "Internal Promoted Article",
+    "targetUrl": "https://www.sneakers.com/?srsltid=AfmBOoo-X105e6RecjWkibVKPu0Xn9o6EtXUe7Abjpc2qpUf6BmvvRHi",
+    "selectedArticleSlug": "1789032821715",
+    "imageUrl": "https://f005.backblazeb2.com/file/timeschicago/ads/ad_hp_slot_4_1789033045937.jpeg"
+  },
+  {
+    "id": "hp_slot_5",
+    "slotName": "Homepage ad 5",
+    "dimension": "300x320",
+    "placementGroup": "Homepage",
+    "description": "Displayed full-width between A+ Main News and Business category sections.",
+    "active": true,
+    "actionType": "External Link (URL)",
+    "targetUrl": "https://www.wsj.com/",
+    "selectedArticleSlug": "1788521652439",
+    "imageUrl": "https://f005.backblazeb2.com/file/timeschicago/ads/ad_hp_slot_5_1789033075749.jpeg"
+  },
+  {
+    "id": "hp_slot_6",
+    "slotName": "Homepage ad 6",
+    "dimension": "970x180",
+    "placementGroup": "Homepage",
+    "description": "Displayed horizontally above the Market Views section.",
+    "active": true,
+    "actionType": "Internal Promoted Article",
+    "targetUrl": "https://www.bloomberg.com/",
+    "selectedArticleSlug": "1788612491098",
+    "imageUrl": "https://f005.backblazeb2.com/file/timeschicago/ads/ad_hp_slot_6_1789033098936.jpeg"
+  },
+  {
+    "id": "hp_slot_7",
+    "slotName": "Homepage ad 7",
+    "dimension": "300x320",
+    "placementGroup": "Homepage",
+    "description": "Displayed right above the main site footer across homepage.",
+    "active": true,
+    "actionType": "External Link (URL)",
+    "targetUrl": "https://www.pepsi.com/",
+    "selectedArticleSlug": "",
+    "imageUrl": "https://f005.backblazeb2.com/file/timeschicago/ads/ad_hp_slot_7_1789033130582.jpeg"
+  }
+]

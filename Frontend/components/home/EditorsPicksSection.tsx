@@ -11,16 +11,36 @@ interface PickArticle {
   summary?: string;
   imageUrl: string;
   sectionTag?: string;
+  publishedAt?: number;
 }
+
+const formatTimeAgo = (timestamp?: number | string): string => {
+  if (!timestamp) return "2 hours ago";
+  const now = Date.now();
+  const time = typeof timestamp === "string" ? new Date(timestamp).getTime() : timestamp;
+  if (isNaN(time) || time <= 0) return "2 hours ago";
+  const diffMs = Math.max(0, now - time);
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  if (diffHours < 1) {
+    const diffMins = Math.max(1, Math.floor(diffMs / (1000 * 60)));
+    return `${diffMins} min${diffMins > 1 ? "s" : ""} ago`;
+  }
+  if (diffHours < 24) {
+    return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
+  }
+  const diffDays = Math.floor(diffHours / 24);
+  return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
+};
 
 const defaultHero: PickArticle = {
   id: "ep1",
   categoryTag: "NEW | INTERVIEW",
   title: "Tanya Byron: Stop misusing mental health terms like ‘triggered’",
   slug: "tanya-byron-stop-misusing-mental-health-terms",
-  summary: "The clinical psychologist has had enough of people adopting mental health labels to describe normal feelings such as grief, disappointment and sadness",
-  imageUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=1000&q=80",
+  summary: "The clinical psychologist has had enough of people adopting mental health labels to describe normal feelings such as grief, disappointment and sadness. In a wide-ranging discussion, she warns that pathologising everyday emotional ups and downs undermines medical care for severe illnesses while fueling unnecessary anxiety across schools and workplaces.",
+  imageUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?fm=webp&fit=crop&w=1000&q=80",
   sectionTag: "Health & Fitness",
+  publishedAt: Date.now() - 3 * 3600 * 1000,
 };
 
 const defaultBottomCards: PickArticle[] = [
@@ -28,15 +48,17 @@ const defaultBottomCards: PickArticle[] = [
     id: "ep2",
     title: "Why Earl Spencer is still haunted by the ghost of Diana",
     slug: "why-earl-spencer-is-still-haunted",
-    imageUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?fm=webp&fit=crop&w=600&q=80",
     sectionTag: "Royal family",
+    publishedAt: Date.now() - 6 * 3600 * 1000,
   },
   {
     id: "ep3",
     title: "Emma Barnett: Why I had the hysterectomy I never wanted to have",
     slug: "emma-barnett-why-i-had-hysterectomy",
-    imageUrl: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=600&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1580489944761-15a19d654956?fm=webp&fit=crop&w=600&q=80",
     sectionTag: "Health & Fitness",
+    publishedAt: Date.now() - 10 * 3600 * 1000,
   },
 ];
 
@@ -46,29 +68,33 @@ const defaultRightCards: PickArticle[] = [
     categoryTag: "NEW",
     title: "I was an undercover drugs cop. Now I experiment with psychedelics",
     slug: "undercover-drugs-cop-psychedelics",
-    imageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?fm=webp&fit=crop&w=400&q=80",
+    publishedAt: Date.now() - 4 * 3600 * 1000,
   },
   {
     id: "ep5",
     title: "The best (and worst) James Bond themes — and who should sing it next",
     slug: "best-worst-james-bond-themes",
-    imageUrl: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?fm=webp&fit=crop&w=400&q=80",
     sectionTag: "Film",
+    publishedAt: Date.now() - 9 * 3600 * 1000,
   },
   {
     id: "ep6",
     title: "The books we couldn’t finish — from American Psycho and Dubliners to Flesh",
     slug: "the-books-we-couldnt-finish",
-    imageUrl: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=400&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?fm=webp&fit=crop&w=400&q=80",
     sectionTag: "Books",
+    publishedAt: Date.now() - 16 * 3600 * 1000,
   },
   {
     id: "ep7",
     categoryTag: "DEBORAH ROSS",
     title: "King Charles won’t slow down and won’t do what he’s told",
     slug: "king-charles-wont-slow-down",
-    imageUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?fm=webp&fit=crop&w=400&q=80",
     sectionTag: "Royal family",
+    publishedAt: Date.now() - 27 * 3600 * 1000,
   },
 ];
 
@@ -76,7 +102,7 @@ const extractText = (html: string): string => {
   if (typeof window === "undefined") return "";
   const tmp = document.createElement("div");
   tmp.innerHTML = html || "";
-  return (tmp.textContent || tmp.innerText || "").trim().slice(0, 140);
+  return (tmp.textContent || tmp.innerText || "").trim().slice(0, 500);
 };
 
 export const EditorsPicksSection: React.FC = () => {
@@ -104,8 +130,9 @@ export const EditorsPicksSection: React.FC = () => {
             title: p.title,
             slug: p.slug || p.id,
             summary: p.subheadline || extractText(p.bodyContent) || "",
-            imageUrl: p.thumbnail || "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=1000&q=80",
+            imageUrl: p.thumbnail || "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?fm=webp&fit=crop&w=1000&q=80",
             sectionTag: p.subCategories?.[0] || p.category,
+            publishedAt: p.publishedAt || (p.id && !isNaN(Number(p.id)) ? Number(p.id) : undefined),
           }));
 
           if (formatted[0]) setHero(formatted[0]);
@@ -173,7 +200,7 @@ export const EditorsPicksSection: React.FC = () => {
               </h3>
               
               {hero.summary && (
-                <p className="font-sans text-[12.5px] sm:text-[13px] leading-[1.4] text-[#555555] line-clamp-3">
+                <p className="font-sans text-[13px] sm:text-[13.5px] leading-[1.45] text-[#444444] line-clamp-6 mb-2">
                   {hero.summary}
                 </p>
               )}
@@ -185,6 +212,10 @@ export const EditorsPicksSection: React.FC = () => {
                   </span>
                 </div>
               )}
+              
+              <span className="font-mono text-[11px] text-[#666666] mt-1.5 block">
+                {formatTimeAgo(hero.publishedAt)}
+              </span>
             </div>
 
             {/* Right Large Hero Image */}
@@ -214,16 +245,21 @@ export const EditorsPicksSection: React.FC = () => {
                   />
                 </Link>
                 <div className="flex-1 flex flex-col justify-between h-full min-h-[100px] sm:min-h-[115px]">
-                  <h4 className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
-                    <Link href={`/article/${bottomCards[0].slug}`}>
-                      {bottomCards[0].title}
-                    </Link>
-                  </h4>
-                  {bottomCards[0].sectionTag && (
-                    <span className="font-sans font-bold text-[11px] text-[#555555] mt-1">
-                      {bottomCards[0].sectionTag}
-                    </span>
-                  )}
+                  <div>
+                    <h4 className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
+                      <Link href={`/article/${bottomCards[0].slug}`}>
+                        {bottomCards[0].title}
+                      </Link>
+                    </h4>
+                    {bottomCards[0].sectionTag && (
+                      <span className="font-sans font-bold text-[11px] text-[#555555] mt-1 block">
+                        {bottomCards[0].sectionTag}
+                      </span>
+                    )}
+                  </div>
+                  <span className="font-mono text-[11px] text-[#666666] mt-1 block">
+                    {formatTimeAgo(bottomCards[0].publishedAt)}
+                  </span>
                 </div>
               </article>
             )}
@@ -238,16 +274,21 @@ export const EditorsPicksSection: React.FC = () => {
                   />
                 </Link>
                 <div className="flex-1 flex flex-col justify-between h-full min-h-[100px] sm:min-h-[115px]">
-                  <h4 className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
-                    <Link href={`/article/${bottomCards[1].slug}`}>
-                      {bottomCards[1].title}
-                    </Link>
-                  </h4>
-                  {bottomCards[1].sectionTag && (
-                    <span className="font-sans font-bold text-[11px] text-[#555555] mt-1">
-                      {bottomCards[1].sectionTag}
-                    </span>
-                  )}
+                  <div>
+                    <h4 className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
+                      <Link href={`/article/${bottomCards[1].slug}`}>
+                        {bottomCards[1].title}
+                      </Link>
+                    </h4>
+                    {bottomCards[1].sectionTag && (
+                      <span className="font-sans font-bold text-[11px] text-[#555555] mt-1 block">
+                        {bottomCards[1].sectionTag}
+                      </span>
+                    )}
+                  </div>
+                  <span className="font-mono text-[11px] text-[#666666] mt-1 block">
+                    {formatTimeAgo(bottomCards[1].publishedAt)}
+                  </span>
                 </div>
               </article>
             )}
@@ -282,6 +323,9 @@ export const EditorsPicksSection: React.FC = () => {
                       </Link>
                     </h4>
                   </div>
+                  <span className="font-mono text-[11px] text-[#666666] mt-1.5 block">
+                    {formatTimeAgo(rightCards[0].publishedAt)}
+                  </span>
                 </article>
               )}
 
@@ -301,11 +345,16 @@ export const EditorsPicksSection: React.FC = () => {
                       </Link>
                     </h4>
                   </div>
-                  {rightCards[1].sectionTag && (
-                    <span className="font-sans font-bold text-[11px] text-[#555555] mt-2 block">
-                      {rightCards[1].sectionTag}
+                  <div>
+                    {rightCards[1].sectionTag && (
+                      <span className="font-sans font-bold text-[11px] text-[#555555] mt-1 block">
+                        {rightCards[1].sectionTag}
+                      </span>
+                    )}
+                    <span className="font-mono text-[11px] text-[#666666] mt-1 block">
+                      {formatTimeAgo(rightCards[1].publishedAt)}
                     </span>
-                  )}
+                  </div>
                 </article>
               )}
             </div>
@@ -327,11 +376,16 @@ export const EditorsPicksSection: React.FC = () => {
                       </Link>
                     </h4>
                   </div>
-                  {rightCards[2].sectionTag && (
-                    <span className="font-sans font-bold text-[11px] text-[#555555] mt-2 block">
-                      {rightCards[2].sectionTag}
+                  <div>
+                    {rightCards[2].sectionTag && (
+                      <span className="font-sans font-bold text-[11px] text-[#555555] mt-1 block">
+                        {rightCards[2].sectionTag}
+                      </span>
+                    )}
+                    <span className="font-mono text-[11px] text-[#666666] mt-1 block">
+                      {formatTimeAgo(rightCards[2].publishedAt)}
                     </span>
-                  )}
+                  </div>
                 </article>
               )}
 
@@ -356,11 +410,16 @@ export const EditorsPicksSection: React.FC = () => {
                       </Link>
                     </h4>
                   </div>
-                  {rightCards[3].sectionTag && (
-                    <span className="font-sans font-bold text-[11px] text-[#555555] mt-2 block">
-                      {rightCards[3].sectionTag}
+                  <div>
+                    {rightCards[3].sectionTag && (
+                      <span className="font-sans font-bold text-[11px] text-[#555555] mt-1 block">
+                        {rightCards[3].sectionTag}
+                      </span>
+                    )}
+                    <span className="font-mono text-[11px] text-[#666666] mt-1 block">
+                      {formatTimeAgo(rightCards[3].publishedAt)}
                     </span>
-                  )}
+                  </div>
                 </article>
               )}
             </div>

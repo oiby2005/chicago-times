@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import { getRelativeTime } from "@/lib/relativeTime";
 
 interface InDepthArticle {
   id: string;
@@ -9,6 +10,7 @@ interface InDepthArticle {
   title: string;
   slug: string;
   imageUrl: string;
+  timeAgo?: string;
 }
 
 const inDepthArticles: InDepthArticle[] = [
@@ -17,25 +19,25 @@ const inDepthArticles: InDepthArticle[] = [
     category: "IN DEPTH",
     title: "Could Andy Burnham really end rough sleeping by Christmas?",
     slug: "could-andy-burnham-end-rough-sleeping-christmas",
-    imageUrl: "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=300&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1544717305-2782549b5136?fm=webp&fit=crop&w=300&q=80",
   },
   {
     id: "2",
     title: "Girl, 13, ‘was fed suicide videos by algorithms’ before death",
     slug: "girl-13-fed-suicide-videos-algorithms-before-death",
-    imageUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?fm=webp&fit=crop&w=300&q=80",
   },
   {
     id: "3",
     title: "Kennedy scion who dated Taylor Swift goes on Russia’s wanted list",
     slug: "kennedy-scion-taylor-swift-russia-wanted-list",
-    imageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?fm=webp&fit=crop&w=300&q=80",
   },
   {
     id: "4",
     title: "Kennedy scion who dated Taylor Swift goes on Russia’s wanted list",
     slug: "kennedy-scion-taylor-swift-russia-wanted-list-2",
-    imageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?fm=webp&fit=crop&w=300&q=80",
   },
 ];
 
@@ -63,7 +65,8 @@ export const InDepthPanelSection: React.FC = () => {
             category: idx === 0 ? "IN DEPTH" : undefined,
             title: p.title,
             slug: p.slug || p.id,
-            imageUrl: p.thumbnail || "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=300&q=80",
+            imageUrl: p.thumbnail || "https://images.unsplash.com/photo-1544717305-2782549b5136?fm=webp&fit=crop&w=300&q=80",
+            timeAgo: getRelativeTime(p.publishedAt, p.date),
           }));
 
           const merged = [...formatted];
@@ -112,6 +115,11 @@ export const InDepthPanelSection: React.FC = () => {
                 {article.title}
               </Link>
             </h3>
+            {article.timeAgo && (
+              <span className="font-sans text-[10px] text-[#666666] mt-0.5 block">
+                {article.timeAgo}
+              </span>
+            )}
           </div>
 
           <Link href={`/article/${article.slug}`} className="shrink-0 block w-[95px] h-[64px] overflow-hidden bg-gray-100 border border-gray-200">

@@ -10,6 +10,8 @@ import ProfileSettingsModal, { UserProfile } from "@/components/ui/ProfileSettin
 import MobileNavDrawer from "@/components/navigation/MobileNavDrawer";
 import SearchOverlay from "@/components/search/SearchOverlay";
 
+import { getAuthorSlugForUser, getUserDashboardUrl, getAuthorBySlug } from "@/data/authors";
+
 export const LogoHeader: React.FC = () => {
   const pathname = usePathname();
   const router = useRouter();
@@ -32,33 +34,29 @@ export const LogoHeader: React.FC = () => {
   const loadUserFromStorage = () => {
     if (typeof window === "undefined") return;
     const tabUser = sessionStorage.getItem("wsj_user");
-    const sessionActive = sessionStorage.getItem("wsj_session_active");
-
     let parsed: any = null;
-    if (tabUser && sessionActive === "true") {
+    if (tabUser) {
       try { parsed = JSON.parse(tabUser); } catch (e) {}
-    } else if (isWriterDashboard) {
-      const writerUser = localStorage.getItem("wsj_writer_user") || localStorage.getItem("wsj_user");
-      if (writerUser) {
-        try { parsed = JSON.parse(writerUser); } catch (e) {}
-      }
-    } else if (isAdminDashboard) {
-      const adminUser = localStorage.getItem("wsj_admin_user") || localStorage.getItem("wsj_user");
-      if (adminUser) {
-        try { parsed = JSON.parse(adminUser); } catch (e) {}
-      }
-    } else if (isReaderDashboard) {
-      const readerUser = localStorage.getItem("wsj_reader_user") || localStorage.getItem("wsj_user");
-      if (readerUser) {
-        try { parsed = JSON.parse(readerUser); } catch (e) {}
+    }
+
+    if (!parsed && pathname) {
+      const match = pathname.match(/^\/(writer|admin|reader)\/([^/]+)/i);
+      if (match) {
+        const role = match[1].toLowerCase();
+        const slug = match[2];
+        const authorObj = getAuthorBySlug(slug);
+        parsed = {
+          id: authorObj?.id || slug,
+          full_name: authorObj?.name || slug.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" "),
+          email: authorObj?.email || `${slug}@gmail.com`,
+          role: role,
+          bio: authorObj?.bio || "",
+          avatar_url: authorObj?.avatarUrl || "",
+        };
       }
     }
 
-    if (parsed) {
-      setCurrentUser(parsed);
-    } else {
-      setCurrentUser(null);
-    }
+    setCurrentUser(parsed);
   };
 
   useEffect(() => {
@@ -94,15 +92,18 @@ export const LogoHeader: React.FC = () => {
   }, []);
 
   const handleSignOut = () => {
-    sessionStorage.removeItem("wsj_user");
-    sessionStorage.removeItem("wsj_session_active");
-    localStorage.removeItem("wsj_user");
-    localStorage.removeItem("wsj_token");
-    localStorage.removeItem("wsj_admin_user");
-    setCurrentUser(null);
-    setShowDropdown(false);
-    window.dispatchEvent(new Event("wsj_user_updated"));
-    router.push("/");
+    if (typeof window !== "undefined") {
+      sessionStorage.clear();
+      localStorage.removeItem("wsj_user");
+      localStorage.removeItem("wsj_token");
+      localStorage.removeItem("wsj_admin_user");
+      localStorage.removeItem("wsj_session_active");
+      setCurrentUser(null);
+      setShowDropdown(false);
+      window.dispatchEvent(new Event("wsj_user_updated"));
+      window.dispatchEvent(new Event("wsj_logout"));
+      window.location.href = "/";
+    }
   };
 
   const editionLinks = [
@@ -120,15 +121,11 @@ export const LogoHeader: React.FC = () => {
   let dashboardLabel = "Dashboard";
   let dashboardHref = "/";
 
-  if (userRole === "writer") {
-    dashboardLabel = "Writer Dashboard";
-    dashboardHref = "/writer-dashboard";
-  } else if (userRole === "reader") {
-    dashboardLabel = "Reader dashboard";
-    dashboardHref = "/reader-dashboard";
-  } else if (userRole === "admin") {
-    dashboardLabel = "Admin dashboard";
-    dashboardHref = "/admin-dashboard";
+  if (currentUser) {
+    dashboardHref = getUserDashboardUrl(currentUser);
+    if (userRole === "writer") dashboardLabel = "Writer Dashboard";
+    else if (userRole === "reader") dashboardLabel = "Reader dashboard";
+    else if (userRole === "admin") dashboardLabel = "Admin dashboard";
   }
 
   const renderDropdownMenu = () => (
@@ -163,8 +160,7 @@ export const LogoHeader: React.FC = () => {
 
         {userRole === "writer" && (
           <Link
-            href="/writer"
-           
+            href={getAuthorSlugForUser(currentUser)}
             onClick={() => setShowDropdown(false)}
             className="flex items-center space-x-3 px-3 py-2.5 hover:bg-slate-50 rounded-xl text-xs font-bold text-[#1e293b] transition-colors cursor-pointer group"
           >
@@ -228,7 +224,7 @@ export const LogoHeader: React.FC = () => {
               </svg>
             </button>
             <button
-              onClick={() => setIsSearchOverlayOpen(true)}
+              onClick={() => router.push("/search")}
               className="p-1.5 text-[#111111] hover:text-gray-700 transition-colors cursor-pointer focus:outline-none"
               aria-label="Search"
             >

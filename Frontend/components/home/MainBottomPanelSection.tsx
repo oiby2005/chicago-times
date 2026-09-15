@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import { getRelativeTime } from "@/lib/relativeTime";
 
 interface MainBottomArticle {
   id: string;
@@ -10,6 +11,7 @@ interface MainBottomArticle {
   summary: string;
   imageUrl: string;
   commentsCount: string;
+  timeAgo?: string;
 }
 
 const mainBottomArticles: MainBottomArticle[] = [
@@ -61,8 +63,9 @@ export const MainBottomPanelSection: React.FC = () => {
               (p.bodyContent
                 ? p.bodyContent.replace(/<[^>]+>/g, " ").trim().slice(0, 120) + "..."
                 : ""),
-            imageUrl: p.thumbnail || "https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?auto=format&fit=crop&w=800&q=80",
+            imageUrl: p.thumbnail || "https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?fm=webp&fit=crop&w=800&q=80",
             commentsCount: p.commentsCount || "0",
+            timeAgo: getRelativeTime(p.publishedAt, p.date),
           }));
 
           const merged = [...formatted];
@@ -109,20 +112,23 @@ export const MainBottomPanelSection: React.FC = () => {
             </p>
           </div>
 
-          <div className="mt-2 flex items-center space-x-1.5 font-sans text-[10.5px] text-[#666666]">
-            <svg
-              className="w-3.5 h-3.5 text-[#666666] stroke-[1.8]"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-              />
-            </svg>
-            <span>{article.commentsCount}</span>
+          <div className="mt-2 flex items-center justify-between font-sans text-[10.5px] text-[#666666]">
+            <div className="flex items-center space-x-1.5">
+              <svg
+                className="w-3.5 h-3.5 text-[#666666] stroke-[1.8]"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                />
+              </svg>
+              <span>{article.commentsCount}</span>
+            </div>
+            <span>{article.timeAgo || "Recently"}</span>
           </div>
         </article>
       ))}

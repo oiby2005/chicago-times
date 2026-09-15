@@ -33,40 +33,72 @@ export default function AuthorHeader({ author = defaultAuthor }: AuthorHeaderPro
     name: extractSingleAuthorName(author.name),
   });
 
-  const syncProfile = () => {
+  const syncProfile = async () => {
     if (typeof window === "undefined") return;
-    const storedUserStr = localStorage.getItem("wsj_user");
-    if (storedUserStr) {
-      try {
-        const storedUser = JSON.parse(storedUserStr);
-        const userRole = (storedUser.role || "").toLowerCase();
-        const storedNameLower = (storedUser.full_name || storedUser.name || "").toLowerCase();
-        const authorNameLower = (author?.name || "").toLowerCase();
-        
-        const isWriterPage = typeof window !== "undefined" && (window.location.pathname === "/writer" || window.location.pathname.startsWith("/author/writer"));
-        const isDefaultWriter = !author || authorNameLower === "writer" || authorNameLower === "writer user";
-        const isSelfProfile = storedNameLower === authorNameLower;
+    const authorEmailLower = (author?.email || "").toLowerCase().trim();
+    const authorNameLower = (author?.name || "").toLowerCase().trim();
+    const authorSlugLower = (author?.slug || "").toLowerCase().trim();
 
-        if (isWriterPage || isSelfProfile || (userRole === "writer" && isDefaultWriter)) {
+    if (authorEmailLower) {
+      try {
+        const res = await fetch(`http://localhost:5000/api/users/${encodeURIComponent(authorEmailLower)}`).catch(() => null);
+        if (res && res.ok) {
+          const data = await res.json();
+          if (data.success && data.user) {
+            const u = data.user;
+            setProfile({
+              name: extractSingleAuthorName(u.full_name || u.name || author.name),
+              role: (u.role || author.role || "WRITER").toUpperCase(),
+              bio: u.bio !== undefined && u.bio !== "" ? u.bio : (author?.bio || "Journalist & Writer"),
+              image: u.avatar_url || u.image || author?.image || "",
+              linkedinUrl: u.linkedin || u.linkedinUrl || author?.linkedinUrl || "https://www.linkedin.com/in/your-profile",
+            });
+            return;
+          }
+        }
+      } catch (e) {}
+    }
+
+    try {
+      const map = JSON.parse(localStorage.getItem("wsj_users_by_email") || "{}");
+      
+      // 1. Direct match by exact email address
+      if (authorEmailLower && map[authorEmailLower]) {
+        const u = map[authorEmailLower];
+        setProfile({
+          name: extractSingleAuthorName(u.full_name || u.name || author.name),
+          role: (u.role || author.role || "WRITER").toUpperCase(),
+          bio: u.bio !== undefined && u.bio !== "" ? u.bio : author?.bio || "Journalist & Writer",
+          image: u.avatar_url || u.image || author?.image || "",
+          linkedinUrl: u.linkedin || u.linkedinUrl || author?.linkedinUrl || "https://www.linkedin.com/in/your-profile",
+        });
+        return;
+      }
+
+      // 2. Match by email prefix or slug in users map
+      for (const email of Object.keys(map)) {
+        const u = map[email];
+        const uNameLower = (u.full_name || u.name || "").toLowerCase().trim();
+        const uSlug = uNameLower.replace(/[^a-z0-9]+/g, "-");
+        const emailPrefix = email.split("@")[0].toLowerCase();
+
+        if (authorSlugLower === uSlug || authorSlugLower === emailPrefix || (authorNameLower && authorNameLower === uNameLower)) {
           setProfile({
-            name: extractSingleAuthorName(storedUser.full_name || storedUser.name || author?.name || "Writer User"),
-            role: (storedUser.role || author?.role || "WRITER").toUpperCase(),
-            bio: storedUser.bio !== undefined ? storedUser.bio : (author?.bio || "Journalist & Columnist"),
-            image: storedUser.avatar_url !== undefined ? storedUser.avatar_url : (author?.image || ""),
-            linkedinUrl: storedUser.linkedin || storedUser.linkedinUrl || author?.linkedinUrl || "https://www.linkedin.com/in/your-profile",
+            name: extractSingleAuthorName(u.full_name || u.name || author.name),
+            role: (u.role || author.role || "WRITER").toUpperCase(),
+            bio: u.bio !== undefined && u.bio !== "" ? u.bio : author?.bio || "Journalist & Writer",
+            image: u.avatar_url || u.image || author?.image || "",
+            linkedinUrl: u.linkedin || u.linkedinUrl || author?.linkedinUrl || "https://www.linkedin.com/in/your-profile",
           });
           return;
         }
-      } catch (e) {
-        console.error("Error parsing wsj_user in AuthorHeader:", e);
       }
-    }
-    if (author) {
-      setProfile({
-        ...author,
-        name: extractSingleAuthorName(author.name),
-      });
-    }
+    } catch (e) {}
+
+    setProfile({
+      ...author,
+      name: extractSingleAuthorName(author.name),
+    });
   };
 
   useEffect(() => {
@@ -108,7 +140,7 @@ export default function AuthorHeader({ author = defaultAuthor }: AuthorHeaderPro
         <div className="flex flex-col sm:flex-row items-start gap-6">
           {/* Avatar Photo */}
           <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden shrink-0 border border-gray-200 shadow-sm bg-gray-100 flex items-center justify-center">
-            {profile.image ? (
+            {profile.image && profile.image.trim() !== "" ? (
               <img
                 src={profile.image}
                 alt={profile.name}
@@ -133,11 +165,11 @@ export default function AuthorHeader({ author = defaultAuthor }: AuthorHeaderPro
                   href={profile.linkedinUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center justify-center w-6 h-6 sm:w-6.5 sm:h-6.5 bg-[#0a66c2] hover:bg-[#084e96] text-white rounded-xs transition-colors shadow-xs cursor-pointer ml-1"
+                  className="inline-flex items-center justify-center hover:opacity-85 transition-opacity ml-1.5 cursor-pointer"
                   title="LinkedIn Profile"
                 >
-                  <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                    <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/>
+                  <svg className="w-5.5 h-5.5 sm:w-6 sm:h-6 text-[#0077b5] fill-current" viewBox="0 0 24 24">
+                    <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
                   </svg>
                 </a>
               )}

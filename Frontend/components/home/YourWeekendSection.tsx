@@ -10,7 +10,26 @@ interface WeekendArticle {
   summary: string;
   imageUrl: string;
   commentCount?: number;
+  publishedAt?: number | string;
 }
+
+const formatTimeAgo = (timestamp?: number | string): string => {
+  if (!timestamp) return "2 hours ago";
+  const now = Date.now();
+  const time = typeof timestamp === "string" ? new Date(timestamp).getTime() : timestamp;
+  if (isNaN(time) || time <= 0) return "2 hours ago";
+  const diffMs = Math.max(0, now - time);
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  if (diffHours < 1) {
+    const diffMins = Math.max(1, Math.floor(diffMs / (1000 * 60)));
+    return `${diffMins} min${diffMins > 1 ? "s" : ""} ago`;
+  }
+  if (diffHours < 24) {
+    return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
+  }
+  const diffDays = Math.floor(diffHours / 24);
+  return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
+};
 
 const defaultArticles: WeekendArticle[] = [
   {
@@ -18,23 +37,26 @@ const defaultArticles: WeekendArticle[] = [
     title: "Why It is Impossible to Get a Restaurant Reservation",
     slug: "why-it-is-impossible-to-get-restaurant-reservation",
     summary: "New apps, membership clubs and other middlemen are fighting over access to high-spending customers and the eateries they love.",
-    imageUrl: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?fm=webp&fit=crop&w=1200&q=80",
     commentCount: 363,
+    publishedAt: Date.now() - 3 * 3600 * 1000,
   },
   {
     id: "yw2",
     title: "The Cyberattack That Brought a Distant War to Small-Town Minnesota",
     slug: "the-cyberattack-that-brought-distant-war",
     summary: "The water system in Braham was one of dozens affected after federal agencies warned Iran-linked hackers could target U.S. infrastructure.",
-    imageUrl: "https://images.unsplash.com/photo-1508614589041-895b88991e3e?auto=format&fit=crop&w=600&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1508614589041-895b88991e3e?fm=webp&fit=crop&w=600&q=80",
     commentCount: 92,
+    publishedAt: Date.now() - 5 * 3600 * 1000,
   },
   {
     id: "yw3",
     title: "Situational Awareness Bets $400 Million on Stealth Chip Startup After Crash",
     slug: "situational-awareness-bets-400-million",
     summary: "The AI-battered hedge fund made a big bet this week in Source Foundry, a private company aiming to reinvent how chips are manufactured.",
-    imageUrl: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=600&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1518770660439-4636190af475?fm=webp&fit=crop&w=600&q=80",
+    publishedAt: Date.now() - 8 * 3600 * 1000,
   },
 ];
 
@@ -69,8 +91,9 @@ export const YourWeekendSection: React.FC = () => {
             title: p.title,
             slug: p.slug || p.id,
             summary: p.subheadline || extractText(p.bodyContent) || "",
-            imageUrl: p.thumbnail || "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80",
+            imageUrl: p.thumbnail || "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?fm=webp&fit=crop&w=1200&q=80",
             commentCount: p.commentsCount || 0,
+            publishedAt: p.publishedAt,
           }));
 
           const merged = [...formatted];
@@ -138,6 +161,9 @@ export const YourWeekendSection: React.FC = () => {
                 <span>{hero.commentCount}</span>
               </div>
             )}
+            <span className="font-mono text-[11px] text-[#666666] mt-1 block">
+              {formatTimeAgo(hero.publishedAt)}
+            </span>
           </div>
         </div>
 
@@ -174,6 +200,9 @@ export const YourWeekendSection: React.FC = () => {
                 <span>{rightTop.commentCount}</span>
               </div>
             )}
+            <span className="font-mono text-[11px] text-[#666666] mt-1 block">
+              {formatTimeAgo(rightTop.publishedAt)}
+            </span>
           </article>
 
           {/* Bottom Story (Position 3) */}
@@ -190,12 +219,17 @@ export const YourWeekendSection: React.FC = () => {
                 </p>
               )}
             </div>
-            {rightBottom.commentCount !== undefined && rightBottom.commentCount > 0 && (
-              <div className="font-sans text-[12px] text-[#777777] flex items-center space-x-1 mt-2">
-                <span>💬</span>
-                <span>{rightBottom.commentCount}</span>
-              </div>
-            )}
+            <div>
+              {rightBottom.commentCount !== undefined && rightBottom.commentCount > 0 && (
+                <div className="font-sans text-[12px] text-[#777777] flex items-center space-x-1 mt-2">
+                  <span>💬</span>
+                  <span>{rightBottom.commentCount}</span>
+                </div>
+              )}
+              <span className="font-mono text-[11px] text-[#666666] mt-1 block">
+                {formatTimeAgo(rightBottom.publishedAt)}
+              </span>
+            </div>
           </article>
         </div>
       </div>

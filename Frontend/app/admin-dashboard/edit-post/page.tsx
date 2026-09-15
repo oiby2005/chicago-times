@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getAuthorForArticle } from "@/data/authors";
+import { ALL_69_SUBCATEGORIES } from "@/data/subCategories";
 
 const ALL_MAIN_CATEGORIES = [
   "News", "U.S. News", "International News",
@@ -49,7 +50,7 @@ const compressImageFile = (file: File, maxWidth = 800, quality = 0.7): Promise<s
         const ctx = canvas.getContext("2d");
         if (ctx) {
           ctx.drawImage(img, 0, 0, width, height);
-          resolve(canvas.toDataURL("image/jpeg", quality));
+          resolve(canvas.toDataURL("image/webp", quality));
         } else {
           resolve(src);
         }
@@ -96,7 +97,7 @@ const safeSavePostsToStorage = (posts: any[]): boolean => {
   const sanitizePost = (post: any) => {
     let thumb = post.thumbnail || "";
     if (thumb.startsWith("data:image/") && thumb.length > 150000) {
-      thumb = "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=800&q=80";
+      thumb = "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?fm=webp&fit=crop&w=800&q=80";
     }
     return { ...post, thumbnail: thumb };
   };
@@ -105,6 +106,13 @@ const safeSavePostsToStorage = (posts: any[]): boolean => {
 
   try {
     localStorage.setItem("wsj_posts", JSON.stringify(sanitized));
+    try {
+      fetch("http://localhost:5000/api/posts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(sanitized),
+      }).catch(() => {});
+    } catch (e) {}
     return true;
   } catch (err) {
     console.warn("QuotaExceededError caught while saving wsj_posts. Compacting base64 images...", err);
@@ -113,13 +121,13 @@ const safeSavePostsToStorage = (posts: any[]): boolean => {
         let body = p.bodyContent || "";
         body = body.replace(/src="data:image\/[^;]+;base64,[^"]+"/g, (match: string) => {
           if (match.length > 80000) {
-            return 'src="https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=800&q=80"';
+            return 'src="https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?fm=webp&fit=crop&w=800&q=80"';
           }
           return match;
         });
         let thumb = p.thumbnail || "";
         if (thumb.startsWith("data:")) {
-          thumb = "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=800&q=80";
+          thumb = "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?fm=webp&fit=crop&w=800&q=80";
         }
         return {
           ...p,
@@ -134,8 +142,8 @@ const safeSavePostsToStorage = (posts: any[]): boolean => {
       try {
         const trimmed = sanitized.slice(0, 15).map((p) => ({
           ...p,
-          bodyContent: (p.bodyContent || "").replace(/src="data:image\/[^;]+;base64,[^"]+"/g, 'src="https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=800&q=80"'),
-          thumbnail: "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=800&q=80",
+          bodyContent: (p.bodyContent || "").replace(/src="data:image\/[^;]+;base64,[^"]+"/g, 'src="https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?fm=webp&fit=crop&w=800&q=80"'),
+          thumbnail: "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?fm=webp&fit=crop&w=800&q=80",
         }));
         localStorage.setItem("wsj_posts", JSON.stringify(trimmed));
         return true;
@@ -160,10 +168,19 @@ export default function AdminEditPostPage() {
   const [bodyContent, setBodyContent] = useState("");
   const [mainCategory, setMainCategory] = useState("Business");
   const [selectedSubCategories, setSelectedSubCategories] = useState<string[]>([]);
+  const [subCatSearch, setSubCatSearch] = useState("");
 
-  const availableSubCategories = Array.from(new Set(ALL_MAIN_CATEGORIES)).filter(
-    (cat) => cat.toLowerCase().trim() !== (mainCategory || "").toLowerCase().trim()
+  const availableSubCategories = ALL_69_SUBCATEGORIES.filter(
+    (item) => item.toLowerCase().trim() !== (mainCategory || "").toLowerCase().trim()
   );
+
+  const filteredSubCategories = React.useMemo(() => {
+    const query = subCatSearch.trim().toLowerCase();
+    if (!query) return availableSubCategories;
+    return availableSubCategories.filter((subCat) =>
+      subCat.toLowerCase().includes(query)
+    );
+  }, [availableSubCategories, subCatSearch]);
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
   const [readDuration, setReadDuration] = useState("5 min read");
@@ -230,7 +247,7 @@ export default function AdminEditPostPage() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const storedUser = sessionStorage.getItem("wsj_user") || localStorage.getItem("wsj_user");
+      const storedUser = sessionStorage.getItem("wsj_user");
       if (storedUser) {
         try {
           const parsed = JSON.parse(storedUser);
@@ -270,7 +287,7 @@ export default function AdminEditPostPage() {
           if (loadedContent) {
             const sanitizedContent = loadedContent.replace(
               /src="blob:[^"]*"/g,
-              'src="https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=800&q=80"'
+              'src="https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?fm=webp&fit=crop&w=800&q=80"'
             );
             setBodyContent(sanitizedContent);
             if (editorRef.current) {
@@ -283,24 +300,17 @@ export default function AdminEditPostPage() {
           setReadDuration(found.readDuration || found.readTime || "5 min read");
           setIsExclusive(found.isExclusive !== undefined ? found.isExclusive : true);
 
-          if (found.subCategories && Array.isArray(found.subCategories) && found.subCategories.length > 0) {
-            setSelectedSubCategories(found.subCategories);
+          if (found.subCategories && Array.isArray(found.subCategories)) {
+            const validSubs = found.subCategories.filter((s: string) => ALL_69_SUBCATEGORIES.includes(s));
+            setSelectedSubCategories(validSubs.slice(0, 5));
           } else {
-            const catLower = categoryVal.toLowerCase();
-            if (catLower.includes("business")) {
-              setSelectedSubCategories(["Economy & Finance", "CFO Spotlight"]);
-            } else if (catLower.includes("tech")) {
-              setSelectedSubCategories(["Technology", "Crypto"]);
-            } else {
-              setSelectedSubCategories(["World", "US"]);
-            }
+            setSelectedSubCategories([]);
           }
 
-          if (found.tags && Array.isArray(found.tags) && found.tags.length > 0) {
+          if (found.tags && Array.isArray(found.tags)) {
             setTags(found.tags);
           } else {
-            const words = titleVal.split(/\s+/).filter((w: string) => w.length > 3).slice(0, 3).map((w: string) => w.replace(/[^a-zA-Z]/g, "").toUpperCase());
-            setTags(words.length > 0 ? words : [categoryVal.toUpperCase()]);
+            setTags([]);
           }
 
           const plainText = bodyVal.replace(/<[^>]+>/g, " ").trim();
@@ -328,7 +338,7 @@ export default function AdminEditPostPage() {
   const authorInitial = authorName.charAt(0).toUpperCase();
   const authorImage =
     getAuthorForArticle("", authorName)?.image ||
-    "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80";
+    "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?fm=webp&fit=crop&w=300&q=80";
 
   const handleToggleBlockquote = () => {
     if (!editorRef.current) return;
@@ -432,6 +442,99 @@ export default function AdminEditPostPage() {
     });
 
     setBodyContent(editorRef.current.innerHTML);
+  };
+
+  const cleanAndNormalizeHtml = (rawHtml: string): string => {
+    if (typeof window === "undefined") return rawHtml;
+    try {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(rawHtml, "text/html");
+
+      const fontTags = doc.querySelectorAll("font");
+      fontTags.forEach((font) => {
+        const span = doc.createElement("span");
+        span.innerHTML = font.innerHTML;
+        font.parentNode?.replaceChild(span, font);
+      });
+
+      const allEls = doc.querySelectorAll("*");
+      allEls.forEach((el) => {
+        if (el instanceof HTMLElement) {
+          const tagName = el.tagName.toUpperCase();
+          const isInsideFigure = !!el.closest("figure");
+          if (tagName !== "FIGURE" && tagName !== "FIGCAPTION" && !isInsideFigure && tagName !== "IMG" && tagName !== "A") {
+            el.removeAttribute("style");
+          }
+        }
+      });
+
+      const paragraphs = doc.querySelectorAll("p");
+      paragraphs.forEach((p) => {
+        if (p.children.length === 1) {
+          const firstChild = p.firstElementChild;
+          if (firstChild && (firstChild.tagName === "STRONG" || firstChild.tagName === "B")) {
+            if (firstChild.textContent?.trim() === p.textContent?.trim()) {
+              p.innerHTML = firstChild.innerHTML;
+            }
+          }
+        }
+      });
+
+      return doc.body.innerHTML;
+    } catch (e) {
+      return rawHtml;
+    }
+  };
+
+  const sanitizeEditorRefElements = (container: HTMLElement) => {
+    const els = container.querySelectorAll<HTMLElement>("*");
+    els.forEach((el) => {
+      const tagName = el.tagName.toUpperCase();
+      const isInsideFigure = !!el.closest("figure");
+      if (tagName !== "FIGURE" && tagName !== "FIGCAPTION" && !isInsideFigure && tagName !== "IMG" && tagName !== "A") {
+        el.removeAttribute("style");
+      }
+    });
+
+    const paragraphs = container.querySelectorAll("p");
+    paragraphs.forEach((p) => {
+      if (p.children.length === 1) {
+        const firstChild = p.firstElementChild;
+        if (firstChild && (firstChild.tagName === "STRONG" || firstChild.tagName === "B")) {
+          if (firstChild.textContent?.trim() === p.textContent?.trim()) {
+            p.innerHTML = firstChild.innerHTML;
+          }
+        }
+      }
+    });
+  };
+
+  const handleEditorPaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const clipboardData = e.clipboardData;
+    const pastedHtml = clipboardData.getData("text/html");
+    const pastedText = clipboardData.getData("text/plain");
+
+    let contentToInsert = "";
+    if (pastedHtml && pastedHtml.trim()) {
+      contentToInsert = cleanAndNormalizeHtml(pastedHtml);
+    } else if (pastedText) {
+      const paragraphs = pastedText.split(/\r?\n\r?\n/).filter((p) => p.trim());
+      if (paragraphs.length > 0) {
+        contentToInsert = paragraphs.map((p) => `<p>${p.replace(/\r?\n/g, "<br>")}</p>`).join("");
+      } else {
+        contentToInsert = `<p>${pastedText}</p>`;
+      }
+    }
+
+    if (contentToInsert) {
+      document.execCommand("insertHTML", false, contentToInsert);
+    }
+
+    if (editorRef.current) {
+      sanitizeEditorRefElements(editorRef.current);
+      setBodyContent(editorRef.current.innerHTML);
+    }
   };
 
   const execCommand = (command: string, value: string = "") => {
@@ -852,7 +955,7 @@ export default function AdminEditPostPage() {
       finalUrl = await compressImageFile(modalImageFile, 800, 0.7);
     }
     if (!finalUrl || finalUrl.startsWith("blob:")) {
-      finalUrl = "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=800&q=80";
+      finalUrl = "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?fm=webp&fit=crop&w=800&q=80";
     }
 
     let exactWidthStyle = "width: 450px; max-width: 100%;";
@@ -860,9 +963,9 @@ export default function AdminEditPostPage() {
     if (modalImageSize.includes("450px")) exactWidthStyle = "width: 450px; max-width: 100%;";
     if (modalImageSize.includes("100%")) exactWidthStyle = "width: 100%;";
 
-    const captionHtml = modalImageCaption ? `<span style="font-size: 11px; font-style: italic; color: #475569; margin-right: 12px;">${modalImageCaption}</span>` : "";
+    const captionHtml = modalImageCaption ? `<span class="image-caption" style="font-size: 11px; font-style: italic; color: #64748b; margin-right: 12px;">${modalImageCaption}</span>` : "";
     const creditText = modalImageCredit ? (modalImageCredit.toUpperCase().startsWith("PHOTO:") ? modalImageCredit.toUpperCase() : `(PHOTO: ${modalImageCredit.toUpperCase()})`) : "";
-    const creditHtml = creditText ? `<span style="font-size: 10px; font-family: monospace; color: #64748b; text-transform: uppercase; margin-left: auto; text-align: right;">${creditText}</span>` : "";
+    const creditHtml = creditText ? `<span class="image-credit" style="font-size: 10px; font-weight: bold; font-family: monospace, sans-serif; color: #64748b; text-transform: uppercase; margin-left: auto; text-align: right;">${creditText}</span>` : "";
 
     let figureStyle = "";
     if (modalImageAlign.startsWith("Left")) {
@@ -990,7 +1093,7 @@ export default function AdminEditPostPage() {
       if (match) thumb = match[1];
     }
     if (!thumb) {
-      thumb = "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=800&q=80";
+      thumb = "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?fm=webp&fit=crop&w=800&q=80";
     }
 
     let existingPosts: any[] = [];
@@ -1081,6 +1184,7 @@ export default function AdminEditPostPage() {
       });
     }
 
+    existingPosts.sort((a: any, b: any) => (Number(b.publishedAt) || 0) - (Number(a.publishedAt) || 0));
     safeSavePostsToStorage(existingPosts);
     window.dispatchEvent(new Event("wsj_posts_updated"));
     router.push("/admin-dashboard?tab=Published Posts");
@@ -1314,9 +1418,10 @@ export default function AdminEditPostPage() {
                     contentEditable
                     suppressContentEditableWarning
                     onInput={(e: any) => setBodyContent(e.currentTarget.innerHTML)}
+                    onPaste={handleEditorPaste}
                     onClick={handleEditorClick}
                     style={{ fontSize: `${editorFontSize}px` }}
-                    className="w-full min-h-[320px] sm:min-h-[380px] h-auto flow-root outline-none text-[#1a1a1a] leading-[1.75] font-serif touch-pan-y empty:before:content-[attr(data-placeholder)] empty:before:text-[#cbd5e1] empty:before:pointer-events-none [&_p]:mb-5 [&_p]:leading-[1.75] [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:my-2 [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:my-2 [&_blockquote]:border-l-[5px] [&_blockquote]:border-[#ea580c] [&_blockquote]:bg-[#f8fafc] [&_blockquote]:py-3.5 [&_blockquote]:px-5 [&_blockquote]:my-3 [&_blockquote]:rounded-r-md [&_blockquote]:italic [&_blockquote]:text-[#334155] [&_blockquote]:flow-root [&_pre]:bg-[#f1f5f9] [&_pre]:border-none [&_pre]:outline-none [&_pre]:p-5 [&_pre]:rounded-xl [&_pre]:italic [&_pre]:text-[#334155] [&_pre]:text-base [&_pre]:my-4 [&_pre]:max-w-full [&_pre]:box-border [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_pre]:flow-root [&_a]:text-[#2563eb] [&_a]:underline [&_img]:max-w-full [&_img]:rounded-xl [&_img]:cursor-grab [&_img:active]:cursor-grabbing [&_figure]:cursor-grab [&_figure:active]:cursor-grabbing [&_img]:hover:ring-2 [&_img]:hover:ring-[#2563eb] transition-all duration-150"
+                    className="w-full min-h-[320px] sm:min-h-[380px] h-auto flow-root outline-none text-[#1a1a1a] leading-[1.75] font-normal editor-body-text editor-reserve-font touch-pan-y empty:before:content-[attr(data-placeholder)] empty:before:text-[#cbd5e1] empty:before:pointer-events-none [&_p]:mb-5 [&_p]:leading-[1.75] [&_p]:font-normal [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:my-2 [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:my-2 [&_blockquote]:border-l-[5px] [&_blockquote]:border-[#ea580c] [&_blockquote]:bg-[#f8fafc] [&_blockquote]:py-3.5 [&_blockquote]:px-5 [&_blockquote]:my-3 [&_blockquote]:rounded-r-md [&_blockquote]:italic [&_blockquote]:text-[#334155] [&_blockquote]:flow-root [&_pre]:bg-[#f1f5f9] [&_pre]:border-none [&_pre]:outline-none [&_pre]:p-5 [&_pre]:rounded-xl [&_pre]:italic [&_pre]:text-[#334155] [&_pre]:text-base [&_pre]:my-4 [&_pre]:max-w-full [&_pre]:box-border [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_pre]:flow-root [&_a]:text-[#2563eb] [&_a]:underline [&_img]:max-w-full [&_img]:rounded-xl [&_img]:cursor-grab [&_img:active]:cursor-grabbing [&_figure]:cursor-grab [&_figure:active]:cursor-grabbing [&_img]:hover:ring-2 [&_img]:hover:ring-[#2563eb] transition-all duration-150"
                     data-placeholder="Start writing or type / for plugins"
                   />
 
@@ -1582,47 +1687,102 @@ export default function AdminEditPostPage() {
                           </div>
                         </div>
 
+                        {/* 2. SELECT SUB-CATEGORIES (OPTIONAL, MAX 5) WITH SEARCH BAR */}
                         <div className="space-y-1.5">
                           <label className="block text-[10.5px] font-mono font-bold text-[#94a3b8] uppercase tracking-wider">
                             SELECT SUB-CATEGORIES (OPTIONAL, MAX 5)
                           </label>
-                          <div className="relative bg-[#f8fafc] border border-[#e2e8f0] rounded-2xl p-3.5">
+
+                          {/* Subcategory Search Input Bar */}
+                          <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                              </svg>
+                            </div>
+                            <input
+                              type="text"
+                              value={subCatSearch}
+                              onChange={(e) => setSubCatSearch(e.target.value)}
+                              placeholder="Search sub-categories..."
+                              className="w-full pl-8 pr-8 py-2 bg-[#ffffff] border border-[#cbd5e1] rounded-xl text-xs text-[#1e293b] placeholder-gray-400 focus:outline-none focus:border-[#ea580c] focus:ring-1 focus:ring-[#ea580c] transition-all"
+                            />
+                            {subCatSearch && (
+                              <button
+                                type="button"
+                                onClick={() => setSubCatSearch("")}
+                                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 text-xs font-bold"
+                              >
+                                ✕
+                              </button>
+                            )}
+                          </div>
+
+                          {/* Currently Selected Subcategory Pills */}
+                          {selectedSubCategories.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5 pt-0.5">
+                              {selectedSubCategories.map((subCat) => (
+                                <span
+                                  key={subCat}
+                                  onClick={() => handleSubCategoryToggle(subCat)}
+                                  className="bg-[#ea580c] text-white text-[10.5px] font-sans font-semibold px-2.5 py-0.5 rounded-lg flex items-center space-x-1 cursor-pointer hover:bg-[#c2410c] transition-colors"
+                                  title="Click to remove"
+                                >
+                                  <span>{subCat}</span>
+                                  <span className="text-[9px] font-bold">✕</span>
+                                </span>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Scrollable Container with filtered list */}
+                          <div className="relative bg-[#f8fafc] border border-[#e2e8f0] rounded-2xl p-3.5 pr-2">
                             <div
-                              id="subcat-scroll-container"
-                              className="max-h-none sm:max-h-[145px] overflow-visible sm:overflow-y-auto font-sans text-xs space-y-2.5 sm:pr-4 scroll-smooth"
+                              id="edit-subcat-scroll-container"
+                              className="max-h-none sm:max-h-[145px] overflow-x-hidden sm:overflow-y-auto font-sans text-xs sm:pr-2 scroll-smooth"
                               style={{
                                 scrollbarWidth: "thin",
                                 scrollbarColor: "#ea580c #f1f5f9",
                               }}
                             >
-                              <div className="grid grid-cols-2 gap-x-3 gap-y-2.5">
-                                {availableSubCategories.map((subCat) => {
-                                  const isChecked = selectedSubCategories.includes(subCat);
-                                  const isDisabled = !isChecked && selectedSubCategories.length >= 5;
-                                  return (
-                                    <label
-                                      key={subCat}
-                                      className={`flex items-center space-x-2 truncate transition-opacity ${
-                                        isChecked
-                                          ? "text-[#1e293b] font-bold cursor-pointer"
-                                          : isDisabled
-                                          ? "text-[#cbd5e1] opacity-35 cursor-not-allowed pointer-events-none"
-                                          : "text-[#475569] font-medium hover:text-black cursor-pointer"
-                                      }`}
-                                    >
-                                      <input
-                                        type="checkbox"
-                                        checked={isChecked}
-                                        disabled={isDisabled}
-                                        onChange={() => handleSubCategoryToggle(subCat)}
-                                        className="w-4 h-4 accent-[#ea580c] rounded border-gray-300 focus:ring-0 cursor-pointer disabled:cursor-not-allowed"
-                                      />
-                                      <span className="truncate text-[12px]">{subCat}</span>
-                                    </label>
-                                  );
-                                })}
-                              </div>
+                              {filteredSubCategories.length === 0 ? (
+                                <div className="py-4 text-center text-xs text-gray-500 font-sans italic">
+                                  No sub-categories match "{subCatSearch}"
+                                </div>
+                              ) : (
+                                <div className="grid grid-cols-2 gap-x-6 gap-y-2.5">
+                                  {filteredSubCategories.map((subCat) => {
+                                    const isChecked = selectedSubCategories.includes(subCat);
+                                    const isDisabled = !isChecked && selectedSubCategories.length >= 5;
+                                    return (
+                                      <label
+                                        key={subCat}
+                                        className={`flex items-center space-x-1.5 whitespace-nowrap transition-opacity ${
+                                          isChecked
+                                            ? "text-[#1e293b] font-bold cursor-pointer"
+                                            : isDisabled
+                                            ? "text-[#cbd5e1] opacity-35 cursor-not-allowed pointer-events-none"
+                                            : "text-[#475569] font-medium hover:text-black cursor-pointer"
+                                        }`}
+                                      >
+                                        <input
+                                          type="checkbox"
+                                          checked={isChecked}
+                                          disabled={isDisabled}
+                                          onChange={() => handleSubCategoryToggle(subCat)}
+                                          className="w-3.5 h-3.5 accent-[#ea580c] rounded border-gray-300 focus:ring-0 cursor-pointer disabled:cursor-not-allowed shrink-0"
+                                        />
+                                        <span className="text-[10px] font-sans whitespace-nowrap">{subCat}</span>
+                                      </label>
+                                    );
+                                  })}
+                                </div>
+                              )}
                             </div>
+                          </div>
+
+                          <div className="text-[10px] font-mono font-bold text-[#94a3b8] tracking-wider pt-0.5 uppercase">
+                            SELECTED: {selectedSubCategories.length} / 5
                           </div>
                         </div>
 
@@ -1701,34 +1861,6 @@ export default function AdminEditPostPage() {
                           </div>
                           <p className="text-[10px] font-mono text-[#64748b] leading-relaxed">
                             Select where this story will be curated on the homepage layout. Any list slots will automatically push the newest article to rank #1 and shift older items down.
-                          </p>
-                        </div>
-
-                        {/* NEWSLETTER BANNER SECTION */}
-                        <div className="space-y-1.5 pt-1 text-left">
-                          <label className="block text-[10px] font-mono font-bold text-[#ea580c] uppercase tracking-wider">
-                            NEWSLETTER BANNER
-                          </label>
-                          <div className="relative">
-                            <select
-                              value={newsletterBanner}
-                              onChange={(e) => setNewsletterBanner(e.target.value)}
-                              className="w-full bg-[#fffdf0] border border-[#facc15] rounded-xl px-3.5 py-2.5 text-xs font-bold text-[#1e293b] focus:outline-none focus:border-[#eab308] cursor-pointer appearance-none pr-8"
-                            >
-                              <option value="Auto — Middle of article (default)">Auto — Middle of article (default)</option>
-                              <option value="Top of article">Top of article</option>
-                              <option value="Middle of article">Middle of article</option>
-                              <option value="End of article">End of article</option>
-                              <option value="Off — don't show">Off — don't show</option>
-                            </select>
-                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-[#1e293b]">
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                              </svg>
-                            </div>
-                          </div>
-                          <p className="text-[10px] font-mono text-[#64748b] leading-relaxed">
-                            Where the "IBT Fast Start" signup banner appears inside this article.
                           </p>
                         </div>
                       </div>
@@ -2042,7 +2174,7 @@ export default function AdminEditPostPage() {
                 </div>
 
                 <div
-                  className="flow-root text-[#1a1a1a] leading-[1.75] font-serif space-y-5 [&_p]:mb-5 [&_p]:leading-[1.75] [&_img]:rounded-xl [&_img]:max-w-full [&_blockquote]:border-l-[5px] [&_blockquote]:border-[#ea580c] [&_blockquote]:bg-[#f8fafc] [&_blockquote]:py-3.5 [&_blockquote]:px-5 [&_blockquote]:my-3 [&_blockquote]:rounded-r-md [&_blockquote]:italic [&_blockquote]:text-[#334155] [&_blockquote]:flow-root [&_pre]:bg-[#f1f5f9] [&_pre]:border-none [&_pre]:outline-none [&_pre]:p-5 [&_pre]:rounded-xl [&_pre]:italic [&_pre]:text-[#334155] [&_pre]:text-base [&_pre]:my-4 [&_pre]:max-w-full [&_pre]:box-border [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_pre]:flow-root transition-all duration-150"
+                  className="preview-body-text editor-body-text flow-root text-[#1a1a1a] leading-[1.75] font-serif space-y-5 [&_p]:mb-5 [&_p]:leading-[1.75] [&_img]:rounded-xl [&_img]:max-w-full [&_blockquote]:border-l-[5px] [&_blockquote]:border-[#ea580c] [&_blockquote]:bg-[#f8fafc] [&_blockquote]:py-3.5 [&_blockquote]:px-5 [&_blockquote]:my-3 [&_blockquote]:rounded-r-md [&_blockquote]:italic [&_blockquote]:text-[#334155] [&_blockquote]:flow-root [&_pre]:bg-[#f1f5f9] [&_pre]:border-none [&_pre]:outline-none [&_pre]:p-5 [&_pre]:rounded-xl [&_pre]:italic [&_pre]:text-[#334155] [&_pre]:text-base [&_pre]:my-4 [&_pre]:max-w-full [&_pre]:box-border [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_pre]:flow-root transition-all duration-150"
                   dangerouslySetInnerHTML={{ __html: bodyContent }}
                 />
               </div>

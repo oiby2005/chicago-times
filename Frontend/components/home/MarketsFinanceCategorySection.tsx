@@ -28,7 +28,7 @@ const defaultArticles: MarketArticle[] = [
     id: "mf3",
     title: "Banking Sector Reports Resilience Amid Shifting Interest Rate Trends",
     slug: "banking-sector-reports-resilience",
-    imageUrl: "https://images.unsplash.com/photo-1461360370896-922624d12aa1?auto=format&fit=crop&w=600&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1461360370896-922624d12aa1?fm=webp&fit=crop&w=600&q=80",
   },
   {
     id: "mf4",
@@ -63,7 +63,7 @@ export const MarketsFinanceCategorySection: React.FC = () => {
             id: p.id,
             title: p.title,
             slug: p.slug || p.id,
-            imageUrl: p.thumbnail || "https://images.unsplash.com/photo-1461360370896-922624d12aa1?auto=format&fit=crop&w=600&q=80",
+            imageUrl: p.thumbnail || "https://images.unsplash.com/photo-1461360370896-922624d12aa1?fm=webp&fit=crop&w=600&q=80",
           }));
 
           const merged = [...formatted];

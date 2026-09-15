@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { convertFileToWebP } from "@/lib/webpConverter";
+import { slugifyAuthorName } from "@/data/authors";
 
 export interface UserProfile {
   id?: number;
@@ -35,8 +37,10 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
   const [linkedin, setLinkedin] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [showSavedToast, setShowSavedToast] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
+    setIsSaving(false);
     if (currentUser) {
       setFullName(currentUser.full_name || (currentUser as any).name || "User");
       setEmail(currentUser.email || "user@gmail.com");
@@ -67,18 +71,20 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
   const initials = getInitials(fullName);
 
   // File upload handler for "Change photo"
-  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setAvatarUrl(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      const webpUrl = await convertFileToWebP(file);
+      if (webpUrl) {
+        setAvatarUrl(webpUrl);
+      }
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    if (isSaving) return;
+    setIsSaving(true);
+
     const updatedUser: UserProfile = {
       ...(currentUser || {}),
       full_name: fullName,
@@ -89,21 +95,62 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
       avatar_url: avatarUrl,
     };
 
-    // Save to active user keys
-    localStorage.setItem("wsj_user", JSON.stringify(updatedUser));
-    sessionStorage.setItem("wsj_user", JSON.stringify(updatedUser));
+    // 1. Immediately apply to active session & trigger instant UI updates
+    try {
+      localStorage.setItem("wsj_user", JSON.stringify(updatedUser));
+      sessionStorage.setItem("wsj_user", JSON.stringify(updatedUser));
+    } catch (e) {}
 
-    const userRole = role.toLowerCase();
-    if (userRole === "writer" || email.toLowerCase().includes("writer")) {
-      localStorage.setItem("wsj_writer_user", JSON.stringify(updatedUser));
-      sessionStorage.setItem("wsj_writer_user", JSON.stringify(updatedUser));
-    } else if (userRole === "admin" || email.toLowerCase().includes("admin")) {
-      localStorage.setItem("wsj_admin_user", JSON.stringify(updatedUser));
-      sessionStorage.setItem("wsj_admin_user", JSON.stringify(updatedUser));
-    } else if (userRole === "reader" || email.toLowerCase().includes("reader")) {
-      localStorage.setItem("wsj_reader_user", JSON.stringify(updatedUser));
-      sessionStorage.setItem("wsj_reader_user", JSON.stringify(updatedUser));
+    // Broadcast user update event across all components instantly
+    window.dispatchEvent(new Event("wsj_user_updated"));
+
+    if (onSave) {
+      onSave(updatedUser);
     }
+
+    onClose();
+
+    // 2. Persist to Express Backend API & MySQL in background
+    try {
+      const res = await fetch("http://localhost:5000/api/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedUser),
+      });
+      if (res.ok) {
+        const resData = await res.json();
+        if (resData.success && resData.user) {
+          const finalAvatar = resData.user.avatar_url !== undefined && resData.user.avatar_url !== null ? resData.user.avatar_url : avatarUrl;
+          const finalUser = { ...updatedUser, ...resData.user, avatar_url: finalAvatar };
+          localStorage.setItem("wsj_user", JSON.stringify(finalUser));
+          sessionStorage.setItem("wsj_user", JSON.stringify(finalUser));
+          window.dispatchEvent(new Event("wsj_user_updated"));
+        }
+      }
+    } catch (e) {}
+
+    // Update posts created by this specific user
+    try {
+      const updatePostsAuthor = (key: string) => {
+        const raw = localStorage.getItem(key);
+        if (raw) {
+          const list = JSON.parse(raw);
+          if (Array.isArray(list)) {
+            const updatedList = list.map((p: any) => {
+              const pEmail = (p.authorEmail || "").toLowerCase().trim();
+              if (pEmail === email.toLowerCase().trim()) {
+                return { ...p, author: fullName };
+              }
+              return p;
+            });
+            localStorage.setItem(key, JSON.stringify(updatedList));
+          }
+        }
+      };
+      updatePostsAuthor("wsj_posts");
+      updatePostsAuthor("wsj_published_posts");
+      window.dispatchEvent(new Event("wsj_posts_updated"));
+    } catch (e) {}
 
     // Persist to stored accounts list
     try {
@@ -111,8 +158,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
       if (storedAccounts) {
         const accounts = JSON.parse(storedAccounts);
         const idx = accounts.findIndex((a: any) => 
-          (a.email && a.email.toLowerCase() === email.toLowerCase()) || 
-          (a.role && a.role.toLowerCase() === userRole)
+          a.email && a.email.toLowerCase() === email.toLowerCase()
         );
         if (idx !== -1) {
           accounts[idx] = {
@@ -121,12 +167,28 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
             name: fullName,
             bio: bio,
             linkedin: linkedin,
-            avatar_url: avatarUrl,
-            image: avatarUrl,
+            avatar_url: updatedUser.avatar_url,
+            image: updatedUser.avatar_url,
           };
           localStorage.setItem("wsj_accounts", JSON.stringify(accounts));
         }
       }
+    } catch (e) {}
+
+    // Save to user profiles map by email in localStorage
+    const userEmailLower = email.toLowerCase().trim();
+    const newSlug = slugifyAuthorName(fullName);
+
+    try {
+      const existingProfiles = JSON.parse(localStorage.getItem("wsj_users_by_email") || "{}");
+      existingProfiles[userEmailLower] = updatedUser;
+      localStorage.setItem("wsj_users_by_email", JSON.stringify(existingProfiles));
+
+      const slugMap = JSON.parse(localStorage.getItem("wsj_slug_to_email") || "{}");
+      slugMap[newSlug] = userEmailLower;
+      const prefix = userEmailLower.split("@")[0];
+      slugMap[prefix] = userEmailLower;
+      localStorage.setItem("wsj_slug_to_email", JSON.stringify(slugMap));
     } catch (e) {}
 
     // Broadcast user update event across components
@@ -137,6 +199,23 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
     }
 
     onClose();
+
+    // Dynamically update URL if currently on an author page or writer page
+    if (typeof window !== "undefined") {
+      const path = window.location.pathname;
+      const role = (updatedUser.role || "writer").toLowerCase();
+      let targetUrl = "";
+      if (path.includes("-dashboard")) {
+        targetUrl = `/${role}-dashboard/${newSlug}`;
+      } else if (path.includes("/author/")) {
+        targetUrl = `/author/${newSlug}`;
+      } else if (path.startsWith("/admin/") || path.startsWith("/writer/") || path.startsWith("/reader/")) {
+        targetUrl = `/${role}/${newSlug}`;
+      }
+      if (targetUrl && window.location.pathname !== targetUrl) {
+        window.location.href = targetUrl;
+      }
+    }
   };
 
   return (
@@ -252,9 +331,11 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
             </label>
             <div className="relative flex items-center">
               <div className="absolute left-3.5 flex items-center justify-center pointer-events-none">
-                {/* LinkedIn Badge Icon matching screenshot */}
-                <div className="w-5 h-5 bg-[#0a66c2] rounded-xs flex items-center justify-center text-white font-bold text-[11px] font-sans leading-none">
-                  in
+                {/* LinkedIn Badge Icon matching Image 2 */}
+                <div className="w-5 h-5 flex items-center justify-center cursor-default">
+                  <svg className="w-5 h-5 text-[#0077b5] fill-current" viewBox="0 0 24 24">
+                    <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                  </svg>
                 </div>
               </div>
               <input
@@ -283,9 +364,10 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
           <button
             type="button"
             onClick={handleSave}
-            className="w-1/2 py-3.5 bg-[#00487c] hover:bg-[#003862] text-white font-mono font-bold text-[13.5px] sm:text-[14px] tracking-wider uppercase rounded-xl transition-all shadow-md cursor-pointer text-center"
+            disabled={isSaving}
+            className="w-1/2 py-3.5 bg-[#00487c] hover:bg-[#003862] text-white font-mono font-bold text-[13.5px] sm:text-[14px] tracking-wider uppercase rounded-xl transition-all shadow-md cursor-pointer text-center disabled:opacity-50"
           >
-            SAVE CHANGES
+            {isSaving ? "SAVING..." : "SAVE CHANGES"}
           </button>
         </div>
 

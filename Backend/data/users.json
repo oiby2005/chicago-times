@@ -1,0 +1,82 @@
+{
+  "admin@gmail.com": {
+    "id": 127,
+    "full_name": "admin1",
+    "email": "admin@gmail.com",
+    "role": "admin",
+    "bio": "System",
+    "avatar_url": "https://f005.backblazeb2.com/file/timeschicago/avatars/avatar_admin_gmail_com_1788851756644.webp",
+    "linkedin": "",
+    "is_default_admin": false,
+    "created_at": "2026-09-11T01:06:45.000Z"
+  },
+  "writer@gmail.com": {
+    "id": 119,
+    "full_name": "Imaya",
+    "email": "writer@gmail.com",
+    "role": "writer",
+    "bio": "Creative Thinking",
+    "avatar_url": "https://f005.backblazeb2.com/file/timeschicago/avatars/avatar_writer_gmail_com_1788855462970.webp",
+    "linkedin": "https://www.wsj.com/",
+    "is_default_admin": false
+  },
+  "reader@gmail.com": {
+    "id": 120,
+    "full_name": "John",
+    "email": "reader@gmail.com",
+    "role": "reader",
+    "bio": "Avid Reader and Community Subscriber",
+    "avatar_url": "https://f005.backblazeb2.com/file/timeschicago/avatars/avatar_reader_gmail_com_1788851735337.webp",
+    "linkedin": "",
+    "is_default_admin": false
+  },
+  "writer1@gmail.com": {
+    "id": 121,
+    "full_name": "Mayon",
+    "email": "writer1@gmail.com",
+    "role": "writer",
+    "bio": "Journalist & Writer covering technology, innovation, and global developments.",
+    "avatar_url": "https://f005.backblazeb2.com/file/timeschicago/avatars/avatar_writer1_gmail_com_1789032192513.webp",
+    "linkedin": "https://www.linkedin.com/in/your-profile",
+    "is_default_admin": false
+  },
+  "akramyoonos006@gmail.com": {
+    "id": 122,
+    "full_name": "Akram Yanoos",
+    "email": "akramyoonos006@gmail.com",
+    "role": "admin",
+    "bio": "Default System Administrator",
+    "avatar_url": "https://f005.backblazeb2.com/file/timeschicago/avatars/avatar_akramyoonos006_gmail_com_1788839577006.webp",
+    "linkedin": "",
+    "is_default_admin": true
+  },
+  "geethliyanage979@gmail.com": {
+    "id": 123,
+    "full_name": "Geeth Liyanage",
+    "email": "geethliyanage979@gmail.com",
+    "role": "admin",
+    "bio": "Default System Administrator",
+    "avatar_url": "",
+    "linkedin": "",
+    "is_default_admin": true
+  },
+  "timeschicago17@gmail.com": {
+    "id": 124,
+    "full_name": "Times Chicago",
+    "email": "timeschicago17@gmail.com",
+    "role": "admin",
+    "bio": "Default System Administrator",
+    "avatar_url": "",
+    "linkedin": "",
+    "is_default_admin": true
+  },
+  "oshidiishmitha@gmail.com": {
+    "id": 140,
+    "full_name": "Oshidi Ishmitha",
+    "email": "oshidiishmitha@gmail.com",
+    "role": "reader",
+    "bio": "",
+    "avatar_url": "https://lh3.googleusercontent.com/a/ACg8ocKi3gAaAnbAIV6tW5RiehaBK_U3uahizFN3GRJsOT7H1Y3Brg=s96-c",
+    "is_default_admin": false
+  }
+}
