@@ -91,7 +91,7 @@ export const StickyHeaderBar: React.FC = () => {
     <div className="sticky top-0 z-40 w-full bg-white border-b border-[#d4d4d4] shadow-sm transition-all duration-200 select-none">
       <Container>
         {/* Top Header Row of Sticky Bar */}
-        <div className="flex items-center justify-between h-9 sm:h-11 border-b border-[#f0f0f0] relative px-2 sm:px-0">
+        <div className="flex items-center justify-between h-10 sm:h-12 border-b border-[#f0f0f0] relative px-2 sm:px-0">
           {/* Left Action Button: Newsletter */}
           <div className="hidden md:flex items-center z-10 shrink-0">
             <Link
@@ -109,7 +109,7 @@ export const StickyHeaderBar: React.FC = () => {
               <img
                 src="/images/design-reference/Times Chicago.svg"
                 alt="Times Chicago"
-                className="h-3.5 sm:h-5 md:h-6 w-auto object-contain block"
+                className="h-5 sm:h-7 md:h-8 w-auto object-contain block"
               />
             </Link>
           </div>
