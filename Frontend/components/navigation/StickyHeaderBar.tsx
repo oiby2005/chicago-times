@@ -91,12 +91,12 @@ export const StickyHeaderBar: React.FC = () => {
     <div className="sticky top-0 z-40 w-full bg-white border-b border-[#d4d4d4] shadow-sm transition-all duration-200 select-none">
       <Container>
         {/* Top Header Row of Sticky Bar */}
-        <div className="flex items-center justify-between h-10 sm:h-12 border-b border-[#f0f0f0] relative px-2 sm:px-0">
+        <div className="flex items-center justify-between h-12 sm:h-14 md:h-16 border-b border-[#f0f0f0] relative px-2 sm:px-0">
           {/* Left Action Button: Newsletter */}
           <div className="hidden md:flex items-center z-10 shrink-0">
             <Link
               href="/newsletters"
-              className="h-6 sm:h-7 bg-black hover:bg-gray-800 text-white font-sans text-[10px] sm:text-[11px] font-bold px-2 sm:px-2.5 rounded-none tracking-tight transition-colors whitespace-nowrap flex items-center justify-center leading-none cursor-pointer"
+              className="h-7 sm:h-8 bg-black hover:bg-gray-800 text-white font-sans text-[11px] sm:text-[12px] font-bold px-3 py-1 rounded-none tracking-tight transition-colors whitespace-nowrap flex items-center justify-center leading-none cursor-pointer"
               suppressHydrationWarning
             >
               Newsletter
@@ -104,12 +104,12 @@ export const StickyHeaderBar: React.FC = () => {
           </div>
 
           {/* Centered Masthead Logo on desktop, left-aligned on mobile */}
-          <div className="static md:absolute md:left-1/2 md:-translate-x-1/2 shrink-0">
-            <Link href="/">
+          <div className="static md:absolute md:left-1/2 md:-translate-x-1/2 shrink-0 flex items-center justify-center">
+            <Link href="/" className="inline-block py-1">
               <img
                 src="/images/design-reference/Times Chicago.svg"
                 alt="Times Chicago"
-                className="h-5 sm:h-7 md:h-8 w-auto object-contain block"
+                className="h-7 sm:h-9 md:h-10 lg:h-11 w-auto object-contain block max-h-12"
               />
             </Link>
           </div>
