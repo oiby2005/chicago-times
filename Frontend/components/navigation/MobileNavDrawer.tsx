@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { getCategoryRoute, allCategories } from "@/components/navigation/Navbar";
+import { getCategoryRoute, allCategories, megaMenuData } from "@/components/navigation/Navbar";
 import SpecialOfferPopover from "@/components/navigation/SpecialOfferPopover";
 import { UserProfile } from "@/components/ui/ProfileSettingsModal";
 
@@ -19,6 +19,8 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({
   currentUser,
   onOpenSearch,
 }) => {
+  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
+
   // Lock body scroll when drawer is open
   useEffect(() => {
     if (isOpen) {
@@ -36,6 +38,13 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({
   const isLoggedIn = currentUser !== null;
   const displayName = currentUser?.full_name || "";
   const displayEmail = currentUser?.email || "";
+
+  const toggleCategory = (cat: string) => {
+    setExpandedCategories((prev) => ({
+      ...prev,
+      [cat]: !prev[cat],
+    }));
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex lg:hidden">
@@ -101,23 +110,69 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({
           </SpecialOfferPopover>
         </div>
 
-        {/* Main Categories Navigation List */}
+        {/* Main Categories Navigation List with Sub-Category Accordions */}
         <div className="flex-1 px-4 py-3 overflow-y-auto">
           <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2 font-sans">
-            Sections
+            Sections & Categories
           </div>
           <ul className="space-y-1">
-            {allCategories.map((cat) => (
-              <li key={cat}>
-                <Link
-                  href={getCategoryRoute(cat)}
-                  onClick={onClose}
-                  className="block py-2 text-sm font-sans font-medium text-[#222222] hover:text-black hover:bg-gray-50 px-2 rounded-none transition-colors"
-                >
-                  {cat}
-                </Link>
-              </li>
-            ))}
+            {allCategories.map((cat) => {
+              const subMenu = megaMenuData[cat];
+              const subLinks = subMenu?.columns?.[0]?.links || [];
+              const hasSubLinks = subLinks.length > 0;
+              const isExpanded = Boolean(expandedCategories[cat]);
+
+              return (
+                <li key={cat} className="border-b border-[#f4f4f5] last:border-b-0">
+                  <div className="flex items-center justify-between py-1.5 hover:bg-gray-50 px-1 rounded-sm">
+                    {/* Category Title Link */}
+                    <Link
+                      href={getCategoryRoute(cat)}
+                      onClick={onClose}
+                      className="text-sm font-sans font-semibold text-[#111111] hover:text-[#990000] transition-colors flex-1"
+                    >
+                      {cat}
+                    </Link>
+
+                    {/* Accordion Expand / Collapse Toggle Caret */}
+                    {hasSubLinks && (
+                      <button
+                        type="button"
+                        onClick={() => toggleCategory(cat)}
+                        className="p-1 text-gray-500 hover:text-black cursor-pointer focus:outline-none shrink-0"
+                        aria-label={`Toggle ${cat} sub-categories`}
+                      >
+                        <svg
+                          className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? "rotate-180 text-[#990000]" : ""}`}
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Collapsible Sub-Categories List */}
+                  {hasSubLinks && isExpanded && (
+                    <div className="pl-3 py-1.5 space-y-1 border-l-2 border-[#b8860b] ml-2 mb-1.5 bg-[#fafafa] rounded-r-sm animate-in fade-in duration-150">
+                      {subLinks.map((link) => (
+                        <Link
+                          key={link.name}
+                          href={link.href}
+                          onClick={onClose}
+                          className="block text-xs font-sans text-[#444444] hover:text-[#990000] hover:underline py-1 px-1 transition-colors"
+                        >
+                          {link.name}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </div>
 

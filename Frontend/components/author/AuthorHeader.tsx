@@ -149,78 +149,77 @@ export default function AuthorHeader({ author = defaultAuthor }: AuthorHeaderPro
           <span>GO BACK</span>
         </button>
 
-        {/* Author Bio Header Card (Vertical Layout: Details directly under Square Image) */}
+        {/* Author Bio Header Card (Vertical Layout: Details directly under Image) */}
         <div className="flex flex-col items-start gap-4">
-          {/* Square Avatar Photo */}
-          <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-none overflow-hidden shrink-0 border border-gray-200 shadow-xs bg-gray-100 flex items-center justify-center">
+          {/* Avatar Photo with Rounded Corners (Small & proportional on all screen sizes) */}
+          <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-24 md:h-24 rounded-xl overflow-hidden shrink-0 border border-gray-200 shadow-xs bg-gray-100 flex items-center justify-center aspect-square">
             {profile.image && profile.image.trim() !== "" ? (
               <img
                 src={profile.image}
                 alt={profile.name}
-                className="w-full h-full object-cover rounded-none"
+                className="w-full h-full object-cover object-center rounded-xl aspect-square"
               />
             ) : (
-              <div className="w-full h-full bg-[#111111] text-white font-bold text-3xl sm:text-4xl flex items-center justify-center rounded-none">
+              <div className="w-full h-full bg-[#111111] text-white font-bold text-xl sm:text-2xl flex items-center justify-center rounded-xl">
                 {getInitials(profile.name)}
               </div>
             )}
           </div>
 
           {/* Author Details - Positioned directly UNDER the image */}
-          <div className="w-full pt-1 space-y-1.5">
-            {/* Name + LinkedIn Icon + X Icon + Mail Icon */}
-            <div className="flex items-center gap-3 flex-wrap">
-              <h1 className="font-serif font-bold text-2xl sm:text-3xl md:text-4xl text-[#111111] leading-tight">
-                {profile.name}
-              </h1>
+          <div className="w-full pt-1 space-y-2">
+            {/* 1. Name */}
+            <h1 className="font-serif font-bold text-2xl sm:text-3xl md:text-4xl text-[#111111] leading-tight">
+              {profile.name}
+            </h1>
 
-              <div className="flex items-center space-x-2.5">
-                {/* LinkedIn Icon */}
-                <a
-                  href={profile.linkedinUrl || "https://www.linkedin.com"}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center justify-center hover:opacity-80 transition-opacity cursor-pointer text-[#0077b5]"
-                  title="LinkedIn Profile"
-                >
-                  <svg className="w-5.5 h-5.5 sm:w-6 sm:h-6 fill-current" viewBox="0 0 24 24">
-                    <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
-                  </svg>
-                </a>
-
-                {/* Original X Icon (x.com) */}
-                <a
-                  href={profile.twitterUrl || "https://x.com"}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center justify-center hover:opacity-80 transition-opacity cursor-pointer text-[#111111]"
-                  title="X (Twitter) Profile"
-                >
-                  <svg className="w-5 h-5 sm:w-5.5 sm:h-5.5 fill-current" viewBox="0 0 24 24">
-                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                  </svg>
-                </a>
-
-                {/* Mail Icon */}
-                <a
-                  href={`mailto:${profile.email || "info@timeschicago.com"}`}
-                  className="inline-flex items-center justify-center hover:opacity-80 transition-opacity cursor-pointer text-[#333333] hover:text-[#990000]"
-                  title={`Email ${profile.name}`}
-                >
-                  <svg className="w-5.5 h-5.5 sm:w-6 sm:h-6 fill-current" viewBox="0 0 24 24">
-                    <path d="M1.5 4.5a3 3 0 0 1 3-3h15a3 3 0 0 1 3 3v15a3 3 0 0 1-3 3h-15a3 3 0 0 1-3-3v-15zm3-1.5a1.5 1.5 0 0 0-1.5 1.5v.735l10.5 6.3 10.5-6.3V4.5a1.5 1.5 0 0 0-1.5-1.5h-15zm19.5 4.365l-10.11 6.066a.75.75 0 0 1-.78 0L3 7.365V19.5a1.5 1.5 0 0 0 1.5 1.5h15a1.5 1.5 0 0 0 1.5-1.5V7.365z"/>
-                  </svg>
-                </a>
-              </div>
-            </div>
-
-            {/* Role Badge */}
+            {/* 2. Role Badge (e.g. WRITER) */}
             <div className="font-sans font-bold text-xs sm:text-sm uppercase tracking-wider text-[#990000]">
               {profile.role}
             </div>
 
-            {/* Bio Description */}
-            <p className="font-sans text-xs sm:text-sm text-[#555555] leading-relaxed max-w-3xl pt-1">
+            {/* 3. Social Icons Row - Positioned directly UNDER "Writer" */}
+            <div className="flex items-center space-x-3 pt-0.5 pb-1 flex-wrap overflow-visible">
+              {/* LinkedIn Icon */}
+              <a
+                href={profile.linkedinUrl || "https://www.linkedin.com"}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center justify-center hover:opacity-80 transition-opacity cursor-pointer text-[#0077b5] shrink-0 p-0.5"
+                title="LinkedIn Profile"
+              >
+                <svg className="w-5 h-5 sm:w-6 sm:h-6 fill-current shrink-0" viewBox="0 0 24 24">
+                  <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                </svg>
+              </a>
+
+              {/* Original X Icon (x.com) */}
+              <a
+                href={profile.twitterUrl || "https://x.com"}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center justify-center hover:opacity-80 transition-opacity cursor-pointer text-[#111111] shrink-0 p-0.5"
+                title="X (Twitter) Profile"
+              >
+                <svg className="w-5 h-5 sm:w-6 sm:h-6 fill-current shrink-0" viewBox="0 0 24 24">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                </svg>
+              </a>
+
+              {/* Mail Icon - Uncropped */}
+              <a
+                href={`mailto:${profile.email || "info@timeschicago.com"}`}
+                className="inline-flex items-center justify-center hover:opacity-80 transition-opacity cursor-pointer text-[#333333] hover:text-[#990000] shrink-0 p-0.5 overflow-visible"
+                title={`Email ${profile.name}`}
+              >
+                <svg className="w-5 h-5 sm:w-6 sm:h-6 fill-current shrink-0 overflow-visible" viewBox="0 0 24 24">
+                  <path d="M1.5 4.5a3 3 0 0 1 3-3h15a3 3 0 0 1 3 3v15a3 3 0 0 1-3 3h-15a3 3 0 0 1-3-3v-15zm3-1.5a1.5 1.5 0 0 0-1.5 1.5v.735l10.5 6.3 10.5-6.3V4.5a1.5 1.5 0 0 0-1.5-1.5h-15zm19.5 4.365l-10.11 6.066a.75.75 0 0 1-.78 0L3 7.365V19.5a1.5 1.5 0 0 0 1.5 1.5h15a1.5 1.5 0 0 0 1.5-1.5V7.365z"/>
+                </svg>
+              </a>
+            </div>
+
+            {/* 4. Bio Description - Extends 100% Full Width */}
+            <p className="font-sans text-xs sm:text-sm text-[#555555] leading-relaxed w-full max-w-none pt-0.5">
               {profile.bio}
             </p>
           </div>

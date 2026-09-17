@@ -23,7 +23,7 @@ interface CategoryMegaMenu {
   columns: ColumnGroup[];
 }
 
-const megaMenuData: Record<string, CategoryMegaMenu> = {
+export const megaMenuData: Record<string, CategoryMegaMenu> = {
   News: {
     title: "News",
     href: "/news",

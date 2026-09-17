@@ -345,53 +345,6 @@ export const LogoHeader: React.FC = () => {
             Top 20 Billionaires
           </a>
         </div>
-
-        {/* Mobile Action Buttons Row (Strictly BELOW English Edition Links) */}
-        <div className="flex md:hidden items-center justify-center space-x-2 pt-2 pb-1 border-t border-gray-100 mt-1">
-          <Link href="/newsletters">
-            <button className="h-7 bg-black hover:bg-gray-800 text-white font-sans text-[11px] font-bold px-3 transition-colors whitespace-nowrap flex items-center justify-center leading-none rounded-none cursor-pointer">
-              Newsletter
-            </button>
-          </Link>
-
-          <SpecialOfferPopover>
-            <button className="h-7 bg-[#007cb9] hover:bg-[#006996] text-white font-sans text-[11px] font-bold px-3 transition-colors whitespace-nowrap flex items-center justify-center leading-none rounded-none cursor-pointer shadow-xs">
-              Special Offer
-            </button>
-          </SpecialOfferPopover>
-
-          {isLoggedIn ? (
-            <div className="relative" ref={mobileDropdownRef}>
-              <button
-                onClick={() => setShowDropdown(!showDropdown)}
-                className="w-7 h-7 bg-[#f3f4f6] hover:bg-[#e5e7eb] border-2 border-[#1e293b] rounded-full flex items-center justify-center relative overflow-hidden transition-colors cursor-pointer shadow-xs shrink-0"
-                aria-label="User Profile"
-                title={displayName}
-              >
-                {currentUser?.avatar_url ? (
-                  <img
-                    src={currentUser.avatar_url}
-                    alt={displayName}
-                    className="w-full h-full object-cover rounded-full"
-                  />
-                ) : (
-                  <svg className="w-4 h-4 text-[#1e293b]" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                  </svg>
-                )}
-                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#00c853] border-2 border-white rounded-full shadow-2xs z-10" />
-              </button>
-
-              {showDropdown && renderDropdownMenu()}
-            </div>
-          ) : (
-            <Link href="/signin">
-              <button className="h-7 bg-white hover:bg-gray-50 text-black border border-[#333333] hover:border-black font-sans text-[11px] font-bold px-3 transition-colors whitespace-nowrap flex items-center justify-center leading-none rounded-none cursor-pointer">
-                Sign In
-              </button>
-            </Link>
-          )}
-        </div>
       </div>
 
       {/* Render Profile Settings Modal */}

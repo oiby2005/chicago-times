@@ -90,7 +90,20 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
   const photoCaption = customPost?.photoCaption || staticArticle.photoCaption || "";
   const rawBodyHtml = customPost?.bodyContent || null;
   const bodyHtml = rawBodyHtml
-    ? rawBodyHtml.replace(/src=["']([^"']+)["']/g, (match: string, src: string) => `src="${ensureWebpUrl(src)}"`)
+    ? rawBodyHtml
+        .replace(/src=["']([^"']+)["']/g, (match: string, src: string) => `src="${ensureWebpUrl(src)}"`)
+        .replace(/<a\b([^>]*)>/gi, (match: string, p1: string) => {
+          let attrs = p1;
+          if (!/target\s*=/i.test(attrs)) {
+            attrs += ' target="_blank"';
+          } else {
+            attrs = attrs.replace(/target\s*=\s*(['"])[^'"]*\1/gi, 'target="_blank"');
+          }
+          if (!/rel\s*=/i.test(attrs)) {
+            attrs += ' rel="noopener noreferrer"';
+          }
+          return `<a${attrs}>`;
+        })
     : null;
   const tags: string[] = customPost?.tags || [];
 

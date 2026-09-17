@@ -13,16 +13,38 @@ export interface PodcastSlot {
   status: string;
 }
 
-const DEFAULT_PODCAST_SLOT: PodcastSlot = {
-  id: "podcast_1",
-  slotNumber: 1,
-  videoUrl: "https://www.wsj.com/podcasts/the-journal",
-  platform: "Youtube Video",
-  title: "The Journal: Daily Economic & Financial Deep Dive Podcast",
-  thumbnailUrl: "https://images.unsplash.com/photo-1590602847861-f357a9332bbc?fm=webp&fit=crop&w=600&q=80",
-  duration: "24:15",
-  status: "Active",
-};
+const DEFAULT_PODCAST_SLOTS: PodcastSlot[] = [
+  {
+    id: "podcast_slot_1",
+    slotNumber: 1,
+    videoUrl: "https://podcasts.apple.com/us/podcast/liv-golfs-%245-billion-path-to-bankruptcy/id1578096201?i=1000789339748",
+    platform: "Apple Podcasts",
+    title: "LIV Golf’s $5 Billion Path to Bankruptcy",
+    thumbnailUrl: "https://images.unsplash.com/photo-1590602847861-f357a9332bbc?fm=webp&fit=crop&w=600&q=80",
+    duration: "16:24",
+    status: "Active",
+  },
+  {
+    id: "podcast_slot_2",
+    slotNumber: 2,
+    videoUrl: "https://www.youtube.com/watch?v=rv1",
+    platform: "Apple Podcasts",
+    title: "The Market Watch: Federal Reserve Rate Strategy & Global Outlook",
+    thumbnailUrl: "https://images.unsplash.com/photo-1478737270239-2f02b77fc618?fm=webp&fit=crop&w=600&q=80",
+    duration: "18:30",
+    status: "Active",
+  },
+  {
+    id: "podcast_slot_3",
+    slotNumber: 3,
+    videoUrl: "https://podcasts.apple.com/in/podcast/story-of-kandy-temple-jadetimes-talk-travel-episode-01/id1791836245?i=1000685037348&l=kn",
+    platform: "Apple Podcasts",
+    title: "Story of Kandy Temple | Jadetimes Talk | Travel Episode 01",
+    thumbnailUrl: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?fm=webp&fit=crop&w=600&q=80",
+    duration: "8:27",
+    status: "Active",
+  },
+];
 
 function decodeHtmlEntities(str: string): string {
   if (!str) return "";
@@ -49,48 +71,60 @@ interface PodcastSectionProps {
 }
 
 export const PodcastSection: React.FC<PodcastSectionProps> = ({ onActiveCountChange }) => {
-  const [podcasts, setPodcasts] = useState<PodcastSlot[]>([DEFAULT_PODCAST_SLOT]);
+  const [podcasts, setPodcasts] = useState<PodcastSlot[]>(DEFAULT_PODCAST_SLOTS);
 
   const loadSlots = async () => {
-    let activePods: PodcastSlot[] = [];
-
     if (typeof window !== "undefined") {
-      // 1. ALWAYS attempt fresh fetch from backend API first
+      const podMap = new Map<number, PodcastSlot>();
+      DEFAULT_PODCAST_SLOTS.forEach((d) => podMap.set(d.slotNumber, d));
+
       try {
         const res = await fetch("http://localhost:5000/api/shorts", { cache: "no-store" });
         if (res.ok) {
           const data = await res.json();
           if (data.success && Array.isArray(data.slots)) {
             const allPods = data.slots.filter(
-              (v: any) => (v.id?.includes("podcast") || v.id?.includes("pod") || v.subTab === "podcast")
+              (v: any) =>
+                v.id?.includes("podcast") ||
+                v.id?.includes("pod") ||
+                (v.subTab || "").toLowerCase() === "podcast"
             );
-            activePods = allPods.filter(
-              (v: any) => (v.status || "Active").toLowerCase() !== "inactive" && v.videoUrl
-            );
+            // Sort so canonical podcast_slot_ IDs take precedence over legacy ones
+            allPods.sort((a: any, b: any) => (a.id?.includes("_slot_") ? 1 : -1));
+            allPods.forEach((p: any) => {
+              const num = Number(p.slotNumber || 1);
+              if (num >= 1 && num <= 3) {
+                if ((p.status || "Active").toLowerCase() !== "inactive" && p.videoUrl && p.videoUrl.trim() !== "") {
+                  podMap.set(num, { ...p, id: `podcast_slot_${num}` });
+                } else if ((p.status || "").toLowerCase() === "inactive" || !p.videoUrl || p.videoUrl.trim() === "") {
+                  podMap.delete(num);
+                }
+              }
+            });
           }
         }
       } catch (err) {}
 
-      // 2. Fallback to localStorage if offline or empty backend response
-      if (activePods.length === 0) {
-        const saved = localStorage.getItem("wsj_podcast_slots");
-        if (saved) {
-          try {
-            const parsed = JSON.parse(saved);
-            if (Array.isArray(parsed) && parsed.length > 0) {
-              activePods = parsed.filter(
-                (p: PodcastSlot) => (p.status || "Active").toLowerCase() !== "inactive" && p.videoUrl && (p.id?.includes("podcast") || p.id?.includes("pod") || (p as any).subTab === "podcast")
-              );
-            }
-          } catch (e) {}
-        }
+      const saved = localStorage.getItem("wsj_podcast_slots");
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            parsed.forEach((p: PodcastSlot) => {
+              const num = Number(p.slotNumber || 1);
+              if (num >= 1 && num <= 3) {
+                if ((p.status || "Active").toLowerCase() !== "inactive" && p.videoUrl && p.videoUrl.trim() !== "") {
+                  podMap.set(num, { ...p, id: `podcast_slot_${num}` });
+                } else if ((p.status || "").toLowerCase() === "inactive" || !p.videoUrl || p.videoUrl.trim() === "") {
+                  podMap.delete(num);
+                }
+              }
+            });
+          }
+        } catch (e) {}
       }
 
-      if (activePods.length === 0) {
-        activePods = [DEFAULT_PODCAST_SLOT];
-      }
-
-      // Sort by slotNumber ASC
+      const activePods = Array.from(podMap.values());
       activePods.sort((a, b) => Number(a.slotNumber || 1) - Number(b.slotNumber || 1));
       setPodcasts(activePods);
 
@@ -125,7 +159,7 @@ export const PodcastSection: React.FC<PodcastSectionProps> = ({ onActiveCountCha
               <img
                 src={podcast.thumbnailUrl || "https://images.unsplash.com/photo-1590602847861-f357a9332bbc?fm=webp&fit=crop&w=600&q=80"}
                 alt={displayTitle}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
               />
 
               {/* Top Left: Sound Button Pill */}

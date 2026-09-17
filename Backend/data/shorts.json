@@ -1,100 +1,149 @@
 {
   "recommended": [
     {
-      "id": "recommended_slot_1",
-      "slotNumber": 1,
-      "videoUrl": "https://www.instagram.com/reel/DdEzx4aRVpB/?utm_source=ig_web_copy_link&stkn=NTc4MTIwNjQ2YQ==",
-      "platform": "Instagram shorts",
-      "title": "Red Bull Bike on Instagram: \"still wrapping our heads around this one ‍\n\nIf you haven’t watched @brandonsemenuk, @frix.frix, @kade_2000 and @r_doggystyles in Parallel III yet, don‘t waste any time and hit that link in bio. \n\n#mtb #freeride #biking #mountainbiking #bikelife\"",
-      "thumbnailUrl": "https://f005.backblazeb2.com/file/timeschicago/cover_images/cover_1789090772215_1789090772513.jpg",
-      "duration": "0:45",
-      "status": "Active",
-      "subTab": "recommended",
-      "createdAt": "2026-09-11T01:28:12.000Z"
-    },
-    {
       "id": "recommended_slot_2",
       "slotNumber": 2,
-      "videoUrl": "https://www.facebook.com/reel/1638383828074517",
+      "videoUrl": "https://www.instagram.com/bbcfootball/reel/DdZL1hmCWr_/",
       "platform": "Instagram shorts",
-      "title": "Tristan Harris, co-founder of the Center for Humane Technology, weighs in on artificial intelligence and how worried people should be about rapid advancements. | CBS Evening News",
-      "thumbnailUrl": "https://f005.backblazeb2.com/file/timeschicago/cover_images/cover_1789090852267_1789090852346.jpg",
+      "title": "Match of the Day on Instagram: \"The Canadian Prime Minister supports Everton! ⁣\n⁣\nHere's why ⬆️\"",
+      "thumbnailUrl": "https://f005.backblazeb2.com/file/timeschicago/cover_images/cover_1789671094306_1789671094596.jpg",
       "duration": "0:45",
       "status": "Active",
-      "createdAt": "2026-09-11T01:42:41.348Z"
+      "createdAt": "2026-09-17T18:53:24.016Z"
     },
     {
       "id": "recommended_slot_3",
       "slotNumber": 3,
-      "videoUrl": "https://rumble.com/v7fbkby-a-russian-drone-hit-leipzig-and-left-its-passport-behind.html?e9s=src_v1_news%2Csrc_v1_hp_rs",
+      "videoUrl": "https://rumble.com/v7flgom-ep-3994b-ff-countermeasures-alien-terrorist-removal-was-just-tested-for-mas.html?e9s=src_v1_leaderboard%2Csrc_v2_hp",
       "platform": "Rumble Video",
-      "title": "A 'Russian' Drone Hit Leipzig And Left Its Passport Behind",
-      "thumbnailUrl": "https://f005.backblazeb2.com/file/timeschicago/cover_images/cover_1789090776027_1789090777381.jpg",
-      "duration": "31:47",
+      "title": "Ep 3994b - [FF] Countermeasures, Alien Terrorist Removal Was Just Tested For Mass Roundups",
+      "thumbnailUrl": "https://f005.backblazeb2.com/file/timeschicago/cover_images/cover_1789668622106_1789668624169.jpg",
+      "duration": "1:05:00",
       "status": "Active",
       "subTab": "recommended",
-      "createdAt": "2026-09-11T01:28:12.000Z"
+      "createdAt": "2026-09-17T18:51:36.000Z"
     },
     {
       "id": "recommended_slot_4",
       "slotNumber": 4,
-      "videoUrl": "https://www.youtube.com/shorts/4eG5uEay0J4",
+      "videoUrl": "https://www.youtube.com/shorts/vp8Ohac5YJc",
       "platform": "YouTube Shorts",
-      "title": "Apple unveils new foldable iPhone. #BBCNews",
-      "thumbnailUrl": "https://f005.backblazeb2.com/file/timeschicago/cover_images/cover_1789090779192_1789090779347.jpg",
-      "duration": "1:00",
+      "title": "Lena Dunham announces birth of first baby via surrogacy after fertility struggles. #BBCNews",
+      "thumbnailUrl": "https://f005.backblazeb2.com/file/timeschicago/cover_images/cover_1789668315692_1789668315877.jpg",
+      "duration": "0:50",
       "status": "Active",
       "subTab": "recommended",
-      "createdAt": "2026-09-11T01:28:12.000Z"
+      "createdAt": "2026-09-17T18:51:36.000Z"
     },
     {
       "id": "recommended_slot_5",
       "slotNumber": 5,
-      "videoUrl": "https://www.youtube.com/shorts/DISPbVb2zf8",
-      "platform": "YouTube Shorts",
-      "title": "BBC drops Drag Race UK after eight series. #DragRaceUK #RuPaul #BBCNews",
-      "thumbnailUrl": "https://f005.backblazeb2.com/file/timeschicago/cover_images/cover_1789090780471_1789090780537.jpg",
-      "duration": "0:43",
+      "videoUrl": "https://www.facebook.com/reel/1850508219448108/?s=fb_shorts_profile&stack_idx=0",
+      "platform": "Facebook Short",
+      "title": "Between a third to a half of people in the UK work even when sick, according to research - something experts call presenteeism. Find out which generation takes the most sick days: https://bbc.in/4xzlerj | BBC News",
+      "thumbnailUrl": "https://f005.backblazeb2.com/file/timeschicago/cover_images/cover_1789668433598_1789668433675.jpg",
+      "duration": "0:45",
       "status": "Active",
       "subTab": "recommended",
-      "createdAt": "2026-09-11T01:28:12.000Z"
+      "createdAt": "2026-09-17T18:51:36.000Z"
+    },
+    {
+      "id": "recommended_slot_1",
+      "slotNumber": 1,
+      "videoUrl": "https://www.facebook.com/reel/1760190338558276/?s=fb_shorts_profile&stack_idx=0",
+      "platform": "Facebook Short",
+      "title": "MPs voted against proposals to legalise assisted dying in England and Wales, bringing the latest effort to change the law to an end. Read more: https://bbc.in/4r5cyqY | BBC News",
+      "thumbnailUrl": "https://f005.backblazeb2.com/file/timeschicago/cover_images/cover_1789671056166_1789671056249.jpg",
+      "duration": "0:45",
+      "status": "Active",
+      "subTab": "recommended",
+      "createdAt": "2026-09-17T18:51:34.000Z"
     }
   ],
   "podcast": [
     {
       "id": "podcast_slot_1",
       "slotNumber": 1,
-      "videoUrl": "https://podcasts.apple.com/us/podcast/liv-golfs-%245-billion-path-to-bankruptcy/id1578096201?i=1000789339748",
+      "videoUrl": "https://podcasts.apple.com/us/podcast/cruel-summer%3A-the-violent-death-of-tiffany-valiante/id6801170249",
       "platform": "Apple Podcasts",
-      "title": "LIV Golf’s $5 Billion Path to Bankruptcy",
-      "thumbnailUrl": "https://f005.backblazeb2.com/file/timeschicago/cover_images/cover_1789447199597_1789447201098.jpg",
-      "duration": "16:24",
+      "title": "Cruel Summer: The Violent Death of Tiffany Valiante",
+      "thumbnailUrl": "https://f005.backblazeb2.com/file/timeschicago/cover_images/cover_1789670333027_1789670333497.jpg",
+      "duration": "40:34",
       "status": "Active",
       "subTab": "podcast",
-      "createdAt": "2026-09-15T05:19:52.000Z"
+      "createdAt": "2026-09-17T18:53:47.000Z"
     },
     {
-      "id": "podcast_2",
+      "id": "podcast_slot_2",
       "slotNumber": 2,
-      "videoUrl": "https://podcasts.apple.com/us/podcast/haitians-live-in-a-dual-state-in-ohio-right-now/id73330715?i=1000789109676",
+      "videoUrl": "https://podcasts.apple.com/us/podcast/killer-summer/id6787232239",
       "platform": "Apple Podcasts",
-      "title": "Haitians Live in a Dual State in Ohio Right Now",
-      "thumbnailUrl": "https://f005.backblazeb2.com/file/timeschicago/cover_images/cover_1789449163659_1789449165556.jpg",
-      "duration": "50:21",
-      "status": "Active",
-      "createdAt": "2026-09-15T05:21:15.351Z"
+      "title": "Killer Summer",
+      "thumbnailUrl": "https://f005.backblazeb2.com/file/timeschicago/cover_images/cover_1789671246681_1789671247442.jpg",
+      "duration": "12:22",
+      "status": "Inactive",
+      "createdAt": "2026-09-17T18:54:06.665Z"
     },
     {
-      "id": "podcast_3",
+      "id": "podcast_slot_3",
       "slotNumber": 3,
-      "videoUrl": "https://podcasts.apple.com/us/podcast/25-years-later-new-9-11-accusations/id1355180130?i=1000789023408",
-      "platform": "Apple Podcasts",
-      "title": "25 Years Later, New 9/11 Accusations",
-      "thumbnailUrl": "https://f005.backblazeb2.com/file/timeschicago/cover_images/cover_1789449250862_1789449252079.jpg",
-      "duration": "28:25",
+      "videoUrl": "https://open.spotify.com/album/5pSk3c3wVwnb2arb6ohCPU?si=i0K8SFtFQQ6zw6QQXCUSqw",
+      "platform": "Spotify",
+      "title": "GOLDEN - Album by Jung Kook | Spotify",
+      "thumbnailUrl": "https://f005.backblazeb2.com/file/timeschicago/cover_images/cover_1789671170524_1789671170619.jpg",
+      "duration": "0:45",
       "status": "Active",
       "subTab": "podcast",
-      "createdAt": "2026-09-15T05:19:52.000Z"
+      "createdAt": "2026-09-17T18:53:47.000Z"
+    }
+  ],
+  "videos": [
+    {
+      "id": "video_slot_1",
+      "slotNumber": 1,
+      "videoUrl": "https://rumble.com/v7fkrnm--impeachment-jd-vance-and-that-lindsay-clancy-juror-finally-speaks.html?e9s=src_v1_leaderboard%2Csrc_v2_hp",
+      "platform": "Rumble Video",
+      "title": "Holdout Juror Identified & He is a Clancy Fan's Worst Nightmare",
+      "thumbnailUrl": "https://f005.backblazeb2.com/file/timeschicago/cover_images/cover_1789671540907_1789671543098.jpg",
+      "duration": "1:59:56",
+      "status": "Active",
+      "createdAt": "2026-09-17T18:59:00.909Z"
+    },
+    {
+      "id": "video_slot_2",
+      "slotNumber": 2,
+      "videoUrl": "https://www.youtube.com/shorts/xSpi3G1QoTw",
+      "platform": "YouTube Shorts",
+      "title": "AI models could become ‘new silicon species’, says Microsoft AI boss. #BBCNews",
+      "thumbnailUrl": "https://f005.backblazeb2.com/file/timeschicago/cover_images/cover_1789671508524_1789671508694.jpg",
+      "duration": "1:07",
+      "status": "Active",
+      "subTab": "videos",
+      "createdAt": "2026-09-17T18:58:30.000Z"
+    },
+    {
+      "id": "video_slot_3",
+      "slotNumber": 3,
+      "videoUrl": "https://www.instagram.com/bbcnews/reel/DdZKMqWFAPz/",
+      "platform": "Instagram shorts",
+      "title": "BBC News on Instagram: \"Do you think networking matters when looking for a job?\n \nJust under half (44%) of Gen Z say not having the right network is the biggest barrier to landing an entry-level role, according to research form LinkedIn.\n \nTap the link in @BBCNews's bio to read some more tips for building your network.\n \n#BBCNews\"",
+      "thumbnailUrl": "https://f005.backblazeb2.com/file/timeschicago/cover_images/cover_1789670903298_1789670903606.jpg",
+      "duration": "0:45",
+      "status": "Active",
+      "subTab": "videos",
+      "createdAt": "2026-09-17T18:58:30.000Z"
+    },
+    {
+      "id": "video_slot_4",
+      "slotNumber": 4,
+      "videoUrl": "https://rumble.com/v7flgom-ep-3994b-ff-countermeasures-alien-terrorist-removal-was-just-tested-for-mas.html?e9s=src_v1_leaderboard%2Csrc_v2_hp",
+      "platform": "Rumble Video",
+      "title": "Ep 3994b - [FF] Countermeasures, Alien Terrorist Removal Was Just Tested For Mass Roundups",
+      "thumbnailUrl": "https://f005.backblazeb2.com/file/timeschicago/cover_images/cover_1789670935687_1789670936094.jpg",
+      "duration": "1:05:00",
+      "status": "Active",
+      "subTab": "videos",
+      "createdAt": "2026-09-17T18:58:30.000Z"
     }
   ]
 }

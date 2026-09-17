@@ -611,25 +611,122 @@ export default function CreateNewPostPage() {
   };
 
   const handleInsertLink = () => {
-    let url = window.prompt("Enter link URL:", "https://");
-    if (url) {
-      url = url.trim();
-      if (!/^https?:\/\//i.test(url) && !url.startsWith("/") && !url.startsWith("#")) {
-        url = `https://${url}`;
-      }
-      execCommand("createLink", url);
+    if (!editorRef.current) return;
 
-      if (editorRef.current) {
-        const anchors = editorRef.current.querySelectorAll("a");
-        anchors.forEach((a) => {
-          a.setAttribute("target", "_blank");
-          a.setAttribute("rel", "noopener noreferrer");
-          a.style.color = "#ea580c";
-          a.style.textDecoration = "underline";
-        });
-        setBodyContent(editorRef.current.innerHTML);
+    const selection = window.getSelection();
+    let range: Range | null = null;
+    if (selection && selection.rangeCount > 0) {
+      range = selection.getRangeAt(0);
+    }
+
+    if (!range || !editorRef.current.contains(range.commonAncestorContainer)) {
+      editorRef.current.focus();
+      const sel = window.getSelection();
+      if (sel && sel.rangeCount > 0) {
+        range = sel.getRangeAt(0);
       }
     }
+
+    let selectedText = range ? range.toString() : "";
+
+    if (
+      (!selectedText || !selectedText.trim()) &&
+      range &&
+      range.collapsed &&
+      range.startContainer.nodeType === Node.TEXT_NODE
+    ) {
+      const textNode = range.startContainer;
+      const text = textNode.nodeValue || "";
+      const offset = range.startOffset;
+
+      let start = offset;
+      while (start > 0 && /\S/.test(text[start - 1])) {
+        start--;
+      }
+      let end = offset;
+      while (end < text.length && /\S/.test(text[end])) {
+        end++;
+      }
+
+      if (start < end) {
+        const wordRange = document.createRange();
+        wordRange.setStart(textNode, start);
+        wordRange.setEnd(textNode, end);
+        if (selection) {
+          selection.removeAllRanges();
+          selection.addRange(wordRange);
+        }
+        range = wordRange;
+        selectedText = wordRange.toString();
+      }
+    }
+
+    let url = window.prompt("Enter link URL:", "https://");
+    if (!url) return;
+
+    url = url.trim();
+    if (!url) return;
+
+    if (!/^https?:\/\//i.test(url) && !url.startsWith("/") && !url.startsWith("#")) {
+      url = `https://${url}`;
+    }
+
+    const targetText = selectedText.trim();
+
+    if (targetText) {
+      const a = document.createElement("a");
+      a.href = url;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      a.className = "text-[#111111] font-semibold underline";
+      a.style.color = "#111111";
+      a.style.fontWeight = "600";
+      a.style.textDecoration = "underline";
+      a.textContent = targetText;
+
+      if (range) {
+        range.deleteContents();
+        range.insertNode(a);
+
+        const newRange = document.createRange();
+        newRange.setStartAfter(a);
+        newRange.setEndAfter(a);
+        if (selection) {
+          selection.removeAllRanges();
+          selection.addRange(newRange);
+        }
+      }
+    } else {
+      let linkText = window.prompt("Enter text to display for the link:", url);
+      if (!linkText || !linkText.trim()) linkText = url;
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      a.className = "text-[#111111] font-semibold underline";
+      a.style.color = "#111111";
+      a.style.fontWeight = "600";
+      a.style.textDecoration = "underline";
+      a.textContent = linkText.trim();
+
+      if (range && editorRef.current.contains(range.commonAncestorContainer)) {
+        range.insertNode(a);
+      } else {
+        editorRef.current.appendChild(a);
+      }
+    }
+
+    const anchors = editorRef.current.querySelectorAll("a");
+    anchors.forEach((anc) => {
+      anc.setAttribute("target", "_blank");
+      anc.setAttribute("rel", "noopener noreferrer");
+      anc.style.color = "#111111";
+      anc.style.fontWeight = "600";
+      anc.style.textDecoration = "underline";
+    });
+
+    setBodyContent(editorRef.current.innerHTML);
   };
 
   const handleInsertImage = () => {
@@ -1501,7 +1598,7 @@ export default function CreateNewPostPage() {
                       U
                     </button>
                     <span className="text-gray-300 font-light">|</span>
-                    <button type="button" onClick={handleInsertLink} className="p-1.5 hover:bg-gray-200/60 rounded text-gray-600 transition-colors cursor-pointer" title="Hyperlink">
+                    <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={handleInsertLink} className="p-1.5 hover:bg-gray-200/60 rounded text-gray-600 transition-colors cursor-pointer" title="Hyperlink">
                       <svg width="16" height="16" className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                       </svg>
@@ -1603,7 +1700,7 @@ export default function CreateNewPostPage() {
                     onPaste={handleEditorPaste}
                     onClick={handleEditorClick}
                     style={{ fontSize: `${editorFontSize}px` }}
-                    className="w-full min-h-[380px] h-auto flow-root outline-none text-[#1a1a1a] leading-[1.75] font-normal editor-body-text editor-reserve-font empty:before:content-[attr(data-placeholder)] empty:before:text-[#cbd5e1] empty:before:pointer-events-none [&_p]:mb-5 [&_p]:leading-[1.75] [&_p]:font-normal [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:my-2 [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:my-2 [&_blockquote]:border-l-[5px] [&_blockquote]:border-[#ea580c] [&_blockquote]:bg-[#f8fafc] [&_blockquote]:py-3.5 [&_blockquote]:px-5 [&_blockquote]:my-3 [&_blockquote]:rounded-r-md [&_blockquote]:italic [&_blockquote]:text-[#334155] [&_blockquote]:flow-root [&_pre]:bg-[#f1f5f9] [&_pre]:border-none [&_pre]:outline-none [&_pre]:p-5 [&_pre]:rounded-xl [&_pre]:italic [&_pre]:text-[#334155] [&_pre]:text-base [&_pre]:my-4 [&_pre]:max-w-full [&_pre]:box-border [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_pre]:flow-root [&_a]:text-[#2563eb] [&_a]:underline [&_img]:max-w-full [&_img]:rounded-xl [&_img]:cursor-grab [&_img:active]:cursor-grabbing [&_figure]:cursor-grab [&_figure:active]:cursor-grabbing [&_img]:hover:ring-2 [&_img]:hover:ring-[#2563eb] transition-all duration-150 touch-pan-y"
+                    className="w-full min-h-[380px] h-auto flow-root outline-none text-[#1a1a1a] leading-[1.75] font-normal editor-body-text editor-reserve-font empty:before:content-[attr(data-placeholder)] empty:before:text-[#cbd5e1] empty:before:pointer-events-none [&_p]:mb-5 [&_p]:leading-[1.75] [&_p]:font-normal [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:my-2 [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:my-2 [&_blockquote]:border-l-[5px] [&_blockquote]:border-[#ea580c] [&_blockquote]:bg-[#f8fafc] [&_blockquote]:py-3.5 [&_blockquote]:px-5 [&_blockquote]:my-3 [&_blockquote]:rounded-r-md [&_blockquote]:italic [&_blockquote]:text-[#334155] [&_blockquote]:flow-root [&_pre]:bg-[#f1f5f9] [&_pre]:border-none [&_pre]:outline-none [&_pre]:p-5 [&_pre]:rounded-xl [&_pre]:italic [&_pre]:text-[#334155] [&_pre]:text-base [&_pre]:my-4 [&_pre]:max-w-full [&_pre]:box-border [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_pre]:flow-root [&_a]:!text-[#111111] [&_a]:!font-semibold [&_a]:!underline [&_img]:max-w-full [&_img]:rounded-xl [&_img]:cursor-grab [&_img:active]:cursor-grabbing [&_figure]:cursor-grab [&_figure:active]:cursor-grabbing [&_img]:hover:ring-2 [&_img]:hover:ring-[#2563eb] transition-all duration-150 touch-pan-y"
                     data-placeholder="Start writing or type / for plugins"
                   />
 

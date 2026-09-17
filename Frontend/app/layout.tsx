@@ -64,7 +64,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${playfair.variable} ${sourceSerif.variable} ${inter.variable} ${bodoni.variable} ${kumbh.variable}`} suppressHydrationWarning>
-      <body className="min-h-screen bg-white font-sans text-[#111111] antialiased flex flex-col" suppressHydrationWarning>
+      <body className="min-h-screen max-w-full overflow-x-hidden bg-white font-sans text-[#111111] antialiased flex flex-col" suppressHydrationWarning>
         <WebpGlobalInterceptor />
         <GlobalDataSync />
         {children}

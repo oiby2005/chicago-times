@@ -14,7 +14,7 @@ export const SpecialOfferPopover: React.FC<SpecialOfferPopoverProps> = ({
 
   return (
     <div
-      className="relative inline-block"
+      className="relative inline-block z-[100]"
       onMouseEnter={() => setIsOpen(true)}
       onMouseLeave={() => setIsOpen(false)}
     >
@@ -28,7 +28,7 @@ export const SpecialOfferPopover: React.FC<SpecialOfferPopoverProps> = ({
 
       {/* Popover Card */}
       {isOpen && (
-        <div className="absolute top-full right-0 pt-2 z-50 animate-in fade-in duration-150">
+        <div className="absolute top-full right-0 pt-2 z-[100] animate-in fade-in duration-150">
           <div className="w-[320px] bg-white border border-[#e2e2e2] shadow-xl rounded-sm p-6 text-center select-none">
             {/* WSJ Logo Header */}
             <div className="mb-3">

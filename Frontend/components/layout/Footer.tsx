@@ -61,13 +61,13 @@ const aboutLinks = [
   { name: "RSS Feed", href: "/newsletter" },
 ];
 
-// EDITIONS Column (5 items)
+// EDITIONS Column (United States active, others light and non-clickable)
 const editionsLinks = [
-  { name: "United States", href: "/" },
-  { name: "Australia", href: "/news" },
-  { name: "India", href: "/news" },
-  { name: "Singapore", href: "/news" },
-  { name: "United Kingdom", href: "/news" },
+  { name: "United States", href: "/", isClickable: true },
+  { name: "Australia", href: "#", isClickable: false },
+  { name: "India", href: "#", isClickable: false },
+  { name: "Singapore", href: "#", isClickable: false },
+  { name: "United Kingdom", href: "#", isClickable: false },
 ];
 
 export const Footer: React.FC = () => {
@@ -160,9 +160,15 @@ export const Footer: React.FC = () => {
             <ul className="space-y-2.5 text-xs text-[#444444]">
               {editionsLinks.map((item) => (
                 <li key={item.name}>
-                  <a href={item.href} className="hover:text-[#00558c] transition-colors block text-[#111111] font-medium">
-                    {item.name}
-                  </a>
+                  {item.isClickable ? (
+                    <a href={item.href} className="hover:text-[#00558c] transition-colors block text-[#111111] font-bold">
+                      {item.name}
+                    </a>
+                  ) : (
+                    <span className="block text-[#a0aec0] font-normal cursor-not-allowed select-none opacity-60">
+                      {item.name}
+                    </span>
+                  )}
                 </li>
               ))}
             </ul>

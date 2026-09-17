@@ -120,6 +120,16 @@
   font-family: Exchange, Georgia, 'Source Serif 4', var(--font-sourceserif), serif !important;
 }
 
+.editor-body-text a,
+.editor-reserve-font a,
+.article-body-text a,
+.article-body-content a,
+.preview-body-text a {
+  color: #111111 !important;
+  font-weight: 600 !important;
+  text-decoration: underline !important;
+}
+
 /* Dedicated Image Caption & Photo Credit Styling matching reference image */
 figure div,
 figcaption div {

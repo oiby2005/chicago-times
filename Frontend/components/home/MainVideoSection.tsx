@@ -82,46 +82,57 @@ export const MainVideoSection: React.FC = () => {
 
   const loadSlots = async () => {
     if (typeof window !== "undefined") {
-      // 1. ALWAYS attempt fresh fetch from backend API first
+      const vMap = new Map<number, MainVideoSlot>();
+      DEFAULT_MAIN_VIDEOS_SLOTS.forEach((d) => vMap.set(d.slotNumber, d));
+
       try {
         const res = await fetch("http://localhost:5000/api/shorts", { cache: "no-store" });
         if (res.ok) {
           const data = await res.json();
           if (data.success && Array.isArray(data.slots)) {
-            const mainV = data.slots.filter(
+            const allVideos = data.slots.filter(
               (v: any) =>
-                v.status === "Active" &&
-                v.videoUrl &&
-                (v.id?.includes("videos") || v.id?.includes("main"))
+                v.id?.includes("video") ||
+                v.id?.includes("main") ||
+                (v.subTab || "").toLowerCase() === "videos"
             );
-            if (mainV.length > 0) {
-              setSlots(mainV);
-              localStorage.setItem("wsj_main_video_slots", JSON.stringify(mainV));
-              return;
-            }
+            allVideos.sort((a: any, b: any) => (a.id?.includes("_slot_") ? 1 : -1));
+            allVideos.forEach((v: any) => {
+              const num = Number(v.slotNumber || 1);
+              if (num >= 1 && num <= 4) {
+                if ((v.status || "Active").toLowerCase() !== "inactive" && v.videoUrl && v.videoUrl.trim() !== "") {
+                  vMap.set(num, { ...v, id: `video_slot_${num}` });
+                } else if ((v.status || "").toLowerCase() === "inactive" || !v.videoUrl || v.videoUrl.trim() === "") {
+                  vMap.delete(num);
+                }
+              }
+            });
           }
         }
       } catch (err) {}
 
-      // 2. Fallback to localStorage if offline
       const saved = localStorage.getItem("wsj_main_video_slots");
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
           if (Array.isArray(parsed) && parsed.length > 0) {
-            const activeOnly = parsed.filter(
-              (v: MainVideoSlot) =>
-                v.status === "Active" &&
-                v.videoUrl &&
-                (v.id?.includes("videos") || v.id?.includes("main"))
-            );
-            if (activeOnly.length > 0) {
-              setSlots(activeOnly);
-              return;
-            }
+            parsed.forEach((v: MainVideoSlot) => {
+              const num = Number(v.slotNumber || 1);
+              if (num >= 1 && num <= 4) {
+                if ((v.status || "Active").toLowerCase() !== "inactive" && v.videoUrl && v.videoUrl.trim() !== "") {
+                  vMap.set(num, { ...v, id: `video_slot_${num}` });
+                } else if ((v.status || "").toLowerCase() === "inactive" || !v.videoUrl || v.videoUrl.trim() === "") {
+                  vMap.delete(num);
+                }
+              }
+            });
           }
         } catch (e) {}
       }
+
+      const activeVideos = Array.from(vMap.values());
+      activeVideos.sort((a, b) => Number(a.slotNumber || 1) - Number(b.slotNumber || 1));
+      setSlots(activeVideos);
     }
   };
 
@@ -131,8 +142,10 @@ export const MainVideoSection: React.FC = () => {
     return () => window.removeEventListener("wsj_shorts_updated", loadSlots);
   }, []);
 
-  const featured = slots.find((s) => s.slotNumber === 1) || slots[0] || DEFAULT_MAIN_VIDEOS_SLOTS[0];
-  const subVideos = slots.filter((s) => s.slotNumber !== 1).slice(0, 3);
+  if (!slots || slots.length === 0) return null;
+
+  const featured = slots[0];
+  const subVideos = slots.slice(1, 4);
   const featuredTitle = cleanVideoTitle(featured.title);
 
   return (
@@ -161,7 +174,7 @@ export const MainVideoSection: React.FC = () => {
         <img
           src={featured.thumbnailUrl || "https://images.unsplash.com/photo-1508614589041-895b88991e3e?fm=webp&fit=crop&w=1200&q=80"}
           alt={featuredTitle}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
         />
 
         {/* Top Left: Sound Button Pill */}
@@ -199,46 +212,50 @@ export const MainVideoSection: React.FC = () => {
         </div>
       </a>
 
-      {/* 3 Bottom Video Cards Row */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
-        {subVideos.map((video) => {
-          const subTitle = cleanVideoTitle(video.title);
-          return (
-            <article key={video.id || video.slotNumber} className="flex flex-col justify-start">
-              {/* Thumbnail with Duration Overlay */}
-              <a
-                href={video.videoUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block relative aspect-[16/9] w-full overflow-hidden bg-gray-100 mb-2 group"
-              >
-                <img
-                  src={video.thumbnailUrl || "https://images.unsplash.com/photo-1508614589041-895b88991e3e?fm=webp&fit=crop&w=600&q=80"}
-                  alt={subTitle}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-                {/* Duration Badge */}
-                <div className="absolute bottom-2 left-2 bg-black/85 text-white font-sans text-[11px] font-bold px-1.5 py-0.5 rounded-xs flex items-center space-x-1">
-                  <svg className="w-2.5 h-2.5 fill-current" viewBox="0 0 24 24">
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
-                  <span>{video.duration}</span>
-                </div>
-              </a>
-
-              {/* Title with Line Clamp 4 */}
-              <h4
-                className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.2] text-[#111111] hover:underline cursor-pointer"
-                style={{ display: "-webkit-box", WebkitLineClamp: 4, WebkitBoxOrient: "vertical", overflow: "hidden" }}
-              >
-                <a href={video.videoUrl} target="_blank" rel="noopener noreferrer" title={subTitle}>
-                  {subTitle}
+      {/* Dynamic Bottom Video Cards Row based on active sub-videos */}
+      {subVideos.length > 0 && (
+        <div className={`grid grid-cols-1 ${
+          subVideos.length === 1 ? "md:grid-cols-1" : subVideos.length === 2 ? "md:grid-cols-2" : "md:grid-cols-3"
+        } gap-4 pt-1`}>
+          {subVideos.map((video) => {
+            const subTitle = cleanVideoTitle(video.title);
+            return (
+              <article key={video.id || video.slotNumber} className="flex flex-col justify-start">
+                {/* Thumbnail with Duration Overlay */}
+                <a
+                  href={video.videoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block relative aspect-[16/9] w-full overflow-hidden bg-gray-100 mb-2 group"
+                >
+                  <img
+                    src={video.thumbnailUrl || "https://images.unsplash.com/photo-1508614589041-895b88991e3e?fm=webp&fit=crop&w=600&q=80"}
+                    alt={subTitle}
+                    className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
+                  />
+                  {/* Duration Badge */}
+                  <div className="absolute bottom-2 left-2 bg-black/85 text-white font-sans text-[11px] font-bold px-1.5 py-0.5 rounded-xs flex items-center space-x-1">
+                    <svg className="w-2.5 h-2.5 fill-current" viewBox="0 0 24 24">
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                    <span>{video.duration}</span>
+                  </div>
                 </a>
-              </h4>
-            </article>
-          );
-        })}
-      </div>
+
+                {/* Title with Line Clamp 4 */}
+                <h4
+                  className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.2] text-[#111111] hover:underline cursor-pointer"
+                  style={{ display: "-webkit-box", WebkitLineClamp: 4, WebkitBoxOrient: "vertical", overflow: "hidden" }}
+                >
+                  <a href={video.videoUrl} target="_blank" rel="noopener noreferrer" title={subTitle}>
+                    {subTitle}
+                  </a>
+                </h4>
+              </article>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };

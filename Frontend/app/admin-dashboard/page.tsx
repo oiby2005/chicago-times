@@ -124,7 +124,7 @@ const DEFAULT_RECOMMENDED_SLOTS: ShortReelItem[] = [
 
 const DEFAULT_MAIN_VIDEOS_SLOTS: ShortReelItem[] = [
   {
-    id: "main_v_1",
+    id: "video_slot_1",
     slotNumber: 1,
     videoUrl: "https://www.youtube.com/watch?v=v1",
     platform: "Youtube Video",
@@ -134,7 +134,7 @@ const DEFAULT_MAIN_VIDEOS_SLOTS: ShortReelItem[] = [
     status: "Active",
   },
   {
-    id: "main_v_2",
+    id: "video_slot_2",
     slotNumber: 2,
     videoUrl: "https://www.youtube.com/watch?v=v2",
     platform: "Youtube Video",
@@ -144,7 +144,7 @@ const DEFAULT_MAIN_VIDEOS_SLOTS: ShortReelItem[] = [
     status: "Active",
   },
   {
-    id: "main_v_3",
+    id: "video_slot_3",
     slotNumber: 3,
     videoUrl: "https://www.youtube.com/watch?v=v3",
     platform: "Youtube Video",
@@ -154,7 +154,7 @@ const DEFAULT_MAIN_VIDEOS_SLOTS: ShortReelItem[] = [
     status: "Active",
   },
   {
-    id: "main_v_4",
+    id: "video_slot_4",
     slotNumber: 4,
     videoUrl: "https://www.youtube.com/watch?v=v4",
     platform: "Youtube Video",
@@ -167,13 +167,33 @@ const DEFAULT_MAIN_VIDEOS_SLOTS: ShortReelItem[] = [
 
 const DEFAULT_PODCAST_SLOTS: ShortReelItem[] = [
   {
-    id: "podcast_1",
+    id: "podcast_slot_1",
     slotNumber: 1,
-    videoUrl: "https://www.wsj.com/podcasts/the-journal",
-    platform: "Youtube Video",
-    title: "The Journal: Daily Economic & Financial Deep Dive Podcast",
+    videoUrl: "https://podcasts.apple.com/us/podcast/cruel-summer%3A-the-violent-death-of-tiffany-valiante/id6801170249",
+    platform: "Apple Podcasts",
+    title: "Cruel Summer: The Violent Death of Tiffany Valiante",
     thumbnailUrl: "https://images.unsplash.com/photo-1590602847861-f357a9332bbc?fm=webp&fit=crop&w=600&q=80",
-    duration: "24:15",
+    duration: "40:34",
+    status: "Active",
+  },
+  {
+    id: "podcast_slot_2",
+    slotNumber: 2,
+    videoUrl: "https://podcasts.apple.com/in/podcast/smart-ways-to-regulate-your-energy-levels-jadetimes/id1791836245?i=1000702397718&l=kn",
+    platform: "Apple Podcasts",
+    title: "Smart Ways to Regulate Your Energy Levels | Jadetimes Talks | Episode 04",
+    thumbnailUrl: "https://images.unsplash.com/photo-1478737270239-2f02b77fc618?fm=webp&fit=crop&w=600&q=80",
+    duration: "20:05",
+    status: "Active",
+  },
+  {
+    id: "podcast_slot_3",
+    slotNumber: 3,
+    videoUrl: "https://podcasts.apple.com/in/podcast/john-cenas-journey-wrestling-to-wealth-mastery-jadetimes/id1791836245?i=1000705047737&l=kn",
+    platform: "Apple Podcasts",
+    title: "John Cena’s Journey | Wrestling to Wealth Mastery | Jadetimes Talks | Episode 05",
+    thumbnailUrl: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?fm=webp&fit=crop&w=600&q=80",
+    duration: "7:03",
     status: "Active",
   },
 ];
@@ -953,9 +973,15 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
         if (res && res.ok) {
           const data = await res.json();
           if (data.success && Array.isArray(data.slots)) {
-            const rec = data.slots.filter((s: any) => s.id?.includes("recommended") || s.slotNumber <= 5);
-            const mainV = data.slots.filter((s: any) => s.id?.includes("main") || s.id?.includes("videos"));
-            const pod = data.slots.filter((s: any) => s.id?.includes("podcast") || s.id?.includes("pod"));
+            const rec = data.slots.filter(
+              (s: any) => (s.id?.includes("recommended") || s.id?.startsWith("rec") || s.subTab === "RECOMMENDED") && !s.id?.includes("main") && !s.id?.includes("videos") && !s.id?.includes("podcast") && !s.id?.includes("pod")
+            );
+            const mainV = data.slots.filter(
+              (s: any) => s.id?.includes("main") || s.id?.includes("videos") || s.subTab === "VIDEOS"
+            );
+            const pod = data.slots.filter(
+              (s: any) => s.id?.includes("podcast") || s.id?.includes("pod") || s.subTab === "PODCAST"
+            );
 
             if (rec.length > 0) {
               setRecommendedList(rec);
@@ -1222,7 +1248,7 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
     const currentList = getCurrentShortsList();
     const updated = [...currentList];
     const targetIdx = updated.findIndex((s) => s.slotNumber === shortTargetSlot);
-    const slotId = shortsSubTab === "PODCAST" ? `podcast_${shortTargetSlot}` : `${shortsSubTab.toLowerCase()}_slot_${shortTargetSlot}`;
+    const slotId = shortsSubTab === "PODCAST" ? `podcast_slot_${shortTargetSlot}` : shortsSubTab === "VIDEOS" ? `video_slot_${shortTargetSlot}` : `recommended_slot_${shortTargetSlot}`;
 
     const newShort: ShortReelItem = {
       id: slotId,
@@ -1260,7 +1286,7 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
             if (shortsSubTab === "RECOMMENDED")
               return s.id?.includes("recommended") || (s.id?.startsWith("rec") && !s.id?.includes("video"));
             if (shortsSubTab === "VIDEOS")
-              return s.id?.includes("videos") || s.id?.includes("main");
+              return s.id?.includes("videos") || s.id?.includes("main") || s.id?.includes("video_slot");
             return s.id?.includes("podcast") || s.id?.includes("pod") || s.subTab === "podcast";
           });
           if (filtered.length > 0) {
@@ -1283,29 +1309,43 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
   };
 
   const handleEditShortSlot = (item: ShortReelItem) => {
-    setEditingSlotNumber(item.slotNumber);
-    setShortTargetSlot(item.slotNumber);
-    setShortVideoUrl(item.videoUrl);
-    setShortPlatform(item.platform);
-    setShortTitle(item.title);
-    setShortThumbnailUrl(item.thumbnailUrl);
-    setShortDuration(item.duration);
-    setShortStatus(item.status);
+    if (!item) return;
+    setEditingSlotNumber(item.slotNumber || 1);
+    setShortTargetSlot(item.slotNumber || 1);
+    setShortVideoUrl(item.videoUrl || "");
+
+    let validPlatform = item.platform || (shortsSubTab === "PODCAST" ? "Apple Podcasts" : "Youtube Video");
+    if (shortsSubTab === "PODCAST") {
+      if (!["Apple Podcasts", "Spotify", "YouTube Music", "Amazon Music"].includes(validPlatform)) {
+        validPlatform = "Apple Podcasts";
+      }
+    } else {
+      if (!["Youtube Video", "Rumble Video", "Facebook Short", "Instagram shorts"].includes(validPlatform)) {
+        validPlatform = "Youtube Video";
+      }
+    }
+    setShortPlatform(validPlatform as any);
+    setShortTitle(item.title && !item.title.includes("[Empty Slot") ? item.title : "");
+    setShortThumbnailUrl(item.thumbnailUrl || "");
+    setShortDuration(item.duration || "0:45");
+    setShortStatus(item.status || "Active");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleDeleteShortSlot = (slotNumber: number) => {
-    if (confirm(`Are you sure you want to reset Slot #${slotNumber}?`)) {
+    if (confirm(`Are you sure you want to delete / reset content for Slot #${slotNumber}? The slot container will remain available.`)) {
       const currentList = getCurrentShortsList();
+      const slotId = shortsSubTab === "PODCAST" ? `podcast_slot_${slotNumber}` : shortsSubTab === "VIDEOS" ? `video_slot_${slotNumber}` : `recommended_slot_${slotNumber}`;
+      
       const updated = currentList.map((s) => {
         if (s.slotNumber === slotNumber) {
           return {
-            id: `${shortsSubTab.toLowerCase()}_slot_${slotNumber}`,
+            id: slotId,
             slotNumber,
             videoUrl: "",
-            platform: "Youtube Video" as const,
+            platform: (shortsSubTab === "PODCAST" ? "Apple Podcasts" : "Youtube Video") as any,
             title: `[Empty Slot #${slotNumber}]`,
-            thumbnailUrl: "",
+            thumbnailUrl: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><rect width='100%' height='100%' fill='%23000000'/></svg>",
             duration: "0:00",
             status: "Inactive" as const,
           };
@@ -4819,7 +4859,7 @@ ${divider70}
                   const isOccupied = Boolean(slotItem.videoUrl && slotItem.title && !slotItem.title.includes("[Empty Slot"));
 
                   const platformBadgeText =
-                    slotItem.platform === "Youtube Video"
+                    slotItem.platform === "Youtube Video" || slotItem.platform === "YouTube Shorts"
                       ? "YOUTUBE"
                       : slotItem.platform === "Instagram shorts"
                       ? "INSTAGRAM"
@@ -4862,7 +4902,7 @@ ${divider70}
                             className={`absolute top-1 left-1 text-[8px] font-mono font-black uppercase px-1 py-0.5 rounded-xs shadow-xs tracking-wider z-10 ${
                               slotItem.platform === "Instagram shorts"
                                 ? "bg-gradient-to-r from-purple-600 via-pink-600 to-red-500 text-white"
-                                : slotItem.platform === "Youtube Video"
+                                : slotItem.platform === "Youtube Video" || slotItem.platform === "YouTube Shorts"
                                 ? "bg-red-600 text-white"
                                 : slotItem.platform === "Rumble Video"
                                 ? "bg-emerald-500 text-black font-bold"

@@ -643,6 +643,14 @@ async function initShortsTable() {
     await db.query(createTableSql);
     console.log('✅ MySQL shorts table initialized/verified.');
 
+    // Cleanup legacy non-canonical IDs or duplicate slot entries in MySQL shorts table
+    try {
+      await db.query(`DELETE FROM shorts WHERE id IN ('podcast_1', 'podcast_2', 'podcast_3', 'videos_slot_1', 'videos_slot_2', 'videos_slot_3', 'videos_slot_4', 'main_v_1', 'main_v_2', 'main_v_3', 'main_v_4', 'main_slot_1', 'main_slot_2', 'main_slot_3', 'main_slot_4')`);
+      await db.query(`UPDATE shorts SET sub_tab = 'recommended' WHERE id LIKE 'recommended_slot_%' OR id LIKE 'rec%'`);
+      await db.query(`UPDATE shorts SET sub_tab = 'videos' WHERE id LIKE 'video_slot_%' OR id LIKE 'videos_%' OR id LIKE 'main_%'`);
+      await db.query(`UPDATE shorts SET sub_tab = 'podcast' WHERE id LIKE 'podcast_slot_%' OR id LIKE 'pod%'`);
+    } catch (cleanErr) {}
+
     const [rows] = await db.query('SELECT COUNT(*) AS count FROM shorts');
     if (rows && rows[0].count === 0) {
       console.log('Seeding initial shorts/reels into MySQL shorts table...');
@@ -661,7 +669,7 @@ async function initShortsTable() {
       for (const slot of listToInsert) {
         if (!slot || !slot.id) continue;
         let subTab = 'recommended';
-        if (slot.id.includes('videos') || slot.id.includes('main')) subTab = 'videos';
+        if (slot.id.includes('video') || slot.id.includes('main')) subTab = 'videos';
         else if (slot.id.includes('podcast') || slot.id.includes('pod')) subTab = 'podcast';
 
         await db.query(
@@ -699,21 +707,33 @@ setImmediate(() => initShortsTable());
 app.get('/api/shorts', async (req, res) => {
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
   try {
-    const [rows] = await db.query('SELECT * FROM shorts ORDER BY slot_number ASC, created_at ASC');
+    const [rows] = await db.query('SELECT * FROM shorts ORDER BY updated_at DESC, created_at DESC');
     if (rows && rows.length > 0) {
-      const formattedSlots = rows.map((r) => ({
-        id: r.id,
-        slotNumber: r.slot_number,
-        videoUrl: r.video_url,
-        platform: r.platform,
-        title: r.title,
-        thumbnailUrl: r.thumbnail_url,
-        duration: r.duration,
-        status: r.status,
-        subTab: r.sub_tab,
-        createdAt: r.created_at
-      }));
-      return res.status(200).json({ success: true, slots: formattedSlots });
+      // Deduplicate by category + slot_number keeping latest updated row
+      const seenMap = new Map();
+      rows.forEach((r) => {
+        let cat = (r.sub_tab || 'recommended').toLowerCase();
+        if (r.id?.includes('video') || r.id?.includes('main')) cat = 'videos';
+        else if (r.id?.includes('podcast') || r.id?.includes('pod')) cat = 'podcast';
+        else if (r.id?.includes('recommended') || r.id?.startsWith('rec')) cat = 'recommended';
+
+        const key = `${cat}_${r.slot_number}`;
+        if (!seenMap.has(key)) {
+          seenMap.set(key, {
+            id: r.id,
+            slotNumber: r.slot_number,
+            videoUrl: r.video_url,
+            platform: r.platform,
+            title: r.title,
+            thumbnailUrl: r.thumbnail_url,
+            duration: r.duration,
+            status: r.status,
+            subTab: cat,
+            createdAt: r.created_at
+          });
+        }
+      });
+      return res.status(200).json({ success: true, slots: Array.from(seenMap.values()) });
     }
   } catch (dbErr) {
     console.warn('MySQL Shorts Fetch Notice:', dbErr.message);
@@ -761,6 +781,16 @@ app.post('/api/shorts', async (req, res) => {
 
       // 2. Save / Update into MySQL `shorts` database table
       try {
+        const canonicalPrefix = normSubTab === 'podcast' ? 'podcast' : normSubTab === 'videos' ? 'video' : 'recommended';
+        const canonicalId = `${canonicalPrefix}_slot_${slot.slotNumber || 1}`;
+        slot.id = canonicalId;
+
+        // Delete any existing entries for this slot_number in this category or with legacy IDs
+        await db.query(
+          `DELETE FROM shorts WHERE (sub_tab = ? AND slot_number = ?) OR id = ? OR id = ? OR id = ?`,
+          [normSubTab, Number(slot.slotNumber || 1), canonicalId, `podcast_${slot.slotNumber}`, `videos_slot_${slot.slotNumber}`]
+        ).catch(() => {});
+
         await db.query(
           `INSERT INTO shorts (id, sub_tab, slot_number, video_url, platform, title, thumbnail_url, duration, status)
            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -774,7 +804,7 @@ app.post('/api/shorts', async (req, res) => {
             duration = VALUES(duration),
             status = VALUES(status);`,
           [
-            String(slot.id),
+            canonicalId,
             normSubTab,
             Number(slot.slotNumber || 1),
             slot.videoUrl || '',
@@ -801,21 +831,32 @@ app.post('/api/shorts', async (req, res) => {
 
     // 4. Return fresh list from MySQL database
     try {
-      const [rows] = await db.query('SELECT * FROM shorts ORDER BY created_at DESC, slot_number ASC');
+      const [rows] = await db.query('SELECT * FROM shorts ORDER BY slot_number ASC');
       if (rows && rows.length > 0) {
-        const formattedSlots = rows.map((r) => ({
-          id: r.id,
-          slotNumber: r.slot_number,
-          videoUrl: r.video_url,
-          platform: r.platform,
-          title: r.title,
-          thumbnailUrl: r.thumbnail_url,
-          duration: r.duration,
-          status: r.status,
-          subTab: r.sub_tab,
-          createdAt: r.created_at
-        }));
-        return res.status(200).json({ success: true, subTab: normSubTab, slots: formattedSlots });
+        const seenMap = new Map();
+        rows.forEach((r) => {
+          let cat = (r.sub_tab || 'recommended').toLowerCase();
+          if (r.id?.includes('video') || r.id?.includes('main')) cat = 'videos';
+          else if (r.id?.includes('podcast') || r.id?.includes('pod')) cat = 'podcast';
+          else if (r.id?.includes('recommended') || r.id?.startsWith('rec')) cat = 'recommended';
+
+          const key = `${cat}_${r.slot_number}`;
+          if (!seenMap.has(key)) {
+            seenMap.set(key, {
+              id: r.id,
+              slotNumber: r.slot_number,
+              videoUrl: r.video_url,
+              platform: r.platform,
+              title: r.title,
+              thumbnailUrl: r.thumbnail_url,
+              duration: r.duration,
+              status: r.status,
+              subTab: cat,
+              createdAt: r.created_at
+            });
+          }
+        });
+        return res.status(200).json({ success: true, subTab: normSubTab, slots: Array.from(seenMap.values()) });
       }
     } catch (e) {}
 
