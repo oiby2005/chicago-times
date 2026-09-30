@@ -218,12 +218,6 @@ export const TechCategorySection: React.FC = () => {
                 {side2.summary}
               </p>
             )}
-            {side2.commentsCount !== undefined && (
-              <div className="font-sans text-[12px] text-[#777777] flex items-center space-x-1">
-                <span>💬</span>
-                <span>{side2.commentsCount}</span>
-              </div>
-            )}
             <span className="font-mono text-[11px] text-[#666666] mt-1 block">
               {formatTimeAgo(side2.publishedAt)}
             </span>
@@ -240,12 +234,6 @@ export const TechCategorySection: React.FC = () => {
               <p className="font-sans text-[13px] leading-relaxed text-[#555555] mb-2 line-clamp-3">
                 {side3.summary}
               </p>
-            )}
-            {side3.commentsCount !== undefined && (
-              <div className="font-sans text-[12px] text-[#777777] flex items-center space-x-1">
-                <span>💬</span>
-                <span>{side3.commentsCount}</span>
-              </div>
             )}
             <span className="font-mono text-[11px] text-[#666666] mt-1 block">
               {formatTimeAgo(side3.publishedAt)}

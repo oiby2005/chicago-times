@@ -91,7 +91,9 @@ export const RecommendedVideosSection: React.FC = () => {
 
   const loadSlots = async () => {
     if (typeof window !== "undefined") {
-      // 1. ALWAYS attempt fresh fetch from backend API first to guarantee sync across browsers/accounts
+      const recMap = new Map<number, RecommendedVideo>();
+      DEFAULT_RECOMMENDED_SLOTS.forEach((d) => recMap.set(d.slotNumber, d));
+
       try {
         const res = await fetch("http://localhost:5000/api/shorts", { cache: "no-store" });
         if (res.ok) {
@@ -99,38 +101,46 @@ export const RecommendedVideosSection: React.FC = () => {
           if (data.success && Array.isArray(data.slots)) {
             const rec = data.slots.filter(
               (v: any) =>
-                v.status === "Active" &&
-                v.videoUrl &&
-                (v.id?.includes("recommended") || (v.id?.startsWith("rec") && !v.id?.includes("video")))
+                v.id?.includes("recommended") ||
+                (v.id?.startsWith("rec") && !v.id?.includes("video")) ||
+                (v.subTab || "").toUpperCase() === "RECOMMENDED"
             );
-            if (rec.length > 0) {
-              setVideos(rec);
-              localStorage.setItem("wsj_recommended_video_slots", JSON.stringify(rec));
-              return;
-            }
+            rec.forEach((v: any) => {
+              const num = Number(v.slotNumber || 1);
+              if (num >= 1 && num <= 5) {
+                if ((v.status || "Active").toLowerCase() !== "inactive" && v.videoUrl && v.videoUrl.trim() !== "") {
+                  recMap.set(num, { ...v, slotNumber: num, id: `recommended_slot_${num}` });
+                } else if ((v.status || "").toLowerCase() === "inactive" || !v.videoUrl || v.videoUrl.trim() === "") {
+                  recMap.delete(num);
+                }
+              }
+            });
           }
         }
       } catch (err) {}
 
-      // 2. Fallback to localStorage if offline/API fails
       const saved = localStorage.getItem("wsj_recommended_video_slots");
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
           if (Array.isArray(parsed) && parsed.length > 0) {
-            const activeOnly = parsed.filter(
-              (v: RecommendedVideo) =>
-                v.status === "Active" &&
-                v.videoUrl &&
-                (v.id?.includes("recommended") || (v.id?.startsWith("rec") && !v.id?.includes("video")))
-            );
-            if (activeOnly.length > 0) {
-              setVideos(activeOnly);
-              return;
-            }
+            parsed.forEach((v: RecommendedVideo) => {
+              const num = Number(v.slotNumber || 1);
+              if (num >= 1 && num <= 5) {
+                if ((v.status || "Active").toLowerCase() !== "inactive" && v.videoUrl && v.videoUrl.trim() !== "") {
+                  recMap.set(num, { ...v, slotNumber: num, id: `recommended_slot_${num}` });
+                } else if ((v.status || "").toLowerCase() === "inactive" || !v.videoUrl || v.videoUrl.trim() === "") {
+                  recMap.delete(num);
+                }
+              }
+            });
           }
         } catch (e) {}
       }
+
+      const activeVideos = Array.from(recMap.values());
+      activeVideos.sort((a, b) => Number(a.slotNumber || 1) - Number(b.slotNumber || 1));
+      setVideos(activeVideos);
     }
   };
 
@@ -153,6 +163,20 @@ export const RecommendedVideosSection: React.FC = () => {
       <div className="flex flex-col space-y-4">
         {videos.map((video) => {
           const displayTitle = cleanVideoTitle(video.title);
+          const pLower = (video.platform || "").toLowerCase();
+          const uLower = (video.videoUrl || "").toLowerCase();
+
+          const isShortOrReel =
+            pLower.includes("instagram") ||
+            pLower.includes("facebook") ||
+            pLower.includes("short") ||
+            pLower.includes("reel") ||
+            uLower.includes("instagram.com") ||
+            uLower.includes("facebook.com") ||
+            uLower.includes("fb.watch") ||
+            uLower.includes("/shorts/") ||
+            uLower.includes("/reel/");
+
           return (
             <article key={video.id || video.slotNumber} className="flex items-start justify-between gap-3">
               {/* Title with Line Clamp 4 */}
@@ -165,30 +189,25 @@ export const RecommendedVideosSection: React.FC = () => {
                 </a>
               </h4>
 
-            {/* Thumbnail with Play Icon Overlay */}
-            <a
-              href={video.videoUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="relative w-[105px] sm:w-[115px] aspect-[16/10] overflow-hidden bg-gray-100 flex-shrink-0 group"
-            >
-              <img
-                src={video.thumbnailUrl || "https://images.unsplash.com/photo-1513104890138-7c749659a591?fm=webp&fit=crop&w=400&q=80"}
-                alt={video.title}
-                className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
-              />
-              {/* Play Button Overlay */}
-              <div className="absolute inset-0 flex items-center justify-center bg-black/25 group-hover:bg-black/35 transition-colors">
-                <div className="w-7 h-7 rounded-full bg-black/60 border border-white/80 flex items-center justify-center text-white">
-                  <svg className="w-3.5 h-3.5 fill-current ml-0.5" viewBox="0 0 24 24">
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
-                </div>
-              </div>
-            </a>
-          </article>
-        );
-      })}
+              {/* Thumbnail with Play Icon Overlay */}
+              <a
+                href={video.videoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="relative w-[105px] sm:w-[115px] aspect-[16/10] overflow-hidden bg-black flex-shrink-0 group"
+              >
+                <img
+                  src={video.thumbnailUrl || "https://images.unsplash.com/photo-1513104890138-7c749659a591?fm=webp&fit=crop&w=400&q=80"}
+                  alt={video.title}
+                  className={`w-full h-full group-hover:scale-105 transition-transform duration-300 ${
+                    isShortOrReel ? "object-contain bg-black" : "object-cover object-center"
+                  }`}
+                />
+
+              </a>
+            </article>
+          );
+        })}
       </div>
     </div>
   );

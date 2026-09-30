@@ -342,12 +342,50 @@ async function downloadBackblazeFile(fileName) {
   }
 }
 
+async function uploadAllExternalImagesInHtml(htmlContent, prefix = 'article', folder = 'articles') {
+  if (!htmlContent || typeof htmlContent !== 'string') return htmlContent;
+
+  let updatedHtml = htmlContent;
+
+  // 1. Upload base64 images first
+  if (updatedHtml.includes('data:image/')) {
+    updatedHtml = await uploadAllBase64InHtml(updatedHtml, prefix, folder);
+  }
+
+  // 2. Upload external HTTP/HTTPS images that are NOT backblazeb2.com
+  const imgRegex = /src=["'](https?:\/\/[^"']+)["']/gi;
+  let match;
+  const externalUrls = new Set();
+  while ((match = imgRegex.exec(updatedHtml)) !== null) {
+    const url = match[1];
+    if (url && !url.includes('backblazeb2.com') && !url.includes('localhost:3000/api/webp-proxy')) {
+      externalUrls.add(url);
+    }
+  }
+
+  let index = 0;
+  for (const extUrl of externalUrls) {
+    try {
+      const b2Url = await uploadRemoteUrlToB2(extUrl, `${prefix}_external_${Date.now()}_${index}`, folder);
+      if (b2Url) {
+        updatedHtml = updatedHtml.split(extUrl).join(b2Url);
+      }
+    } catch (e) {
+      console.warn('Notice: External image B2 upload skipped:', extUrl, e.message);
+    }
+    index++;
+  }
+
+  return updatedHtml;
+}
+
 module.exports = {
   getB2Auth,
   uploadToBackblazeB2,
   uploadBase64ToB2,
   uploadAllBase64InHtml,
   uploadRemoteUrlToB2,
+  uploadAllExternalImagesInHtml,
   listBackblazeFiles,
   deleteBackblazeFile,
   downloadBackblazeFile,

@@ -116,46 +116,48 @@ export const MostPopularNewsSection: React.FC = () => {
 
   return (
     <section className="w-full font-sans select-none my-2 pt-2">
-      {/* Header Title */}
-      <div className="mb-4">
-        <h3 className="font-serif font-bold text-[22px] sm:text-[24px] text-[#111111] tracking-tight">
-          Most Popular News
-        </h3>
-      </div>
+      <div className="w-full">
+        {/* Header Title */}
+        <div className="mb-4">
+          <h3 className="font-serif font-bold text-[22px] sm:text-[24px] text-[#111111] tracking-tight">
+            Most Popular News
+          </h3>
+        </div>
 
-      {/* Popular Items List */}
-      <div className="space-y-4">
-        {articles.map((item, idx) => (
-          <React.Fragment key={item.id}>
-            <article className="flex items-start justify-between space-x-3">
-              <div className="flex-1">
-                <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.22] text-[#111111] hover:underline cursor-pointer">
-                  <Link href={`/article/${item.slug}`}>
-                    {item.title}
-                  </Link>
-                </h4>
-                <span className="font-mono text-[11px] text-[#666666] mt-1 block">
-                  {formatTimeAgo(item.publishedAt)}
-                </span>
-              </div>
+        {/* Popular Items List */}
+        <div className="space-y-4">
+          {articles.map((item, idx) => (
+            <React.Fragment key={item.id}>
+              <article className="flex items-start justify-between space-x-3">
+                <div className="flex-1">
+                  <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.22] text-[#111111] hover:underline cursor-pointer">
+                    <Link href={`/article/${item.slug}`}>
+                      {item.title}
+                    </Link>
+                  </h4>
+                  <span className="font-mono text-[11px] text-[#666666] mt-1 block">
+                    {formatTimeAgo(item.publishedAt)}
+                  </span>
+                </div>
 
-              <Link
-                href={`/article/${item.slug}`}
-                className="shrink-0 block w-[64px] h-[64px] sm:w-[70px] sm:h-[70px] overflow-hidden bg-gray-100 border border-gray-200"
-              >
-                <img
-                  src={item.imageUrl}
-                  alt={item.title}
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                />
-              </Link>
-            </article>
+                <Link
+                  href={`/article/${item.slug}`}
+                  className="shrink-0 block w-[64px] h-[64px] sm:w-[70px] sm:h-[70px] overflow-hidden bg-gray-100 border border-gray-200"
+                >
+                  <img
+                    src={item.imageUrl}
+                    alt={item.title}
+                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                  />
+                </Link>
+              </article>
 
-            {idx < articles.length - 1 && (
-              <hr className="border-t border-[#E5E0D5] my-2" />
-            )}
-          </React.Fragment>
-        ))}
+              {idx < articles.length - 1 && (
+                <hr className="border-t border-[#E5E0D5] my-2" />
+              )}
+            </React.Fragment>
+          ))}
+        </div>
       </div>
     </section>
   );

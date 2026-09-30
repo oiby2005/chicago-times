@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
+const nodemailer = require('nodemailer');
 require('dotenv').config();
 
 const authRoutes = require('./routes/authRoutes');
@@ -16,6 +17,7 @@ app.use(cors({
 }));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+app.use(express.static(path.join(__dirname, '../Frontend/public')));
 
 // Paths to persistent data files
 const DATA_DIR = path.join(__dirname, 'data');
@@ -24,6 +26,7 @@ const SAVED_FILE = path.join(DATA_DIR, 'saved.json');
 const USERS_FILE = path.join(DATA_DIR, 'users.json');
 const ADS_FILE = path.join(DATA_DIR, 'ads.json');
 const SHORTS_FILE = path.join(DATA_DIR, 'shorts.json');
+const COMMENTS_FILE = path.join(DATA_DIR, 'comments.json');
 
 // Ensure data directory & files exist
 if (!fs.existsSync(DATA_DIR)) {
@@ -43,6 +46,9 @@ if (!fs.existsSync(ADS_FILE)) {
 }
 if (!fs.existsSync(SHORTS_FILE)) {
   fs.writeFileSync(SHORTS_FILE, JSON.stringify([], null, 2));
+}
+if (!fs.existsSync(COMMENTS_FILE)) {
+  fs.writeFileSync(COMMENTS_FILE, JSON.stringify([], null, 2));
 }
 
 // Helpers for reading/writing persistent data
@@ -70,7 +76,31 @@ const writeJSONFile = (filePath, data) => {
 // Routes
 app.use('/api/auth', authRoutes);
 
-const { uploadBase64ToB2, uploadToBackblazeB2, uploadAllBase64InHtml, uploadRemoteUrlToB2 } = require('./lib/backblazeB2');
+const { uploadBase64ToB2, uploadToBackblazeB2, uploadAllBase64InHtml, uploadRemoteUrlToB2, uploadAllExternalImagesInHtml } = require('./lib/backblazeB2');
+
+function unwrapWebpProxyUrl(url) {
+  if (!url || typeof url !== 'string') return url;
+  if (url.includes('webp-proxy') && url.includes('url=')) {
+    try {
+      let target = url;
+      while (target.includes('webp-proxy') && target.includes('url=')) {
+        const match = target.match(/url=([^&]+)/);
+        if (match && match[1]) {
+          const decoded = decodeURIComponent(match[1]);
+          if (decoded && (decoded.startsWith('http') || decoded.startsWith('/'))) {
+            target = decoded;
+          } else {
+            break;
+          }
+        } else {
+          break;
+        }
+      }
+      return target;
+    } catch (e) {}
+  }
+  return url;
+}
 
 // Helper to format ISO 8601 duration (PT1M25S -> "1:25", PT21M42S -> "21:42") or seconds (5695 -> "1:34:55")
 function parseIsoDuration(durationStr) {
@@ -142,6 +172,45 @@ app.post('/api/upload', async (req, res) => {
   } catch (error) {
     console.error('Image Upload API error:', error);
     res.status(500).json({ success: false, message: 'Image upload failed' });
+  }
+});
+
+// Upload remote URL or base64 to Backblaze B2
+app.post('/api/upload-url', async (req, res) => {
+  try {
+    const { url, imageBase64, folder } = req.body || {};
+    const targetFolder = folder || 'articles';
+
+    if (url && typeof url === 'string') {
+      const cleanUrl = url.trim();
+      if (cleanUrl.includes('f005.backblazeb2.com')) {
+        return res.status(200).json({ success: true, url: cleanUrl });
+      }
+      if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://')) {
+        const b2Url = await uploadRemoteUrlToB2(cleanUrl, `article_img_${Date.now()}`, targetFolder);
+        if (b2Url) {
+          return res.status(200).json({ success: true, url: b2Url });
+        }
+      }
+      if (cleanUrl.startsWith('data:image/')) {
+        const b2Url = await uploadBase64ToB2(cleanUrl, `article_img_${Date.now()}.webp`, targetFolder);
+        if (b2Url) {
+          return res.status(200).json({ success: true, url: b2Url });
+        }
+      }
+    }
+
+    if (imageBase64 && typeof imageBase64 === 'string' && imageBase64.startsWith('data:image/')) {
+      const b2Url = await uploadBase64ToB2(imageBase64, `article_img_${Date.now()}.webp`, targetFolder);
+      if (b2Url) {
+        return res.status(200).json({ success: true, url: b2Url });
+      }
+    }
+
+    return res.status(400).json({ success: false, message: 'Could not upload image URL to Backblaze B2' });
+  } catch (error) {
+    console.error('Upload URL API error:', error);
+    res.status(500).json({ success: false, message: 'Failed to process image URL upload' });
   }
 });
 
@@ -228,6 +297,7 @@ app.post('/api/video-metadata', async (req, res) => {
 
     let rawTitle = '';
     let rawThumbnailUrl = '';
+    let rawAudioUrl = '';
     let formattedDuration = '0:45';
 
     // 0A. Apple Podcasts
@@ -264,6 +334,54 @@ app.post('/api/video-metadata', async (req, res) => {
 
           const dur = extractDurationFromHtml(html);
           if (dur) formattedDuration = dur;
+
+          // Match specific episode streamUrl using episode ID parameter i=...
+          let streamUrlMatch = null;
+          const iMatch = trimmedUrl.match(/i=(\d+)/);
+          if (iMatch && iMatch[1]) {
+            const epId = iMatch[1];
+            let pos = 0;
+            while ((pos = html.indexOf(epId, pos)) !== -1) {
+              const chunk = html.slice(Math.max(0, pos - 1500), Math.min(html.length, pos + 1500));
+              const chunkMatch = (
+                chunk.match(/"streamUrl"\s*:\s*"([^"]+)"/i) ||
+                chunk.match(/"assetUrl"\s*:\s*"([^"]+)"/i)
+              )?.[1];
+              if (chunkMatch && !chunkMatch.includes('.m3u8')) {
+                streamUrlMatch = chunkMatch;
+                break;
+              }
+              pos += epId.length;
+            }
+          }
+          if (!streamUrlMatch) {
+            streamUrlMatch = (
+              html.match(/"streamUrl"\s*:\s*"([^"]+)"/i) ||
+              html.match(/"assetUrl"\s*:\s*"([^"]+)"/i) ||
+              html.match(/https:\/\/[^"'\s>]+\.(?:mp3|m4a|aac)/i)
+            )?.[1];
+          }
+
+          if (streamUrlMatch) {
+            rawAudioUrl = decodeURIComponent(streamUrlMatch.replace(/\\/g, ''));
+          }
+        }
+
+        // Query iTunes Lookup API for direct episode MP3 audio URL if HTML scraping didn't find one
+        if (!rawAudioUrl) {
+          const idMatch = trimmedUrl.match(/id(\d+)/);
+          if (idMatch && idMatch[1]) {
+            const itunesRes = await fetchWithTimeout(`https://itunes.apple.com/lookup?id=${idMatch[1]}&entity=podcastEpisode`, {}, 3000);
+            if (itunesRes.ok) {
+              const itunesData = await itunesRes.json();
+              if (itunesData && Array.isArray(itunesData.results) && itunesData.results.length > 0) {
+                const ep = itunesData.results.find(r => r.episodeUrl) || itunesData.results[0];
+                if (ep && ep.episodeUrl) {
+                  rawAudioUrl = ep.episodeUrl;
+                }
+              }
+            }
+          }
         }
       } catch (e) {}
     }
@@ -308,6 +426,24 @@ app.post('/api/video-metadata', async (req, res) => {
             }
           }
         }
+
+        // Fetch Spotify Embed page to extract Spotify's official direct 320kbps audio preview URL
+        let embedPageUrl = trimmedUrl;
+        if (trimmedUrl.includes('open.spotify.com/') && !trimmedUrl.includes('/embed/')) {
+          embedPageUrl = trimmedUrl.replace('open.spotify.com/', 'open.spotify.com/embed/');
+        }
+        const embedRes = await fetchWithTimeout(embedPageUrl, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+          }
+        }, 3000);
+        if (embedRes.ok) {
+          const embedHtml = await embedRes.text();
+          const mp3Match = embedHtml.match(/https:\/\/p\.scdn\.co\/mp3-preview\/[a-zA-Z0-9]+/);
+          if (mp3Match && mp3Match[0]) {
+            rawAudioUrl = mp3Match[0];
+          }
+        }
       } catch (e) {}
     }
 
@@ -342,8 +478,8 @@ app.post('/api/video-metadata', async (req, res) => {
       } catch (e) {}
     }
 
-    // 1. YouTube
-    const ytMatch = trimmedUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([\w-]{11})/);
+    // 1. YouTube & YouTube Music
+    const ytMatch = trimmedUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/)|music\.youtube\.com\/watch\?v=)([\w-]{11})/i);
     if (ytMatch && ytMatch[1]) {
       const ytId = ytMatch[1];
       rawThumbnailUrl = `https://i.ytimg.com/vi/${ytId}/hqdefault.jpg`;
@@ -368,6 +504,47 @@ app.post('/api/video-metadata', async (req, res) => {
           if (dur) formattedDuration = dur;
         }
       } catch (e) {}
+
+      // Direct high-quality audio stream extraction for YouTube & YouTube Music
+      try {
+        const playerRes = await fetchWithTimeout('https://www.youtube.com/youtubei/v1/player', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'User-Agent': 'Mozilla/5.0 (Android; VR) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
+          },
+          body: JSON.stringify({
+            videoId: ytId,
+            context: {
+              client: {
+                clientName: 'ANDROID_VR',
+                clientVersion: '1.54.30',
+                deviceMake: 'Oculus',
+                deviceModel: 'Quest 3',
+                osName: 'Android',
+                osVersion: '12',
+                hl: 'en',
+                gl: 'US'
+              }
+            }
+          })
+        }, 3500);
+
+        if (playerRes.ok) {
+          const playerData = await playerRes.json();
+          if (playerData.streamingData && Array.isArray(playerData.streamingData.adaptiveFormats)) {
+            const audioFormats = playerData.streamingData.adaptiveFormats.filter(
+              f => f.mimeType && f.mimeType.startsWith('audio/') && f.url
+            );
+            if (audioFormats.length > 0) {
+              const mp4Audio = audioFormats.filter(f => f.mimeType.includes('audio/mp4'));
+              const target = mp4Audio.length > 0 ? mp4Audio : audioFormats;
+              target.sort((a, b) => (b.bitrate || 0) - (a.bitrate || 0));
+              rawAudioUrl = target[0].url;
+            }
+          }
+        }
+      } catch (audioErr) {}
     }
 
     // 2. Rumble
@@ -610,6 +787,7 @@ app.post('/api/video-metadata', async (req, res) => {
       title: finalTitle || rawTitle,
       thumbnailUrl: rawThumbnailUrl,
       duration: formattedDuration,
+      audioUrl: rawAudioUrl,
     });
   } catch (error) {
     console.error('Video Metadata API error:', error);
@@ -635,12 +813,14 @@ async function initShortsTable() {
         thumbnail_url TEXT DEFAULT NULL,
         duration VARCHAR(50) DEFAULT '0:45',
         status VARCHAR(50) NOT NULL DEFAULT 'Active',
+        audio_url TEXT DEFAULT NULL,
         created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         PRIMARY KEY (id)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
     `;
     await db.query(createTableSql);
+    try { await db.query('ALTER TABLE shorts ADD COLUMN audio_url TEXT DEFAULT NULL'); } catch (e) {}
     console.log('✅ MySQL shorts table initialized/verified.');
 
     // Cleanup legacy non-canonical IDs or duplicate slot entries in MySQL shorts table
@@ -673,8 +853,8 @@ async function initShortsTable() {
         else if (slot.id.includes('podcast') || slot.id.includes('pod')) subTab = 'podcast';
 
         await db.query(
-          `INSERT INTO shorts (id, sub_tab, slot_number, video_url, platform, title, thumbnail_url, duration, status)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+          `INSERT INTO shorts (id, sub_tab, slot_number, video_url, platform, title, thumbnail_url, duration, status, audio_url)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
            ON DUPLICATE KEY UPDATE
             sub_tab = VALUES(sub_tab),
             slot_number = VALUES(slot_number),
@@ -683,7 +863,8 @@ async function initShortsTable() {
             title = VALUES(title),
             thumbnail_url = VALUES(thumbnail_url),
             duration = VALUES(duration),
-            status = VALUES(status);`,
+            status = VALUES(status),
+            audio_url = VALUES(audio_url);`,
           [
             slot.id,
             subTab,
@@ -693,7 +874,8 @@ async function initShortsTable() {
             slot.title || '',
             slot.thumbnailUrl || null,
             slot.duration || '0:45',
-            slot.status || 'Active'
+            slot.status || 'Active',
+            slot.audioUrl || null
           ]
         );
       }
@@ -728,6 +910,7 @@ app.get('/api/shorts', async (req, res) => {
             thumbnailUrl: r.thumbnail_url,
             duration: r.duration,
             status: r.status,
+            audioUrl: r.audio_url || r.audioUrl || '',
             subTab: cat,
             createdAt: r.created_at
           });
@@ -761,7 +944,7 @@ app.post('/api/shorts', async (req, res) => {
 
     const normSubTab = (subTab || 'recommended').toLowerCase();
 
-    // 1. Upload thumbnail copy to Backblaze B2 under cover images/ folder if needed
+    // 1. Upload thumbnail copy to Backblaze B2 under cover images/ folder if needed & auto-extract audioUrl if missing
     for (const slot of incomingSlots) {
       if (!slot || !slot.id) continue;
 
@@ -779,6 +962,109 @@ app.post('/api/shorts', async (req, res) => {
         }
       }
 
+      // Auto-extract audioUrl for podcast slots whenever videoUrl is present
+      if ((normSubTab === 'podcast' || slot.id?.includes('podcast')) && slot.videoUrl) {
+        slot.audioUrl = ''; // Reset audioUrl before extracting for new videoUrl
+        try {
+          const lowerUrl = slot.videoUrl.toLowerCase();
+            if (lowerUrl.includes('apple.com') || lowerUrl.includes('podcasts.apple.com')) {
+              const podRes = await fetchWithTimeout(slot.videoUrl.trim(), {
+                headers: {
+                  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                }
+              }, 3000);
+              if (podRes.ok) {
+                const html = await podRes.text();
+                let streamUrlMatch = null;
+                const iMatch = slot.videoUrl.trim().match(/i=(\d+)/);
+                if (iMatch && iMatch[1]) {
+                  const epId = iMatch[1];
+                  let pos = 0;
+                  while ((pos = html.indexOf(epId, pos)) !== -1) {
+                    const chunk = html.slice(Math.max(0, pos - 1500), Math.min(html.length, pos + 1500));
+                    const chunkMatch = (
+                      chunk.match(/"streamUrl"\s*:\s*"([^"]+)"/i) ||
+                      chunk.match(/"assetUrl"\s*:\s*"([^"]+)"/i)
+                    )?.[1];
+                    if (chunkMatch && !chunkMatch.includes('.m3u8')) {
+                      streamUrlMatch = chunkMatch;
+                      break;
+                    }
+                    pos += epId.length;
+                  }
+                }
+                if (!streamUrlMatch) {
+                  streamUrlMatch = (
+                    html.match(/"streamUrl"\s*:\s*"([^"]+)"/i) ||
+                    html.match(/"assetUrl"\s*:\s*"([^"]+)"/i) ||
+                    html.match(/https:\/\/[^"'\s>]+\.(?:mp3|m4a|aac)/i)
+                  )?.[1];
+                }
+                if (streamUrlMatch) {
+                  slot.audioUrl = decodeURIComponent(streamUrlMatch.replace(/\\/g, ''));
+                }
+              }
+            } else if (lowerUrl.includes('spotify.com')) {
+              let embedUrl = slot.videoUrl.trim();
+              if (embedUrl.includes('open.spotify.com/') && !embedUrl.includes('/embed/')) {
+                embedUrl = embedUrl.replace('open.spotify.com/', 'open.spotify.com/embed/');
+              }
+              const spotRes = await fetchWithTimeout(embedUrl, {
+                headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
+              }, 3000);
+              if (spotRes.ok) {
+                const html = await spotRes.text();
+                const match = html.match(/https:\/\/p\.scdn\.co\/mp3-preview\/[a-zA-Z0-9]+/);
+                if (match && match[0]) slot.audioUrl = match[0];
+              }
+            } else if (lowerUrl.includes('music.youtube.com') || lowerUrl.includes('youtube.com') || lowerUrl.includes('youtu.be')) {
+              const ytMatch = slot.videoUrl.trim().match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/)|music\.youtube\.com\/watch\?v=)([\w-]{11})/i);
+              if (ytMatch && ytMatch[1]) {
+                const ytId = ytMatch[1];
+                const playerRes = await fetchWithTimeout('https://www.youtube.com/youtubei/v1/player', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'User-Agent': 'Mozilla/5.0 (Android; VR) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
+                  },
+                  body: JSON.stringify({
+                    videoId: ytId,
+                    context: {
+                      client: {
+                        clientName: 'ANDROID_VR',
+                        clientVersion: '1.54.30',
+                        deviceMake: 'Oculus',
+                        deviceModel: 'Quest 3',
+                        osName: 'Android',
+                        osVersion: '12',
+                        hl: 'en',
+                        gl: 'US'
+                      }
+                    }
+                  })
+                }, 3500);
+
+                if (playerRes.ok) {
+                  const playerData = await playerRes.json();
+                  if (playerData.streamingData && Array.isArray(playerData.streamingData.adaptiveFormats)) {
+                    const audioFormats = playerData.streamingData.adaptiveFormats.filter(
+                      f => f.mimeType && f.mimeType.startsWith('audio/') && f.url
+                    );
+                    if (audioFormats.length > 0) {
+                      const mp4Audio = audioFormats.filter(f => f.mimeType.includes('audio/mp4'));
+                      const target = mp4Audio.length > 0 ? mp4Audio : audioFormats;
+                      target.sort((a, b) => (b.bitrate || 0) - (a.bitrate || 0));
+                      slot.audioUrl = target[0].url;
+                    }
+                  }
+                }
+              }
+            } else if (lowerUrl.endsWith('.mp3') || lowerUrl.endsWith('.m4a') || lowerUrl.endsWith('.wav')) {
+              slot.audioUrl = slot.videoUrl.trim();
+            }
+          } catch (audioExtractErr) {}
+        }
+
       // 2. Save / Update into MySQL `shorts` database table
       try {
         const canonicalPrefix = normSubTab === 'podcast' ? 'podcast' : normSubTab === 'videos' ? 'video' : 'recommended';
@@ -787,13 +1073,21 @@ app.post('/api/shorts', async (req, res) => {
 
         // Delete any existing entries for this slot_number in this category or with legacy IDs
         await db.query(
-          `DELETE FROM shorts WHERE (sub_tab = ? AND slot_number = ?) OR id = ? OR id = ? OR id = ?`,
-          [normSubTab, Number(slot.slotNumber || 1), canonicalId, `podcast_${slot.slotNumber}`, `videos_slot_${slot.slotNumber}`]
+          `DELETE FROM shorts WHERE (sub_tab = ? AND slot_number = ?) OR id = ? OR id = ? OR id = ? OR id = ? OR id = ?`,
+          [
+            normSubTab,
+            Number(slot.slotNumber || 1),
+            canonicalId,
+            `podcast_${slot.slotNumber}`,
+            `videos_slot_${slot.slotNumber}`,
+            `main_v_${slot.slotNumber}`,
+            `main_slot_${slot.slotNumber}`
+          ]
         ).catch(() => {});
 
         await db.query(
-          `INSERT INTO shorts (id, sub_tab, slot_number, video_url, platform, title, thumbnail_url, duration, status)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+          `INSERT INTO shorts (id, sub_tab, slot_number, video_url, platform, title, thumbnail_url, duration, status, audio_url)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
            ON DUPLICATE KEY UPDATE
             sub_tab = VALUES(sub_tab),
             slot_number = VALUES(slot_number),
@@ -802,7 +1096,8 @@ app.post('/api/shorts', async (req, res) => {
             title = VALUES(title),
             thumbnail_url = VALUES(thumbnail_url),
             duration = VALUES(duration),
-            status = VALUES(status);`,
+            status = VALUES(status),
+            audio_url = VALUES(audio_url);`,
           [
             canonicalId,
             normSubTab,
@@ -812,7 +1107,8 @@ app.post('/api/shorts', async (req, res) => {
             slot.title || '',
             slot.thumbnailUrl || null,
             slot.duration || '0:45',
-            slot.status || 'Active'
+            slot.status || 'Active',
+            slot.audioUrl || null
           ]
         );
       } catch (dbErr) {
@@ -831,7 +1127,7 @@ app.post('/api/shorts', async (req, res) => {
 
     // 4. Return fresh list from MySQL database
     try {
-      const [rows] = await db.query('SELECT * FROM shorts ORDER BY slot_number ASC');
+      const [rows] = await db.query('SELECT * FROM shorts ORDER BY updated_at DESC, created_at DESC');
       if (rows && rows.length > 0) {
         const seenMap = new Map();
         rows.forEach((r) => {
@@ -851,6 +1147,7 @@ app.post('/api/shorts', async (req, res) => {
               thumbnailUrl: r.thumbnail_url,
               duration: r.duration,
               status: r.status,
+              audioUrl: r.audio_url || r.audioUrl || '',
               subTab: cat,
               createdAt: r.created_at
             });
@@ -879,13 +1176,384 @@ const formatPostRow = (row) => {
     tagsArr = typeof row.tags === 'string' ? JSON.parse(row.tags) : (row.tags || []);
   } catch (e) {}
 
+  let imageSeoKeywordsArr = [];
+  try {
+    imageSeoKeywordsArr = typeof row.imageSeoKeywords === 'string' ? JSON.parse(row.imageSeoKeywords) : (row.imageSeoKeywords || []);
+  } catch (e) {}
+
+  let targetedEmailsArr = [];
+  try {
+    targetedEmailsArr = typeof row.targetedEmails === 'string' ? JSON.parse(row.targetedEmails) : (row.targetedEmails || []);
+  } catch (e) {}
+
+  const cleanThumb = unwrapWebpProxyUrl(row.thumbnail || '');
+
   return {
     ...row,
+    thumbnail: cleanThumb,
     subCategories: Array.isArray(subs) ? subs : [],
     tags: Array.isArray(tagsArr) ? tagsArr : [],
+    imageSeoKeywords: Array.isArray(imageSeoKeywordsArr) ? imageSeoKeywordsArr : [],
+    targetedEmails: Array.isArray(targetedEmailsArr) ? targetedEmailsArr : [],
+    focusKeyword: row.focusKeyword || '',
+    seoTitle: row.seoTitle || '',
+    seoDescription: row.seoDescription || '',
+    broadcastToSubscribers: row.broadcastToSubscribers !== undefined && row.broadcastToSubscribers !== null
+      ? (row.broadcastToSubscribers !== 0 && row.broadcastToSubscribers !== '0' && row.broadcastToSubscribers !== false && row.broadcastToSubscribers !== 'false')
+      : true,
     views: Number(row.views || 0),
     publishedAt: Number(row.publishedAt || 0),
   };
+};
+
+// Helper to dispatch targeted email notifications for published articles
+const sendTargetedArticleEmails = async (post) => {
+  if (!post || (post.status !== 'Published' && post.status !== 'published')) {
+    return { success: false, reason: 'Article is not published' };
+  }
+
+  const recipients = new Set();
+
+  // 1. Collect custom targeted emails added to this article
+  let targetedArr = [];
+  if (Array.isArray(post.targetedEmails)) {
+    targetedArr = post.targetedEmails;
+  } else if (typeof post.targetedEmails === 'string') {
+    try {
+      const parsed = JSON.parse(post.targetedEmails);
+      if (Array.isArray(parsed)) targetedArr = parsed;
+    } catch (e) {}
+  }
+
+  targetedArr.forEach((email) => {
+    const clean = String(email).trim().toLowerCase();
+    if (clean && clean.includes('@')) {
+      recipients.add(clean);
+    }
+  });
+
+  // 2. Collect newsletter subscribers if broadcastToSubscribers is enabled (default true)
+  const shouldBroadcast = post.broadcastToSubscribers !== false &&
+    post.broadcastToSubscribers !== 0 &&
+    post.broadcastToSubscribers !== '0' &&
+    post.broadcastToSubscribers !== 'false';
+
+  if (shouldBroadcast) {
+    try {
+      let subRows = [];
+      try {
+        const [rows] = await db.query('SELECT * FROM newsletter_subscriptions');
+        if (rows && rows.length > 0) subRows = rows;
+      } catch (dbErr) {}
+
+      if (subRows.length === 0) {
+        subRows = readJSONFile(NEWSLETTER_FILE, []);
+      }
+
+      // Determine article published timestamp & categories
+      const postTime = post.publishedAt
+        ? new Date(post.publishedAt).getTime()
+        : (post.date ? new Date(post.date).getTime() : Date.now());
+
+      const postCat = (post.category || '').toLowerCase().trim();
+      const postSubs = Array.isArray(post.subCategories) ? post.subCategories.map((s) => String(s).toLowerCase().trim()) : [];
+      const postTags = Array.isArray(post.tags) ? post.tags.map((t) => String(t).toLowerCase().trim()) : [];
+      const allPostCategories = Array.from(new Set([postCat, ...postSubs, ...postTags])).filter(Boolean);
+
+      const normalizeCatStr = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const normPostCategories = allPostCategories.map(normalizeCatStr).filter(Boolean);
+
+      subRows.forEach((sub) => {
+        const subEmail = (typeof sub === 'string' ? sub : sub.email || '').toLowerCase().trim();
+        if (!subEmail || !subEmail.includes('@')) return;
+
+        // Rule 1: Timestamp check - Article MUST be published AFTER subscriber signed up
+        const subTime = sub.subscribed_at ? new Date(sub.subscribed_at).getTime() : (sub.subscribedTimestamp || 0);
+        if (subTime > 0 && postTime < subTime - 60000) {
+          // Post was published BEFORE the user signed up to the newsletter -> Skip!
+          return;
+        }
+
+        // Rule 2: Category check - Article category MUST strictly match subscriber's chosen categories
+        let topics = [];
+        if (Array.isArray(sub.newsletters)) {
+          topics = sub.newsletters.map((t) => String(t).toLowerCase().trim());
+        } else if (typeof sub.newsletters === 'string') {
+          try {
+            const parsed = JSON.parse(sub.newsletters);
+            if (Array.isArray(parsed)) topics = parsed.map((t) => String(t).toLowerCase().trim());
+          } catch (e) {}
+        }
+
+        const normTopics = topics.map(normalizeCatStr).filter(Boolean);
+        const isAllSelected = normTopics.includes('all') || normTopics.includes('allnewsletters');
+
+        let matchesCategory = false;
+        if (isAllSelected) {
+          matchesCategory = true;
+        } else if (normTopics.length > 0) {
+          matchesCategory = normTopics.some((t) =>
+            normPostCategories.some((c) => {
+              if (!c || !t) return false;
+              if (c === t) return true;
+              if (c.length >= 3 && t.length >= 3) {
+                return c.includes(t) || t.includes(c);
+              }
+              return false;
+            })
+          );
+        }
+
+        if (matchesCategory) {
+          recipients.add(subEmail);
+        }
+      });
+    } catch (err) {
+      console.warn('Newsletter subscriber fetch notice:', err.message);
+    }
+  }
+
+  const finalRecipientList = Array.from(recipients);
+  if (finalRecipientList.length === 0) {
+    console.log(`[EMAIL DISTRIBUTION] No matching subscribers for published article "${post.title}" (ID: ${post.id}).`);
+    return { success: true, count: 0, recipients: [] };
+  }
+
+  const siteUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+  const articleUrl = `${siteUrl}/article/${post.slug || post.id}`;
+  const articleTitle = post.title || 'Untitled Article';
+  const articleSubheadline = post.subheadline || post.cardSummary || post.description || '';
+  const articleCategory = (post.category || 'World').toUpperCase();
+  const articleAuthor = post.author || 'The Editorial Board';
+  
+  const formattedDate = new Date(post.publishedAt || Date.now()).toLocaleDateString('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric'
+  }).toUpperCase();
+
+  // Exact requested logo: website-thumbnail - Copy.jpg (hosted on B2)
+  const logoSrc = 'https://f005.backblazeb2.com/file/timeschicago/branding/exact_timeschicago_logo.jpg';
+
+  // Resolve article thumbnail: filter out article page URLs, base64 strings, and relative/local paths
+  let rawThumb = unwrapWebpProxyUrl((post.thumbnail || '').trim());
+
+  // 1. Filter out article webpage URLs (e.g. http://localhost:3000/article/slug)
+  if (rawThumb.includes('/article/') || rawThumb.includes('timeschicago.com/article') || rawThumb.includes('localhost:3000/article')) {
+    rawThumb = '';
+  }
+
+  // 2. If thumbnail is empty or was an article page URL, extract first <img> from bodyContent
+  if (!rawThumb && post.bodyContent) {
+    const imgMatch = post.bodyContent.match(/<img[^>]+src=["']([^"']+)["']/i);
+    if (imgMatch && imgMatch[1]) {
+      const candidate = imgMatch[1].trim();
+      if (!candidate.includes('/article/')) {
+        rawThumb = candidate;
+      }
+    }
+  }
+
+  // 3. Upload base64 data URIs to Backblaze B2
+  if (rawThumb.startsWith('data:image/')) {
+    try {
+      const b2Url = await uploadBase64ToB2(rawThumb, `thumb_${post.id || Date.now()}.webp`, 'articles');
+      if (b2Url) rawThumb = b2Url;
+    } catch (e) {}
+  }
+
+  // 4. Resolve relative image paths
+  if (rawThumb.startsWith('/') || rawThumb.startsWith('images/') || rawThumb.startsWith('uploads/')) {
+    const cleanPath = rawThumb.startsWith('/') ? rawThumb : `/${rawThumb}`;
+    rawThumb = `${siteUrl}${cleanPath}`;
+  }
+
+  // 5. Upload local localhost images to Backblaze B2 so external email clients can view them
+  if (rawThumb.includes('localhost:') || rawThumb.includes('127.0.0.1:')) {
+    try {
+      const relativePart = rawThumb.replace(/^https?:\/\/[^\/]+/, '');
+      const diskPathFrontend = path.join(__dirname, '../Frontend/public', relativePart);
+      const diskPathBackend = path.join(__dirname, relativePart);
+
+      let diskPath = null;
+      if (fs.existsSync(diskPathFrontend)) diskPath = diskPathFrontend;
+      else if (fs.existsSync(diskPathBackend)) diskPath = diskPathBackend;
+
+      if (diskPath) {
+        const fileBuffer = fs.readFileSync(diskPath);
+        const ext = path.extname(diskPath).replace('.', '') || 'jpeg';
+        const mimeType = ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg';
+        const uploadedUrl = await uploadToBackblazeB2(fileBuffer, `thumb_${post.id || Date.now()}.${ext}`, mimeType, 'articles');
+        if (uploadedUrl) rawThumb = uploadedUrl;
+      }
+    } catch (e) {}
+  }
+
+  // Final valid image thumbnail URL fallback
+  const articleThumbnail = (rawThumb && rawThumb.startsWith('http'))
+    ? rawThumb
+    : 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=800&q=80';
+
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${articleTitle}</title>
+        <!-- Google Fonts matching website typography (Playfair Display & Source Serif 4) -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&display=swap" rel="stylesheet">
+        <style>
+          @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&display=swap');
+          .article-title {
+            font-family: 'Playfair Display', Georgia, 'Times New Roman', serif !important;
+            font-weight: 700 !important;
+          }
+          .article-summary {
+            font-family: 'Source Serif 4', Georgia, 'Times New Roman', serif !important;
+          }
+        </style>
+      </head>
+      <body style="margin: 0; padding: 20px 0; background-color: #f4f4f0; font-family: 'Source Serif 4', Georgia, 'Times New Roman', serif; color: #111111;">
+        <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 640px; margin: 20px auto; background-color: #ffffff; border: 1px solid #eae6da; border-radius: 4px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.03);">
+          
+          <!-- Top Masthead Header -->
+          <tr>
+            <td style="padding: 24px 24px 8px 24px; text-align: center;">
+              <p style="margin: 0 0 16px 0;">
+                <a href="${siteUrl}" target="_blank" style="font-family: Arial, sans-serif; font-size: 13px; font-weight: bold; color: #718096 !important; text-decoration: none !important; letter-spacing: 0.5px;">
+                  <span style="color: #718096 !important; text-decoration: none !important;">timeschicago.com</span>
+                </a>
+              </p>
+              <!-- Masthead Logo -->
+              <a href="${siteUrl}" target="_blank" style="text-decoration: none;">
+                <img src="${logoSrc}" alt="Times Chicago" style="max-width: 280px; width: 100%; height: auto; display: block; margin: 0 auto; border: 0;" />
+              </a>
+            </td>
+          </tr>
+
+          <!-- Category Title & Date -->
+          <tr>
+            <td style="padding: 16px 24px 20px 24px; text-align: center;">
+              <h1 class="article-title" style="font-family: 'Playfair Display', Georgia, 'Times New Roman', serif; font-size: 30px; font-weight: 900; color: #111111; margin: 12px 0 6px 0; text-transform: uppercase; letter-spacing: 1px;">
+                ${articleCategory}
+              </h1>
+              <p style="font-family: Arial, sans-serif; font-size: 12px; color: #777777; margin: 0; text-transform: uppercase; letter-spacing: 1.5px;">
+                ${formattedDate}
+              </p>
+            </td>
+          </tr>
+
+          <!-- Main Article Layout -->
+          <tr>
+            <td style="padding: 0 24px 28px 24px;">
+              <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                  <!-- Left: Article Thumbnail Image -->
+                  ${articleThumbnail ? `
+                  <td width="38%" valign="top" style="padding-right: 18px;">
+                    <a href="${articleUrl}" target="_blank">
+                      <img src="${articleThumbnail}" alt="${articleTitle}" style="width: 100%; max-width: 220px; border-radius: 8px; display: block; object-fit: cover; border: 1px solid #eae6da;" />
+                    </a>
+                  </td>
+                  ` : ''}
+
+                  <!-- Right: Article Content -->
+                  <td width="${articleThumbnail ? '62%' : '100%'}" valign="top">
+                    <h2 class="article-title" style="font-family: 'Playfair Display', Georgia, 'Times New Roman', serif; font-size: 22px; font-weight: 700; line-height: 1.2; color: #111111; margin: 0 0 10px 0; letter-spacing: -0.2px;">
+                      <a href="${articleUrl}" target="_blank" class="article-title" style="color: #111111; text-decoration: none; font-family: 'Playfair Display', Georgia, 'Times New Roman', serif; font-weight: 700;">
+                        ${articleTitle}
+                      </a>
+                    </h2>
+                    ${articleSubheadline ? `
+                    <p class="article-summary" style="font-family: 'Source Serif 4', Georgia, 'Times New Roman', serif; font-size: 14px; line-height: 1.5; color: #333333; margin: 0 0 12px 0;">
+                      ${articleSubheadline}
+                    </p>
+                    ` : ''}
+                    <p style="font-family: Arial, sans-serif; font-size: 13px; font-weight: 700; color: #555555; margin: 0 0 14px 0;">
+                      By ${articleAuthor}
+                    </p>
+                    <div>
+                      <a href="${articleUrl}" target="_blank" style="font-family: Arial, sans-serif; font-size: 12px; font-weight: 800; color: #990000; text-transform: uppercase; text-decoration: underline; letter-spacing: 0.5px;">
+                        READ FULL ARTICLE &raquo;
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer Section -->
+          <tr>
+            <td style="padding: 24px 24px 28px 24px; text-align: center; border-top: 1px solid #eae6da; background-color: #ffffff;">
+              <p style="font-family: Arial, sans-serif; font-size: 11px; color: #777777; line-height: 1.5; margin: 0 0 6px 0;">
+                &copy; 2026 Times Chicago Media Inc. All Rights Reserved.
+              </p>
+              <p style="font-family: Arial, sans-serif; font-size: 11px; color: #777777; line-height: 1.5; margin: 0 0 4px 0;">
+                You received this email because you are on the Times Chicago distribution list.
+              </p>
+              <p style="font-family: Arial, sans-serif; font-size: 11px; color: #777777; line-height: 1.5; margin: 0;">
+                To manage your notification preferences, <a href="${siteUrl}/newsletters" target="_blank" style="color: #990000; text-decoration: underline;">click here</a>.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </body>
+    </html>
+  `;
+
+  const host = process.env.SMTP_HOST || process.env.MAIL_HOST;
+  const user = process.env.SMTP_USER || process.env.MAIL_USER || process.env.GMAIL_USER;
+  const pass = process.env.SMTP_PASS || process.env.MAIL_PASS || process.env.GMAIL_APP_PASSWORD;
+  const port = Number(process.env.SMTP_PORT || process.env.MAIL_PORT || 587);
+
+  let transporter;
+  if (user && pass) {
+    if (host) {
+      transporter = nodemailer.createTransport({
+        host,
+        port,
+        secure: port === 465,
+        auth: { user, pass }
+      });
+    } else {
+      transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: { user, pass }
+      });
+    }
+  } else {
+    transporter = nodemailer.createTransport({ jsonTransport: true });
+    console.log('[EMAIL DISTRIBUTION NOTICE] No SMTP/Gmail credentials in Backend/.env. Set GMAIL_USER & GMAIL_APP_PASSWORD to send live emails.');
+  }
+
+  const fromEmail = process.env.SMTP_FROM || (user ? `"Times Chicago News" <${user}>` : null) || process.env.GMAIL_USER || '"Times Chicago News" <news@chicagotimes.com>';
+
+  const mailOptions = {
+    from: fromEmail,
+    subject: articleTitle,
+    html: htmlContent
+  };
+
+  let sentCount = 0;
+  for (const toEmail of finalRecipientList) {
+    try {
+      await transporter.sendMail({
+        ...mailOptions,
+        to: toEmail
+      });
+      sentCount++;
+    } catch (mailErr) {
+      console.warn(`[EMAIL DISTRIBUTION NOTICE] Mail error for ${toEmail}:`, mailErr.message);
+    }
+  }
+
+  console.log(`[EMAIL DISTRIBUTION DISPATCHED] Article "${articleTitle}" sent to ${sentCount} recipient(s):`, finalRecipientList);
+  return { success: true, count: sentCount, recipients: finalRecipientList };
 };
 
 // ==========================================
@@ -926,25 +1594,87 @@ app.post('/api/posts', async (req, res) => {
     for (const p of listToProcess) {
       if (!p || !p.id) continue;
 
-      // 1. Upload thumbnail image to Backblaze B2 under articles/ if base64 data URI
-      if (p.thumbnail && p.thumbnail.startsWith('data:image/')) {
-        const b2Url = await uploadBase64ToB2(p.thumbnail, `thumb_${p.id}.webp`, 'articles');
-        if (b2Url) p.thumbnail = b2Url;
+      // 1. Resolve and upload thumbnail image to Backblaze B2 under articles/
+      let rawThumb = unwrapWebpProxyUrl(String(p.thumbnail || '').trim());
+
+      // A. Filter out article webpage URLs (e.g. http://localhost:3000/article/slug)
+      if (rawThumb.includes('/article/') || rawThumb.includes('timeschicago.com/article') || rawThumb.includes('localhost:3000/article')) {
+        rawThumb = '';
       }
 
-      // 2. Upload all inline body images in article HTML to Backblaze B2 under articles/
-      if (p.bodyContent && p.bodyContent.includes('data:image/')) {
-        p.bodyContent = await uploadAllBase64InHtml(p.bodyContent, `article_${p.id}`, 'articles');
+      // B. Extract first <img> from bodyContent if thumbnail is empty or was an article webpage URL
+      if (!rawThumb && p.bodyContent) {
+        const imgMatch = p.bodyContent.match(/<img[^>]+src=["']([^"']+)["']/i);
+        if (imgMatch && imgMatch[1]) {
+          const candidate = imgMatch[1].trim();
+          if (!candidate.includes('/article/')) {
+            rawThumb = candidate;
+          }
+        }
+      }
+
+      // C. Upload base64 image data URIs to Backblaze B2
+      if (rawThumb.startsWith('data:image/')) {
+        try {
+          const b2Url = await uploadBase64ToB2(rawThumb, `thumb_${p.id}_${Date.now()}.webp`, 'articles');
+          if (b2Url) rawThumb = b2Url;
+        } catch (e) {}
+      } 
+      // D. Upload remote image URLs (e.g. Unsplash or external image links) to Backblaze B2 if not already B2
+      else if (rawThumb.startsWith('http://') || rawThumb.startsWith('https://')) {
+        if (!rawThumb.includes('backblazeb2.com') && !rawThumb.includes('localhost:') && !rawThumb.includes('127.0.0.1:')) {
+          try {
+            const b2Url = await uploadRemoteUrlToB2(rawThumb, `thumb_${p.id}_${Date.now()}.webp`, 'articles');
+            if (b2Url) rawThumb = b2Url;
+          } catch (e) {}
+        }
+      }
+      // E. Resolve relative or local image paths by uploading local file to Backblaze B2
+      else if (rawThumb.startsWith('/') || rawThumb.startsWith('images/') || rawThumb.startsWith('uploads/')) {
+        try {
+          const cleanPath = rawThumb.startsWith('/') ? rawThumb : `/${rawThumb}`;
+          const diskPathFrontend = path.join(__dirname, '../Frontend/public', cleanPath);
+          const diskPathBackend = path.join(__dirname, cleanPath);
+          let diskPath = null;
+          if (fs.existsSync(diskPathFrontend)) diskPath = diskPathFrontend;
+          else if (fs.existsSync(diskPathBackend)) diskPath = diskPathBackend;
+
+          if (diskPath) {
+            const fileBuffer = fs.readFileSync(diskPath);
+            const ext = path.extname(diskPath).replace('.', '') || 'webp';
+            const mimeType = ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg';
+            const uploadedUrl = await uploadToBackblazeB2(fileBuffer, `thumb_${p.id}_${Date.now()}.${ext}`, mimeType, 'articles');
+            if (uploadedUrl) rawThumb = uploadedUrl;
+          }
+        } catch (e) {}
+      }
+
+      if (rawThumb) {
+        p.thumbnail = rawThumb;
+      }
+
+      // 2. Upload all inline body images (base64 & external URLs) in article HTML to Backblaze B2 under articles/
+      if (p.bodyContent) {
+        p.bodyContent = await uploadAllExternalImagesInHtml(p.bodyContent, `article_${p.id}`, 'articles');
       }
 
       // 3. Save / Update in MySQL posts table
       try {
+        // Ensure imageSeoKeywords, targetedEmails, broadcastToSubscribers, focusKeyword, seoTitle, seoDescription columns exist in MySQL posts table
+        try { await db.query('ALTER TABLE posts ADD COLUMN imageSeoKeywords JSON DEFAULT NULL'); } catch (colErr) {}
+        try { await db.query('ALTER TABLE posts ADD COLUMN targetedEmails JSON DEFAULT NULL'); } catch (colErr) {}
+        try { await db.query('ALTER TABLE posts ADD COLUMN broadcastToSubscribers TINYINT(1) DEFAULT 1'); } catch (colErr) {}
+        try { await db.query('ALTER TABLE posts ADD COLUMN focusKeyword VARCHAR(255) DEFAULT NULL'); } catch (colErr) {}
+        try { await db.query('ALTER TABLE posts ADD COLUMN seoTitle VARCHAR(255) DEFAULT NULL'); } catch (colErr) {}
+        try { await db.query('ALTER TABLE posts ADD COLUMN seoDescription TEXT DEFAULT NULL'); } catch (colErr) {}
+
         const insertQuery = `
           INSERT INTO posts (
             id, title, slug, subheadline, cardSummary, bodyContent, category,
             subCategories, homepagePlacement, author, authorEmail, status,
-            thumbnail, photoCaption, tags, readDuration, views, publishedAt, date
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            thumbnail, photoCaption, tags, imageSeoKeywords, targetedEmails, broadcastToSubscribers, readDuration, views, publishedAt, date,
+            focusKeyword, seoTitle, seoDescription
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
           ON DUPLICATE KEY UPDATE
             title = VALUES(title),
             slug = VALUES(slug),
@@ -960,11 +1690,32 @@ app.post('/api/posts', async (req, res) => {
             thumbnail = VALUES(thumbnail),
             photoCaption = VALUES(photoCaption),
             tags = VALUES(tags),
+            imageSeoKeywords = VALUES(imageSeoKeywords),
+            targetedEmails = VALUES(targetedEmails),
+            broadcastToSubscribers = VALUES(broadcastToSubscribers),
             readDuration = VALUES(readDuration),
             views = VALUES(views),
             publishedAt = VALUES(publishedAt),
-            date = VALUES(date);
+            date = VALUES(date),
+            focusKeyword = VALUES(focusKeyword),
+            seoTitle = VALUES(seoTitle),
+            seoDescription = VALUES(seoDescription);
         `;
+
+        // Check if article was previously published in database to avoid duplicate email broadcasts
+        let wasAlreadyPublished = false;
+        try {
+          const [existingRows] = await db.query('SELECT status FROM posts WHERE id = ?', [String(p.id)]);
+          if (existingRows && existingRows.length > 0) {
+            const prevStatus = String(existingRows[0].status || '').toLowerCase().trim();
+            if (prevStatus === 'published') {
+              wasAlreadyPublished = true;
+            }
+          }
+        } catch (checkErr) {}
+
+        const isCurrentlyPublished = String(p.status || '').toLowerCase().trim() === 'published';
+        const isExplicitNotify = p.justPublished === true || p.notifySubscribers === true || p._triggerEmail === true;
 
         await db.query(insertQuery, [
           String(p.id),
@@ -982,11 +1733,22 @@ app.post('/api/posts', async (req, res) => {
           p.thumbnail || null,
           p.photoCaption || null,
           JSON.stringify(p.tags || []),
+          JSON.stringify(p.imageSeoKeywords || []),
+          JSON.stringify(p.targetedEmails || []),
+          (p.broadcastToSubscribers !== false && p.broadcastToSubscribers !== 0 && p.broadcastToSubscribers !== '0' && p.broadcastToSubscribers !== 'false') ? 1 : 0,
           p.readDuration || null,
           Number(p.views || 0),
           Number(p.publishedAt || Date.now()),
           p.date || null,
+          p.focusKeyword || null,
+          p.seoTitle || null,
+          p.seoDescription || null
         ]);
+
+        // Dispatch targeted email notifications ONLY if status is Published AND it was not previously published (or explicit notify requested)
+        if (isCurrentlyPublished && (!wasAlreadyPublished || isExplicitNotify)) {
+          sendTargetedArticleEmails(p).catch((err) => console.warn('Targeted Email Dispatch Error:', err.message));
+        }
       } catch (dbErr) {
         console.warn(`MySQL Post Save Notice for ID ${p.id}:`, dbErr.message);
       }
@@ -1019,6 +1781,27 @@ app.post('/api/posts', async (req, res) => {
   } catch (error) {
     console.error('Error saving posts:', error);
     res.status(500).json({ success: false, message: 'Failed to save posts' });
+  }
+});
+
+// Explicit Email Notification Endpoint for any published article
+app.post('/api/posts/notify', async (req, res) => {
+  try {
+    const { postId, post } = req.body || {};
+    let targetPost = post;
+    if (!targetPost && postId) {
+      try {
+        const [rows] = await db.query('SELECT * FROM posts WHERE id = ?', [String(postId)]);
+        if (rows && rows.length > 0) targetPost = formatPostRow(rows[0]);
+      } catch (e) {}
+    }
+    if (!targetPost) {
+      return res.status(404).json({ success: false, message: 'Article not found' });
+    }
+    const result = await sendTargetedArticleEmails(targetPost);
+    res.status(200).json({ success: true, ...result });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
   }
 });
 
@@ -1225,9 +2008,10 @@ app.post('/api/newsletter', async (req, res) => {
     const cleanEmail = email.toLowerCase().trim();
     const topicsArr = Array.isArray(newsletters) ? newsletters : ["US", "WORLD", "BUSINESS"];
 
+    const nowISO = new Date().toISOString();
     try {
       await db.query(
-        `INSERT INTO newsletter_subscriptions (email, newsletters) VALUES (?, ?) ON DUPLICATE KEY UPDATE newsletters = VALUES(newsletters);`,
+        `INSERT INTO newsletter_subscriptions (email, newsletters, subscribed_at) VALUES (?, ?, NOW()) ON DUPLICATE KEY UPDATE newsletters = VALUES(newsletters), subscribed_at = NOW();`,
         [cleanEmail, JSON.stringify(topicsArr)]
       );
     } catch (dbErr) {
@@ -1235,15 +2019,20 @@ app.post('/api/newsletter', async (req, res) => {
     }
 
     let subscribers = readJSONFile(NEWSLETTER_FILE, []);
-    if (!subscribers.some((s) => (typeof s === 'string' ? s : s.email) === cleanEmail)) {
-      subscribers.unshift({
-        id: 'sub_' + Date.now(),
-        email: cleanEmail,
-        newsletters: topicsArr,
-        subscribedDate: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-      });
-      writeJSONFile(NEWSLETTER_FILE, subscribers);
+    const existingIdx = subscribers.findIndex((s) => (typeof s === 'string' ? s : s.email || '').toLowerCase().trim() === cleanEmail);
+    const subRecord = {
+      id: existingIdx >= 0 && subscribers[existingIdx].id ? subscribers[existingIdx].id : 'sub_' + Date.now(),
+      email: cleanEmail,
+      newsletters: topicsArr,
+      subscribed_at: nowISO,
+      subscribedDate: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    };
+    if (existingIdx >= 0) {
+      subscribers[existingIdx] = subRecord;
+    } else {
+      subscribers.unshift(subRecord);
     }
+    writeJSONFile(NEWSLETTER_FILE, subscribers);
 
     res.status(200).json({ success: true, message: 'Successfully subscribed to newsletter', email: cleanEmail, newsletters: topicsArr });
   } catch (error) {
@@ -2320,6 +3109,39 @@ app.post('/api/backups/restore', async (req, res) => {
   }
 });
 
+// GET /api/backups/download/:fileName - Force download backup file as attachment
+app.get('/api/backups/download/:fileName', async (req, res) => {
+  try {
+    const fileName = req.params.fileName;
+    if (!fileName) {
+      return res.status(400).json({ success: false, message: 'fileName required' });
+    }
+
+    const localPath = path.join(BACKUPS_DIR, fileName);
+    let fileBuffer = null;
+
+    if (fs.existsSync(localPath)) {
+      fileBuffer = fs.readFileSync(localPath);
+    } else {
+      const downloadedStr = await downloadBackblazeFile(`backups/${fileName}`).catch(() => null);
+      if (downloadedStr) {
+        fileBuffer = Buffer.from(downloadedStr, 'utf-8');
+      }
+    }
+
+    if (!fileBuffer) {
+      return res.status(404).json({ success: false, message: 'Backup file not found' });
+    }
+
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+    return res.send(fileBuffer);
+  } catch (err) {
+    console.error('Error downloading backup file:', err);
+    return res.status(500).json({ success: false, message: 'Failed to download backup file' });
+  }
+});
+
 // DELETE /api/backups/:fileName - Delete backup file
 app.delete('/api/backups/:fileName', async (req, res) => {
   try {
@@ -2528,6 +3350,88 @@ app.delete('/api/advertise-leads/:id', async (req, res) => {
   }
 });
 
+// =================================================================
+// COMMENTS API ENDPOINTS (Saved persistently in database/comments.json)
+// =================================================================
+app.get('/api/comments/:articleSlug', (req, res) => {
+  try {
+    const { articleSlug } = req.params;
+    const allComments = readJSONFile(COMMENTS_FILE, []);
+    if (!articleSlug || articleSlug === 'all') {
+      return res.status(200).json({ success: true, comments: allComments });
+    }
+    const filtered = allComments.filter((c) => c.articleSlug === articleSlug);
+    return res.status(200).json({ success: true, comments: filtered });
+  } catch (err) {
+    console.error('Error fetching comments:', err);
+    return res.status(500).json({ success: false, comments: [], message: err.message });
+  }
+});
+
+app.post('/api/comments', (req, res) => {
+  try {
+    const { id, articleSlug, text, authorName, authorEmail } = req.body || {};
+    if (!articleSlug || !text || !text.trim()) {
+      return res.status(400).json({ success: false, message: 'articleSlug and text are required' });
+    }
+    const allComments = readJSONFile(COMMENTS_FILE, []);
+    const now = new Date();
+    const formattedDate = now.toLocaleString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+
+    const commentId = (id && typeof id === 'string' && id.trim())
+      ? id.trim()
+      : `comment_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+
+    const newComment = {
+      id: commentId,
+      articleSlug: articleSlug.trim(),
+      authorName: (authorName || 'Anonymous').trim(),
+      authorEmail: (authorEmail || '').trim(),
+      createdAt: formattedDate,
+      timestamp: Date.now(),
+      text: text.trim(),
+    };
+
+    allComments.unshift(newComment);
+    writeJSONFile(COMMENTS_FILE, allComments);
+
+    return res.status(201).json({ success: true, comment: newComment });
+  } catch (err) {
+    console.error('Error saving comment:', err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.delete('/api/comments/:id', (req, res) => {
+  try {
+    const rawId = req.params.id || '';
+    const targetId = decodeURIComponent(rawId).trim();
+    let allComments = readJSONFile(COMMENTS_FILE, []);
+    const initialCount = allComments.length;
+    allComments = allComments.filter((c) => {
+      const cId = String(c.id || '').trim();
+      return cId !== targetId && cId !== String(rawId).trim();
+    });
+    
+    if (allComments.length === initialCount) {
+      return res.status(404).json({ success: false, message: 'Comment not found' });
+    }
+
+    writeJSONFile(COMMENTS_FILE, allComments);
+    return res.status(200).json({ success: true, message: 'Comment deleted successfully' });
+  } catch (err) {
+    console.error('Error deleting comment:', err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 // Root & Health check
 app.get('/', (req, res) => {
   res.status(200).json({ status: 'ok', message: 'WSJ Express Backend Server Running' });
@@ -2535,6 +3439,118 @@ app.get('/', (req, res) => {
 
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok', message: 'WSJ Express Backend Server Running' });
+});
+
+// ==========================================
+// RSS 2.0 XML ENDPOINT FOR TIMES CHICAGO
+// ==========================================
+app.get(['/rss.xml', '/api/rss'], async (req, res) => {
+  const isRaw = req.query.raw === 'true' || req.query.format === 'raw';
+  const isDownload = req.query.download === '1' || req.query.download === 'true';
+
+  res.setHeader('Content-Type', isRaw ? 'text/plain; charset=utf-8' : 'application/xml; charset=utf-8');
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+
+  if (isDownload) {
+    res.setHeader('Content-Disposition', 'attachment; filename="rss.xml"');
+  }
+
+  let posts = [];
+  try {
+    const [rows] = await db.query('SELECT * FROM posts ORDER BY publishedAt DESC, created_at DESC LIMIT 50');
+    if (rows && rows.length > 0) {
+      posts = rows.map(formatPostRow);
+    }
+  } catch (err) {
+    posts = readJSONFile(POSTS_FILE, []);
+  }
+
+  const cleanCdata = (str) => {
+    if (!str) return '';
+    return String(str).replace(/\]\]>/g, ']]&gt;').trim();
+  };
+
+  const getCleanDescription = (post) => {
+    const raw =
+      post.excerpt ||
+      post.summary ||
+      post.description ||
+      post.content ||
+      post.headline ||
+      post.title ||
+      '';
+    const cleaned = String(raw)
+      .replace(/<[^>]*>?/gm, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    if (cleaned.length > 250) {
+      return cleaned.substring(0, 247) + '...';
+    }
+    return cleaned || 'Read the latest news report on Times Chicago.';
+  };
+
+  const siteUrl = 'http://localhost:3000';
+  const activePosts = posts.filter((p) => (p.status || 'Published').toLowerCase() === 'published');
+
+  const itemsXml = activePosts
+    .map((post) => {
+      const title = cleanCdata(post.title || post.headline || 'Untitled');
+      const description = cleanCdata(getCleanDescription(post));
+      const slug = post.slug || post.id || 'article';
+      const link = `${siteUrl}/article/${slug}`;
+      const pubDate = post.publishedAt
+        ? new Date(post.publishedAt).toUTCString()
+        : new Date(post.created_at || Date.now()).toUTCString();
+      const author = cleanCdata(post.author || post.authorName || 'Times Chicago Staff');
+      const category = cleanCdata(post.category || 'News');
+      const imageUrl = post.image || post.imageUrl || post.thumbnailUrl || post.coverImage || '';
+
+      const enclosureTag = imageUrl
+        ? `\n<enclosure url="${imageUrl.replace(/&/g, '&amp;')}" length="0" type="image/jpeg"/>`
+        : '';
+
+      return `<item>
+<title>
+<![CDATA[ ${title} ]]>
+</title>
+<link>${link}</link>
+<guid isPermaLink="true">${link}</guid>
+<description>
+<![CDATA[ ${description} ]]>
+</description>
+<pubDate>${pubDate}</pubDate>
+<author>
+<![CDATA[ ${author} ]]>
+</author>
+<dc:creator>
+<![CDATA[ ${author} ]]>
+</dc:creator>
+<category>
+<![CDATA[ ${category} ]]>
+</category>${enclosureTag}
+</item>`;
+    })
+    .join('\n');
+
+  const rssXml = `<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+<channel>
+<title>Times Chicago</title>
+<link>${siteUrl}</link>
+<description>Latest news, politics, business, technology, sports and health updates from Times Chicago.</description>
+<language>en-us</language>
+<atom:link href="${siteUrl}/rss.xml" rel="self" type="application/rss+xml"/>
+<image>
+<url>${siteUrl}/favicon.jpg</url>
+<title>Times Chicago</title>
+<link>${siteUrl}</link>
+</image>
+${itemsXml}
+</channel>
+</rss>`;
+
+  res.send(rssXml);
 });
 
 // Start server

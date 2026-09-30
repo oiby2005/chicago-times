@@ -53,6 +53,14 @@ const opinionArticles: OpinionArticle[] = [
     imageUrl: "/images/world/odesa_port.jpg",
     isCircularImage: false,
   },
+  {
+    id: "6",
+    author: "MAYON",
+    title: "The Science Behind Venezuela’s Doublet Earthquake",
+    slug: "science-behind-venezuela-doublet-earthquake",
+    imageUrl: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?fm=webp&fit=crop&w=150&q=80",
+    isCircularImage: false,
+  },
 ];
 
 export const OpinionSection: React.FC = () => {
@@ -83,7 +91,7 @@ export const OpinionSection: React.FC = () => {
         opinionPosts.sort((a: any, b: any) => (b.publishedAt || 0) - (a.publishedAt || 0));
 
         if (opinionPosts.length > 0) {
-          const formatted: OpinionArticle[] = opinionPosts.slice(0, 5).map((p: any) => ({
+          const formatted: OpinionArticle[] = opinionPosts.slice(0, 6).map((p: any) => ({
             id: p.id,
             author: (p.author || "BY WRITER").toUpperCase(),
             title: p.title,
@@ -93,12 +101,12 @@ export const OpinionSection: React.FC = () => {
           }));
 
           const merged = [...formatted];
-          for (let i = 0; i < opinionArticles.length && merged.length < 5; i++) {
+          for (let i = 0; i < opinionArticles.length && merged.length < 6; i++) {
             if (!merged.some((m) => m.id === opinionArticles[i].id)) {
               merged.push(opinionArticles[i]);
             }
           }
-          setArticles(merged.slice(0, 5));
+          setArticles(merged.slice(0, 6));
           return;
         }
       }
@@ -124,11 +132,12 @@ export const OpinionSection: React.FC = () => {
       </div>
 
       {/* Opinion Articles List */}
-      <div className="flex-1 flex flex-col justify-between divide-y divide-dashed divide-[#D6CEBF]">
+      <div className="flex flex-col divide-y divide-dashed divide-[#D6CEBF]">
         {articles.map((article) => (
-          <article key={article.id} className="py-2 flex items-start space-x-3 first:pt-0 last:pb-0">
+          <article key={article.id} className="py-2.5 flex items-start space-x-3">
             {/* Image */}
             <div className="shrink-0 pt-0.5">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={article.imageUrl}
                 alt={article.author}
@@ -141,7 +150,15 @@ export const OpinionSection: React.FC = () => {
               <div className="font-sans font-bold text-[9.5px] text-[#8b6f37] uppercase tracking-wider mb-0.5">
                 {article.author}
               </div>
-              <h3 className="font-serif font-bold text-[13.5px] sm:text-[14px] leading-[1.2] text-[#111111] hover:text-[#333333] hover:underline cursor-pointer">
+              <h3
+                className="font-serif font-bold text-[13.5px] sm:text-[14px] leading-[1.2] text-[#111111] hover:text-[#333333] hover:underline cursor-pointer line-clamp-2"
+                style={{
+                  display: "-webkit-box",
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: "vertical",
+                  overflow: "hidden",
+                }}
+              >
                 <Link href={`/article/${article.slug}`}>
                   {article.title}
                 </Link>

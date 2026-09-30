@@ -173,7 +173,7 @@ export const SportCategorySection: React.FC = () => {
             Sport
           </Link>
         </h2>
-        <div className="w-6 h-6 rounded-full bg-[#f0f7f2] flex items-center justify-center text-[#1b7538] cursor-pointer hover:bg-[#e1f0e5]">
+        <div className="w-6 h-6 rounded-full bg-[#f0f7f2] flex items-center justify-center text-[#1b7538] cursor-pointer hover:bg-[#e1f0e5] translate-y-[2px]">
           <span className="text-[14px] font-bold leading-none">›</span>
         </div>
       </div>
@@ -182,19 +182,12 @@ export const SportCategorySection: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 items-stretch">
         
         {/* LEFT & CENTER HERO AREA (8 of 12 cols ~ 67%) */}
-        <div className="lg:col-span-8 pr-0 lg:pr-4 flex flex-col justify-start h-full" style={{ borderRight: "1px solid #CCCCCC" }}>
+        <div className="lg:col-span-8 pr-0 lg:pr-4 flex flex-col justify-start h-full border-r border-dashed border-[#CCCCCC]">
           
           {/* Top Half: Left Headline Text (4 cols) + Large Hero Photo (4 cols) */}
           <div className="grid grid-cols-1 md:grid-cols-8 gap-4 pb-4 border-b border-dashed border-[#CCCCCC]">
             {/* Left Headline */}
             <div className="md:col-span-4 flex flex-col justify-start">
-              {heroItem.categoryTag && (
-                <div className="mb-1">
-                  <span className="font-sans font-bold text-[11px] tracking-wider text-[#1b7538] uppercase">
-                    {heroItem.categoryTag}
-                  </span>
-                </div>
-              )}
               <h3 className="font-serif font-bold text-[28px] sm:text-[32px] leading-[1.12] text-[#111111] hover:underline cursor-pointer mb-2">
                 <Link href={`/article/${heroItem.slug}`}>
                   {heroItem.title}
@@ -205,11 +198,6 @@ export const SportCategorySection: React.FC = () => {
                   {heroItem.summary}
                 </p>
               )}
-              <div className="mt-1">
-                <span className="font-sans font-bold text-[12px] text-[#111111]">
-                  {heroItem.sectionTag || "Cricket"}
-                </span>
-              </div>
               <span className="font-mono text-[11px] text-[#666666] mt-1 block">
                 {formatTimeAgo(heroItem.publishedAt)}
               </span>
@@ -231,9 +219,9 @@ export const SportCategorySection: React.FC = () => {
           </div>
 
           {/* Bottom Half: 2 Mini Columns */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-8 mt-4">
             {/* Mini Story 1 */}
-            <div className="flex items-start space-x-3 pr-0 md:pr-3" style={{ borderRight: "1px solid #CCCCCC" }}>
+            <div className="flex items-start space-x-3 pr-0 md:pr-3 border-r border-dashed border-[#CCCCCC]">
               <Link
                 href={`/article/${miniItem1.slug}`}
                 className="block relative w-[140px] sm:w-[165px] aspect-[16/10] overflow-hidden bg-gray-100 flex-shrink-0 group"
@@ -251,9 +239,6 @@ export const SportCategorySection: React.FC = () => {
                   </Link>
                 </h4>
                 <div>
-                  <span className="font-sans font-bold text-[12px] text-[#111111]">
-                    {miniItem1.sectionTag || "Football"}
-                  </span>
                   <span className="font-mono text-[11px] text-[#666666] mt-0.5 block">
                     {formatTimeAgo(miniItem1.publishedAt)}
                   </span>
@@ -275,13 +260,6 @@ export const SportCategorySection: React.FC = () => {
               </Link>
               <div className="flex flex-col justify-between flex-1">
                 <div>
-                  {miniItem2.categoryTag && (
-                    <div className="mb-1">
-                      <span className="font-sans font-bold text-[10px] tracking-wider text-[#1b7538] uppercase">
-                        {miniItem2.categoryTag}
-                      </span>
-                    </div>
-                  )}
                   <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-2">
                     <Link href={`/article/${miniItem2.slug}`}>
                       {miniItem2.title}
@@ -289,9 +267,6 @@ export const SportCategorySection: React.FC = () => {
                   </h4>
                 </div>
                 <div>
-                  <span className="font-sans font-bold text-[12px] text-[#111111]">
-                    {miniItem2.sectionTag || "Cricket"}
-                  </span>
                   <span className="font-mono text-[11px] text-[#666666] mt-0.5 block">
                     {formatTimeAgo(miniItem2.publishedAt)}
                   </span>
@@ -304,10 +279,10 @@ export const SportCategorySection: React.FC = () => {
 
         {/* RIGHT SIDEBAR STORIES AREA (2x2 Grid of 4 Articles matching Image 1) */}
         <div className="lg:col-span-4 pl-0 lg:pl-4 pt-4 lg:pt-0">
-          <div className="grid grid-cols-2 gap-x-3 gap-y-4">
+          <div className="grid grid-cols-2 gap-0">
             
             {/* Top-Left (Item 1 of sidebar) */}
-            <article className="pr-2 pb-3 border-r border-b border-dashed border-[#CCCCCC] flex flex-col justify-between">
+            <article className="pr-3 pb-4 border-r border-b border-dashed border-[#CCCCCC] flex flex-col justify-between">
               <div>
                 <Link
                   href={`/article/${sidebarItem1.slug}`}
@@ -319,13 +294,6 @@ export const SportCategorySection: React.FC = () => {
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 </Link>
-                {sidebarItem1.categoryTag && (
-                  <div className="mb-1">
-                    <span className="font-sans font-bold text-[10px] tracking-wider text-[#1b7538] uppercase">
-                      {sidebarItem1.categoryTag}
-                    </span>
-                  </div>
-                )}
                 <h4 className="font-serif font-bold text-[14px] sm:text-[15px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-2">
                   <Link href={`/article/${sidebarItem1.slug}`}>
                     {sidebarItem1.title}
@@ -333,9 +301,6 @@ export const SportCategorySection: React.FC = () => {
                 </h4>
               </div>
               <div>
-                <span className="font-sans font-bold text-[11px] text-[#111111] mt-1 block">
-                  {sidebarItem1.sectionTag || "Cricket"}
-                </span>
                 <span className="font-mono text-[11px] text-[#666666] mt-0.5 block">
                   {formatTimeAgo(sidebarItem1.publishedAt)}
                 </span>
@@ -343,7 +308,7 @@ export const SportCategorySection: React.FC = () => {
             </article>
 
             {/* Top-Right (Item 2 of sidebar) */}
-            <article className="pl-1 pb-3 border-b border-dashed border-[#CCCCCC] flex flex-col justify-between">
+            <article className="pl-3 pb-4 border-b border-dashed border-[#CCCCCC] flex flex-col justify-between">
               <div>
                 <Link
                   href={`/article/${sidebarItem2.slug}`}
@@ -355,13 +320,6 @@ export const SportCategorySection: React.FC = () => {
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 </Link>
-                {sidebarItem2.categoryTag && (
-                  <div className="mb-1">
-                    <span className="font-sans font-bold text-[10px] tracking-wider text-[#1b7538] uppercase">
-                      {sidebarItem2.categoryTag}
-                    </span>
-                  </div>
-                )}
                 <h4 className="font-serif font-bold text-[14px] sm:text-[15px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-2">
                   <Link href={`/article/${sidebarItem2.slug}`}>
                     {sidebarItem2.title}
@@ -369,9 +327,6 @@ export const SportCategorySection: React.FC = () => {
                 </h4>
               </div>
               <div>
-                <span className="font-sans font-bold text-[11px] text-[#111111] mt-1 block">
-                  {sidebarItem2.sectionTag || "Football"}
-                </span>
                 <span className="font-mono text-[11px] text-[#666666] mt-0.5 block">
                   {formatTimeAgo(sidebarItem2.publishedAt)}
                 </span>
@@ -379,7 +334,7 @@ export const SportCategorySection: React.FC = () => {
             </article>
 
             {/* Bottom-Left (Item 3 of sidebar) */}
-            <article className="pr-2 pt-1 border-r border-dashed border-[#CCCCCC] flex flex-col justify-between">
+            <article className="pr-3 pt-4 border-r border-dashed border-[#CCCCCC] flex flex-col justify-between">
               <div>
                 <Link
                   href={`/article/${sidebarItem3.slug}`}
@@ -391,13 +346,6 @@ export const SportCategorySection: React.FC = () => {
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 </Link>
-                {sidebarItem3.categoryTag && (
-                  <div className="mb-1">
-                    <span className="font-sans font-bold text-[10px] tracking-wider text-[#1b7538] uppercase">
-                      {sidebarItem3.categoryTag}
-                    </span>
-                  </div>
-                )}
                 <h4 className="font-serif font-bold text-[14px] sm:text-[15px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-2">
                   <Link href={`/article/${sidebarItem3.slug}`}>
                     {sidebarItem3.title}
@@ -405,9 +353,6 @@ export const SportCategorySection: React.FC = () => {
                 </h4>
               </div>
               <div>
-                <span className="font-sans font-bold text-[11px] text-[#111111] mt-1 block">
-                  {sidebarItem3.sectionTag || "Tennis"}
-                </span>
                 <span className="font-mono text-[11px] text-[#666666] mt-0.5 block">
                   {formatTimeAgo(sidebarItem3.publishedAt)}
                 </span>
@@ -415,7 +360,7 @@ export const SportCategorySection: React.FC = () => {
             </article>
 
             {/* Bottom-Right (Item 4 of sidebar) */}
-            <article className="pl-1 pt-1 flex flex-col justify-between">
+            <article className="pl-3 pt-4 flex flex-col justify-between">
               <div>
                 <Link
                   href={`/article/${sidebarItem4.slug}`}
@@ -427,13 +372,6 @@ export const SportCategorySection: React.FC = () => {
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 </Link>
-                {sidebarItem4.categoryTag && (
-                  <div className="mb-1">
-                    <span className="font-sans font-bold text-[10px] tracking-wider text-[#1b7538] uppercase">
-                      {sidebarItem4.categoryTag}
-                    </span>
-                  </div>
-                )}
                 <h4 className="font-serif font-bold text-[14px] sm:text-[15px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-2">
                   <Link href={`/article/${sidebarItem4.slug}`}>
                     {sidebarItem4.title}
@@ -441,9 +379,6 @@ export const SportCategorySection: React.FC = () => {
                 </h4>
               </div>
               <div>
-                <span className="font-sans font-bold text-[11px] text-[#111111] mt-1 block">
-                  {sidebarItem4.sectionTag || "Athletics"}
-                </span>
                 <span className="font-mono text-[11px] text-[#666666] mt-0.5 block">
                   {formatTimeAgo(sidebarItem4.publishedAt)}
                 </span>

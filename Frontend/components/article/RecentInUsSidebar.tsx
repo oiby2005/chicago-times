@@ -27,39 +27,62 @@ function matchesCategory(
   articleBreadcrumb?: string,
   targetCat?: string
 ): boolean {
-  if (!targetCat) return false;
+  if (!targetCat) return true;
   const target = targetCat.toLowerCase().trim();
   const cat = (articleCat || "").toLowerCase().trim();
-  const breadcrumb = (articleBreadcrumb || "").toLowerCase().trim();
 
-  if (!cat && !breadcrumb) return false;
-  if (cat === target) return true;
-  if (cat && (cat.includes(target) || target.includes(cat))) return true;
-  if (breadcrumb && breadcrumb.includes(target)) return true;
+  if (!cat) return false;
 
-  if (target === "us" || target === "u.s." || target === "united states") {
-    if (cat === "us" || cat === "u.s." || cat === "united states" || cat === "us news") return true;
-  }
-  if (target === "tech" || target === "technology") {
-    if (cat === "tech" || cat === "technology") return true;
-  }
-  if (
+  // Strict check for business / economy / markets / finance
+  const isBusinessTarget =
+    target === "business" ||
+    target === "business & finance" ||
     target === "economy" ||
     target === "markets" ||
-    target === "business" ||
-    target === "finance" ||
-    target === "economy & markets" ||
-    target === "business & finance"
-  ) {
+    target === "markets & finance";
+  const isBusinessArticle =
+    cat.includes("business") ||
+    cat.includes("economy") ||
+    cat.includes("market") ||
+    cat.includes("finance") ||
+    cat.includes("investing") ||
+    cat.includes("corporate") ||
+    cat.includes("stock") ||
+    cat.includes("crypto") ||
+    cat.includes("wealth");
+
+  if (isBusinessTarget) {
     if (
-      cat.includes("economy") ||
-      cat.includes("market") ||
-      cat.includes("finance") ||
-      cat.includes("business")
+      cat.includes("sport") ||
+      cat.includes("opinion") ||
+      cat.includes("lifestyle") ||
+      cat.includes("entertainment") ||
+      cat.includes("culture") ||
+      cat.includes("art")
     ) {
-      return true;
+      return false;
     }
+    return isBusinessArticle;
   }
+
+  // Strict check for sports
+  if (target === "sports" || target === "sport") {
+    return cat.includes("sport") || cat.includes("nba") || cat.includes("soccer") || cat.includes("tennis");
+  }
+
+  // Strict check for opinion
+  if (target === "opinion" || target === "opinions" || target === "editorial" || target === "editorials") {
+    return cat.includes("opinion") || cat.includes("editorial");
+  }
+
+  // Strict check for lifestyle
+  if (target === "lifestyle" || target === "style") {
+    return cat.includes("lifestyle") || cat.includes("style") || cat.includes("food") || cat.includes("travel");
+  }
+
+  // Standard category check
+  if (cat === target) return true;
+  if (cat.includes(target) || target.includes(cat)) return true;
 
   return false;
 }
@@ -186,14 +209,14 @@ export default function RecentInUsSidebar({
   return (
     <aside className="w-full select-none">
       {/* Sidebar Header */}
-      <div className="border-b border-[#111111] pb-1.5 mb-4">
-        <h3 className="font-serif font-bold text-xs uppercase tracking-wider text-[#111111]">
-          RECENT IN {categoryName ? categoryName.toUpperCase() : "US"}
+      <div className="border-b border-dashed border-[#CCCCCC] pb-1.5 mb-4">
+        <h3 className="font-sans font-bold text-[12px] tracking-wider uppercase text-[#111111]">
+          Recent in {categoryName || "US"}
         </h3>
       </div>
 
       {/* List of Recent Articles */}
-      <div className="divide-y divide-[#f1f5f9]">
+      <div className="divide-y divide-dashed divide-[#CCCCCC]">
         {articles.map((item) => (
           <Link
             key={item.id + "-" + item.slug}

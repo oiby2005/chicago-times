@@ -9,21 +9,25 @@ import StickySubscribeBar from "@/components/ui/StickySubscribeBar";
 import Container from "@/components/layout/Container";
 
 const COVERAGE_TOPICS = [
-  "U.S. News",
-  "World News",
+  "News",
+  "Law",
   "Politics",
-  "Business & Economy",
-  "Technology",
-  "Science",
-  "Health",
-  "Education",
-  "Environment",
-  "Sports",
+  "Business",
+  "Markets & Finance",
+  "Economy",
+  "Tech",
   "Entertainment",
+  "Arts",
+  "Industries",
+  "Fashion",
+  "Investing",
+  "Health",
+  "Sports",
   "Lifestyle",
-  "Opinion & Editorials",
-  "Press Releases",
-  "Sponsored Content",
+  "Science",
+  "Opinions",
+  "Editorials",
+  "Interviews",
 ];
 
 const EDITORIAL_VALUES = [
@@ -62,25 +66,13 @@ export default function AboutUsClient() {
 
         <main className="bg-white py-8 sm:py-12 border-b border-[#eaedf1]">
           <Container>
-            {/* Header / Editorial Profile Top Title Bar */}
-            <div className="text-center max-w-4xl mx-auto mb-8">
-              <span className="font-sans font-extrabold text-[11px] tracking-[0.22em] text-[#990000] uppercase block mb-2">
-                ESTABLISHED 2026 • EDITORIAL PROFILE
-              </span>
-              
-              <h1 className="font-serif font-black text-[32px] sm:text-[44px] leading-tight text-[#111111] tracking-tight mb-3">
-                About Times Chicago
-              </h1>
-
-              <p className="font-serif italic text-[16px] sm:text-[18px] text-[#4a5568] max-w-2xl mx-auto">
-                &ldquo;Delivering Trusted News. Empowering Informed Communities.&rdquo;
-              </p>
-
-              {/* Matching 100% Identical Parallel Lines */}
-              <div className="w-full flex flex-col gap-[3px] mt-6 mb-8">
-                <div className="w-full h-[1.5px] bg-[#111111]"></div>
-                <div className="w-full h-[1.5px] bg-[#111111]"></div>
-              </div>
+            {/* Main Featured Image: Clean static About Us (3).png without slider or text overlay */}
+            <div className="mb-10 w-full overflow-hidden border border-[#e2e8f0] shadow-xs">
+              <img
+                src="/About Us (3).png"
+                alt="Times Chicago About Us"
+                className="w-full h-auto object-cover block"
+              />
             </div>
 
             {/* Main Content 2-Column Grid */}
@@ -165,21 +157,21 @@ export default function AboutUsClient() {
               <div className="lg:col-span-4 space-y-6">
                 
                 {/* 1. Our Mission Card */}
-                <div className="bg-[#f0f7fa] border border-[#d0e3ef] p-6 shadow-xs">
-                  <h3 className="font-serif font-bold text-[20px] text-[#00558c] mb-3">
+                <div className="bg-white border border-[#e2e8f0] p-6 shadow-xs">
+                  <h3 className="font-serif font-bold text-[20px] text-[#111111] pb-2 mb-3 border-b border-[#edf2f7]">
                     Our Mission
                   </h3>
-                  <p className="font-sans text-[13px] text-[#334455] leading-relaxed">
+                  <p className="font-sans text-[13.5px] text-[#4a5568] leading-relaxed">
                     Our mission is to empower individuals through credible journalism by providing fair, accurate, and accessible news. We believe that informed citizens build stronger communities, and we are dedicated to making trustworthy information available to everyone.
                   </p>
                 </div>
 
                 {/* 2. Our Vision Card */}
-                <div className="bg-[#fcf5f5] border border-[#f2dada] p-6 shadow-xs">
-                  <h3 className="font-serif font-bold text-[20px] text-[#990000] mb-3">
+                <div className="bg-white border border-[#e2e8f0] p-6 shadow-xs">
+                  <h3 className="font-serif font-bold text-[20px] text-[#111111] pb-2 mb-3 border-b border-[#edf2f7]">
                     Our Vision
                   </h3>
-                  <p className="font-sans text-[13px] text-[#553333] leading-relaxed">
+                  <p className="font-sans text-[13.5px] text-[#4a5568] leading-relaxed">
                     We aim to become one of the most trusted digital news platforms in the United States by delivering high-quality journalism, embracing technological innovation, and fostering meaningful public dialogue.
                   </p>
                 </div>
@@ -219,10 +211,10 @@ export default function AboutUsClient() {
                           EMAIL INQUIRY
                         </span>
                         <a
-                          href="mailto:info@timeschicago.com"
+                          href="mailto:worldnews@timeschicago.com"
                           className="font-bold text-[13.5px] text-[#00558c] hover:underline block"
                         >
-                          info@timeschicago.com
+                          worldnews@timeschicago.com
                         </a>
                       </div>
                     </div>

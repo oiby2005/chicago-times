@@ -41,10 +41,10 @@ export const TopNetworkBar: React.FC = () => {
 
         {/* Right Chevron Controls ending at exact right margin */}
         <div className="flex items-center space-x-1.5 pl-2 text-[#777777] font-sans text-[12px] shrink-0">
-          <button aria-label="Previous market ticker" className="hover:text-black cursor-pointer leading-none text-gray-400">
+          <button suppressHydrationWarning aria-label="Previous market ticker" className="hover:text-black cursor-pointer leading-none text-gray-400">
             ‹
           </button>
-          <button aria-label="Next market ticker" className="hover:text-black cursor-pointer font-bold leading-none text-black">
+          <button suppressHydrationWarning aria-label="Next market ticker" className="hover:text-black cursor-pointer font-bold leading-none text-black">
             ›
           </button>
         </div>

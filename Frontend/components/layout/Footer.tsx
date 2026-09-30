@@ -25,6 +25,7 @@ const newsLinksCol2 = [
   { name: "Sports", href: "/sports" },
   { name: "Lifestyle", href: "/lifestyle" },
   { name: "Science", href: "/science" },
+  { name: "Interviews", href: "/interviews" },
 ];
 
 // FEATURED Column 1 (8 items max - Small Business under CEO & Executives)
@@ -58,21 +59,22 @@ const aboutLinks = [
   { name: "Cookie Policy", href: "/cookie-policy" },
   { name: "Editorial Policy", href: "/editorial-policy" },
   { name: "Advertise with us", href: "/advertise-with-us" },
-  { name: "RSS Feed", href: "/newsletter" },
+  { name: "Leadership", href: "#" },
+  { name: "RSS Feed", href: "/rss.xml", target: "_blank" },
 ];
 
-// EDITIONS Column (United States active, others light and non-clickable)
+// LANGUAGE EDITIONS Column (non-clickable)
 const editionsLinks = [
-  { name: "United States", href: "/", isClickable: true },
-  { name: "Australia", href: "#", isClickable: false },
-  { name: "India", href: "#", isClickable: false },
-  { name: "Singapore", href: "#", isClickable: false },
-  { name: "United Kingdom", href: "#", isClickable: false },
+  { name: "English", href: "#", isClickable: false },
+  { name: "Spanish", href: "#", isClickable: false },
+  { name: "German", href: "#", isClickable: false },
+  { name: "Korean", href: "#", isClickable: false },
+  { name: "Chinese", href: "#", isClickable: false },
 ];
 
 export const Footer: React.FC = () => {
   return (
-    <footer className="w-full bg-[#FAF7EE] text-[#111111] border-t border-[#EAE6DA] font-sans select-none pt-10 pb-8">
+    <footer className="w-full bg-[#FAF7EE] text-[#111111] border-t border-[#EAE6DA] font-sans select-none pt-10 pb-24">
       <Container>
         {/* Multi-Column Grid (Max 8 items per list, split into columns) */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-6 pb-10">
@@ -144,7 +146,12 @@ export const Footer: React.FC = () => {
             <ul className="space-y-2.5 text-xs text-[#444444]">
               {aboutLinks.map((item) => (
                 <li key={item.name}>
-                  <a href={item.href} className="hover:text-[#00558c] transition-colors block">
+                  <a
+                    href={item.href}
+                    target={item.target || undefined}
+                    rel={item.target === "_blank" ? "noopener noreferrer" : undefined}
+                    className="hover:text-[#00558c] transition-colors block"
+                  >
                     {item.name}
                   </a>
                 </li>
@@ -152,23 +159,17 @@ export const Footer: React.FC = () => {
             </ul>
           </div>
 
-          {/* Column 6: EDITIONS */}
+          {/* Column 6: LANGUAGE EDITIONS */}
           <div>
             <h3 className="font-bold text-xs uppercase tracking-wider text-[#111111] mb-4">
-              EDITIONS
+              LANGUAGE EDITIONS
             </h3>
             <ul className="space-y-2.5 text-xs text-[#444444]">
               {editionsLinks.map((item) => (
                 <li key={item.name}>
-                  {item.isClickable ? (
-                    <a href={item.href} className="hover:text-[#00558c] transition-colors block text-[#111111] font-bold">
-                      {item.name}
-                    </a>
-                  ) : (
-                    <span className="block text-[#a0aec0] font-normal cursor-not-allowed select-none opacity-60">
-                      {item.name}
-                    </span>
-                  )}
+                  <a href={item.href} className="hover:text-[#00558c] transition-colors block text-[#444444]">
+                    {item.name}
+                  </a>
                 </li>
               ))}
             </ul>

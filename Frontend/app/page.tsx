@@ -4,6 +4,7 @@ import StickyHeaderBar from "@/components/navigation/StickyHeaderBar";
 import NewHomeBody from "@/components/home/NewHomeBody";
 import StickySubscribeBar from "@/components/ui/StickySubscribeBar";
 import Footer from "@/components/layout/Footer";
+import HomePageLoader from "@/components/home/HomePageLoader";
 import { getLinkPreviewMetadata } from "@/lib/linkPreview";
 
 export const metadata = getLinkPreviewMetadata({
@@ -13,14 +14,16 @@ export const metadata = getLinkPreviewMetadata({
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-white flex flex-col justify-between">
-      <div>
-        <Header />
-        <StickyHeaderBar />
-        <NewHomeBody />
-        <StickySubscribeBar />
-      </div>
-      <Footer />
-    </main>
+    <HomePageLoader>
+      <main className="min-h-screen bg-white flex flex-col justify-between">
+        <div>
+          <Header />
+          <StickyHeaderBar />
+          <NewHomeBody />
+          <StickySubscribeBar />
+        </div>
+        <Footer />
+      </main>
+    </HomePageLoader>
   );
 }

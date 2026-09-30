@@ -124,10 +124,31 @@
 .editor-reserve-font a,
 .article-body-text a,
 .article-body-content a,
-.preview-body-text a {
-  color: #111111 !important;
+.preview-body-text a,
+[contenteditable="true"] a,
+[contenteditable] a {
+  color: #000000 !important;
   font-weight: 600 !important;
   text-decoration: underline !important;
+  text-decoration-style: solid !important;
+  text-decoration-line: underline !important;
+  text-decoration-thickness: 1px !important;
+  text-underline-offset: 2px !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+}
+
+.editor-body-text a u,
+.editor-reserve-font a u,
+.article-body-text a u,
+.article-body-content a u,
+.preview-body-text a u,
+[contenteditable="true"] a u,
+[contenteditable] a u,
+u a,
+a u {
+  text-decoration: none !important;
+  border-bottom: none !important;
 }
 
 /* Dedicated Image Caption & Photo Credit Styling matching reference image */

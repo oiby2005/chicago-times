@@ -257,7 +257,7 @@ export default function AdvertiseClient() {
             {/* Right Column: Client Inquiry Lead Form */}
             <div className="md:col-span-7">
               <h2 className="font-serif font-bold text-2xl sm:text-3xl text-gray-900 mb-1.5">
-                Client Inquiry Lead
+                Get your article published today
               </h2>
               <p className="text-xs text-gray-500 mb-6 font-sans">
                 Fill out the form below to connect with our advertising & partnership team.

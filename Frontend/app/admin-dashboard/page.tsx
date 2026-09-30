@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import ProfileSettingsModal, { UserProfile } from "@/components/ui/ProfileSettingsModal";
+import { getUserDashboardUrl } from "@/data/authors";
 
 interface ProjectItem {
   id: string;
@@ -66,6 +67,7 @@ export interface ShortReelItem {
   thumbnailUrl: string;
   duration: string;
   status: "Active" | "Inactive";
+  audioUrl?: string;
   createdAt?: string;
 }
 
@@ -543,10 +545,42 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
   const [shortTitle, setShortTitle] = useState("");
   const [shortThumbnailUrl, setShortThumbnailUrl] = useState("");
   const [shortDuration, setShortDuration] = useState("0:45");
+  const [shortAudioUrl, setShortAudioUrl] = useState("");
   const [shortTargetSlot, setShortTargetSlot] = useState<number>(1);
   const [shortStatus, setShortStatus] = useState<"Active" | "Inactive">("Active");
   const [editingSlotNumber, setEditingSlotNumber] = useState<number | null>(null);
   const [shortSuccessMsg, setShortSuccessMsg] = useState("");
+
+  const [popupModal, setPopupModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+  }>({
+    isOpen: false,
+    title: "",
+    message: "",
+  });
+
+  const showPopup = (message: string, title = "Platform Link Not Allowed") => {
+    setPopupModal({
+      isOpen: true,
+      title,
+      message,
+    });
+  };
+
+  const closePopup = () => {
+    setPopupModal((prev) => ({ ...prev, isOpen: false }));
+  };
+
+  const resetShortForm = () => {
+    setShortVideoUrl("");
+    setShortTitle("");
+    setShortThumbnailUrl("");
+    setShortDuration("0:45");
+    setShortStatus("Active");
+    setEditingSlotNumber(null);
+  };
 
   interface BackupItem {
     fileName: string;
@@ -915,33 +949,29 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
 
   const handleDownloadBackup = async (backup: BackupItem) => {
     try {
-      if (backup.publicUrl) {
-        const res = await fetch(backup.publicUrl).catch(() => null);
-        if (res && res.ok) {
-          const blob = await res.blob();
-          const downloadUrl = URL.createObjectURL(blob);
-          const link = document.createElement("a");
-          link.href = downloadUrl;
-          link.download = backup.fileName;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          URL.revokeObjectURL(downloadUrl);
-          return;
-        }
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
+      const downloadEndpoint = `${backendUrl}/api/backups/download/${encodeURIComponent(backup.fileName)}`;
+
+      const res = await fetch(downloadEndpoint).catch(() => null);
+      if (res && res.ok) {
+        const blob = await res.blob();
+        const downloadUrl = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = downloadUrl;
+        link.download = backup.fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(downloadUrl);
+        return;
       }
 
-      const res = await fetch("http://localhost:5000/api/backups");
-      if (res.ok) {
-        const data = await res.json();
-        const found = (data.backups || []).find((b: any) => b.fileName === backup.fileName);
-        if (found && found.publicUrl) {
-          window.open(found.publicUrl, "_blank");
-          return;
-        }
-      }
-
-      setAdminNoticePopup("Could not download backup file.");
+      const link = document.createElement("a");
+      link.href = downloadEndpoint;
+      link.setAttribute("download", backup.fileName);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     } catch (e) {
       setAdminNoticePopup("Error downloading backup file.");
     }
@@ -966,6 +996,59 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
     }
   };
 
+  const BLACK_THUMBNAIL_URL = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><rect width='100%' height='100%' fill='%23000000'/></svg>";
+
+  const normalizeSlotList = (rawSlots: ShortReelItem[], subTab: "RECOMMENDED" | "VIDEOS" | "PODCAST"): ShortReelItem[] => {
+    const maxSlots = subTab === "RECOMMENDED" ? 5 : subTab === "VIDEOS" ? 4 : 3;
+    const prefix = subTab === "PODCAST" ? "podcast" : subTab === "VIDEOS" ? "video" : "recommended";
+    const defaultPlatform = subTab === "PODCAST" ? "Apple Podcasts" : "Youtube Video";
+
+    const slotMap = new Map<number, ShortReelItem>();
+    (rawSlots || []).forEach((item) => {
+      const num = Number(item.slotNumber || 1);
+      if (num >= 1 && num <= maxSlots) {
+        if (!slotMap.has(num) || (item.videoUrl && item.videoUrl.trim() !== "" && (!slotMap.get(num)?.videoUrl || slotMap.get(num)?.videoUrl?.trim() === ""))) {
+          slotMap.set(num, item);
+        }
+      }
+    });
+
+    const normalized: ShortReelItem[] = [];
+    for (let i = 1; i <= maxSlots; i++) {
+      const existing = slotMap.get(i);
+      const isOccupiedSlot = Boolean(
+        existing &&
+          existing.videoUrl &&
+          existing.videoUrl.trim() !== "" &&
+          existing.status === "Active" &&
+          existing.title &&
+          !existing.title.includes("[Empty Slot")
+      );
+
+      if (existing && isOccupiedSlot) {
+        const thumbnailUrl = existing.thumbnailUrl || BLACK_THUMBNAIL_URL;
+        normalized.push({
+          ...existing,
+          slotNumber: i,
+          id: `${prefix}_slot_${i}`,
+          thumbnailUrl,
+        });
+      } else {
+        normalized.push({
+          id: `${prefix}_slot_${i}`,
+          slotNumber: i,
+          videoUrl: "",
+          platform: defaultPlatform as any,
+          title: `[Empty Slot #${i}]`,
+          thumbnailUrl: BLACK_THUMBNAIL_URL,
+          duration: "0:00",
+          status: "Inactive",
+        });
+      }
+    }
+    return normalized;
+  };
+
   useEffect(() => {
     const fetchShortsList = async () => {
       try {
@@ -974,27 +1057,38 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
           const data = await res.json();
           if (data.success && Array.isArray(data.slots)) {
             const rec = data.slots.filter(
-              (s: any) => (s.id?.includes("recommended") || s.id?.startsWith("rec") || s.subTab === "RECOMMENDED") && !s.id?.includes("main") && !s.id?.includes("videos") && !s.id?.includes("podcast") && !s.id?.includes("pod")
+              (s: any) =>
+                (s.id?.includes("recommended") || s.id?.startsWith("rec") || (s.subTab || "").toUpperCase() === "RECOMMENDED") &&
+                !s.id?.includes("main") &&
+                !s.id?.includes("video") &&
+                !s.id?.includes("podcast") &&
+                !s.id?.includes("pod")
             );
             const mainV = data.slots.filter(
-              (s: any) => s.id?.includes("main") || s.id?.includes("videos") || s.subTab === "VIDEOS"
+              (s: any) =>
+                s.id?.includes("video") ||
+                s.id?.includes("main") ||
+                (s.subTab || "").toUpperCase() === "VIDEOS"
             );
             const pod = data.slots.filter(
-              (s: any) => s.id?.includes("podcast") || s.id?.includes("pod") || s.subTab === "PODCAST"
+              (s: any) =>
+                s.id?.includes("podcast") ||
+                s.id?.includes("pod") ||
+                (s.subTab || "").toUpperCase() === "PODCAST"
             );
 
-            if (rec.length > 0) {
-              setRecommendedList(rec);
-              localStorage.setItem("wsj_recommended_video_slots", JSON.stringify(rec));
-            }
-            if (mainV.length > 0) {
-              setMainVideosList(mainV);
-              localStorage.setItem("wsj_main_video_slots", JSON.stringify(mainV));
-            }
-            if (pod.length > 0) {
-              setPodcastList(pod);
-              localStorage.setItem("wsj_podcast_slots", JSON.stringify(pod));
-            }
+            const normalizedRec = normalizeSlotList(rec, "RECOMMENDED");
+            const normalizedMainV = normalizeSlotList(mainV, "VIDEOS");
+            const normalizedPod = normalizeSlotList(pod, "PODCAST");
+
+            setRecommendedList(normalizedRec);
+            localStorage.setItem("wsj_recommended_video_slots", JSON.stringify(normalizedRec));
+
+            setMainVideosList(normalizedMainV);
+            localStorage.setItem("wsj_main_video_slots", JSON.stringify(normalizedMainV));
+
+            setPodcastList(normalizedPod);
+            localStorage.setItem("wsj_podcast_slots", JSON.stringify(normalizedPod));
             return;
           }
         }
@@ -1007,7 +1101,7 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
         try {
           const parsed = JSON.parse(savedPod);
           if (Array.isArray(parsed) && parsed.length > 0) {
-            setPodcastList(parsed);
+            setPodcastList(normalizeSlotList(parsed, "PODCAST"));
           }
         } catch (e) {}
       }
@@ -1028,8 +1122,8 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
       try {
         const parsed = JSON.parse(savedRec);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          const sanitized = sanitizeList(parsed.slice(0, 5), DEFAULT_RECOMMENDED_SLOTS);
-          setRecommendedList(sanitized);
+          const sanitized = sanitizeList(parsed, DEFAULT_RECOMMENDED_SLOTS);
+          setRecommendedList(normalizeSlotList(sanitized, "RECOMMENDED"));
         }
       } catch (e) {}
     }
@@ -1039,7 +1133,7 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
         const parsed = JSON.parse(savedMain);
         if (Array.isArray(parsed) && parsed.length > 0) {
           const sanitized = sanitizeList(parsed, DEFAULT_MAIN_VIDEOS_SLOTS);
-          setMainVideosList(sanitized);
+          setMainVideosList(normalizeSlotList(sanitized, "VIDEOS"));
         }
       } catch (e) {}
     }
@@ -1048,7 +1142,7 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
       try {
         const parsed = JSON.parse(savedPod);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          setPodcastList(parsed);
+          setPodcastList(normalizeSlotList(parsed, "PODCAST"));
         }
       } catch (e) {}
     }
@@ -1065,11 +1159,43 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
     return match ? match[1] : null;
   };
 
+  const validateUrlForSubTab = (url: string, targetSubTab: "RECOMMENDED" | "VIDEOS" | "PODCAST"): boolean => {
+    if (!url || !url.trim()) return true;
+    const lower = url.trim().toLowerCase();
+
+    const isApple = lower.includes("podcasts.apple.com") || lower.includes("apple.com");
+    const isSpotify = lower.includes("spotify.com") || lower.includes("open.spotify.com");
+    const isYtMusic = lower.includes("music.youtube.com");
+    const isYoutube = (lower.includes("youtube.com") || lower.includes("youtu.be")) && !isYtMusic;
+    const isRumble = lower.includes("rumble.com");
+    const isFacebook = lower.includes("facebook.com") || lower.includes("fb.watch");
+    const isInstagram = lower.includes("instagram.com");
+
+    if (targetSubTab === "RECOMMENDED" || targetSubTab === "VIDEOS") {
+      const isValid = isYoutube || isInstagram || isFacebook || isRumble;
+      if (!isValid) {
+        showPopup(
+          "Only YouTube, Instagram, Facebook, and Rumble links are allowed for Video slots.",
+          "Platform Link Not Allowed"
+        );
+        return false;
+      }
+    } else if (targetSubTab === "PODCAST") {
+      const isValid = isApple;
+      if (!isValid) {
+        showPopup(
+          "Only Apple Podcasts links are allowed for Podcast slots.",
+          "Platform Link Not Allowed"
+        );
+        return false;
+      }
+    }
+    return true;
+  };
+
   const detectShortPlatform = (url: string) => {
     const lower = url.toLowerCase();
     if (lower.includes("podcasts.apple.com") || lower.includes("apple.com")) return "Apple Podcasts";
-    if (lower.includes("spotify.com") || lower.includes("open.spotify.com")) return "Spotify";
-    if (lower.includes("music.youtube.com")) return "YouTube Music";
     if (lower.includes("youtube.com") || lower.includes("youtu.be")) return "Youtube Video";
     if (lower.includes("rumble.com")) return "Rumble Video";
     if (lower.includes("facebook.com") || lower.includes("fb.watch")) return "Facebook Short";
@@ -1103,6 +1229,12 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
     if (!url || !url.trim()) return;
     const trimmed = url.trim();
 
+    if (!validateUrlForSubTab(trimmed, shortsSubTab)) {
+      setShortVideoUrl("");
+      setIsFetchingVideoDetails(false);
+      return;
+    }
+
     setIsFetchingVideoDetails(true);
 
     // 1. Primary Backend Universal Video Metadata Fetcher & Backblaze B2 Cover Image uploader
@@ -1119,6 +1251,7 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
           if (data.title) setShortTitle(cleanVideoTitle(data.title));
           if (data.thumbnailUrl) setShortThumbnailUrl(data.thumbnailUrl);
           if (data.duration) setShortDuration(data.duration);
+          setShortAudioUrl(data.audioUrl || "");
           setIsFetchingVideoDetails(false);
           return;
         }
@@ -1172,7 +1305,19 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
   const handleShortUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setShortVideoUrl(val);
+    setShortAudioUrl("");
     if (val && val.trim().length > 8) {
+      if (editingSlotNumber === null && isSlotOccupied(shortTargetSlot)) {
+        showPopup(
+          `Slot #${shortTargetSlot} already contains a video/podcast. In Add mode, you can only paste links into an empty slot. Please select an empty slot or click 'EDIT' on Slot #${shortTargetSlot}.`,
+          "Slot Already Occupied"
+        );
+        return;
+      }
+      if (!validateUrlForSubTab(val, shortsSubTab)) {
+        setShortVideoUrl("");
+        return;
+      }
       autoFetchVideoDetails(val);
     }
   };
@@ -1214,34 +1359,110 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
     return podcastList;
   };
 
+  const isSlotOccupied = (slotNum: number): boolean => {
+    const list = getCurrentShortsList();
+    const item = list.find((s) => s.slotNumber === slotNum);
+    return Boolean(
+      item &&
+        item.videoUrl &&
+        item.videoUrl.trim() !== "" &&
+        item.title &&
+        !item.title.includes("[Empty Slot")
+    );
+  };
+
+  const getFirstEmptySlotNumber = (): number => {
+    const max = getMaxSlotsForSubTab();
+    for (let i = 1; i <= max; i++) {
+      if (!isSlotOccupied(i)) return i;
+    }
+    return 1;
+  };
+
   const getMaxSlotsForSubTab = () => {
     if (shortsSubTab === "RECOMMENDED") return 5;
     if (shortsSubTab === "VIDEOS") return 4;
     return 3;
   };
 
-  const updateCurrentShortsList = (updated: ShortReelItem[]) => {
-    if (shortsSubTab === "RECOMMENDED") {
-      setRecommendedList(updated);
-      localStorage.setItem("wsj_recommended_video_slots", JSON.stringify(updated));
-    } else if (shortsSubTab === "VIDEOS") {
-      setMainVideosList(updated);
-      localStorage.setItem("wsj_main_video_slots", JSON.stringify(updated));
+  const handleTargetSlotChange = (newSlotNum: number) => {
+    const occupied = isSlotOccupied(newSlotNum);
+
+    if (editingSlotNumber !== null) {
+      // In EDIT mode
+      if (!occupied) {
+        showPopup(
+          `Slot #${newSlotNum} is empty. In Edit mode, you can only select slots that already contain a video or podcast.`,
+          "Cannot Edit Empty Slot"
+        );
+        return;
+      }
+      const item = getCurrentShortsList().find((s) => s.slotNumber === newSlotNum);
+      if (item) {
+        handleEditShortSlot(item);
+      } else {
+        setShortTargetSlot(newSlotNum);
+      }
     } else {
-      setPodcastList(updated);
-      localStorage.setItem("wsj_podcast_slots", JSON.stringify(updated));
+      // In ADD mode
+      if (occupied) {
+        showPopup(
+          `Slot #${newSlotNum} already contains a video/podcast. You cannot add to an occupied slot. Please select an empty slot or click 'EDIT' on Slot #${newSlotNum}.`,
+          "Slot Already Occupied"
+        );
+        return;
+      }
+      setShortTargetSlot(newSlotNum);
+    }
+  };
+
+  const updateCurrentShortsList = (updated: ShortReelItem[]) => {
+    const normalized = normalizeSlotList(updated, shortsSubTab);
+    if (shortsSubTab === "RECOMMENDED") {
+      setRecommendedList(normalized);
+      localStorage.setItem("wsj_recommended_video_slots", JSON.stringify(normalized));
+    } else if (shortsSubTab === "VIDEOS") {
+      setMainVideosList(normalized);
+      localStorage.setItem("wsj_main_video_slots", JSON.stringify(normalized));
+    } else {
+      setPodcastList(normalized);
+      localStorage.setItem("wsj_podcast_slots", JSON.stringify(normalized));
     }
     window.dispatchEvent(new Event("wsj_shorts_updated"));
   };
 
   const handleSaveShortSlot = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (editingSlotNumber !== null) {
+      // EDIT MODE
+      if (!isSlotOccupied(shortTargetSlot)) {
+        showPopup(
+          `Slot #${shortTargetSlot} is empty. You cannot edit an empty slot. Please switch to Add mode to add content to an empty slot.`,
+          "Cannot Edit Empty Slot"
+        );
+        return;
+      }
+    } else {
+      // ADD MODE
+      if (isSlotOccupied(shortTargetSlot)) {
+        showPopup(
+          `Slot #${shortTargetSlot} already contains a video/podcast. You cannot add to an occupied slot. Please select an empty slot or click 'EDIT' on Slot #${shortTargetSlot}.`,
+          "Slot Already Occupied"
+        );
+        return;
+      }
+    }
+
     if (!shortVideoUrl.trim()) {
-      alert("Please enter a Video URL.");
+      showPopup("Please enter a Video / Audio URL.", "Missing URL");
+      return;
+    }
+    if (!validateUrlForSubTab(shortVideoUrl, shortsSubTab)) {
       return;
     }
     if (!shortTitle.trim()) {
-      alert("Please enter a Video Title / Headline.");
+      showPopup("Please enter a Video Title / Headline.", "Missing Title");
       return;
     }
 
@@ -1259,6 +1480,7 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
       thumbnailUrl: shortThumbnailUrl.trim(),
       duration: shortDuration.trim() || "0:45",
       status: shortStatus,
+      audioUrl: shortAudioUrl.trim() || undefined,
       createdAt: new Date().toISOString(),
     };
 
@@ -1305,14 +1527,24 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
     setShortTitle("");
     setShortThumbnailUrl("");
     setShortDuration("0:45");
+    setShortAudioUrl("");
     setEditingSlotNumber(null);
   };
 
   const handleEditShortSlot = (item: ShortReelItem) => {
     if (!item) return;
-    setEditingSlotNumber(item.slotNumber || 1);
-    setShortTargetSlot(item.slotNumber || 1);
+    const slotNum = item.slotNumber || 1;
+    if (!isSlotOccupied(slotNum)) {
+      showPopup(
+        `Slot #${slotNum} is currently empty. You cannot edit an empty slot. Please select an empty slot and use 'ADD TO FEED' to add new content.`,
+        "Cannot Edit Empty Slot"
+      );
+      return;
+    }
+    setEditingSlotNumber(slotNum);
+    setShortTargetSlot(slotNum);
     setShortVideoUrl(item.videoUrl || "");
+    setShortAudioUrl(item.audioUrl || "");
 
     let validPlatform = item.platform || (shortsSubTab === "PODCAST" ? "Apple Podcasts" : "Youtube Video");
     if (shortsSubTab === "PODCAST") {
@@ -1333,32 +1565,45 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
   };
 
   const handleDeleteShortSlot = (slotNumber: number) => {
-    if (confirm(`Are you sure you want to delete / reset content for Slot #${slotNumber}? The slot container will remain available.`)) {
-      const currentList = getCurrentShortsList();
-      const slotId = shortsSubTab === "PODCAST" ? `podcast_slot_${slotNumber}` : shortsSubTab === "VIDEOS" ? `video_slot_${slotNumber}` : `recommended_slot_${slotNumber}`;
-      
-      const updated = currentList.map((s) => {
-        if (s.slotNumber === slotNumber) {
-          return {
-            id: slotId,
-            slotNumber,
-            videoUrl: "",
-            platform: (shortsSubTab === "PODCAST" ? "Apple Podcasts" : "Youtube Video") as any,
-            title: `[Empty Slot #${slotNumber}]`,
-            thumbnailUrl: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><rect width='100%' height='100%' fill='%23000000'/></svg>",
-            duration: "0:00",
-            status: "Inactive" as const,
-          };
-        }
-        return s;
-      });
-      updateCurrentShortsList(updated);
-      fetch("http://localhost:5000/api/shorts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ subTab: shortsSubTab, slots: updated }),
-      }).catch((err) => console.log("Backend shorts delete sync skipped:", err));
-    }
+    const itemType = shortsSubTab === "PODCAST" ? "Podcast" : shortsSubTab === "VIDEOS" ? "Video" : "Recommended Video";
+    setDeleteConfirmModal({
+      isOpen: true,
+      title: `Delete ${itemType} Slot #${slotNumber}`,
+      message: `Are you sure you want to delete / reset content for ${itemType} Slot #${slotNumber}? The slot container will remain available.`,
+      confirmText: `Delete ${itemType}`,
+      onConfirm: () => {
+        const currentList = getCurrentShortsList();
+        const slotId = shortsSubTab === "PODCAST" ? `podcast_slot_${slotNumber}` : shortsSubTab === "VIDEOS" ? `video_slot_${slotNumber}` : `recommended_slot_${slotNumber}`;
+        const defaultPlatform = shortsSubTab === "PODCAST" ? "Apple Podcasts" : "Youtube Video";
+
+        const updated = currentList.map((s) => {
+          if (s.slotNumber === slotNumber) {
+            return {
+              id: slotId,
+              slotNumber,
+              videoUrl: "",
+              platform: defaultPlatform as any,
+              title: `[Empty Slot #${slotNumber}]`,
+              thumbnailUrl: BLACK_THUMBNAIL_URL,
+              duration: "0:00",
+              status: "Inactive" as const,
+            };
+          }
+          return s;
+        });
+
+        const normalized = normalizeSlotList(updated, shortsSubTab);
+        updateCurrentShortsList(normalized);
+
+        fetch("http://localhost:5000/api/shorts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ subTab: shortsSubTab, slots: normalized }),
+        }).catch((err) => console.log("Backend shorts delete sync skipped:", err));
+
+        setDeleteConfirmModal(null);
+      },
+    });
   };
 
   const loggedInEmail = (currentUser?.email || "").toLowerCase().trim();
@@ -1978,6 +2223,26 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
       summary = plainContent.slice(0, 240).trim() + (plainContent.length > 240 ? "…" : "");
     }
 
+    const focusKeyword = post.focusKeyword?.trim() || "";
+    const seoTitle = post.seoTitle?.trim() || title;
+    const seoDescription = post.seoDescription?.trim() || summary;
+
+    const tagsArr = Array.isArray(post.tags)
+      ? post.tags
+      : (typeof post.tags === "string" ? [post.tags] : []);
+    const tagsStr = tagsArr.filter(Boolean).join(", ");
+
+    const imgKeywordsArr = Array.isArray(post.imageSeoKeywords)
+      ? post.imageSeoKeywords
+      : (typeof post.imageSeoKeywords === "string" ? [post.imageSeoKeywords] : []);
+    const imageSeoKeywordsStr = imgKeywordsArr.filter(Boolean).join(", ");
+
+    const seoKeywordsAll = Array.from(new Set([
+      ...(imgKeywordsArr),
+      ...(tagsArr),
+      ...(focusKeyword ? [focusKeyword] : [])
+    ])).filter(Boolean).join(", ");
+
     const border70 = "======================================================================";
     const divider70 = "----------------------------------------------------------------------";
 
@@ -1988,6 +2253,12 @@ AUTHOR: ${author}
 DATE: ${date}
 CATEGORY: ${category}
 IMAGE URL: ${imageUrl}
+SEO KEYWORDS: ${seoKeywordsAll || imageSeoKeywordsStr || tagsStr || focusKeyword || "N/A"}
+FOCUS KEYWORD: ${focusKeyword || "N/A"}
+SEO TITLE: ${seoTitle || title}
+SEO DESCRIPTION: ${seoDescription || summary}
+TAGS: ${tagsStr || "N/A"}
+IMAGE SEO KEYWORDS: ${imageSeoKeywordsStr || "N/A"}
 ${border70}
 
 SUMMARY:
@@ -2531,43 +2802,46 @@ ${divider70}
       )}
 
       {/* ================================================================= */}
-      {/* LEFT SIDEBAR (Light, Elegant Neutral Grey Navigation Bar)          */}
+      {/* LEFT SIDEBAR (Option 1 Editorial Light Palette with Light Ash Accent) */}
       {/* ================================================================= */}
       <aside
-        className={`fixed lg:sticky top-0 bottom-0 left-0 z-50 lg:z-20 w-64 lg:w-72 bg-[#4b5563] text-white flex flex-col justify-between shrink-0 h-screen shadow-lg transition-transform duration-200 ease-in-out ${
+        className={`fixed lg:sticky top-0 bottom-0 left-0 z-50 lg:z-20 w-64 lg:w-72 bg-white text-[#0f172a] border-r-2 border-[#cbd5e1] flex flex-col justify-between shrink-0 h-screen shadow-2xs transition-transform duration-200 ease-in-out ${
           isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >
         <div>
-          {/* Top WSJ Logo / Masthead Header */}
-          <div className="pt-6 pb-5 px-6 border-b border-[#6b7280]/60 text-center flex items-center justify-between lg:justify-center">
-            <Link href="/admin-dashboard" className="inline-block hover:opacity-90 transition-opacity">
+          {/* Top WSJ Logo / Masthead Header - Divider removed below logo & logo links to admin account homepage */}
+          <div className="h-[120px] sm:h-[132px] lg:h-[136px] pt-3.5 sm:pt-6 lg:pt-7 pb-4 px-6 flex items-start justify-between lg:justify-start shrink-0">
+            <Link
+              href={currentUser ? getUserDashboardUrl(currentUser) : "/admin-dashboard"}
+              className="inline-block hover:opacity-90 transition-opacity mt-3 sm:mt-4 lg:mt-5"
+            >
               <img
                 src="/images/design-reference/Times Chicago.svg"
                 alt="Times Chicago"
-                className="h-6 sm:h-7 w-auto object-contain mx-auto brightness-0 invert block"
+                className="h-8 sm:h-9 md:h-10 w-auto object-contain block"
               />
             </Link>
             <button
               onClick={() => setIsMobileSidebarOpen(false)}
-              className="lg:hidden text-[#e5e7eb] hover:text-white p-1"
+              className="lg:hidden text-[#64748b] hover:text-[#0f172a] p-1 ml-auto"
               title="Close Menu"
             >
               ✕
             </button>
           </div>
 
-          {/* Back to Home Navigation Item */}
+          {/* Back to Home Navigation Item (Preserved original font & styling) */}
           <div className="px-4 pt-5 pb-3">
             <Link
               href="/"
-              className="flex items-center space-x-2.5 px-3.5 py-2 text-xs font-medium text-[#e5e7eb] hover:text-white hover:bg-[#6b7280]/60 rounded-xl transition-all cursor-pointer group"
+              className="flex items-center space-x-2.5 px-3.5 py-2 text-xs font-medium text-[#64748b] hover:text-[#0f172a] hover:bg-[#f1f5f9] rounded-xl transition-all cursor-pointer group"
             >
               <svg
                 width={16}
                 height={16}
                 style={{ width: "16px", height: "16px", minWidth: "16px", minHeight: "16px" }}
-                className="shrink-0 text-[#e5e7eb] group-hover:text-white transition-colors"
+                className="shrink-0 text-[#64748b] group-hover:text-[#0f172a] transition-colors"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
@@ -2579,7 +2853,7 @@ ${divider70}
             </Link>
           </div>
 
-          {/* Sidebar Menu Options (Lighter Grey Palette) */}
+          {/* Sidebar Menu Options (Black when inactive, Light Grey when clicked/active, Homepage Category Font) */}
           <nav className="px-4 space-y-1.5 mt-1">
             {/* 1. Overview */}
             <button
@@ -2587,10 +2861,11 @@ ${divider70}
                 setActiveTab("Overview");
                 setIsMobileSidebarOpen(false);
               }}
+              style={{ fontFamily: "'Century Gothic', 'Publica Sans Light', 'Kumbh Sans', sans-serif" }}
               className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeTab === "Overview"
-                  ? "bg-[#6b7280] text-white border border-[#9ca3af]/40 shadow-sm"
-                  : "text-[#e5e7eb] hover:bg-[#6b7280]/40 hover:text-white"
+                  ? "bg-[#f1f5f9] text-[#64748b] border border-[#cbd5e1] shadow-2xs font-bold"
+                  : "text-[#111111] hover:bg-[#f8fafc] hover:text-[#64748b]"
               }`}
             >
               <svg
@@ -2614,10 +2889,11 @@ ${divider70}
                 setActiveTab("Newsletter");
                 setIsMobileSidebarOpen(false);
               }}
+              style={{ fontFamily: "'Century Gothic', 'Publica Sans Light', 'Kumbh Sans', sans-serif" }}
               className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeTab === "Newsletter"
-                  ? "bg-[#6b7280] text-white border border-[#9ca3af]/40 shadow-sm"
-                  : "text-[#e5e7eb] hover:bg-[#6b7280]/40 hover:text-white"
+                  ? "bg-[#f1f5f9] text-[#64748b] border border-[#cbd5e1] shadow-2xs font-bold"
+                  : "text-[#111111] hover:bg-[#f8fafc] hover:text-[#64748b]"
               }`}
             >
               <svg
@@ -2641,10 +2917,11 @@ ${divider70}
                 setActiveTab("Published Posts");
                 setIsMobileSidebarOpen(false);
               }}
+              style={{ fontFamily: "'Century Gothic', 'Publica Sans Light', 'Kumbh Sans', sans-serif" }}
               className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeTab === "Published Posts"
-                  ? "bg-[#6b7280] text-white border border-[#9ca3af]/40 shadow-sm"
-                  : "text-[#e5e7eb] hover:bg-[#6b7280]/40 hover:text-white"
+                  ? "bg-[#f1f5f9] text-[#64748b] border border-[#cbd5e1] shadow-2xs font-bold"
+                  : "text-[#111111] hover:bg-[#f8fafc] hover:text-[#64748b]"
               }`}
             >
               <svg
@@ -2668,10 +2945,11 @@ ${divider70}
                 setActiveTab("Users");
                 setIsMobileSidebarOpen(false);
               }}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+              style={{ fontFamily: "'Century Gothic', 'Publica Sans Light', 'Kumbh Sans', sans-serif" }}
+              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeTab === "Users"
-                  ? "bg-[#6b7280] text-white border border-[#9ca3af]/40 shadow-sm"
-                  : "text-[#e5e7eb] hover:bg-[#6b7280]/40 hover:text-white"
+                  ? "bg-[#f1f5f9] text-[#64748b] border border-[#cbd5e1] shadow-2xs font-bold"
+                  : "text-[#111111] hover:bg-[#f8fafc] hover:text-[#64748b]"
               }`}
             >
               <svg
@@ -2695,10 +2973,11 @@ ${divider70}
                 setActiveTab("Manage Ads");
                 setIsMobileSidebarOpen(false);
               }}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+              style={{ fontFamily: "'Century Gothic', 'Publica Sans Light', 'Kumbh Sans', sans-serif" }}
+              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeTab === "Manage Ads"
-                  ? "bg-[#6b7280] text-white border border-[#9ca3af]/40 shadow-sm"
-                  : "text-[#e5e7eb] hover:bg-[#6b7280]/40 hover:text-white"
+                  ? "bg-[#f1f5f9] text-[#64748b] border border-[#cbd5e1] shadow-2xs font-bold"
+                  : "text-[#111111] hover:bg-[#f8fafc] hover:text-[#64748b]"
               }`}
             >
               <svg
@@ -2722,10 +3001,11 @@ ${divider70}
                 setActiveTab("Contact Us Submissions");
                 setIsMobileSidebarOpen(false);
               }}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+              style={{ fontFamily: "'Century Gothic', 'Publica Sans Light', 'Kumbh Sans', sans-serif" }}
+              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeTab === "Contact Us Submissions"
-                  ? "bg-[#6b7280] text-white border border-[#9ca3af]/40 shadow-sm"
-                  : "text-[#e5e7eb] hover:bg-[#6b7280]/40 hover:text-white"
+                  ? "bg-[#f1f5f9] text-[#64748b] border border-[#cbd5e1] shadow-2xs font-bold"
+                  : "text-[#111111] hover:bg-[#f8fafc] hover:text-[#64748b]"
               }`}
             >
               <svg
@@ -2749,10 +3029,11 @@ ${divider70}
                 setActiveTab("Advertise Leads");
                 setIsMobileSidebarOpen(false);
               }}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+              style={{ fontFamily: "'Century Gothic', 'Publica Sans Light', 'Kumbh Sans', sans-serif" }}
+              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeTab === "Advertise Leads"
-                  ? "bg-[#6b7280] text-white border border-[#9ca3af]/40 shadow-sm"
-                  : "text-[#e5e7eb] hover:bg-[#6b7280]/40 hover:text-white"
+                  ? "bg-[#f1f5f9] text-[#64748b] border border-[#cbd5e1] shadow-2xs font-bold"
+                  : "text-[#111111] hover:bg-[#f8fafc] hover:text-[#64748b]"
               }`}
             >
               <svg
@@ -2776,10 +3057,11 @@ ${divider70}
                 setActiveTab("Database Backups");
                 setIsMobileSidebarOpen(false);
               }}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+              style={{ fontFamily: "'Century Gothic', 'Publica Sans Light', 'Kumbh Sans', sans-serif" }}
+              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeTab === "Database Backups"
-                  ? "bg-[#6b7280] text-white border border-[#9ca3af]/40 shadow-sm"
-                  : "text-[#e5e7eb] hover:bg-[#6b7280]/40 hover:text-white"
+                  ? "bg-[#f1f5f9] text-[#64748b] border border-[#cbd5e1] shadow-2xs font-bold"
+                  : "text-[#111111] hover:bg-[#f8fafc] hover:text-[#64748b]"
               }`}
             >
               <svg
@@ -2803,10 +3085,11 @@ ${divider70}
                 setActiveTab("Shorts & Reels");
                 setIsMobileSidebarOpen(false);
               }}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+              style={{ fontFamily: "'Century Gothic', 'Publica Sans Light', 'Kumbh Sans', sans-serif" }}
+              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeTab === "Shorts & Reels"
-                  ? "bg-[#6b7280] text-white border border-[#9ca3af]/40 shadow-sm"
-                  : "text-[#e5e7eb] hover:bg-[#6b7280]/40 hover:text-white"
+                  ? "bg-[#f1f5f9] text-[#64748b] border border-[#cbd5e1] shadow-2xs font-bold"
+                  : "text-[#111111] hover:bg-[#f8fafc] hover:text-[#64748b]"
               }`}
             >
               <svg
@@ -2827,7 +3110,10 @@ ${divider70}
         </div>
 
         {/* Sidebar Footer Copyright */}
-        <div className="p-4 border-t border-[#6b7280]/60 text-[10px] text-[#e5e7eb] text-center font-mono">
+        <div
+          style={{ fontFamily: "'Century Gothic', 'Publica Sans Light', 'Kumbh Sans', sans-serif" }}
+          className="p-4 border-t border-[#f1f5f9] text-[10px] text-[#94a3b8] text-center"
+        >
           © 2026 Dow Jones & Company, Inc.
         </div>
       </aside>
@@ -2919,11 +3205,6 @@ ${divider70}
                     <div className="font-mono text-xs text-[#64748b] mt-0.5 tracking-tight truncate">
                       {adminEmail}
                     </div>
-                    <div className="mt-1.5">
-                      <span className="bg-[#f1f5f9] text-[#334155] font-mono text-[10px] font-extrabold px-2.5 py-0.5 rounded-md uppercase tracking-wider inline-block">
-                        ADMIN
-                      </span>
-                    </div>
                   </div>
                 </div>
 
@@ -2935,18 +3216,19 @@ ${divider70}
                     setShowProfileDropdown(false);
                     setShowProfileModal(true);
                   }}
-                  className="w-full flex items-center space-x-3 px-3 py-2 hover:bg-slate-50 rounded-xl text-sm font-semibold text-[#1e293b] transition-colors cursor-pointer text-left"
+                  className="w-full flex items-center space-x-3 px-3 py-2 hover:bg-slate-50 rounded-xl text-sm font-bold text-[#334155] transition-colors cursor-pointer text-left"
                 >
                   <svg
                     width={18}
                     height={18}
-                    className="shrink-0 text-[#64748b]"
+                    className="shrink-0 text-slate-400"
                     fill="none"
                     stroke="currentColor"
-                    strokeWidth="1.8"
+                    strokeWidth="2"
                     viewBox="0 0 24 24"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
                   <span>Profile Settings</span>
                 </button>
@@ -2976,15 +3258,15 @@ ${divider70}
           </div>
         </div>
 
-        {/* Top 3 Stat Metric Cards (3 Horizontal Aligning Boxes matching reference site) */}
+        {/* Top 3 Stat Metric Cards (Light Grey Accents) */}
         <div className="grid grid-cols-3 gap-2 xs:gap-3.5 sm:gap-6 mb-5 sm:mb-6">
-          {/* Card 1: ACTIVE REVIEWS (Purple accent line & container) */}
-          <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-[#e5e7eb] shadow-2xs relative overflow-hidden flex flex-col justify-between border-l-4 border-l-[#8b5cf6]">
+          {/* Card 1: ACTIVE REVIEWS (Light Grey Accent) */}
+          <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-[#e5e7eb] shadow-2xs relative overflow-hidden flex flex-col justify-between border-l-4 border-l-[#cbd5e1]">
             <div className="flex items-center justify-between gap-1">
               <span className="text-[8.5px] xs:text-[10px] sm:text-[11px] font-bold text-[#6b7280] tracking-wider sm:tracking-widest uppercase font-mono truncate">
                 ACTIVE REVIEWS
               </span>
-              <div className="w-6 h-6 xs:w-8 xs:h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-[#f3e8ff] text-[#8b5cf6] flex items-center justify-center shrink-0">
+              <div className="w-6 h-6 xs:w-8 xs:h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-[#f1f5f9] text-[#64748b] flex items-center justify-center shrink-0">
                 <svg
                   className="w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-4.5 sm:h-4.5 shrink-0"
                   fill="none"
@@ -3003,13 +3285,13 @@ ${divider70}
             </div>
           </div>
 
-          {/* Card 2: COMPLETED RELEASES (Teal/Green accent line & container) */}
-          <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-[#e5e7eb] shadow-2xs relative overflow-hidden flex flex-col justify-between border-l-4 border-l-[#10b981]">
+          {/* Card 2: COMPLETED RELEASES (Light Grey Accent) */}
+          <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-[#e5e7eb] shadow-2xs relative overflow-hidden flex flex-col justify-between border-l-4 border-l-[#cbd5e1]">
             <div className="flex items-center justify-between gap-1">
               <span className="text-[8.5px] xs:text-[10px] sm:text-[11px] font-bold text-[#6b7280] tracking-wider sm:tracking-widest uppercase font-mono truncate">
                 COMPLETED RELEASES
               </span>
-              <div className="w-6 h-6 xs:w-8 xs:h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-[#d1fae5] text-[#10b981] flex items-center justify-center shrink-0">
+              <div className="w-6 h-6 xs:w-8 xs:h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-[#f1f5f9] text-[#64748b] flex items-center justify-center shrink-0">
                 <svg
                   className="w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-4.5 sm:h-4.5 shrink-0"
                   fill="none"
@@ -3028,13 +3310,13 @@ ${divider70}
             </div>
           </div>
 
-          {/* Card 3: NEWSLETTER SUBS (Orange accent line & container) */}
-          <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-[#e5e7eb] shadow-2xs relative overflow-hidden flex flex-col justify-between border-l-4 border-l-[#ea580c]">
+          {/* Card 3: NEWSLETTER SUBS (Light Grey Accent) */}
+          <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-[#e5e7eb] shadow-2xs relative overflow-hidden flex flex-col justify-between border-l-4 border-l-[#cbd5e1]">
             <div className="flex items-center justify-between gap-1">
               <span className="text-[8.5px] xs:text-[10px] sm:text-[11px] font-bold text-[#6b7280] tracking-wider sm:tracking-widest uppercase font-mono truncate">
                 NEWSLETTER SUBS
               </span>
-              <div className="w-6 h-6 xs:w-8 xs:h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-[#ffedd5] text-[#ea580c] flex items-center justify-center shrink-0">
+              <div className="w-6 h-6 xs:w-8 xs:h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-[#f1f5f9] text-[#64748b] flex items-center justify-center shrink-0">
                 <svg
                   className="w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-4.5 sm:h-4.5 shrink-0"
                   fill="none"
@@ -3362,6 +3644,7 @@ ${divider70}
                     <option value="Health">Health</option>
                     <option value="Style">Style</option>
                     <option value="Sports">Sports</option>
+                    <option value="Interviews">Interviews</option>
                   </select>
                 </div>
 
@@ -3576,7 +3859,7 @@ ${divider70}
                     setNewUserRole("writer");
                     setShowAddUserModal(true);
                   }}
-                  className="flex items-center space-x-2 bg-[#ea580c] hover:bg-[#c2410c] text-white font-bold text-xs uppercase tracking-wider px-4 py-2 rounded-full transition-all cursor-pointer shadow-sm whitespace-nowrap shrink-0"
+                  className="flex items-center space-x-2 bg-[#475569] hover:bg-[#334155] text-white font-bold text-xs uppercase tracking-wider px-4 py-2 rounded-full transition-all cursor-pointer shadow-sm whitespace-nowrap shrink-0"
                 >
                   <svg className="w-4 h-4 stroke-[2] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
@@ -3589,15 +3872,15 @@ ${divider70}
               </div>
             </div>
 
-            {/* Sub-Tabs: ALL USERS (x), ADMINS (x), WRITERS (x), READERS (x) */}
+            {/* Sub-Tabs: ALL USERS (x), ADMINS (x), WRITERS (x), READERS (x) - Black when inactive, Ash when active */}
             <div className="flex items-center space-x-8 border-b border-[#e5e7eb] font-sans text-xs overflow-x-auto">
               <button
                 type="button"
                 onClick={() => setUserSubTab("ALL")}
                 className={`font-bold tracking-wider uppercase transition-all whitespace-nowrap cursor-pointer pb-3 px-1 border-b-2 ${
                   userSubTab === "ALL"
-                    ? "text-[#ea580c] border-[#ea580c] -mb-[1px] font-extrabold"
-                    : "text-[#64748b] hover:text-[#111111] border-transparent"
+                    ? "text-[#64748b] border-[#94a3b8] -mb-[1px] font-extrabold"
+                    : "text-[#111111] hover:text-[#64748b] border-transparent"
                 }`}
               >
                 ALL USERS ({usersList.length})
@@ -3608,8 +3891,8 @@ ${divider70}
                 onClick={() => setUserSubTab("ADMINS")}
                 className={`font-bold tracking-wider uppercase transition-all whitespace-nowrap cursor-pointer pb-3 px-1 border-b-2 ${
                   userSubTab === "ADMINS"
-                    ? "text-[#ea580c] border-[#ea580c] -mb-[1px] font-extrabold"
-                    : "text-[#64748b] hover:text-[#111111] border-transparent"
+                    ? "text-[#64748b] border-[#94a3b8] -mb-[1px] font-extrabold"
+                    : "text-[#111111] hover:text-[#64748b] border-transparent"
                 }`}
               >
                 ADMINS ({usersList.filter((u) => u.role?.toLowerCase() === "admin").length})
@@ -3620,8 +3903,8 @@ ${divider70}
                 onClick={() => setUserSubTab("WRITERS")}
                 className={`font-bold tracking-wider uppercase transition-all whitespace-nowrap cursor-pointer pb-3 px-1 border-b-2 ${
                   userSubTab === "WRITERS"
-                    ? "text-[#ea580c] border-[#ea580c] -mb-[1px] font-extrabold"
-                    : "text-[#64748b] hover:text-[#111111] border-transparent"
+                    ? "text-[#64748b] border-[#94a3b8] -mb-[1px] font-extrabold"
+                    : "text-[#111111] hover:text-[#64748b] border-transparent"
                 }`}
               >
                 WRITERS ({usersList.filter((u) => u.role?.toLowerCase() === "writer").length})
@@ -3632,8 +3915,8 @@ ${divider70}
                 onClick={() => setUserSubTab("READERS")}
                 className={`font-bold tracking-wider uppercase transition-all whitespace-nowrap cursor-pointer pb-3 px-1 border-b-2 ${
                   userSubTab === "READERS"
-                    ? "text-[#ea580c] border-[#ea580c] -mb-[1px] font-extrabold"
-                    : "text-[#64748b] hover:text-[#111111] border-transparent"
+                    ? "text-[#64748b] border-[#94a3b8] -mb-[1px] font-extrabold"
+                    : "text-[#111111] hover:text-[#64748b] border-transparent"
                 }`}
               >
                 READERS ({usersList.filter((u) => u.role?.toLowerCase() === "reader").length})
@@ -3692,8 +3975,8 @@ ${divider70}
                                 </span>
                               )}
                               {isTargetDefaultAdmin && (
-                                <span className="inline-flex items-center space-x-1 border border-[#fcd34d] bg-[#fefce8] text-[#b45309] text-[9.5px] font-mono font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-                                  <svg className="w-3.5 h-3.5 text-[#b45309]" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+                                <span className="inline-flex items-center space-x-1 border border-[#cbd5e1] bg-[#f1f5f9] text-[#334155] text-[9.5px] font-mono font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                                  <svg className="w-3.5 h-3.5 text-[#475569]" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                                   </svg>
                                   <span>DEFAULT ADMIN</span>
@@ -3707,18 +3990,18 @@ ${divider70}
                             {user.email}
                           </td>
 
-                          {/* WORKSPACE ROLE */}
+                          {/* WORKSPACE ROLE (3 Distinct Ash Shades) */}
                           <td className="py-4 px-4 whitespace-nowrap">
                             {userRoleLower === "admin" ? (
-                              <span className="border border-[#f87171] text-[#dc2626] bg-[#fef2f2] text-[10px] font-mono font-bold px-3 py-1 rounded-full uppercase tracking-wider inline-block">
+                              <span className="border border-[#475569] text-white bg-[#334155] text-[10px] font-mono font-bold px-3 py-1 rounded-full uppercase tracking-wider inline-block">
                                 ADMIN
                               </span>
                             ) : userRoleLower === "writer" ? (
-                              <span className="border border-[#60a5fa] text-[#2563eb] bg-[#eff6ff] text-[10px] font-mono font-bold px-3 py-1 rounded-full uppercase tracking-wider inline-block">
+                              <span className="border border-[#cbd5e1] text-[#0f172a] bg-[#e2e8f0] text-[10px] font-mono font-bold px-3 py-1 rounded-full uppercase tracking-wider inline-block">
                                 WRITER
                               </span>
                             ) : (
-                              <span className="border border-[#9ca3af] text-[#4b5563] bg-[#f3f4f6] text-[10px] font-mono font-bold px-3 py-1 rounded-full uppercase tracking-wider inline-block">
+                              <span className="border border-[#e2e8f0] text-[#64748b] bg-[#f8fafc] text-[10px] font-mono font-bold px-3 py-1 rounded-full uppercase tracking-wider inline-block">
                                 READER
                               </span>
                             )}
@@ -3871,7 +4154,7 @@ ${divider70}
                             <select
                               value={item.status || "New"}
                               onChange={(e) => handleUpdateContactStatus(item.id, e.target.value)}
-                              className="bg-sky-50/80 border border-sky-200 text-[#0284c7] font-bold rounded-lg text-xs px-2.5 py-1 focus:outline-none cursor-pointer"
+                              className="bg-[#f1f5f9] border border-[#cbd5e1] text-[#334155] font-bold rounded-lg text-xs px-2.5 py-1 focus:outline-none cursor-pointer"
                             >
                               <option value="New">New</option>
                               <option value="In Progress">In Progress</option>
@@ -3991,7 +4274,7 @@ ${divider70}
                             <div>W: {item.whatsapp || "N/A"}</div>
                           </td>
                           <td className="py-4 px-4 whitespace-nowrap">
-                            <span className="bg-sky-50 text-[#0284c7] border border-sky-200 px-2.5 py-0.5 rounded-full text-[10px] font-bold">
+                            <span className="bg-[#f1f5f9] text-[#334155] border border-[#cbd5e1] px-2.5 py-0.5 rounded-full text-[10px] font-bold">
                               {item.service_option || (item as any).serviceOption || "Publish Company Article"}
                             </span>
                           </td>
@@ -4005,7 +4288,7 @@ ${divider70}
                             <select
                               value={item.status || "New"}
                               onChange={(e) => handleUpdateAdvertiseStatus(item.id, e.target.value)}
-                              className="bg-sky-50/80 border border-sky-200 text-[#0284c7] font-bold rounded-lg text-xs px-2.5 py-1 focus:outline-none cursor-pointer"
+                              className="bg-[#f1f5f9] border border-[#cbd5e1] text-[#334155] font-bold rounded-lg text-xs px-2.5 py-1 focus:outline-none cursor-pointer"
                             >
                               <option value="New">New</option>
                               <option value="Contacted">Contacted</option>
@@ -4064,10 +4347,10 @@ ${divider70}
               <button
                 type="button"
                 onClick={() => setAdSubTab("ALL")}
-                className={`font-bold tracking-wider uppercase transition-all whitespace-nowrap cursor-pointer ${
+                className={`font-bold tracking-wider uppercase transition-all whitespace-nowrap cursor-pointer pb-2.5 ${
                   adSubTab === "ALL"
-                    ? "text-[#b8860b] border-b-2 border-[#b8860b] pb-2.5 font-extrabold"
-                    : "text-[#6b7280] hover:text-[#111111]"
+                    ? "text-[#64748b] border-b-2 border-[#94a3b8] font-extrabold"
+                    : "text-[#111111] hover:text-[#64748b]"
                 }`}
               >
                 ALL AD SLOTS ({adSlots.length})
@@ -4076,10 +4359,10 @@ ${divider70}
               <button
                 type="button"
                 onClick={() => setAdSubTab("HOMEPAGE")}
-                className={`font-bold tracking-wider uppercase transition-all whitespace-nowrap cursor-pointer ${
+                className={`font-bold tracking-wider uppercase transition-all whitespace-nowrap cursor-pointer pb-2.5 ${
                   adSubTab === "HOMEPAGE"
-                    ? "text-[#b8860b] border-b-2 border-[#b8860b] pb-2.5 font-extrabold"
-                    : "text-[#6b7280] hover:text-[#111111]"
+                    ? "text-[#64748b] border-b-2 border-[#94a3b8] font-extrabold"
+                    : "text-[#111111] hover:text-[#64748b]"
                 }`}
               >
                 HOMEPAGE SLOTS ({adSlots.filter((s) => s.placementGroup === "Homepage").length})
@@ -4088,10 +4371,10 @@ ${divider70}
               <button
                 type="button"
                 onClick={() => setAdSubTab("CATEGORY")}
-                className={`font-bold tracking-wider uppercase transition-all whitespace-nowrap cursor-pointer ${
+                className={`font-bold tracking-wider uppercase transition-all whitespace-nowrap cursor-pointer pb-2.5 ${
                   adSubTab === "CATEGORY"
-                    ? "text-[#b8860b] border-b-2 border-[#b8860b] pb-2.5 font-extrabold"
-                    : "text-[#6b7280] hover:text-[#111111]"
+                    ? "text-[#64748b] border-b-2 border-[#94a3b8] font-extrabold"
+                    : "text-[#111111] hover:text-[#64748b]"
                 }`}
               >
                 CATEGORY PAGE SLOTS ({adSlots.filter((s) => s.placementGroup === "Category").length})
@@ -4100,10 +4383,10 @@ ${divider70}
               <button
                 type="button"
                 onClick={() => setAdSubTab("AUTHOR")}
-                className={`font-bold tracking-wider uppercase transition-all whitespace-nowrap cursor-pointer ${
+                className={`font-bold tracking-wider uppercase transition-all whitespace-nowrap cursor-pointer pb-2.5 ${
                   adSubTab === "AUTHOR"
-                    ? "text-[#b8860b] border-b-2 border-[#b8860b] pb-2.5 font-extrabold"
-                    : "text-[#6b7280] hover:text-[#111111]"
+                    ? "text-[#64748b] border-b-2 border-[#94a3b8] font-extrabold"
+                    : "text-[#111111] hover:text-[#64748b]"
                 }`}
               >
                 WRITER PAGE SLOTS ({adSlots.filter((s) => s.placementGroup === "Author").length})
@@ -4133,7 +4416,7 @@ ${divider70}
                         type="button"
                         onClick={() => handleToggleAdSlot(slot.id)}
                         className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                          slot.active ? "bg-[#b8860b]" : "bg-gray-300"
+                          slot.active ? "bg-[#475569]" : "bg-gray-300"
                         }`}
                       >
                         <span
@@ -4148,7 +4431,7 @@ ${divider70}
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                       {/* Left Column: SLOT DIMENSIONS + Image Thumbnail + Choose File */}
                       <div className="lg:col-span-4 flex flex-col space-y-3">
-                        <span className="text-[11px] font-mono font-bold text-[#b8860b] uppercase tracking-wider block">
+                        <span className="text-[11px] font-mono font-bold text-[#64748b] uppercase tracking-wider block">
                           SLOT DIMENSIONS: {slot.dimension}
                         </span>
 
@@ -4171,7 +4454,7 @@ ${divider70}
                             UPLOAD BANNER IMAGE
                           </span>
                           <div className="flex items-center space-x-2">
-                            <label className="bg-white border border-[#cccccc] hover:bg-gray-100 text-[#374151] font-bold px-4 py-1.5 rounded-full cursor-pointer shadow-2xs transition-colors whitespace-nowrap text-xs">
+                            <label className="bg-white border border-[#cbd5e1] hover:bg-slate-50 text-[#334155] font-bold px-4 py-1.5 rounded-full cursor-pointer shadow-2xs transition-colors whitespace-nowrap text-xs">
                               Choose File
                               <input
                                 type="file"
@@ -4212,7 +4495,7 @@ ${divider70}
                               <select
                                 value={slot.actionType}
                                 onChange={(e) => handleUpdateAdSlot(slot.id, "actionType", e.target.value)}
-                                className="w-full bg-white border border-[#cbd5e1] text-xs font-semibold text-[#111111] rounded-xl px-3.5 py-2.5 outline-none focus:border-[#b8860b] transition-colors cursor-pointer"
+                                className="w-full bg-white border border-[#cbd5e1] text-xs font-semibold text-[#111111] rounded-xl px-3.5 py-2.5 outline-none focus:border-[#64748b] transition-colors cursor-pointer"
                               >
                                 <option value="External Link (URL)">External Link (URL)</option>
                                 <option value="Internal Promoted Article">Internal Promoted Article</option>
@@ -4227,7 +4510,7 @@ ${divider70}
                                 <select
                                   value={slot.selectedArticleSlug || ""}
                                   onChange={(e) => handleUpdateAdSlot(slot.id, "selectedArticleSlug", e.target.value)}
-                                  className="w-full bg-white border border-[#cbd5e1] text-xs font-semibold text-[#111111] rounded-xl px-3.5 py-2.5 outline-none focus:border-[#b8860b] transition-colors cursor-pointer"
+                                  className="w-full bg-white border border-[#cbd5e1] text-xs font-semibold text-[#111111] rounded-xl px-3.5 py-2.5 outline-none focus:border-[#64748b] transition-colors cursor-pointer"
                                 >
                                   <option value="">-- Choose Published Story --</option>
                                   {publishedPosts.map((post) => (
@@ -4247,7 +4530,7 @@ ${divider70}
                                   value={slot.targetUrl || ""}
                                   onChange={(e) => handleUpdateAdSlot(slot.id, "targetUrl", e.target.value)}
                                   placeholder="https://..."
-                                  className="w-full bg-white border border-[#cbd5e1] text-xs text-[#111111] rounded-xl px-3.5 py-2.5 outline-none focus:border-[#b8860b] transition-colors font-sans"
+                                  className="w-full bg-white border border-[#cbd5e1] text-xs text-[#111111] rounded-xl px-3.5 py-2.5 outline-none focus:border-[#64748b] transition-colors font-sans"
                                 />
                               </div>
                             )}
@@ -4262,14 +4545,14 @@ ${divider70}
                               handleUpdateAdSlot(slot.id, "imageUrl", "");
                               handleUpdateAdSlot(slot.id, "fileName", "");
                             }}
-                            className="bg-white hover:bg-slate-50 border border-[#cccccc] text-[#4b5563] font-bold text-xs px-5 py-2.5 rounded-xl transition-colors cursor-pointer uppercase shadow-2xs tracking-wider"
+                            className="bg-[#f1f5f9] hover:bg-[#e2e8f0] border border-[#cbd5e1] text-[#475569] font-bold text-xs px-5 py-2.5 rounded-xl transition-colors cursor-pointer uppercase shadow-2xs tracking-wider"
                           >
                             CLEAR IMAGE
                           </button>
                           <button
                             type="button"
                             onClick={() => handleSaveAdConfig(slot.id)}
-                            className="bg-[#b8860b] hover:bg-[#a07409] text-white font-bold text-xs px-6 py-2.5 rounded-xl transition-colors cursor-pointer uppercase shadow-2xs tracking-wider"
+                            className="bg-[#475569] hover:bg-[#334155] text-white font-bold text-xs px-6 py-2.5 rounded-xl transition-colors cursor-pointer uppercase shadow-2xs tracking-wider"
                           >
                             SAVE AD CONFIG
                           </button>
@@ -4305,11 +4588,11 @@ ${divider70}
                     type="button"
                     disabled={isCreatingBackup}
                     onClick={handleCreateB2Backup}
-                    className="inline-flex items-center space-x-2 bg-white hover:bg-[#fff7ed] border border-[#ea580c] text-[#ea580c] font-bold text-xs px-4 py-2.5 rounded-xl transition-all cursor-pointer shadow-2xs disabled:opacity-50"
+                    className="inline-flex items-center space-x-2 bg-[#475569] hover:bg-[#334155] text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all cursor-pointer shadow-2xs disabled:opacity-50"
                   >
                     {isCreatingBackup ? (
                       <>
-                        <svg className="w-4 h-4 animate-spin text-[#ea580c]" fill="none" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 animate-spin text-white" fill="none" viewBox="0 0 24 24">
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
@@ -4317,7 +4600,7 @@ ${divider70}
                       </>
                     ) : (
                       <>
-                        <svg className="w-4 h-4 text-[#ea580c]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                         </svg>
                         <span>CREATE B2 BACKUP</span>
@@ -4391,7 +4674,7 @@ ${divider70}
                                 type="button"
                                 disabled={isRestoringBackup}
                                 onClick={() => handleRestoreBackup(b.fileName)}
-                                className="border border-[#ea580c] text-[#ea580c] hover:bg-[#fff7ed] text-[11px] font-mono font-bold px-3.5 py-1.5 rounded-lg uppercase tracking-wider transition-all cursor-pointer shadow-2xs disabled:opacity-50"
+                                className="border border-[#cbd5e1] bg-[#f1f5f9] text-[#334155] hover:bg-[#e2e8f0] text-[11px] font-mono font-bold px-3.5 py-1.5 rounded-lg uppercase tracking-wider transition-all cursor-pointer shadow-2xs disabled:opacity-50"
                               >
                                 RESTORE
                               </button>
@@ -4439,7 +4722,7 @@ ${divider70}
                     <h2 className="text-xl sm:text-2xl font-bold text-[#111111] tracking-tight">
                       Shorts & Reels Manager
                     </h2>
-                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-sans font-bold bg-[#fef3c7] text-[#b8860b] border border-[#fde68a]">
+                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-sans font-bold bg-[#f1f5f9] text-[#475569] border border-[#cbd5e1] translate-y-1 sm:translate-y-1.5 inline-block">
                       {getMaxSlotsForSubTab()} {shortsSubTab === "PODCAST" ? "Podcast" : "Videos"}
                     </span>
                   </div>
@@ -4449,7 +4732,7 @@ ${divider70}
                 </div>
 
                 <div className="shrink-0">
-                  <span className="px-3.5 py-1.5 rounded-full text-[10px] font-mono font-bold bg-[#e0f2fe] text-[#0284c7] border border-[#bae6fd] tracking-widest uppercase">
+                  <span className="px-3.5 py-1.5 rounded-full text-[10px] font-mono font-bold bg-[#f1f5f9] text-[#334155] border border-[#cbd5e1] tracking-widest uppercase">
                     HOMEPAGE FEED: {getCurrentShortsList().filter((s) => s.status === "Active" && s.videoUrl).length} / {getMaxSlotsForSubTab()} {shortsSubTab === "PODCAST" ? "AUDIO" : "VIDEOS"}
                   </span>
                 </div>
@@ -4461,13 +4744,13 @@ ${divider70}
                   type="button"
                   onClick={() => {
                     setShortsSubTab("RECOMMENDED");
-                    setShortsSubTab("RECOMMENDED");
                     setShortTargetSlot(1);
                     setShortPlatform("Youtube Video");
+                    resetShortForm();
                   }}
                   className={`font-bold tracking-wider uppercase transition-all whitespace-nowrap cursor-pointer pb-2.5 ${
                     shortsSubTab === "RECOMMENDED"
-                      ? "text-[#b8860b] border-b-2 border-[#b8860b] font-extrabold"
+                      ? "text-[#64748b] border-b-2 border-[#94a3b8] font-extrabold"
                       : "text-[#6b7280] hover:text-[#111111]"
                   }`}
                 >
@@ -4480,10 +4763,11 @@ ${divider70}
                     setShortsSubTab("VIDEOS");
                     setShortTargetSlot(1);
                     setShortPlatform("Youtube Video");
+                    resetShortForm();
                   }}
                   className={`font-bold tracking-wider uppercase transition-all whitespace-nowrap cursor-pointer pb-2.5 ${
                     shortsSubTab === "VIDEOS"
-                      ? "text-[#b8860b] border-b-2 border-[#b8860b] font-extrabold"
+                      ? "text-[#64748b] border-b-2 border-[#94a3b8] font-extrabold"
                       : "text-[#6b7280] hover:text-[#111111]"
                   }`}
                 >
@@ -4496,10 +4780,11 @@ ${divider70}
                     setShortsSubTab("PODCAST");
                     setShortTargetSlot(1);
                     setShortPlatform("Apple Podcasts");
+                    resetShortForm();
                   }}
                   className={`font-bold tracking-wider uppercase transition-all whitespace-nowrap cursor-pointer pb-2.5 ${
                     shortsSubTab === "PODCAST"
-                      ? "text-[#b8860b] border-b-2 border-[#b8860b] font-extrabold"
+                      ? "text-[#64748b] border-b-2 border-[#94a3b8] font-extrabold"
                       : "text-[#6b7280] hover:text-[#111111]"
                   }`}
                 >
@@ -4512,7 +4797,7 @@ ${divider70}
             <div className="bg-[#ffffff] rounded-2xl p-6 border border-[#e2e8f0] shadow-2xs space-y-6">
               {/* Card Title & Icon Header */}
               <div className="flex items-start space-x-3 pb-4 border-b border-[#f1f5f9]">
-                <div className="w-9 h-9 rounded-xl bg-[#fef3c7] text-[#b8860b] border border-[#fde68a] flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
+                <div className="w-9 h-9 rounded-xl bg-[#f1f5f9] text-[#475569] border border-[#cbd5e1] flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
                   <svg className="w-4 h-4 fill-current ml-0.5" viewBox="0 0 24 24">
                     <path d="M8 5v14l11-7z" />
                   </svg>
@@ -4523,7 +4808,7 @@ ${divider70}
                   </h3>
                   <p className="text-xs text-[#64748b] mt-0.5 font-sans">
                     {shortsSubTab === "PODCAST"
-                      ? "Paste any Apple Podcasts, Spotify, or YouTube Music link."
+                      ? "Paste any Apple Podcasts link."
                       : "Paste any YouTube, Rumble, Instagram, or Facebook link — platform and thumbnails are detected automatically."}
                   </p>
                 </div>
@@ -4552,11 +4837,11 @@ ${divider70}
                         onClick={() => {
                           if (shortVideoUrl) autoFetchVideoDetails(shortVideoUrl);
                         }}
-                        className="text-[11px] font-sans font-bold text-[#b8860b] hover:underline flex items-center space-x-1.5 cursor-pointer disabled:opacity-70"
+                        className="text-[11px] font-sans font-bold text-[#475569] hover:underline flex items-center space-x-1.5 cursor-pointer disabled:opacity-70"
                       >
                         {isFetchingVideoDetails ? (
                           <>
-                            <svg className="w-3.5 h-3.5 animate-spin text-[#b8860b]" fill="none" viewBox="0 0 24 24">
+                            <svg className="w-3.5 h-3.5 animate-spin text-[#475569]" fill="none" viewBox="0 0 24 24">
                               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
@@ -4573,15 +4858,15 @@ ${divider70}
                       onChange={handleShortUrlChange}
                       placeholder={
                         shortsSubTab === "PODCAST"
-                          ? "e.g. https://podcasts.apple.com/us/podcast/... or https://open.spotify.com/episode/..."
+                          ? "e.g. https://podcasts.apple.com/us/podcast/..."
                           : "e.g. https://www.youtube.com/shorts/... or https://rumble.com/... or https://instagram.com/reel/..."
                       }
-                      className="w-full text-xs bg-[#f8fafc] border border-[#e2e8f0] focus:border-[#b8860b] focus:bg-white rounded-xl px-4 py-2.5 transition-all text-[#0f172a] font-sans placeholder:text-[#94a3b8]"
+                      className="w-full text-xs bg-[#f8fafc] border border-[#e2e8f0] focus:border-[#64748b] focus:bg-white rounded-xl px-4 py-2.5 transition-all text-[#0f172a] font-sans placeholder:text-[#94a3b8]"
                       required
                     />
                     <p className="text-[10px] text-[#94a3b8] mt-1 font-sans">
                       {shortsSubTab === "PODCAST"
-                        ? "Supports Apple Podcasts, Spotify, and YouTube Music."
+                        ? "Supports Apple Podcasts."
                         : "Supports YouTube Shorts, Rumble videos, Instagram Reels, and Facebook Reels."}
                     </p>
                   </div>
@@ -4593,13 +4878,11 @@ ${divider70}
                     <select
                       value={shortPlatform}
                       onChange={(e) => setShortPlatform(e.target.value as any)}
-                      className="w-full text-xs bg-[#f8fafc] border border-[#e2e8f0] focus:border-[#b8860b] focus:bg-white rounded-xl px-4 py-2.5 text-[#0f172a] font-sans font-medium cursor-pointer"
+                      className="w-full text-xs bg-[#f8fafc] border border-[#e2e8f0] focus:border-[#64748b] focus:bg-white rounded-xl px-4 py-2.5 text-[#0f172a] font-sans font-medium cursor-pointer"
                     >
                       {shortsSubTab === "PODCAST" ? (
                         <>
                           <option value="Apple Podcasts">Apple Podcasts</option>
-                          <option value="Spotify">Spotify</option>
-                          <option value="YouTube Music">YouTube Music</option>
                         </>
                       ) : (
                         <>
@@ -4623,7 +4906,7 @@ ${divider70}
                     value={shortTitle}
                     onChange={(e) => setShortTitle(e.target.value)}
                     placeholder="e.g. Supreme Court Hearing Highlights & Legal Analysis"
-                    className="w-full text-xs bg-[#f8fafc] border border-[#e2e8f0] focus:border-[#b8860b] focus:bg-white rounded-xl px-4 py-2.5 transition-all text-[#0f172a] font-sans placeholder:text-[#94a3b8]"
+                    className="w-full text-xs bg-[#f8fafc] border border-[#e2e8f0] focus:border-[#64748b] focus:bg-white rounded-xl px-4 py-2.5 transition-all text-[#0f172a] font-sans placeholder:text-[#94a3b8]"
                     required
                   />
                 </div>
@@ -4642,7 +4925,7 @@ ${divider70}
                         value={shortThumbnailUrl}
                         onChange={(e) => setShortThumbnailUrl(e.target.value)}
                         placeholder="e.g. https://images.unsplash.com/... or auto-fetched YouTube thumbnail"
-                        className="w-full text-xs bg-[#f8fafc] border border-[#e2e8f0] focus:border-[#b8860b] focus:bg-white rounded-xl px-4 py-2.5 transition-all text-[#0f172a] font-sans placeholder:text-[#94a3b8]"
+                        className="w-full text-xs bg-[#f8fafc] border border-[#e2e8f0] focus:border-[#64748b] focus:bg-white rounded-xl px-4 py-2.5 transition-all text-[#0f172a] font-sans placeholder:text-[#94a3b8]"
                       />
                     </div>
 
@@ -4676,7 +4959,7 @@ ${divider70}
                           value={shortDuration}
                           onChange={(e) => setShortDuration(e.target.value)}
                           placeholder="e.g. 0:45"
-                          className="w-full text-xs bg-[#f8fafc] border border-[#e2e8f0] focus:border-[#b8860b] focus:bg-white rounded-xl px-4 py-2.5 text-[#0f172a] font-sans"
+                          className="w-full text-xs bg-[#f8fafc] border border-[#e2e8f0] focus:border-[#64748b] focus:bg-white rounded-xl px-4 py-2.5 text-[#0f172a] font-sans"
                         />
                       </div>
 
@@ -4686,18 +4969,18 @@ ${divider70}
                         </label>
                         <select
                           value={shortTargetSlot}
-                          onChange={(e) => setShortTargetSlot(Number(e.target.value))}
-                          className="w-full text-xs bg-[#f8fafc] border border-[#e2e8f0] focus:border-[#b8860b] focus:bg-white rounded-xl px-4 py-2.5 text-[#0f172a] font-sans font-bold cursor-pointer"
+                          onChange={(e) => handleTargetSlotChange(Number(e.target.value))}
+                          className="w-full text-xs bg-[#f8fafc] border border-[#e2e8f0] focus:border-[#64748b] focus:bg-white rounded-xl px-4 py-2.5 text-[#0f172a] font-sans font-bold cursor-pointer"
                         >
                           {Array.from({ length: getMaxSlotsForSubTab() }, (_, i) => i + 1).map((num) => {
+                            const occupied = isSlotOccupied(num);
                             const existing = getCurrentShortsList().find((s) => s.slotNumber === num);
-                            const isOccupied = Boolean(existing && existing.videoUrl && existing.title && !existing.title.includes("[Empty Slot"));
                             const truncatedTitle = existing && existing.title ? (existing.title.length > 25 ? `${existing.title.slice(0, 25)}...` : existing.title) : "";
                             return (
                               <option key={num} value={num}>
-                                {isOccupied
-                                  ? `Slot #${num} (Occupied: "${truncatedTitle}" - replaces old video)`
-                                  : `Slot #${num} (Available / Empty)`}
+                                {occupied
+                                  ? `Slot #${num} (Occupied: "${truncatedTitle}" — EDIT ONLY)`
+                                  : `Slot #${num} (Available / Empty — ADD ONLY)`}
                               </option>
                             );
                           })}
@@ -4711,7 +4994,7 @@ ${divider70}
                         <select
                           value={shortStatus}
                           onChange={(e) => setShortStatus(e.target.value as any)}
-                          className="w-full text-xs bg-[#f8fafc] border border-[#e2e8f0] focus:border-[#b8860b] focus:bg-white rounded-xl px-4 py-2.5 text-[#0f172a] font-sans cursor-pointer font-bold"
+                          className="w-full text-xs bg-[#f8fafc] border border-[#e2e8f0] focus:border-[#64748b] focus:bg-white rounded-xl px-4 py-2.5 text-[#0f172a] font-sans cursor-pointer font-bold"
                         >
                           <option value="Active">Active</option>
                           <option value="Inactive">Inactive</option>
@@ -4719,12 +5002,12 @@ ${divider70}
                       </div>
                     </div>
 
-                    {/* Row 4: Yellow Lightbulb Alert Banner (Matching Reference Exactly) */}
-                    <div className="bg-[#fffbeb] border border-[#fef3c7] text-[#92400e] p-3.5 rounded-2xl text-xs font-sans font-medium flex items-start space-x-3 mt-auto">
+                    {/* Row 4: Yellow Lightbulb Alert Banner */}
+                    <div className="bg-[#f8fafc] border border-[#e2e8f0] text-[#475569] p-3.5 rounded-2xl text-xs font-sans font-medium flex items-start space-x-3 mt-auto">
                       <span className="text-base shrink-0 mt-0.5">💡</span>
-                      <div className="text-xs leading-relaxed text-[#78350f]">
-                        <span className="font-bold text-[#92400e]">Strict 1 Video Per Slot: </span>
-                        <span>Each slot (1 to {getMaxSlotsForSubTab()}) holds only 1 video. If you assign a video to an already occupied slot, the previous video will automatically be removed and replaced by the new video.</span>
+                      <div className="text-xs leading-relaxed text-[#475569]">
+                        <span className="font-bold text-[#334155]">Strict Slot Control: </span>
+                        <span>Empty slots can only be filled using &lsquo;ADD TO FEED&rsquo;. Occupied slots can only be updated using &lsquo;EDIT&rsquo;.</span>
                       </div>
                     </div>
                   </div>
@@ -4751,7 +5034,7 @@ ${divider70}
                         ) : (
                           <div className="absolute inset-0 bg-black" />
                         )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent p-3 flex flex-col justify-between text-white">
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/85 to-transparent p-3 flex flex-col justify-between text-white">
                           {/* Top-Left Platform Badge */}
                           <div>
                             <span
@@ -4816,19 +5099,31 @@ ${divider70}
                       </div>
                     </div>
 
-                    {/* Submit Action Button BELOW Live Feed Preview (Matching Reference Exactly) */}
-                    <button
-                      type="submit"
-                      className="w-full bg-[#ea580c] hover:bg-[#c2410c] text-white font-bold py-3.5 px-4 rounded-2xl transition-all cursor-pointer shadow-md flex items-center justify-center space-x-2 text-xs uppercase tracking-wider font-sans mt-4"
-                    >
-                      <span>{editingSlotNumber ? `UPDATE SLOT #${editingSlotNumber}` : "ADD TO FEED"}</span>
-                    </button>
+                    {/* Submit Action Button BELOW Live Feed Preview */}
+                    <div className="w-full space-y-2 mt-4">
+                      <button
+                        type="submit"
+                        className="w-full bg-[#475569] hover:bg-[#334155] text-white font-bold py-3.5 px-4 rounded-2xl transition-all cursor-pointer shadow-md flex items-center justify-center space-x-2 text-xs uppercase tracking-wider font-sans"
+                      >
+                        <span>{editingSlotNumber ? `UPDATE SLOT #${editingSlotNumber}` : `ADD TO FEED (SLOT #${shortTargetSlot})`}</span>
+                      </button>
+
+                      {editingSlotNumber !== null && (
+                        <button
+                          type="button"
+                          onClick={() => resetShortForm()}
+                          className="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-2 px-4 rounded-xl transition-all cursor-pointer text-xs uppercase tracking-wider font-sans"
+                        >
+                          Cancel Edit Mode
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </form>
             </div>
 
-            {/* INNER CARD 2: Current Shorts & Reels Slots (Matching Image 1) */}
+            {/* INNER CARD 2: Current Shorts & Reels Slots */}
             <div className="bg-white rounded-2xl p-6 border border-[#e2e8f0] shadow-2xs space-y-6">
               <div className="flex items-center justify-between border-b border-[#f1f5f9] pb-4">
                 <div>
@@ -4856,7 +5151,7 @@ ${divider70}
                     status: "Inactive" as const,
                   };
 
-                  const isOccupied = Boolean(slotItem.videoUrl && slotItem.title && !slotItem.title.includes("[Empty Slot"));
+                  const isOccupied = isSlotOccupied(slotNum);
 
                   const platformBadgeText =
                     slotItem.platform === "Youtube Video" || slotItem.platform === "YouTube Shorts"
@@ -4881,22 +5176,26 @@ ${divider70}
                     <div
                       key={slotNum}
                       className={`bg-white border ${
-                        editingSlotNumber === slotNum ? "border-[#b8860b] ring-2 ring-[#b8860b]/20" : "border-[#e2e8f0]"
-                      } hover:border-[#b8860b]/60 rounded-2xl p-3.5 transition-all shadow-2xs flex flex-col justify-between group`}
+                        editingSlotNumber === slotNum ? "border-[#64748b] ring-2 ring-[#64748b]/20" : "border-[#e2e8f0]"
+                      } hover:border-[#64748b]/60 rounded-2xl p-3.5 transition-all shadow-2xs flex flex-col justify-between group`}
                     >
                       {/* Top Horizontal Content Split */}
                       <div className="flex items-start space-x-3 mb-3">
                         {/* Left Vertical Thumbnail Box with Top-Left Platform Badge */}
-                        <div className="relative w-20 h-32 rounded-xl overflow-hidden shrink-0 border border-[#e2e8f0] bg-slate-900 shadow-2xs">
-                          <img
-                            src={slotItem.thumbnailUrl}
-                            alt=""
-                            referrerPolicy="no-referrer"
-                            onError={(e) => {
-                              (e.currentTarget as HTMLImageElement).src = "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=600&q=80";
-                            }}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
+                        <div className="relative w-20 h-32 rounded-xl overflow-hidden shrink-0 border border-[#e2e8f0] bg-black shadow-2xs">
+                          {isOccupied && slotItem.thumbnailUrl && !slotItem.thumbnailUrl.includes("data:image/svg") ? (
+                            <img
+                              src={slotItem.thumbnailUrl}
+                              alt=""
+                              referrerPolicy="no-referrer"
+                              onError={(e) => {
+                                (e.currentTarget as HTMLImageElement).style.display = "none";
+                              }}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-black" />
+                          )}
                           {/* Overlaid Platform Badge on Top-Left of Thumbnail */}
                           <span
                             className={`absolute top-1 left-1 text-[8px] font-mono font-black uppercase px-1 py-0.5 rounded-xs shadow-xs tracking-wider z-10 ${
@@ -4937,7 +5236,7 @@ ${divider70}
                               {slotItem.status}
                             </span>
 
-                            <span className="text-xs font-mono font-medium px-2.5 py-0.5 bg-[#fef9c3] text-[#854d0e] border border-[#fef08a] rounded-md shadow-2xs">
+                            <span className="text-xs font-mono font-medium px-2.5 py-0.5 bg-[#f1f5f9] text-[#334155] border border-[#cbd5e1] rounded-md shadow-2xs">
                               slot #{slotNum}
                             </span>
                           </div>
@@ -4961,7 +5260,7 @@ ${divider70}
                                 href={slotItem.videoUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-xs font-bold font-sans text-[#f97316] hover:underline flex items-center space-x-0.5"
+                                className="text-xs font-bold font-sans text-[#475569] hover:text-[#0f172a] hover:underline flex items-center space-x-0.5"
                               >
                                 <span>Watch</span>
                                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -4975,29 +5274,71 @@ ${divider70}
                         </div>
                       </div>
 
-                      {/* Bottom Divider Line & Action Buttons (EDIT & DELETE) */}
-                      <div className="border-t border-[#f1f5f9] pt-3 mt-1 flex items-center justify-end space-x-2.5">
-                        <button
-                          type="button"
-                          onClick={() => handleEditShortSlot(slotItem)}
-                          className="text-xs font-bold font-sans text-[#334155] hover:text-[#0f172a] bg-[#f1f5f9] hover:bg-[#e2e8f0] px-4 py-1.5 rounded-xl transition-colors cursor-pointer flex items-center space-x-1.5 shadow-2xs"
-                        >
-                          <svg className="w-3.5 h-3.5 stroke-current" fill="none" strokeWidth="2" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-                          </svg>
-                          <span>EDIT</span>
-                        </button>
+                      {/* Bottom Divider Line & Action Buttons */}
+                      <div className="border-t border-[#f1f5f9] pt-3 mt-1 flex items-center justify-end space-x-2">
+                        {isOccupied ? (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => handleEditShortSlot(slotItem)}
+                              className="text-xs font-bold font-sans text-[#334155] hover:text-[#0f172a] bg-[#f1f5f9] hover:bg-[#e2e8f0] px-3.5 py-1.5 rounded-xl transition-colors cursor-pointer flex items-center space-x-1 shadow-2xs"
+                            >
+                              <svg className="w-3.5 h-3.5 stroke-current" fill="none" strokeWidth="2" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                              </svg>
+                              <span>EDIT</span>
+                            </button>
 
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteShortSlot(slotNum)}
-                          className="text-xs font-bold font-sans text-[#dc2626] hover:text-[#b91c1c] bg-[#fef2f2] hover:bg-[#fee2e2] px-4 py-1.5 rounded-xl transition-colors cursor-pointer flex items-center space-x-1.5 shadow-2xs"
-                        >
-                          <svg className="w-3.5 h-3.5 stroke-current" fill="none" strokeWidth="2" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                          </svg>
-                          <span>DELETE</span>
-                        </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteShortSlot(slotNum)}
+                              className="text-xs font-bold font-sans text-[#dc2626] hover:text-[#b91c1c] bg-[#fef2f2] hover:bg-[#fee2e2] px-3.5 py-1.5 rounded-xl transition-colors cursor-pointer flex items-center space-x-1 shadow-2xs"
+                            >
+                              <svg className="w-3.5 h-3.5 stroke-current" fill="none" strokeWidth="2" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                              </svg>
+                              <span>DELETE</span>
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditingSlotNumber(null);
+                                setShortTargetSlot(slotNum);
+                                setShortVideoUrl("");
+                                setShortTitle("");
+                                setShortThumbnailUrl("");
+                                setShortDuration("0:45");
+                                setShortAudioUrl("");
+                                window.scrollTo({ top: 0, behavior: "smooth" });
+                              }}
+                              className="text-xs font-bold font-sans text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-3 py-1.5 rounded-xl transition-colors cursor-pointer flex items-center space-x-1 shadow-2xs"
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                              </svg>
+                              <span>ADD FEED</span>
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => {
+                                showPopup(
+                                  `Slot #${slotNum} is currently empty. You cannot edit an empty slot — please use 'ADD FEED' to add content to this slot.`,
+                                  "Cannot Edit Empty Slot"
+                                );
+                              }}
+                              className="text-xs font-bold font-sans text-slate-400 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-xl transition-colors cursor-pointer flex items-center space-x-1"
+                            >
+                              <svg className="w-3.5 h-3.5 stroke-current" fill="none" strokeWidth="2" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                              </svg>
+                              <span>EDIT</span>
+                            </button>
+                          </>
+                        )}
                       </div>
                     </div>
                   );
@@ -5045,7 +5386,7 @@ ${divider70}
             {/* Modal Header */}
             <div className="flex items-center justify-between mb-6 pb-2 border-b border-slate-100">
               <div className="flex items-center space-x-2.5">
-                <svg className="w-5 h-5 text-[#ea580c] stroke-[2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-[#475569] stroke-[2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                 </svg>
                 <h3 className="font-serif text-lg font-bold text-[#111827]">
@@ -5080,7 +5421,7 @@ ${divider70}
                   placeholder="e.g. Richard Hendricks"
                   value={newUserName}
                   onChange={(e) => setNewUserName(e.target.value)}
-                  className="w-full bg-white border border-[#d1d5db] rounded-2xl px-4 py-3 text-xs text-[#111827] outline-none focus:border-[#ea580c] transition-colors"
+                  className="w-full bg-white border border-[#d1d5db] rounded-2xl px-4 py-3 text-xs text-[#111827] outline-none focus:border-[#64748b] transition-colors"
                 />
               </div>
 
@@ -5093,7 +5434,7 @@ ${divider70}
                   placeholder="e.g. richard@washington-times.com"
                   value={newUserEmail}
                   onChange={(e) => setNewUserEmail(e.target.value)}
-                  className="w-full bg-white border border-[#d1d5db] rounded-2xl px-4 py-3 text-xs text-[#111827] outline-none focus:border-[#ea580c] transition-colors"
+                  className="w-full bg-white border border-[#d1d5db] rounded-2xl px-4 py-3 text-xs text-[#111827] outline-none focus:border-[#64748b] transition-colors"
                 />
               </div>
 
@@ -5106,7 +5447,7 @@ ${divider70}
                   placeholder="Create user passcode"
                   value={newUserPassword}
                   onChange={(e) => setNewUserPassword(e.target.value)}
-                  className="w-full bg-white border border-[#d1d5db] rounded-2xl px-4 py-3 text-xs text-[#111827] outline-none focus:border-[#ea580c] transition-colors"
+                  className="w-full bg-white border border-[#d1d5db] rounded-2xl px-4 py-3 text-xs text-[#111827] outline-none focus:border-[#64748b] transition-colors"
                 />
               </div>
 
@@ -5117,7 +5458,7 @@ ${divider70}
                 <select
                   value={newUserRole}
                   onChange={(e) => setNewUserRole(e.target.value as any)}
-                  className="w-full bg-white border border-[#ea580c] rounded-2xl px-4 py-3 text-xs font-semibold text-[#111827] outline-none focus:border-[#ea580c] transition-colors cursor-pointer"
+                  className="w-full bg-white border border-[#d1d5db] rounded-2xl px-4 py-3 text-xs font-semibold text-[#111827] outline-none focus:border-[#64748b] transition-colors cursor-pointer"
                 >
                   {isLoggedInUserDefaultAdmin && <option value="admin">Admin</option>}
                   <option value="writer">Writer</option>
@@ -5137,7 +5478,7 @@ ${divider70}
                 <button
                   type="submit"
                   disabled={isSubmittingUser}
-                  className="w-full bg-[#ea580c] hover:bg-[#c2410c] text-white font-bold text-xs uppercase tracking-wider py-3 rounded-2xl transition-colors cursor-pointer shadow-2xs"
+                  className="w-full bg-[#475569] hover:bg-[#334155] text-white font-bold text-xs uppercase tracking-wider py-3 rounded-2xl transition-colors cursor-pointer shadow-2xs"
                 >
                   {isSubmittingUser ? "CREATING..." : "CREATE USER"}
                 </button>
@@ -5184,7 +5525,7 @@ ${divider70}
                   className="w-14 h-14 rounded-2xl object-cover border border-slate-200 shrink-0 shadow-2xs"
                 />
               ) : (
-                <div className="w-14 h-14 rounded-2xl bg-[#ea580c] text-white flex items-center justify-center font-extrabold text-base shrink-0 shadow-2xs">
+                <div className="w-14 h-14 rounded-2xl bg-[#475569] text-white flex items-center justify-center font-extrabold text-base shrink-0 shadow-2xs">
                   {showViewUserModal.full_name?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "US"}
                 </div>
               )}
@@ -5277,7 +5618,7 @@ ${divider70}
             {/* Modal Header */}
             <div className="flex items-center justify-between mb-6 pb-2 border-b border-slate-100">
               <div className="flex items-center space-x-2.5">
-                <svg className="w-5 h-5 text-[#ea580c]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-[#475569]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
                 </svg>
                 <h3 className="font-serif text-lg font-bold text-[#111827]">
@@ -5311,7 +5652,7 @@ ${divider70}
                   type="text"
                   value={editUserName}
                   onChange={(e) => setEditUserName(e.target.value)}
-                  className="w-full bg-white border border-[#d1d5db] rounded-2xl px-4 py-3 text-xs text-[#111827] outline-none focus:border-[#ea580c] transition-colors"
+                  className="w-full bg-white border border-[#d1d5db] rounded-2xl px-4 py-3 text-xs text-[#111827] outline-none focus:border-[#64748b] transition-colors"
                 />
               </div>
 
@@ -5323,7 +5664,7 @@ ${divider70}
                   type="email"
                   value={editUserEmail}
                   onChange={(e) => setEditUserEmail(e.target.value)}
-                  className="w-full bg-white border border-[#d1d5db] rounded-2xl px-4 py-3 text-xs text-[#111827] outline-none focus:border-[#ea580c] transition-colors"
+                  className="w-full bg-white border border-[#d1d5db] rounded-2xl px-4 py-3 text-xs text-[#111827] outline-none focus:border-[#64748b] transition-colors"
                 />
               </div>
 
@@ -5337,7 +5678,7 @@ ${divider70}
                     placeholder="Create new user passcode"
                     value={editUserPassword}
                     onChange={(e) => setEditUserPassword(e.target.value)}
-                    className="w-full bg-white border border-[#d1d5db] rounded-2xl px-4 py-3 pr-10 text-xs text-[#111827] outline-none focus:border-[#ea580c] transition-colors"
+                    className="w-full bg-white border border-[#d1d5db] rounded-2xl px-4 py-3 pr-10 text-xs text-[#111827] outline-none focus:border-[#64748b] transition-colors"
                   />
                   <button
                     type="button"
@@ -5366,7 +5707,7 @@ ${divider70}
                 <select
                   value={editUserRole}
                   onChange={(e) => setEditUserRole(e.target.value as any)}
-                  className="w-full bg-white border border-[#d1d5db] rounded-2xl px-4 py-3 text-xs font-semibold text-[#111827] outline-none focus:border-[#ea580c] transition-colors cursor-pointer"
+                  className="w-full bg-white border border-[#d1d5db] rounded-2xl px-4 py-3 text-xs font-semibold text-[#111827] outline-none focus:border-[#64748b] transition-colors cursor-pointer"
                 >
                   {(isLoggedInUserDefaultAdmin || showEditUserModal.role?.toLowerCase() === "admin") && (
                     <option value="admin">Admin</option>
@@ -5388,7 +5729,7 @@ ${divider70}
                 <button
                   type="submit"
                   disabled={isSubmittingEditUser}
-                  className="w-full bg-[#ea580c] hover:bg-[#c2410c] text-white font-bold text-xs uppercase tracking-wider py-3 rounded-2xl transition-colors cursor-pointer shadow-2xs"
+                  className="w-full bg-[#475569] hover:bg-[#334155] text-white font-bold text-xs uppercase tracking-wider py-3 rounded-2xl transition-colors cursor-pointer shadow-2xs"
                 >
                   {isSubmittingEditUser ? "SAVING..." : "SAVE CHANGES"}
                 </button>
@@ -5461,7 +5802,7 @@ ${divider70}
               <button
                 type="button"
                 onClick={() => setAdSavedPopup(null)}
-                className="w-full bg-[#b8860b] hover:bg-[#a07409] text-white font-bold text-xs uppercase tracking-wider py-3.5 rounded-2xl transition-colors cursor-pointer shadow-md"
+                className="w-full bg-[#475569] hover:bg-[#334155] text-white font-bold text-xs uppercase tracking-wider py-3.5 rounded-2xl transition-colors cursor-pointer shadow-md"
               >
                 OK
               </button>
@@ -5525,7 +5866,7 @@ ${divider70}
               <button
                 type="button"
                 onClick={() => setAdDimensionMismatchPopup(null)}
-                className="w-full bg-[#b8860b] hover:bg-[#a07409] text-white font-bold text-xs uppercase tracking-wider py-3.5 rounded-2xl transition-colors cursor-pointer shadow-md"
+                className="w-full bg-[#475569] hover:bg-[#334155] text-white font-bold text-xs uppercase tracking-wider py-3.5 rounded-2xl transition-colors cursor-pointer shadow-md"
               >
                 I UNDERSTAND
               </button>
@@ -5541,7 +5882,7 @@ ${divider70}
             {/* Top Pill Badge + Title + Close Button */}
             <div className="flex items-start justify-between pb-3 border-b border-slate-100">
               <div>
-                <span className="bg-orange-50 text-orange-600 border border-orange-200 text-[11px] font-bold px-3 py-1 rounded-full inline-block mb-1.5 font-sans">
+                <span className="bg-[#f1f5f9] text-[#475569] border border-[#cbd5e1] text-[11px] font-bold px-3 py-1 rounded-full inline-block mb-1.5 font-sans">
                   {selectedContactModal.inquiry_type || (selectedContactModal as any).inquiryType || "General / Others"}
                 </span>
                 <h3 className="text-xl font-bold text-[#0f172a] font-sans">
@@ -5587,7 +5928,7 @@ ${divider70}
                 <span className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider block mb-0.5">
                   EMAIL ADDRESS
                 </span>
-                <span className="font-bold text-[#00558c] font-mono text-xs block">
+                <span className="font-bold text-[#334155] font-mono text-xs block">
                   {selectedContactModal.email}
                 </span>
               </div>
@@ -5603,7 +5944,7 @@ ${divider70}
                     handleUpdateContactStatus(selectedContactModal.id, newStatus);
                     setSelectedContactModal({ ...selectedContactModal, status: newStatus });
                   }}
-                  className="bg-white border border-slate-300 rounded-lg px-2.5 py-1 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#00558c] cursor-pointer"
+                  className="bg-white border border-slate-300 rounded-lg px-2.5 py-1 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#64748b] cursor-pointer"
                 >
                   <option value="New">New</option>
                   <option value="In Progress">In Progress</option>
@@ -5670,7 +6011,7 @@ ${divider70}
             {/* Top Pill Badge + Title + Close Button */}
             <div className="flex items-start justify-between pb-3 border-b border-slate-100">
               <div>
-                <span className="bg-sky-50 text-sky-600 border border-sky-200 text-[11px] font-bold px-3 py-1 rounded-full inline-block mb-1.5 font-sans">
+                <span className="bg-[#f1f5f9] text-[#475569] border border-[#cbd5e1] text-[11px] font-bold px-3 py-1 rounded-full inline-block mb-1.5 font-sans">
                   {selectedAdvertiseModal.service_option || (selectedAdvertiseModal as any).serviceOption || "Publish Company Article"}
                 </span>
                 <h3 className="text-xl font-bold text-[#0f172a] font-sans">
@@ -5895,6 +6236,30 @@ ${divider70}
                 {deleteConfirmModal.confirmText || "Delete"}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Platform Validation / General Alert Popup Modal */}
+      {popupModal.isOpen && (
+        <div className="fixed inset-0 z-[999999] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl p-6 sm:p-7 max-w-sm w-full shadow-2xl border border-[#e2e8f0] font-sans text-center space-y-4 relative">
+            <div className="w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto mb-1 shrink-0">
+              <svg className="w-6 h-6 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-[#0f172a]">{popupModal.title}</h3>
+              <p className="text-xs text-[#64748b] mt-1.5 leading-relaxed">{popupModal.message}</p>
+            </div>
+            <button
+              type="button"
+              onClick={closePopup}
+              className="w-full bg-[#475569] hover:bg-[#334155] text-white font-bold py-2.5 px-4 rounded-xl transition-all cursor-pointer text-xs uppercase tracking-wider font-sans shadow-xs mt-2"
+            >
+              Understood
+            </button>
           </div>
         </div>
       )}

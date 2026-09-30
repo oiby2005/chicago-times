@@ -234,17 +234,10 @@ export const SpecialOfferPage: React.FC = () => {
           We&apos;ll let you know in advance of any price changes. Learn more
           about our{" "}
           <a
-            href="#"
+            href="/terms-and-conditions"
             className="text-[#007cba] font-semibold hover:underline"
           >
-            cancellation
-          </a>{" "}
-          and{" "}
-          <a
-            href="#"
-            className="text-[#007cba] font-semibold hover:underline"
-          >
-            renewal policies
+            cancellation and renewal policies
           </a>
           .
         </div>

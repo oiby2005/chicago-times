@@ -30,15 +30,6 @@ export const SpecialOfferPopover: React.FC<SpecialOfferPopoverProps> = ({
       {isOpen && (
         <div className="absolute top-full right-0 pt-2 z-[100] animate-in fade-in duration-150">
           <div className="w-[320px] bg-white border border-[#e2e2e2] shadow-xl rounded-sm p-6 text-center select-none">
-            {/* WSJ Logo Header */}
-            <div className="mb-3">
-              <img
-                src="/images/design-reference/Times Chicago.svg"
-                alt="Times Chicago"
-                className="h-5 sm:h-6 w-auto mx-auto object-contain"
-              />
-            </div>
-
             {/* Price Headline */}
             <h3 className="font-serif font-bold text-[26px] text-black tracking-tight leading-none mb-2">
               $3 USD/Month

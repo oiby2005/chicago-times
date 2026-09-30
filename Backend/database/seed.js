@@ -55,6 +55,7 @@ async function seedDatabase() {
         thumbnail LONGTEXT DEFAULT NULL,
         photoCaption TEXT DEFAULT NULL,
         tags JSON DEFAULT NULL,
+        imageSeoKeywords JSON DEFAULT NULL,
         readDuration VARCHAR(50) DEFAULT NULL,
         views INT DEFAULT 0,
         publishedAt BIGINT DEFAULT 0,

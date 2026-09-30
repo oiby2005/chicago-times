@@ -39,4 +39,37 @@ export function getRelativeTime(publishedAt?: number | string | null, dateFallba
   }
 }
 
+export function getFormattedDateTime(publishedAt?: number | string | null, dateFallback?: string): string {
+  let timeMs: number = 0;
+
+  if (typeof publishedAt === "number" && publishedAt > 0) {
+    timeMs = publishedAt;
+  } else if (typeof publishedAt === "string" && !isNaN(Number(publishedAt)) && Number(publishedAt) > 0) {
+    timeMs = Number(publishedAt);
+  } else if (dateFallback) {
+    const parsed = Date.parse(dateFallback);
+    if (!isNaN(parsed)) {
+      timeMs = parsed;
+    }
+  }
+
+  if (!timeMs) return dateFallback || "August 08, 2026 at 10:00 AM";
+
+  const dateObj = new Date(timeMs);
+  if (isNaN(dateObj.getTime())) return dateFallback || "August 08, 2026 at 10:00 AM";
+
+  const dateStr = dateObj.toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+  const timeStr = dateObj.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+
+  return `${dateStr} at ${timeStr}`;
+}
+
 export default getRelativeTime;

@@ -401,15 +401,18 @@ export default function WriterDashboard() {
         {/* ================================================================= */}
         {/* TOP NAVBAR                                                        */}
         {/* ================================================================= */}
-        <header className="bg-white border-t border-t-[#262626] border-b border-b-[#e2e8f0] h-auto min-h-[56px] sm:min-h-[64px] lg:min-h-[2.5cm] px-3 sm:px-6 md:px-8 lg:px-[3.8cm] py-2.5 sm:py-3 flex items-center justify-between sticky top-0 z-30 shadow-2xs">
-          {/* Left Navigation: Back Arrow, Website Logo, WRITER PORTAL Pill */}
-          <div className="flex items-center space-x-1 sm:space-x-2.5 min-w-0">
+        {/* ================================================================= */}
+        {/* TOP NAVBAR (Matching homepage white palette & category styles)   */}
+        {/* ================================================================= */}
+        <header className="bg-white border-b border-[#e2e8f0] h-auto min-h-[82px] px-3 sm:px-6 md:px-8 lg:px-[3.8cm] pt-4 pb-0 flex items-end justify-between sticky top-0 z-30 shadow-2xs">
+          {/* Left Navigation: Back Arrow, Website Logo, WRITER PORTAL Badge */}
+          <div className="flex items-center space-x-2.5 sm:space-x-4 shrink-0 pb-3">
             <button
               onClick={() => router.push("/")}
-              className="p-0.5 sm:p-1 text-gray-400 hover:text-black transition-colors cursor-pointer flex items-center justify-center shrink-0"
+              className="p-1 text-black hover:opacity-70 transition-opacity cursor-pointer flex items-center justify-center shrink-0"
               title="Go to Homepage"
             >
-              <svg className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
               </svg>
             </button>
@@ -419,36 +422,69 @@ export default function WriterDashboard() {
               <img
                 src="/images/design-reference/Times Chicago.svg"
                 alt="Times Chicago"
-                className="h-3 sm:h-4.5 max-w-[95px] xs:max-w-[140px] sm:max-w-none w-auto object-contain block"
+                className="h-7 sm:h-9 md:h-10 w-auto object-contain block"
               />
             </Link>
 
-            {/* WRITER PORTAL Pill Badge with Spacing on BOTH sides */}
-            <span className="bg-[#eff6ff] text-[#2563eb] text-[8px] xs:text-[9.5px] sm:text-[10.5px] font-mono font-bold px-1.5 xs:px-2 sm:px-2.5 mx-1 xs:mx-2 sm:mx-3 h-3.5 xs:h-4 sm:h-4.5 inline-flex items-center justify-center rounded-[4px] uppercase tracking-wider select-none leading-none shrink-0 self-center">
+            <span className="hidden sm:inline-flex bg-[#eff6ff] text-[#2563eb] text-[9.5px] sm:text-[10.5px] font-mono font-bold px-2 py-0.5 rounded uppercase tracking-wider select-none shrink-0">
               WRITER PORTAL
             </span>
           </div>
 
+          {/* Middle Section Navigation Tabs: Published, Drafts, Pending review, Rejected, Trash */}
+          <div className="flex items-end space-x-1 sm:space-x-4 overflow-x-auto no-scrollbar mx-2 sm:mx-4">
+            {(["Published", "Drafts", "Pending review", "Rejected", "Trash"] as const).map((tab) => {
+              const isActive = activeTab === tab;
+              const count = getTabCount(tab);
+              return (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  style={{ fontFamily: "'Century Gothic', 'Publica Sans Light', 'Kumbh Sans', sans-serif" }}
+                  className={`text-[13px] transition-colors relative cursor-pointer flex items-center space-x-1.5 whitespace-nowrap py-2.5 px-1.5 sm:px-2.5 ${
+                    isActive
+                      ? "font-bold text-[#94a3b8]"
+                      : "font-normal text-[#111111] hover:text-[#94a3b8]"
+                  }`}
+                >
+                  <span>{tab}</span>
+                  {count > 0 && (
+                    <span
+                      className={`text-[11px] sm:text-xs font-bold ${
+                        isActive ? "text-[#94a3b8]" : "text-[#111111]"
+                      }`}
+                    >
+                      {count}
+                    </span>
+                  )}
+                  {isActive && (
+                    <div className="absolute -bottom-[1px] left-0 right-0 h-[2.5px] bg-[#94a3b8]" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
           {/* Right User Badge */}
-          <div className="relative shrink-0 ml-1 sm:ml-2" ref={dropdownRef}>
+          <div className="relative shrink-0 pb-3" ref={dropdownRef}>
             <button
               onClick={() => setShowDropdown(!showDropdown)}
-              className="flex items-center space-x-1 sm:space-x-2 bg-white hover:bg-gray-50 border border-[#cbd5e1] rounded-xl p-0.5 pr-1.5 xs:pr-2 sm:pr-2.5 transition-all cursor-pointer shadow-2xs"
+              className="flex items-center space-x-2 bg-white hover:bg-gray-50 border border-[#cbd5e1] rounded-xl px-2.5 py-1.5 transition-all cursor-pointer shadow-2xs"
             >
               {currentUser?.avatar_url ? (
                 <img
                   src={currentUser.avatar_url}
                   alt={displayName}
-                  className="w-5.5 h-5.5 sm:w-7 sm:h-7 rounded-lg object-cover shadow-2xs shrink-0"
+                  className="w-7 h-7 rounded-lg object-cover shadow-2xs shrink-0"
                 />
               ) : (
-                <div className="w-5.5 h-5.5 sm:w-7 sm:h-7 bg-[#ea580c] text-white rounded-lg flex items-center justify-center font-bold text-[10px] sm:text-xs font-sans shadow-2xs shrink-0">
+                <div className="w-7 h-7 bg-[#ea580c] text-white rounded-lg flex items-center justify-center font-bold text-xs font-sans shadow-2xs shrink-0">
                   {avatarLetter}
                 </div>
               )}
-              <span className="font-bold text-[11px] sm:text-xs text-[#0f172a] tracking-tight truncate max-w-[65px] xs:max-w-[110px] sm:max-w-none">{displayName}</span>
+              <span className="font-bold text-[13px] text-[#0f172a] tracking-tight truncate max-w-[120px] sm:max-w-none">{displayName}</span>
               <svg
-                className={`w-3 h-3 text-gray-500 transition-transform ${showDropdown ? "rotate-180" : ""}`}
+                className={`w-3.5 h-3.5 text-gray-500 transition-transform ${showDropdown ? "rotate-180" : ""}`}
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
@@ -514,71 +550,19 @@ export default function WriterDashboard() {
         {/* ================================================================= */}
         {/* MAIN WRITER DASHBOARD BODY                                        */}
         {/* ================================================================= */}
-        <main className="w-full px-3 sm:px-6 md:px-8 lg:px-[3.8cm] py-4 sm:py-6 md:py-8 flex-1">
-          {/* Header Row: Title & Create New Post Button */}
+        <main className="w-full px-3 sm:px-6 md:px-8 lg:px-[3.8cm] mt-6 sm:mt-10 pt-4 sm:pt-6 pb-8 flex-1">
+          {/* Sub-Header Row: Exchanged Search Bar (Left) and Create New Post (Right) */}
           <div className="flex flex-wrap items-center justify-between gap-3 mb-4 sm:mb-5">
             <h1
-              className="text-xl sm:text-2xl lg:text-[26px] font-black text-[#0f172a] tracking-tight leading-none select-none"
+              className="text-xl sm:text-2xl font-black text-[#0f172a] tracking-tight leading-none select-none"
               style={{ fontFamily: '"SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', fontWeight: 900, letterSpacing: '-0.03em' }}
             >
-              Posts
+              {activeTab} Posts
             </h1>
-            <button
-              onClick={() => router.push("/writer-dashboard/create-post")}
-              className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-bold text-xs sm:text-[13px] px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full flex items-center space-x-1.5 transition-all shadow-sm hover:shadow-md cursor-pointer shrink-0"
-              style={{ fontFamily: '"SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}
-            >
-              <span className="text-sm font-bold">+</span>
-              <span>Create New Post</span>
-            </button>
-          </div>
 
-          {/* Section Navigation Tabs (Horizontally Scrollable) */}
-          <div className="border-b border-[#e2e8f0] flex items-center justify-between mb-4 sm:mb-5 relative w-full overflow-x-auto no-scrollbar pb-1">
-            <div className="flex items-center space-x-4 sm:space-x-7 min-w-max pb-2">
-              {(["Published", "Drafts", "Pending review", "Rejected", "Trash"] as const).map((tab) => {
-                const isActive = activeTab === tab;
-                const count = getTabCount(tab);
-                return (
-                  <button
-                    key={tab}
-                    onClick={() => setActiveTab(tab)}
-                    style={{ fontFamily: 'Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}
-                    className={`text-xs sm:text-[13px] transition-all relative cursor-pointer flex items-center space-x-1.5 whitespace-nowrap ${
-                      isActive
-                        ? "font-bold text-[#2563eb]"
-                        : "font-medium text-[#475569] hover:text-[#0f172a]"
-                    }`}
-                  >
-                    <span>{tab}</span>
-                    {count > 0 && (
-                      <span
-                        className="w-5 h-5 rounded-full text-[11px] font-bold flex items-center justify-center bg-[#e0edff] text-[#2563eb] ml-1"
-                      >
-                        {count}
-                      </span>
-                    )}
-                    {isActive && (
-                      <div className="absolute -bottom-2 left-0 right-0 h-[2px] bg-[#2563eb] rounded-t-full" />
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Sort Selector Icon */}
-            <div className="pb-2 pl-2 text-[#94a3b8] hover:text-[#475569] cursor-pointer transition-colors flex items-center shrink-0">
-              <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
-                <path d="M12 4l-5 6h10l-5-6zM12 20l5-6H7l5 6z" />
-              </svg>
-            </div>
-          </div>
-
-          {/* Main Card Container */}
-          <div className="bg-white border border-[#e2e8f0] rounded-2xl shadow-2xs py-4 sm:py-5 min-h-[400px] flex flex-col relative overflow-hidden">
-            {/* Top Right Search Input Box */}
-            <div className="flex justify-end px-3 sm:px-7 mb-4">
-              <div className="flex items-center space-x-2 bg-[#f8fafc] border border-[#e2e8f0] rounded-full px-3 py-1 w-full xs:w-52 sm:w-56 text-xs text-gray-700 focus-within:border-[#2563eb] focus-within:bg-white transition-all">
+            <div className="flex items-center space-x-3 shrink-0 ml-auto">
+              {/* 1. Search Bar (Now first / left position) */}
+              <div className="flex items-center space-x-2 bg-[#f8fafc] border border-[#e2e8f0] rounded-full px-3.5 py-2 w-48 sm:w-60 text-xs text-gray-700 focus-within:border-[#2563eb] focus-within:bg-white transition-all shadow-2xs">
                 <svg className="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
@@ -587,10 +571,23 @@ export default function WriterDashboard() {
                   placeholder="Search..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="bg-transparent border-none outline-none w-full text-[11px] text-gray-700 placeholder-gray-400 font-sans"
+                  className="bg-transparent border-none outline-none w-full text-xs text-gray-700 placeholder-gray-400 font-sans"
                 />
               </div>
+
+              {/* 2. Create New Post Button (Now second / right position) */}
+              <button
+                onClick={() => router.push("/writer-dashboard/create-post")}
+                className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-bold text-xs sm:text-[13px] px-4 py-2 rounded-full flex items-center space-x-1.5 transition-all shadow-sm hover:shadow-md cursor-pointer shrink-0"
+              >
+                <span className="text-sm font-bold">+</span>
+                <span>Create New Post</span>
+              </button>
             </div>
+          </div>
+
+          {/* Main Card Container */}
+          <div className="bg-white border border-[#e2e8f0] rounded-2xl shadow-2xs py-4 sm:py-5 min-h-[400px] flex flex-col relative overflow-hidden">
 
             {/* Posts Table (Non-Scrollable) */}
             {filteredPosts.length > 0 ? (
@@ -792,6 +789,7 @@ export default function WriterDashboard() {
                     <option value="Tech">Tech</option>
                     <option value="Opinion">Opinion</option>
                     <option value="Arts">Arts</option>
+                    <option value="Interviews">Interviews</option>
                   </select>
                 </div>
                 <div>

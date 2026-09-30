@@ -51,7 +51,7 @@ export default function MostReadSidebar() {
         >
           <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
         </svg>
-        <h3 className="font-serif font-bold text-xs uppercase tracking-wider text-[#111111]">
+        <h3 className="font-poppins font-sans font-bold text-xs uppercase tracking-wider text-[#111111]">
           MOST READ
         </h3>
       </div>

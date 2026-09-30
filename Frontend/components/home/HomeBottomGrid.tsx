@@ -51,9 +51,7 @@ export const HomeBottomGrid: React.FC = () => {
                 <p className="text-[12.5px] font-sans text-[#444444] leading-relaxed">
                   {art["oil-analysts-stumped-missing-barrels"].summary}
                 </p>
-                <div className="text-[11px] text-[#666666]">
-                  💬 {art["oil-analysts-stumped-missing-barrels"].commentCount}
-                </div>
+
               </div>
 
               <hr className="border-t border-[#e2e2e2] my-3" />
@@ -94,9 +92,7 @@ export const HomeBottomGrid: React.FC = () => {
                 <p className="text-[12px] font-sans text-[#444444] leading-relaxed">
                   {art["washington-dc-billionaire-boomtown"].summary}
                 </p>
-                <div className="text-[11px] text-[#666666]">
-                  💬 {art["washington-dc-billionaire-boomtown"].commentCount}
-                </div>
+
               </div>
 
               <hr className="border-t border-[#e2e2e2]" />

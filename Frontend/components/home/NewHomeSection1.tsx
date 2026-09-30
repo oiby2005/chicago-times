@@ -40,48 +40,27 @@ export default function NewHomeSection1() {
 
   return (
     <section className="w-full bg-white text-[#111111] pt-0 pb-6 select-none">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-0 mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 mb-6 items-stretch border-b border-dashed border-[#888070] pb-4">
         
-        {/* ==================== LEFT & CENTER COMBINED (9 of 12 cols ~ 75%) ==================== */}
-        <div className="col-span-12 lg:col-span-9">
-          {/* Row 1 (Left & Center): TOP NEWS | A+ MAIN NEWS */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-9 gap-0 pb-4 mb-4 border-b border-dashed border-[#888070]">
-            {/* Column 1 (Left): TOP NEWS SECTION (3 of 9 cols ~ 33%) */}
-            <div className="md:col-span-1 lg:col-span-3 pr-0 md:pr-[0.3cm] flex flex-col justify-between border-r border-dashed border-[#888070]">
-              <TopNewsSection />
-            </div>
-
-            {/* Column 2 (Center): A+ MAIN NEWS SECTION (6 of 9 cols ~ 67%) */}
-            <div className="md:col-span-1 lg:col-span-6 px-0 md:px-[0.3cm] py-6 lg:py-0 flex flex-col justify-between border-r border-dashed border-[#888070]">
-              <APlusMainNewsSection />
-            </div>
-          </div>
-
-          {/* Row 2 (Left & Center): IN DEPTH PANEL | MAIN BOTTOM PANEL */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-9 gap-0 pb-4 border-b border-dashed border-[#888070]">
-            {/* Column 1 (Left): IN DEPTH PANEL SECTION (3 of 9 cols ~ 33%) */}
-            <div className="md:col-span-1 lg:col-span-3 pr-0 md:pr-[0.3cm] flex flex-col justify-between border-r border-dashed border-[#888070]">
-              <InDepthPanelSection />
-            </div>
-
-            {/* Column 2 (Center): MAIN BOTTOM PANEL SECTION (6 of 9 cols ~ 67%) */}
-            <div className="md:col-span-1 lg:col-span-6 px-0 md:px-[0.3cm] py-6 lg:py-0 flex flex-col justify-between border-r border-dashed border-[#888070]">
-              <MainBottomPanelSection />
-            </div>
-          </div>
+        {/* Column 1 (Left 3 of 12 cols ~ 25%): TOP NEWS -> IN DEPTH PANEL */}
+        <div className="col-span-12 lg:col-span-3 pr-0 lg:pr-[0.3cm] flex flex-col justify-between border-r border-dashed border-[#888070]">
+          <TopNewsSection />
+          <div className="my-4 border-b border-dashed border-[#888070] mx-1" />
+          <InDepthPanelSection />
         </div>
 
-        {/* ==================== RIGHT COLUMN (3 of 12 cols ~ 25%): OPINION -> DIVIDER -> RIGHT MAIN PANEL ==================== */}
-        <div className="col-span-12 lg:col-span-3 pl-0 md:pl-[0.3cm] pt-6 lg:pt-0 flex flex-col justify-between">
-          {/* Opinion Section */}
-          <div className="pb-3 border-b border-dashed border-[#888070]">
-            <OpinionSection />
-          </div>
+        {/* Column 2 (Center 6 of 12 cols ~ 50%): A+ MAIN NEWS -> MAIN BOTTOM PANEL */}
+        <div className="col-span-12 lg:col-span-6 px-0 lg:px-[0.3cm] py-6 lg:py-0 flex flex-col justify-between border-r border-dashed border-[#888070]">
+          <APlusMainNewsSection />
+          <div className="my-4 border-b border-dashed border-[#888070] mx-1" />
+          <MainBottomPanelSection />
+        </div>
 
-          {/* Right Main Panel Section */}
-          <div className="pt-3 pb-4 border-b border-dashed border-[#888070]">
-            <RightMainPanelSection />
-          </div>
+        {/* Column 3 (Right 3 of 12 cols ~ 25%): OPINION -> RIGHT MAIN PANEL */}
+        <div className="col-span-12 lg:col-span-3 pl-0 lg:pl-[0.3cm] pt-6 lg:pt-0 flex flex-col justify-between h-full">
+          <OpinionSection />
+          <div className="my-4 border-b border-dashed border-[#888070] mx-1" />
+          <RightMainPanelSection />
         </div>
 
       </div>
@@ -135,38 +114,32 @@ export default function NewHomeSection1() {
         </div>
       </div>
 
-      {/* ==================== ROW 8 (MIDDLE REGION): PEOPLE TO KNOW BOTTOM & POLITICS (LEFT 9 COLS) | MOST POPULAR NEWS (RIGHT 3 COLS ~ 25%) ==================== */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 pt-0 items-start">
-        {/* Left 9 Cols: People to Know Bottom -> Politics Category Section */}
-        <div className="col-span-12 lg:col-span-9 pr-0 lg:pr-[0.4cm]">
+      {/* ==================== ROW 8 & 9 (MIDDLE & TECH REGION): POLITICS & TECH (LEFT 9 COLS) | MOST POPULAR, RECOMMENDED VIDEOS & AD 05 (RIGHT 3 COLS ~ 25%) ==================== */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 pt-0 items-stretch relative">
+        {/* Left 9 Cols: People to Know Bottom -> Politics Category Section -> Sticky Tech Category Section */}
+        <div className="col-span-12 lg:col-span-9 pr-0 lg:pr-[0.4cm] border-r border-dashed border-[#CCCCCC] relative">
           <PeopleToKnowBottom />
 
           <div className="pt-2">
             <PoliticsCategorySection />
           </div>
-        </div>
 
-        {/* Right 3 Cols: Most Popular News Section */}
-        <div className="col-span-12 lg:col-span-3 pl-0 lg:pl-[0.4cm]">
-          <MostPopularNewsSection />
-        </div>
-      </div>
-
-      {/* ==================== ROW 9 (TECH & RECOMMENDED VIDEOS REGION): TECH (LEFT 9 COLS) | RECOMMENDED VIDEOS & AD 05 (RIGHT 3 COLS ~ 25%) WITH SOLID VERTICAL DIVIDER ==================== */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 pt-2 items-stretch relative">
-        {/* Left 9 Cols: Tech Category Section (with solid non-dashed right border line, sticky until bottom of Ad 05) */}
-        <div className="col-span-12 lg:col-span-9 pr-0 lg:pr-[0.4cm] border-r border-solid border-[#CCCCCC] relative">
-          <div className="sticky top-6 z-10 self-start w-full">
+          <div className="sticky top-[105px] z-10 self-start w-full pt-2">
             <TechCategorySection />
           </div>
         </div>
 
-        {/* Right 3 Cols: Recommended Videos Section -> Ad 05 Section */}
+        {/* Right 3 Cols: Most Popular News Section -> Recommended Videos Section -> Ad 05 Section */}
         <div className="col-span-12 lg:col-span-3 pl-0 lg:pl-[0.4cm] flex flex-col justify-between">
-          <RecommendedVideosSection />
+          <div>
+            <MostPopularNewsSection />
+            <div className="pt-4">
+              <RecommendedVideosSection />
+            </div>
+          </div>
 
           {/* Ad 05 Section placed in right sidebar below Recommended Videos Section */}
-          <div className="mt-auto pt-6 lg:pt-[3cm]">
+          <div className="mt-auto pt-6">
             <Ad5Section />
           </div>
         </div>

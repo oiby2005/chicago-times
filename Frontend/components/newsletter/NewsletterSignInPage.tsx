@@ -342,13 +342,13 @@ export const NewsletterSignInPage: React.FC = () => {
               </p>
               <p>
                 Your newsletter subscriptions with us are subject to Times Chicago&apos;s{" "}
-                <a href="#" className="text-[#111111] font-semibold underline hover:text-[#555555]">
+                <Link href="/terms-and-conditions" className="text-[#111111] font-semibold underline hover:text-[#555555]">
                   Terms and Conditions
-                </a>{" "}
+                </Link>{" "}
                 and{" "}
-                <a href="#" className="text-[#111111] font-semibold underline hover:text-[#555555]">
+                <Link href="/privacy-policy" className="text-[#111111] font-semibold underline hover:text-[#555555]">
                   Privacy Policy
-                </a>
+                </Link>
                 .
               </p>
             </div>
@@ -361,6 +361,7 @@ export const NewsletterSignInPage: React.FC = () => {
             type="button"
             onClick={handleSelectAllGlobal}
             className="bg-[#111111] hover:bg-[#333333] text-white font-sans font-bold text-xs uppercase tracking-wider py-2.5 px-8 rounded-xl transition-all shadow-2xs cursor-pointer"
+            suppressHydrationWarning
           >
             {isAllSelected ? "DESELECT ALL NEWSLETTERS" : "SELECT ALL NEWSLETTERS"}
           </button>
@@ -415,6 +416,7 @@ export const NewsletterSignInPage: React.FC = () => {
                             : "bg-[#f8f8f8] text-[#666666] border-[#cccccc] hover:bg-[#efefef]"
                         }`}
                         title="Click to toggle all subcategories in this card"
+                        suppressHydrationWarning
                       >
                         <input
                           type="checkbox"
@@ -449,6 +451,7 @@ export const NewsletterSignInPage: React.FC = () => {
                                   checked={isSubChecked}
                                   onChange={() => handleToggleSubcategory(sub)}
                                   className="w-3.5 h-3.5 accent-[#334155] rounded border-gray-400 focus:ring-0 cursor-pointer"
+                                  suppressHydrationWarning
                                 />
                                 <span>{sub}</span>
                               </div>
@@ -507,6 +510,7 @@ export const NewsletterSignInPage: React.FC = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full pl-10 pr-3.5 py-3 border border-[#cccccc] focus:border-[#111111] text-xs sm:text-sm font-sans text-[#111111] placeholder-gray-400 outline-none transition-colors bg-white rounded-none"
+                  suppressHydrationWarning
                 />
               </div>
 
@@ -514,6 +518,7 @@ export const NewsletterSignInPage: React.FC = () => {
               <button
                 type="submit"
                 className="w-full sm:w-auto bg-[#111111] hover:bg-[#333333] text-white font-sans font-bold text-xs uppercase tracking-wider py-3.5 px-8 transition-colors whitespace-nowrap cursor-pointer rounded-none"
+                suppressHydrationWarning
               >
                 SIGN UP NOW
               </button>
@@ -522,13 +527,13 @@ export const NewsletterSignInPage: React.FC = () => {
             {/* Bottom Disclaimer matching Image 2 */}
             <p className="font-sans text-[11.5px] text-[#777777] text-center max-w-[560px] mx-auto select-none">
               You can unsubscribe at any time. By signing up you are agreeing to our{" "}
-              <a href="#" className="text-[#111111] font-semibold underline hover:text-[#555555]">
+              <Link href="/terms-and-conditions" className="text-[#111111] font-semibold underline hover:text-[#555555]">
                 Terms of Service
-              </a>{" "}
+              </Link>{" "}
               and{" "}
-              <a href="#" className="text-[#111111] font-semibold underline hover:text-[#555555]">
+              <Link href="/privacy-policy" className="text-[#111111] font-semibold underline hover:text-[#555555]">
                 Privacy Policy
-              </a>
+              </Link>
               .
             </p>
           </form>

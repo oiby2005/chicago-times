@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getAuthorForArticle } from "@/data/authors";
 import { ALL_69_SUBCATEGORIES } from "@/data/subCategories";
+import ImageSeoKeywordsInput from "@/components/article/ImageSeoKeywordsInput";
+import TargetedEmailDistribution from "@/components/article/TargetedEmailDistribution";
 
 const ALL_MAIN_CATEGORIES = [
   "News", "U.S. News", "International News",
@@ -182,6 +184,9 @@ export default function AdminReviewPostPage() {
     );
   }, [availableSubCategories, subCatSearch]);
   const [tags, setTags] = useState<string[]>([]);
+  const [imageSeoKeywords, setImageSeoKeywords] = useState<string[]>([]);
+  const [targetedEmails, setTargetedEmails] = useState<string[]>([]);
+  const [broadcastToSubscribers, setBroadcastToSubscribers] = useState<boolean>(true);
   const [tagInput, setTagInput] = useState("");
   const [readDuration, setReadDuration] = useState("5 min read");
   const [isExclusive, setIsExclusive] = useState(true);
@@ -256,76 +261,107 @@ export default function AdminReviewPostPage() {
         } catch (e) {}
       }
 
-      const params = new URLSearchParams(window.location.search);
-      const postId = params.get("id");
-      if (postId) {
-        setReviewPostId(postId);
+      const loadPostData = async () => {
+        const params = new URLSearchParams(window.location.search);
+        const postId = params.get("id");
+        if (postId) {
+          setReviewPostId(postId);
 
-        let found: any = null;
-        try {
-          const storedPosts = localStorage.getItem("wsj_posts");
-          if (storedPosts) {
-            const posts = JSON.parse(storedPosts);
-            found = posts.find((p: any) => p.id === postId);
-          }
-        } catch (e) {}
-
-        if (!found && DEFAULT_PENDING_ARTICLES[postId]) {
-          found = DEFAULT_PENDING_ARTICLES[postId];
-        }
-
-        if (found) {
-          const titleVal = found.title || "";
-          const subheadlineVal = found.subheadline || found.excerpt || "";
-          const categoryVal = found.category || "Business";
-          const bodyVal = found.bodyContent || (subheadlineVal ? `<p>${subheadlineVal}</p>` : "");
-
-          if (titleVal) setHeadline(titleVal);
-          if (subheadlineVal) setSubheadline(subheadlineVal);
-          if (categoryVal) setMainCategory(categoryVal);
-
-          const loadedContent = bodyVal;
-          if (loadedContent) {
-            const sanitizedContent = loadedContent.replace(
-              /src="blob:[^"]*"/g,
-              'src="https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?fm=webp&fit=crop&w=800&q=80"'
-            );
-            setBodyContent(sanitizedContent);
-            if (editorRef.current) {
-              editorRef.current.innerHTML = sanitizedContent;
+          let found: any = null;
+          try {
+            const storedPosts = localStorage.getItem("wsj_posts");
+            if (storedPosts) {
+              const posts = JSON.parse(storedPosts);
+              found = posts.find((p: any) => String(p.id) === String(postId));
             }
+          } catch (e) {}
+
+          if (!found) {
+            try {
+              const res = await fetch("http://localhost:5000/api/posts");
+              if (res.ok) {
+                const data = await res.json();
+                const postsArray = Array.isArray(data) ? data : (data && data.posts && Array.isArray(data.posts) ? data.posts : []);
+                found = postsArray.find((p: any) => String(p.id) === String(postId));
+              }
+            } catch (e) {}
           }
 
-          if (found.author) setArticleAuthor(found.author);
-          if (found.authorEmail) setArticleAuthorEmail(found.authorEmail);
-          if (found.homepagePlacement) setHomepagePlacement(found.homepagePlacement);
-          setReadDuration(found.readDuration || found.readTime || "5 min read");
-          setIsExclusive(found.isExclusive !== undefined ? found.isExclusive : true);
-
-          if (found.subCategories && Array.isArray(found.subCategories)) {
-            const validSubs = found.subCategories.filter((s: string) => ALL_69_SUBCATEGORIES.includes(s));
-            setSelectedSubCategories(validSubs.slice(0, 5));
-          } else {
-            setSelectedSubCategories([]);
+          if (!found && DEFAULT_PENDING_ARTICLES[postId]) {
+            found = DEFAULT_PENDING_ARTICLES[postId];
           }
 
-          if (found.tags && Array.isArray(found.tags)) {
-            setTags(found.tags);
-          } else {
-            setTags([]);
+          if (found) {
+            const titleVal = found.title || "";
+            const subheadlineVal = found.subheadline || found.excerpt || "";
+            const categoryVal = found.category || "Business";
+            const bodyVal = found.bodyContent || (subheadlineVal ? `<p>${subheadlineVal}</p>` : "");
+
+            if (titleVal) setHeadline(titleVal);
+            if (subheadlineVal) setSubheadline(subheadlineVal);
+            if (categoryVal) setMainCategory(categoryVal);
+
+            const loadedContent = bodyVal;
+            if (loadedContent) {
+              const sanitizedContent = loadedContent.replace(
+                /src="blob:[^"]*"/g,
+                'src="https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?fm=webp&fit=crop&w=800&q=80"'
+              );
+              setBodyContent(sanitizedContent);
+              if (editorRef.current) {
+                editorRef.current.innerHTML = sanitizedContent;
+              }
+            }
+
+            if (found.author) setArticleAuthor(found.author);
+            if (found.authorEmail) setArticleAuthorEmail(found.authorEmail);
+            if (found.homepagePlacement) setHomepagePlacement(found.homepagePlacement);
+            setReadDuration(found.readDuration || found.readTime || "5 min read");
+            setIsExclusive(found.isExclusive !== undefined ? found.isExclusive : true);
+
+            if (found.subCategories && Array.isArray(found.subCategories)) {
+              const validSubs = found.subCategories.filter((s: string) => ALL_69_SUBCATEGORIES.includes(s));
+              setSelectedSubCategories(validSubs.slice(0, 5));
+            } else {
+              setSelectedSubCategories([]);
+            }
+
+            if (found.tags && Array.isArray(found.tags)) {
+              setTags(found.tags);
+            } else {
+              setTags([]);
+            }
+
+            if (found.imageSeoKeywords && Array.isArray(found.imageSeoKeywords)) {
+              setImageSeoKeywords(found.imageSeoKeywords);
+            } else {
+              setImageSeoKeywords([]);
+            }
+
+            if (found.targetedEmails && Array.isArray(found.targetedEmails)) {
+              setTargetedEmails(found.targetedEmails);
+            } else {
+              setTargetedEmails([]);
+            }
+            if (found.broadcastToSubscribers !== undefined && found.broadcastToSubscribers !== null) {
+              const bVal = found.broadcastToSubscribers;
+              setBroadcastToSubscribers(bVal !== 0 && bVal !== "0" && bVal !== false && bVal !== "false");
+            }
+
+            const plainText = bodyVal.replace(/<[^>]+>/g, " ").trim();
+            const summaryFallback = found.cardSummary || subheadlineVal || (plainText ? plainText.slice(0, 140) + "..." : "");
+            const descFallback = found.seoDescription || subheadlineVal || (plainText ? plainText.slice(0, 150) + "..." : "");
+            const keywordFallback = found.focusKeyword || titleVal.split(":").pop()?.trim() || titleVal.slice(0, 30);
+
+            setCardSummary(summaryFallback);
+            setSeoDescription(descFallback);
+            setFocusKeyword(keywordFallback);
+            setSeoTitle(found.seoTitle || titleVal);
           }
-
-          const plainText = bodyVal.replace(/<[^>]+>/g, " ").trim();
-          const summaryFallback = found.cardSummary || subheadlineVal || (plainText ? plainText.slice(0, 140) + "..." : "");
-          const descFallback = found.seoDescription || subheadlineVal || (plainText ? plainText.slice(0, 150) + "..." : "");
-          const keywordFallback = found.focusKeyword || titleVal.split(":").pop()?.trim() || titleVal.slice(0, 30);
-
-          setCardSummary(summaryFallback);
-          setSeoDescription(descFallback);
-          setFocusKeyword(keywordFallback);
-          setSeoTitle(found.seoTitle || titleVal);
         }
-      }
+      };
+
+      loadPostData();
     }
   }, []);
 
@@ -672,10 +708,12 @@ export default function AdminReviewPostPage() {
       a.href = url;
       a.target = "_blank";
       a.rel = "noopener noreferrer";
-      a.className = "text-[#111111] font-semibold underline";
-      a.style.color = "#111111";
+      a.className = "text-black font-semibold underline";
+      a.style.color = "#000000";
       a.style.fontWeight = "600";
-      a.style.textDecoration = "underline";
+      a.style.textDecoration = "underline solid 1px";
+      a.style.borderBottom = "none";
+      a.style.boxShadow = "none";
       a.textContent = targetText;
 
       if (range) {
@@ -698,10 +736,12 @@ export default function AdminReviewPostPage() {
       a.href = url;
       a.target = "_blank";
       a.rel = "noopener noreferrer";
-      a.className = "text-[#111111] font-semibold underline";
-      a.style.color = "#111111";
+      a.className = "text-black font-semibold underline";
+      a.style.color = "#000000";
       a.style.fontWeight = "600";
-      a.style.textDecoration = "underline";
+      a.style.textDecoration = "underline solid 1px";
+      a.style.borderBottom = "none";
+      a.style.boxShadow = "none";
       a.textContent = linkText.trim();
 
       if (range && editorRef.current.contains(range.commonAncestorContainer)) {
@@ -715,9 +755,24 @@ export default function AdminReviewPostPage() {
     anchors.forEach((anc) => {
       anc.setAttribute("target", "_blank");
       anc.setAttribute("rel", "noopener noreferrer");
-      anc.style.color = "#111111";
+      anc.className = "text-black font-semibold underline";
+      anc.style.color = "#000000";
       anc.style.fontWeight = "600";
-      anc.style.textDecoration = "underline";
+      anc.style.textDecoration = "underline solid 1px";
+      anc.style.borderBottom = "none";
+      anc.style.boxShadow = "none";
+
+      // Strip inner <u> tags so multiple underlines do not stack
+      const uElements = anc.querySelectorAll("u");
+      uElements.forEach((u) => {
+        const text = u.textContent || "";
+        u.replaceWith(document.createTextNode(text));
+      });
+      // Unwrap outer <u> parent if it wraps the anchor
+      if (anc.parentElement && anc.parentElement.tagName.toLowerCase() === "u") {
+        const uParent = anc.parentElement;
+        uParent.replaceWith(anc);
+      }
     });
 
     setBodyContent(editorRef.current.innerHTML);
@@ -1035,6 +1090,27 @@ export default function AdminReviewPostPage() {
     if (modalImageFile) {
       finalUrl = await compressImageFile(modalImageFile, 800, 0.7);
     }
+
+    // Automatically upload external URL or base64 to Backblaze B2
+    if (finalUrl && !finalUrl.includes("backblazeb2.com") && (finalUrl.startsWith("http://") || finalUrl.startsWith("https://") || finalUrl.startsWith("data:image/"))) {
+      try {
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
+        const res = await fetch(`${backendUrl}/api/upload-url`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: finalUrl, folder: "articles" }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.url) {
+            finalUrl = data.url;
+          }
+        }
+      } catch (uploadErr) {
+        console.warn("Backblaze B2 URL upload notice:", uploadErr);
+      }
+    }
+
     if (!finalUrl || finalUrl.startsWith("blob:")) {
       finalUrl = "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?fm=webp&fit=crop&w=800&q=80";
     }
@@ -1191,6 +1267,9 @@ export default function AdminReviewPostPage() {
       category: mainCategory || "Business",
       subCategories: selectedSubCategories,
       tags: tags,
+      imageSeoKeywords: imageSeoKeywords,
+      targetedEmails: targetedEmails,
+      broadcastToSubscribers: broadcastToSubscribers,
       status: "Published",
       date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
       readDuration: readDuration || "5 min read",
@@ -1765,6 +1844,7 @@ export default function AdminReviewPostPage() {
                               <option value="Research">Research</option>
                               <option value="Opinions">Opinions</option>
                               <option value="Editorials">Editorials</option>
+                              <option value="Interviews">Interviews</option>
                             </select>
                             <div className="pointer-events-none absolute right-3 top-3 text-gray-500">
                               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -2136,6 +2216,16 @@ export default function AdminReviewPostPage() {
                     )}
                   </div>
                 )}
+
+                {/* TARGETED EMAIL DISTRIBUTION CARD (IMAGE 1 & IMAGE 2 MODAL) */}
+                <div className="pt-2">
+                  <TargetedEmailDistribution
+                    emails={targetedEmails}
+                    onChangeEmails={setTargetedEmails}
+                    broadcastToSubscribers={broadcastToSubscribers}
+                    onChangeBroadcast={setBroadcastToSubscribers}
+                  />
+                </div>
               </div>
             </div>
 
@@ -2291,11 +2381,12 @@ export default function AdminReviewPostPage() {
         </div>
       )}
 
-      {/* INSERT IMAGE MODAL */}
+      {/* INSERT ARTICLE IMAGE MODAL */}
       {showImageModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-[520px] w-full p-4 sm:p-7 max-h-[90vh] overflow-y-auto shadow-2xl space-y-4 font-sans text-left border border-slate-100">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-white rounded-3xl max-w-[520px] w-full p-4 sm:p-5 shadow-2xl space-y-3 font-sans text-left animate-in zoom-in-95 duration-150 border border-slate-100 overflow-hidden">
+            {/* Header with Icon and Title */}
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center space-x-2.5">
                 <div className="w-8 h-8 rounded-lg bg-[#fff7ed] border border-[#ffedd5] flex items-center justify-center text-[#ea580c]">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -2303,7 +2394,7 @@ export default function AdminReviewPostPage() {
                   </svg>
                 </div>
                 <h3 className="text-lg font-serif font-bold text-[#0f172a] tracking-tight">
-                  Insert Article Image
+                  {editingFigureEl ? "Edit Article Image" : "Insert Article Image"}
                 </h3>
               </div>
               <button
@@ -2317,12 +2408,71 @@ export default function AdminReviewPostPage() {
               </button>
             </div>
 
-            <div className="space-y-4 pt-1">
-              <div className="space-y-1.5">
+            {/* Form Fields */}
+            <div className="space-y-3 pt-0.5">
+              {/* PASTE IMAGE URL (matching requested design) */}
+              <div className="space-y-1">
+                <label className="block text-[10px] font-mono font-bold text-[#94a3b8] uppercase tracking-wider">
+                  PASTE IMAGE URL
+                </label>
+                <input
+                  type="url"
+                  placeholder="https://..."
+                  value={modalImageUrl}
+                  onChange={(e) => {
+                    setModalImageUrl(e.target.value);
+                    if (e.target.value) setModalImageFile(null);
+                  }}
+                  className="w-full bg-white border border-[#cbd5e1] rounded-xl px-3 py-2 text-xs text-[#1e293b] placeholder-[#94a3b8] focus:outline-none focus:border-[#ea580c] transition-colors font-sans"
+                />
+
+                {/* Live Image Preview & B2 Storage Status */}
+                {modalImageUrl.trim() && (
+                  <div className="mt-1.5 p-2 bg-[#f8fafc] border border-[#cbd5e1] rounded-xl text-center space-y-1">
+                    <div className="text-[10px] font-mono font-bold text-[#64748b] uppercase tracking-wider flex items-center justify-between px-1">
+                      <span>IMAGE PREVIEW</span>
+                      {modalImageUrl.includes("backblazeb2.com") ? (
+                        <span className="text-[#059669] flex items-center gap-1">✓ SAVED TO BACKBLAZE B2</span>
+                      ) : (
+                        <span className="text-[#ea580c] flex items-center gap-1">⚡ WILL SAVE TO BACKBLAZE B2 ON INSERT</span>
+                      )}
+                    </div>
+                    <div className="max-h-36 overflow-hidden rounded-lg border border-slate-200 bg-white flex items-center justify-center p-1 min-h-[60px]">
+                      <img
+                        src={modalImageUrl.trim()}
+                        alt="Pasted Preview"
+                        className="max-h-32 max-w-full object-contain rounded"
+                        onError={(e) => {
+                          const target = e.target as HTMLElement;
+                          target.style.display = "none";
+                          const parent = target.parentElement;
+                          if (parent && !parent.querySelector(".preview-error")) {
+                            const errDiv = document.createElement("div");
+                            errDiv.className = "preview-error text-[11px] font-mono text-amber-600 font-bold py-2";
+                            errDiv.innerText = "⚠️ Image preview loading... (Will save to Backblaze on insert)";
+                            parent.appendChild(errDiv);
+                          }
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* OR UPLOAD FILE Divider */}
+              <div className="relative flex items-center justify-center py-1">
+                <div className="border-t border-[#e2e8f0] w-full"></div>
+                <span className="bg-white px-3 text-[10px] font-mono font-bold text-[#94a3b8] uppercase tracking-wider shrink-0 absolute">
+                  OR UPLOAD FILE
+                </span>
+              </div>
+
+              {/* CHOOSE COMPUTER FILE */}
+              <div className="space-y-1">
                 <label className="block text-[10px] font-mono font-bold text-[#94a3b8] uppercase tracking-wider">
                   CHOOSE COMPUTER FILE
                 </label>
-                <div className="border border-dashed border-[#cbd5e1] rounded-xl p-3 bg-[#f8fafc] text-xs font-mono text-[#475569]">
+                <div className="border border-dashed border-[#cbd5e1] rounded-xl p-2.5 bg-[#f8fafc] text-xs font-mono text-[#475569]">
                   <div className="flex items-center space-x-2">
                     <label className="bg-white border border-[#cbd5e1] hover:bg-slate-50 text-[#0f172a] font-bold px-3 py-1.5 rounded-lg cursor-pointer transition-colors shrink-0 shadow-2xs">
                       Choose File
@@ -2340,44 +2490,63 @@ export default function AdminReviewPostPage() {
                       {modalImageFile ? modalImageFile.name : "No file chosen"}
                     </span>
                   </div>
+
+                  {modalImageFile && (
+                    <div className="text-[10.5px] font-mono font-bold text-[#059669] mt-1.5 flex items-center space-x-1">
+                      <span>✓</span>
+                      <span>
+                        FILE "{modalImageFile.name.toUpperCase()}" COMPRESSED AND READY!
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
 
-              <div className="space-y-1.5">
+              {/* IMAGE SEO KEYWORDS (MAX 4 KEYWORDS) */}
+              <ImageSeoKeywordsInput
+                keywords={imageSeoKeywords}
+                onChange={(newKeywords) => setImageSeoKeywords(newKeywords)}
+                maxKeywords={4}
+              />
+
+              {/* IMAGE CAPTION / ALT TEXT */}
+              <div className="space-y-1">
                 <label className="block text-[10px] font-mono font-bold text-[#94a3b8] uppercase tracking-wider">
-                  IMAGE CAPTION / ALT TEXT
+                  Image Caption (Visible under picture to readers)
                 </label>
                 <input
                   type="text"
-                  placeholder="Describe this image..."
+                  placeholder="Brief description (e.g. President speaking with reporters outside Capitol)"
                   value={modalImageCaption}
                   onChange={(e) => setModalImageCaption(e.target.value)}
-                  className="w-full bg-white border border-[#cbd5e1] rounded-xl px-3.5 py-2.5 text-xs text-[#1e293b] placeholder-[#94a3b8] focus:outline-none focus:border-[#ea580c] transition-colors"
+                  className="w-full bg-white border border-[#cbd5e1] rounded-xl px-3 py-2 text-xs text-[#1e293b] placeholder-[#94a3b8] focus:outline-none focus:border-[#ea580c] transition-colors"
                 />
               </div>
 
-              <div className="space-y-1.5">
+              {/* IMAGE CREDIT / SOURCE (OPTIONAL) */}
+              <div className="space-y-1">
                 <label className="block text-[10px] font-mono font-bold text-[#94a3b8] uppercase tracking-wider">
-                  IMAGE CREDIT / SOURCE (OPTIONAL)
+                  Image Credit / Source (Optional)
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. Getty Images, AP Photo"
+                  placeholder="e.g. Reuters, AP Photo, Getty Images"
                   value={modalImageCredit}
                   onChange={(e) => setModalImageCredit(e.target.value)}
-                  className="w-full bg-white border border-[#cbd5e1] rounded-xl px-3.5 py-2.5 text-xs text-[#1e293b] placeholder-[#94a3b8] focus:outline-none focus:border-[#ea580c] transition-colors"
+                  className="w-full bg-white border border-[#cbd5e1] rounded-xl px-3 py-2 text-xs text-[#1e293b] placeholder-[#94a3b8] focus:outline-none focus:border-[#ea580c] transition-colors"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3.5 pt-1">
-                <div className="space-y-1.5">
+              {/* IMAGE SIZE & POSITION ALIGNMENT */}
+              <div className="grid grid-cols-2 gap-3 pt-0.5">
+                <div className="space-y-1">
                   <label className="block text-[10px] font-mono font-bold text-[#94a3b8] uppercase tracking-wider">
                     IMAGE SIZE
                   </label>
                   <select
                     value={modalImageSize}
                     onChange={(e) => setModalImageSize(e.target.value)}
-                    className="w-full bg-white border border-[#cbd5e1] rounded-xl px-3 py-2.5 text-xs font-sans text-[#1e293b] focus:outline-none focus:border-[#ea580c] transition-colors cursor-pointer"
+                    className="w-full bg-white border border-[#cbd5e1] rounded-xl px-2.5 py-2 text-xs font-sans text-[#1e293b] focus:outline-none focus:border-[#ea580c] transition-colors cursor-pointer"
                   >
                     <option value="Small (Width: 250px)">Small (Width: 250px)</option>
                     <option value="Medium (Width: 450px)">Medium (Width: 450px)</option>
@@ -2385,14 +2554,14 @@ export default function AdminReviewPostPage() {
                   </select>
                 </div>
 
-                <div className="space-y-1.5">
+                <div className="space-y-1">
                   <label className="block text-[10px] font-mono font-bold text-[#94a3b8] uppercase tracking-wider">
                     POSITION ALIGNMENT
                   </label>
                   <select
                     value={modalImageAlign}
                     onChange={(e) => setModalImageAlign(e.target.value)}
-                    className="w-full bg-white border border-[#cbd5e1] rounded-xl px-3 py-2.5 text-xs font-sans text-[#1e293b] focus:outline-none focus:border-[#ea580c] transition-colors cursor-pointer"
+                    className="w-full bg-white border border-[#cbd5e1] rounded-xl px-2.5 py-2 text-xs font-sans text-[#1e293b] focus:outline-none focus:border-[#ea580c] transition-colors cursor-pointer"
                   >
                     <option value="Left (Wrap Text Right)">Left (Wrap Text Right)</option>
                     <option value="Center (No Wrap)">Center (No Wrap)</option>
@@ -2402,20 +2571,21 @@ export default function AdminReviewPostPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 pt-3">
+            {/* Action Buttons */}
+            <div className="grid grid-cols-2 gap-3 pt-2">
               <button
                 type="button"
                 onClick={() => setShowImageModal(false)}
-                className="w-full bg-[#f1f5f9] hover:bg-slate-200 text-[#475569] font-bold text-xs py-3 rounded-xl transition-colors cursor-pointer uppercase tracking-wider"
+                className="w-full bg-[#f1f5f9] hover:bg-[#cbd5e1] text-[#475569] font-bold text-xs py-2.5 rounded-xl transition-colors cursor-pointer uppercase tracking-wider"
               >
                 CANCEL
               </button>
               <button
                 type="button"
                 onClick={handleConfirmInsertImage}
-                className="w-full bg-[#ea580c] hover:bg-[#c2410c] text-white font-bold text-xs py-3 rounded-xl transition-colors cursor-pointer shadow-xs uppercase tracking-wider"
+                className="w-full bg-[#ea580c] hover:bg-[#c2410c] text-white font-bold text-xs py-2.5 rounded-xl transition-all cursor-pointer shadow-md uppercase tracking-wider flex items-center justify-center"
               >
-                INSERT IMAGE
+                <span>{editingFigureEl ? "UPDATE IMAGE" : "INSERT IMAGE"}</span>
               </button>
             </div>
           </div>

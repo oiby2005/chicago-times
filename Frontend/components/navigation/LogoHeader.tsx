@@ -20,8 +20,11 @@ export const LogoHeader: React.FC = () => {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
   const [isSearchOverlayOpen, setIsSearchOverlayOpen] = useState(false);
+  const [showEditionDropdown, setShowEditionDropdown] = useState(false);
+  const [selectedEdition, setSelectedEdition] = useState("English");
   const dropdownRef = useRef<HTMLDivElement>(null);
   const mobileDropdownRef = useRef<HTMLDivElement>(null);
+  const editionRef = useRef<HTMLDivElement>(null);
 
   const isAdminDashboard = pathname?.includes("/admin-dashboard");
   const isWriterDashboard = pathname?.includes("/writer-dashboard");
@@ -77,14 +80,16 @@ export const LogoHeader: React.FC = () => {
     };
   }, []);
 
-  // Click outside listener to close dropdown on desktop or mobile
+  // Click outside listener to close dropdown on desktop, mobile, or edition card
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node;
       const insideDesktop = dropdownRef.current && dropdownRef.current.contains(target);
       const insideMobile = mobileDropdownRef.current && mobileDropdownRef.current.contains(target);
-      if (!insideDesktop && !insideMobile) {
+      const insideEdition = editionRef.current && editionRef.current.contains(target);
+      if (!insideDesktop && !insideMobile && !insideEdition) {
         setShowDropdown(false);
+        setShowEditionDropdown(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -110,7 +115,7 @@ export const LogoHeader: React.FC = () => {
     { label: "English Edition ▼", href: "#" },
     { label: "Opinions", href: "/opinion" },
     { label: "Upcoming Entrepreneurs", href: "#" },
-    { label: "Top 20 Billionaires", href: "#" },
+    { label: "Top 20 Billionaires", href: "https://www.forbes.com/billionaires/" },
   ];
 
   const isLoggedIn = currentUser !== null;
@@ -198,7 +203,7 @@ export const LogoHeader: React.FC = () => {
   );
 
   return (
-    <div className="bg-white h-auto min-h-[90px] md:h-[100px] pb-2 md:pb-0 relative select-none">
+    <div className="bg-white h-auto py-2 sm:py-3 relative select-none">
       <SearchOverlay
         isOpen={isSearchOverlayOpen}
         onClose={() => setIsSearchOverlayOpen(false)}
@@ -209,15 +214,16 @@ export const LogoHeader: React.FC = () => {
         currentUser={currentUser}
         onOpenSearch={() => setIsSearchOverlayOpen(true)}
       />
-      <div className="max-w-[1280px] mx-auto px-2 relative h-full">
+      <div className="max-w-[1280px] mx-auto px-2 relative">
         {/* Main Logo & Auth Action Buttons Row */}
-        <div className="relative flex flex-col md:flex-row items-start justify-between w-full h-full pt-2">
+        <div className="relative flex flex-col md:flex-row items-center justify-between w-full">
           {/* Hamburger button on mobile / tablet */}
           <div className="flex md:hidden items-center justify-between w-full pb-1 mb-1 border-b border-gray-200">
             <button
               onClick={() => setIsMobileDrawerOpen(true)}
               className="p-1.5 text-[#111111] hover:text-gray-700 transition-colors cursor-pointer focus:outline-none"
               aria-label="Open mobile menu"
+              suppressHydrationWarning
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
@@ -227,6 +233,7 @@ export const LogoHeader: React.FC = () => {
               onClick={() => router.push("/search")}
               className="p-1.5 text-[#111111] hover:text-gray-700 transition-colors cursor-pointer focus:outline-none"
               aria-label="Search"
+              suppressHydrationWarning
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -267,7 +274,7 @@ export const LogoHeader: React.FC = () => {
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setShowDropdown(!showDropdown)}
-                  className="w-8 h-8 sm:w-9 sm:h-9 bg-[#f3f4f6] hover:bg-[#e5e7eb] border-2 border-[#1e293b] rounded-full flex items-center justify-center relative overflow-hidden transition-colors cursor-pointer shadow-xs"
+                  className="w-8 h-8 sm:w-9 sm:h-9 bg-[#f3f4f6] hover:bg-[#e5e7eb] border-none rounded-full flex items-center justify-center relative overflow-hidden transition-colors cursor-pointer shadow-xs"
                   aria-label="User Profile"
                   title={`${displayName} (${displayEmail})`}
                   suppressHydrationWarning
@@ -301,16 +308,49 @@ export const LogoHeader: React.FC = () => {
           </div>
         </div>
 
-        {/* Sub-Utility Edition Navigation: Clean normal weight text without heavy bolding */}
-        <div className="md:absolute md:top-[78px] md:left-1/2 md:-translate-x-1/2 flex items-center justify-center text-[11px] sm:text-[12px] font-['Century_Gothic','Publica_Sans_Light','Kumbh_Sans',sans-serif] font-normal text-[#333333] tracking-tight select-none z-10 whitespace-nowrap overflow-x-auto no-scrollbar max-w-full my-1 md:my-0 py-1 px-1">
-          {/* English Edition */}
-          <a
-            href="/edition/english"
-            className="hover:underline cursor-pointer font-normal text-[#666666] hover:text-black flex items-center leading-none"
-          >
-            <span>English Edition</span>
-            <span className="text-[7.5px] text-[#111111] font-bold inline-block leading-none ml-0.5">▼</span>
-          </a>
+        {/* Sub-Utility Edition Navigation: Centered within LogoHeader */}
+        <div className="flex items-center justify-center text-[11px] sm:text-[12px] font-['Century_Gothic','Publica_Sans_Light','Kumbh_Sans',sans-serif] font-normal text-[#333333] tracking-tight select-none z-30 whitespace-nowrap overflow-visible max-w-full my-1 pt-1.5 pb-0.5 px-2">
+          {/* Edition Selection Dropdown Card */}
+          <div className="relative inline-block" ref={editionRef}>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowEditionDropdown((prev) => !prev);
+              }}
+              className="hover:underline cursor-pointer font-normal text-[#666666] hover:text-black flex items-center leading-none focus:outline-none"
+            >
+              <span>{selectedEdition} Edition</span>
+              <span className="text-[7.5px] text-[#111111] font-bold inline-block leading-none ml-0.5">▼</span>
+            </button>
+
+            {showEditionDropdown && (
+              <div className="absolute left-0 top-[calc(100%+4px)] w-36 bg-white border border-[#e2e8f0] shadow-xl rounded-xl p-2 z-50 text-left animate-in zoom-in-95 duration-100 font-sans">
+                {["English", "Spanish", "German", "Korean", "Chinese"].map((edition) => (
+                  <button
+                    key={edition}
+                    type="button"
+                    onClick={() => {
+                      setSelectedEdition(edition);
+                      setShowEditionDropdown(false);
+                    }}
+                    className={`w-full text-left px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors cursor-pointer flex items-center justify-between ${
+                      selectedEdition === edition
+                        ? "bg-[#eff6ff] text-[#2563eb]"
+                        : "text-[#334155] hover:bg-slate-50"
+                    }`}
+                  >
+                    <span>{edition}</span>
+                    {selectedEdition === edition && (
+                      <svg className="w-3.5 h-3.5 text-[#2563eb]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                      </svg>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
 
           {/* Gap between ▼ and | (0.2 cm = 8px) */}
           <span className="ml-[8px] mr-[8px] text-[#999999] font-light text-[10px] leading-none shrink-0">|</span>
@@ -339,7 +379,9 @@ export const LogoHeader: React.FC = () => {
 
           {/* Top 20 Billionaires */}
           <a
-            href="/top-20-billionaires"
+            href="https://www.forbes.com/billionaires/"
+            target="_blank"
+            rel="noopener noreferrer"
             className="hover:underline cursor-pointer font-normal text-[#333333] hover:text-black leading-none"
           >
             Top 20 Billionaires

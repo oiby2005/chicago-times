@@ -96,7 +96,7 @@ export const CeoExecsCategorySection: React.FC = () => {
         <h2 className="font-serif font-bold text-[26px] sm:text-[30px] text-[#3A2371] tracking-tight">
           CEOs & Executives
         </h2>
-        <div className="w-6 h-6 rounded-full bg-[#f4effc] flex items-center justify-center text-[#3A2371] cursor-pointer hover:bg-[#e9defa]">
+        <div className="w-6 h-6 rounded-full bg-[#f4effc] flex items-center justify-center text-[#3A2371] cursor-pointer hover:bg-[#e9defa] translate-y-[2px]">
           <span className="text-[14px] font-bold leading-none">›</span>
         </div>
       </div>
@@ -115,13 +115,6 @@ export const CeoExecsCategorySection: React.FC = () => {
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               />
             </Link>
-            {art.categoryTag && (
-              <div className="mb-1">
-                <span className="font-sans font-bold text-[10px] tracking-wider text-[#336699] uppercase">
-                  {art.categoryTag}
-                </span>
-              </div>
-            )}
             <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
               <Link href={`/article/${art.slug}`}>
                 {art.title}

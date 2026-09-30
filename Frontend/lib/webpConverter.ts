@@ -72,19 +72,49 @@ export function convertDataUrlToWebP(dataUrl: string, quality = 0.85): Promise<s
   });
 }
 
+export function unwrapWebpProxyUrl(url: string): string {
+  if (!url || typeof url !== "string") return url;
+  if (url.includes("webp-proxy") && url.includes("url=")) {
+    try {
+      let target = url;
+      while (target.includes("webp-proxy") && target.includes("url=")) {
+        const match = target.match(/url=([^&]+)/);
+        if (match && match[1]) {
+          const decoded = decodeURIComponent(match[1]);
+          if (decoded && (decoded.startsWith("http") || decoded.startsWith("/"))) {
+            target = decoded;
+          } else {
+            break;
+          }
+        } else {
+          break;
+        }
+      }
+      return target;
+    } catch (e) {}
+  }
+  return url;
+}
+
 /**
  * Utility to ensure any image URL (Unsplash, WSJ CDN, or external) serves WebP format natively.
  */
 export function ensureWebpUrl(url: string): string {
   if (!url || typeof url !== "string") return url;
-  if (url.startsWith("/api/webp-proxy")) return url;
 
-  // Local static assets, relative paths, localhost URLs, SVGs & WebPs: preserve directly without proxying
+  const unwrapped = unwrapWebpProxyUrl(url);
+  if (unwrapped !== url) {
+    url = unwrapped;
+  }
+
+  // Backblaze B2 URLs, static assets, SVGs & WebPs: preserve directly without proxying
   if (
     url.startsWith("/") ||
     url.startsWith(".") ||
     url.includes("localhost") ||
     url.includes("127.0.0.1") ||
+    url.includes("backblazeb2.com") ||
+    url.includes("b2api") ||
     /\.(svg|webp)(\?.*)?$/i.test(url)
   ) {
     return url;

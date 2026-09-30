@@ -9,7 +9,9 @@ import Container from "@/components/layout/Container";
 import StickySubscribeBar from "@/components/ui/StickySubscribeBar";
 import { getArticleBySlug } from "@/data/articles";
 import ArticleTopBar from "@/components/article/ArticleTopBar";
+import ArticleToolbar from "@/components/article/ArticleToolbar";
 import BookmarkButton from "@/components/article/BookmarkButton";
+import ArticleAudioReader from "@/components/article/ArticleAudioReader";
 import RecentInUsSidebar from "@/components/article/RecentInUsSidebar";
 import NewsletterSignupBanner from "@/components/article/NewsletterSignupBanner";
 import ArticleCommentsSection from "@/components/article/ArticleCommentsSection";
@@ -17,7 +19,7 @@ import MoreFromWsjSection from "@/components/article/MoreFromWsjSection";
 import ShareCardModal from "@/components/article/ShareCardModal";
 import { getAuthorForArticle } from "@/data/authors";
 import { ensureWebpUrl, migrateLocalStorageToWebP } from "@/lib/webpConverter";
-import { getRelativeTime } from "@/lib/relativeTime";
+import { getRelativeTime, getFormattedDateTime } from "@/lib/relativeTime";
 
 interface ArticleClientContentProps {
   slug: string;
@@ -27,6 +29,7 @@ interface ArticleClientContentProps {
 export default function ArticleClientContent({ slug, initialArticle }: ArticleClientContentProps) {
   const [customPost, setCustomPost] = useState<any>(null);
   const [isMainShareOpen, setIsMainShareOpen] = useState(false);
+  const [fontSize, setFontSize] = useState<"sm" | "md" | "lg">("md");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -81,7 +84,7 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
   const category = customPost?.category || staticArticle.category || "US";
   const authorName = customPost?.author || staticArticle.author || "writer";
 
-  const publishedDate = getRelativeTime(
+  const publishedDate = getFormattedDateTime(
     customPost?.publishedAt || staticArticle?.publishedAt,
     customPost?.date || staticArticle?.publishedDate
   );
@@ -146,7 +149,16 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
       <div>
         {/* Main Header & Navigation */}
         <Header />
-        <StickyHeaderBar />
+
+        {/* Sticky Article Scroll Navbar (Image 1 - Only sticky navbar on article page) */}
+        <ArticleToolbar
+          articleTitle={title}
+          deck={deck}
+          bodyContent={bodyHtml || undefined}
+          currentFontSize={fontSize}
+          onFontSizeChange={setFontSize}
+          article={currentArticleData}
+        />
 
         {/* Article Page Body */}
         <div className="article-body">
@@ -157,28 +169,28 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
           <Container className="py-8">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
               {/* Left Column: Main Article Body (Span 8) */}
-              <article className="lg:col-span-8 space-y-5">
+              <article className="lg:col-span-8 space-y-5 lg:border-r lg:border-dashed lg:border-[#CCCCCC] lg:pr-10">
                 {/* Category Badge */}
-                <div className="flex items-center space-x-3 mb-3 font-sans">
-                  <span className="text-[12px] font-sans font-bold text-[#666666] tracking-wider uppercase">
+                <div className="flex items-center space-x-3 mb-3">
+                  <span className="text-[13px] font-serif font-playfair font-bold text-[#666666] tracking-widest uppercase">
                     {category}
                   </span>
                 </div>
 
                 {/* Article Headline */}
-                <h1 className="text-3xl sm:text-4xl md:text-[38px] lg:text-[40px] font-encorpada-headline font-bold text-[#111111] mb-4">
+                <h1 className="text-3xl sm:text-4xl md:text-[38px] lg:text-[42px] font-serif font-playfair font-bold text-[#111111] leading-tight mb-4">
                   {title}
                 </h1>
 
                 {/* Subheadline / Deck */}
                 {deck && (
-                  <p className="font-sans text-base sm:text-lg md:text-[19px] text-[#555555] leading-relaxed">
+                  <p className="font-serif text-base sm:text-lg md:text-[19px] text-[#333333] leading-relaxed">
                     {deck}
                   </p>
                 )}
 
                 {/* Author Byline & Share + Bookmark Icons */}
-                <div className="pt-2 pb-4 border-b border-[#e5e7eb]">
+                <div className="pt-2 pb-4 border-b border-dashed border-[#CCCCCC]">
                   <div className="font-sans flex items-center gap-3.5 flex-wrap">
                     {/* Writer's Circular Headshot Profile Image */}
                     <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden shrink-0 border border-gray-200 shadow-xs bg-gray-100 flex items-center justify-center">
@@ -245,6 +257,9 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
 
                         {/* Bookmark Icon */}
                         <BookmarkButton article={currentArticleData} variant="inline" />
+
+                        {/* Google Auto Reader / Listen Audio Control */}
+                        <ArticleAudioReader title={title} deck={deck} bodyContent={bodyHtml || undefined} />
                       </div>
 
                       <div className="text-[13.5px] font-semibold text-[#555555] leading-tight mt-1">
@@ -321,7 +336,10 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
 
                 {/* Section 4: Article Comments Section */}
                 <div className="w-full clear-both pt-8 mt-6 border-t border-gray-200">
-                  <ArticleCommentsSection commentCount={customPost?.commentsCount || staticArticle.commentCount || 0} />
+                  <ArticleCommentsSection
+                    articleSlug={slug}
+                    commentCount={customPost?.commentsCount || staticArticle.commentCount || 0}
+                  />
                 </div>
               </article>
 
@@ -335,8 +353,14 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
               </div>
             </div>
 
-            {/* Bottom Full-Width Section: MORE FROM THE WALL STREET JOURNAL */}
-            <MoreFromWsjSection />
+            {/* Bottom Full-Width Section: RELATED ARTICLES (Method 1 Tag & Subcategory Matching) */}
+            <MoreFromWsjSection
+              categoryName={category}
+              currentSlug={slug}
+              currentId={currentArticleData.id}
+              tags={tags}
+              subCategories={customPost?.subCategories || []}
+            />
           </Container>
         </div>
       </div>

@@ -228,10 +228,10 @@ export default function ContactUsClient() {
                   GENERAL INQUIRIES
                 </h4>
                 <a
-                  href="mailto:Info@Times-Chicago.com"
+                  href="mailto:worldnews@timeschicago.com"
                   className="font-serif font-bold text-base sm:text-lg text-[#00558c] hover:underline block"
                 >
-                  Info@Times-Chicago.com
+                  worldnews@timeschicago.com
                 </a>
               </div>
             </div>

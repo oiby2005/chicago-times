@@ -126,12 +126,8 @@ export const EditorialsSection: React.FC = () => {
       {/* Header Banner */}
       <div className="bg-[#43646B] text-white px-3.5 py-3 flex items-center">
         <h3 className="font-sans font-bold text-[15px] sm:text-[16px] tracking-tight">
-          <Link href="/opinion" className="hover:underline">
-            Times Chicago Opinion
-          </Link>
-          <span className="font-normal mx-1">|</span>
           <Link href="/editorials" className="hover:underline">
-            Free Expression
+            Times Chicago Editorials
           </Link>
         </h3>
       </div>

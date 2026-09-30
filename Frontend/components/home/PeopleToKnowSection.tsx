@@ -127,44 +127,61 @@ const usePeopleToKnowArticles = () => {
   return articles;
 };
 
-export const PeopleToKnowTop: React.FC = () => {
+export const PeopleToKnowSection: React.FC = () => {
   const articles = usePeopleToKnowArticles();
   const leftHero = articles[0] || defaultArticles[0];
   const centerTop = articles[1] || defaultArticles[1];
   const rightTop = articles[2] || defaultArticles[2];
+  const rightBottom = articles[3] || defaultArticles[3];
 
   return (
-    <div className="w-full font-sans select-none mt-2 mb-0 pt-0 pb-0">
+    <section className="w-full font-sans select-none my-2 pt-0 pb-2">
       <div className="mb-3">
         <h2 className="font-serif font-bold text-[24px] sm:text-[28px] text-[#111111] tracking-tight">
           People to Know
         </h2>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-0 pt-1 pb-0 items-stretch">
-        {/* COLUMN 1: LEFT CARD PHOTO */}
-        <article 
-          className="pr-0 md:pr-4 flex flex-col justify-start pb-0"
-          style={{ borderRight: "1px solid #CCCCCC" }}
-        >
-          <Link
-            href={`/article/${leftHero.slug}`}
-            className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 group"
-          >
-            <img
-              src={leftHero.imageUrl || "https://images.unsplash.com/photo-1544005313-94ddf0286df2?fm=webp&fit=crop&w=600&q=80"}
-              alt={leftHero.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            />
-          </Link>
-        </article>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-0 items-stretch">
+        {/* COLUMN 1: Left Hero Photo (Top) + Headline/Summary (Bottom) */}
+        <div className="pr-0 md:pr-4 flex flex-col justify-between border-r border-dashed border-[#CCCCCC]">
+          <article className="flex flex-col h-full justify-between">
+            <Link
+              href={`/article/${leftHero.slug}`}
+              className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 group mb-3 shrink-0"
+            >
+              <img
+                src={leftHero.imageUrl || "https://images.unsplash.com/photo-1544005313-94ddf0286df2?fm=webp&fit=crop&w=600&q=80"}
+                alt={leftHero.title}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+            </Link>
 
-        {/* COLUMN 2: CENTER TOP ARTICLE */}
-        <div 
-          className="px-0 md:px-4 pt-0 flex flex-col justify-between pb-0 h-full"
-          style={{ borderRight: "1px solid #CCCCCC" }}
-        >
-          <article className="flex-1 flex flex-col justify-between pb-3 border-b border-dashed border-[#CCCCCC]">
+            <div className="pt-1 flex flex-col justify-between flex-1">
+              <div>
+                <h3 className="font-serif font-bold text-[18px] sm:text-[20px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-2">
+                  <Link href={`/article/${leftHero.slug}`}>
+                    {leftHero.title}
+                  </Link>
+                </h3>
+                {leftHero.summary && (
+                  <p className="font-sans text-[13px] leading-relaxed text-[#555555] mb-2 line-clamp-3">
+                    {leftHero.summary}
+                  </p>
+                )}
+              </div>
+              <div>
+                <span className="font-mono text-[11px] text-[#666666] mt-1 block">
+                  {formatTimeAgo(leftHero.publishedAt)}
+                </span>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        {/* COLUMN 2: Center Top Article (Top) + Ad 04 Box (Bottom) */}
+        <div className="px-0 md:px-4 flex flex-col justify-between h-full border-r border-dashed border-[#CCCCCC]">
+          <article className="pb-3 border-b border-dashed border-[#CCCCCC] flex-1 flex flex-col justify-between">
             <div>
               <h4 className="font-serif font-bold text-[17px] sm:text-[18px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-1.5">
                 <Link href={`/article/${centerTop.slug}`}>
@@ -178,22 +195,20 @@ export const PeopleToKnowTop: React.FC = () => {
               )}
             </div>
             <div>
-              {centerTop.commentCount !== undefined && centerTop.commentCount > 0 && (
-                <div className="font-sans text-[12px] text-[#777777] flex items-center space-x-1">
-                  <span>💬</span>
-                  <span>{centerTop.commentCount}</span>
-                </div>
-              )}
               <span className="font-mono text-[11px] text-[#666666] mt-1 block">
                 {formatTimeAgo(centerTop.publishedAt)}
               </span>
             </div>
           </article>
+
+          <div className="pt-3 flex flex-col justify-end shrink-0">
+            <AdPlaceholder slotId="hp_slot_4" width="w-full" height="h-[150px]" resolution="300 × 150" />
+          </div>
         </div>
 
-        {/* COLUMN 3: RIGHT TOP STORY */}
-        <div className="pl-0 md:pl-4 pt-0 flex flex-col justify-between pb-0 h-full">
-          <article className="flex-1 flex flex-col justify-between pb-3 border-b border-dashed border-[#CCCCCC]">
+        {/* COLUMN 3: Right Top Article (Top) + Right Bottom Story (Bottom) */}
+        <div className="pl-0 md:pl-4 flex flex-col justify-between h-full">
+          <article className="pb-3 border-b border-dashed border-[#CCCCCC] flex-1 flex flex-col justify-between">
             <div>
               <h4 className="font-serif font-bold text-[17px] sm:text-[18px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-1.5">
                 <Link href={`/article/${rightTop.slug}`}>
@@ -207,72 +222,13 @@ export const PeopleToKnowTop: React.FC = () => {
               )}
             </div>
             <div>
-              {rightTop.commentCount !== undefined && rightTop.commentCount > 0 && (
-                <div className="font-sans text-[12px] text-[#777777] flex items-center space-x-1">
-                  <span>💬</span>
-                  <span>{rightTop.commentCount}</span>
-                </div>
-              )}
               <span className="font-mono text-[11px] text-[#666666] mt-1 block">
                 {formatTimeAgo(rightTop.publishedAt)}
               </span>
             </div>
           </article>
-        </div>
-      </div>
-    </div>
-  );
-};
 
-export const PeopleToKnowBottom: React.FC = () => {
-  const articles = usePeopleToKnowArticles();
-  const leftHero = articles[0] || defaultArticles[0];
-  const rightBottom = articles[3] || defaultArticles[3];
-
-  return (
-    <div className="w-full font-sans select-none pt-0 mt-0">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-0 pt-0 pb-2 items-stretch">
-        {/* COLUMN 1: LEFT CARD HEADLINE + PARAGRAPH */}
-        <div 
-          className="pr-0 md:pr-4 flex flex-col justify-between pt-3"
-          style={{ borderRight: "1px solid #CCCCCC" }}
-        >
-          <div>
-            <h3 className="font-serif font-bold text-[18px] sm:text-[20px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-2">
-              <Link href={`/article/${leftHero.slug}`}>
-                {leftHero.title}
-              </Link>
-            </h3>
-            {leftHero.summary && (
-              <p className="font-sans text-[13px] leading-relaxed text-[#555555] mb-2 line-clamp-3">
-                {leftHero.summary}
-              </p>
-            )}
-          </div>
-          <div>
-            {leftHero.commentCount !== undefined && leftHero.commentCount > 0 && (
-              <div className="font-sans text-[12px] text-[#777777] flex items-center space-x-1 mt-2">
-                <span>💬</span>
-                <span>{leftHero.commentCount}</span>
-              </div>
-            )}
-            <span className="font-mono text-[11px] text-[#666666] mt-1 block">
-              {formatTimeAgo(leftHero.publishedAt)}
-            </span>
-          </div>
-        </div>
-
-        {/* COLUMN 2: CENTER AD 04 BOX AT BOTTOM */}
-        <div 
-          className="px-0 md:px-4 pt-3 flex flex-col justify-stretch"
-          style={{ borderRight: "1px solid #CCCCCC" }}
-        >
-          <AdPlaceholder slotId="hp_slot_4" width="w-full" height="h-[150px]" resolution="300 × 150" />
-        </div>
-
-        {/* COLUMN 3: RIGHT BOTTOM STORY */}
-        <div className="pl-0 md:pl-4 pt-3 flex flex-col justify-between">
-          <article className="flex-1 flex flex-col justify-between">
+          <article className="pt-3 flex-1 flex flex-col justify-between">
             <div>
               <h4 className="font-serif font-bold text-[17px] sm:text-[18px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-1.5">
                 <Link href={`/article/${rightBottom.slug}`}>
@@ -286,12 +242,6 @@ export const PeopleToKnowBottom: React.FC = () => {
               )}
             </div>
             <div>
-              {rightBottom.commentCount !== undefined && rightBottom.commentCount > 0 && (
-                <div className="font-sans text-[12px] text-[#777777] flex items-center space-x-1 mt-1">
-                  <span>💬</span>
-                  <span>{rightBottom.commentCount}</span>
-                </div>
-              )}
               <span className="font-mono text-[11px] text-[#666666] mt-1 block">
                 {formatTimeAgo(rightBottom.publishedAt)}
               </span>
@@ -299,17 +249,16 @@ export const PeopleToKnowBottom: React.FC = () => {
           </article>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 
-export const PeopleToKnowSection: React.FC = () => {
-  return (
-    <>
-      <PeopleToKnowTop />
-      <PeopleToKnowBottom />
-    </>
-  );
+export const PeopleToKnowTop: React.FC = () => {
+  return <PeopleToKnowSection />;
+};
+
+export const PeopleToKnowBottom: React.FC = () => {
+  return null;
 };
 
 export default PeopleToKnowSection;

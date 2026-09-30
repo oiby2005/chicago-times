@@ -341,16 +341,16 @@ export default function CategoryPageTemplate({
         {/* Category Page Main Body */}
         <Container className="pt-6 sm:pt-10 pb-10">
           {/* Top Header Banner with Category Title */}
-          <div className="border-t-2 border-[#111111] border-b border-[#111111] py-3 text-center mb-8">
-            <h1 className="font-serif text-[30px] sm:text-[36px] font-extrabold uppercase tracking-[0.16em] text-[#111111] leading-none">
-              {upperCategory}
+          <div className="border-t border-b border-[#111111] py-2 sm:py-3 text-center mb-8">
+            <h1 className="font-encorpada font-['Encorpada_Classic_Compressed','Escrow_Display_Condensed',serif] text-[38px] sm:text-[46px] font-bold text-[#111111] leading-none">
+              {categoryTitle}
             </h1>
           </div>
 
           {/* Part 1: Top 5 Latest Articles Grid (Latest Article in Big Hero Card on Left) */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-0 pb-8 border-b border-gray-300">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-0 pb-8 border-b border-dashed border-[#CCCCCC]">
             {/* Column 1 (Left): Center Hero Feature Card for Latest Article (Card 1) */}
-            <div className="pr-0 md:pr-6 pb-6 md:pb-0 md:border-r md:border-gray-300">
+            <div className="pr-0 md:pr-6 pb-6 md:pb-0 md:border-r md:border-dashed md:border-[#CCCCCC]">
               <article>
                 <Link
                   href={`/article/${card1.slug || card1.id}`}
@@ -363,7 +363,7 @@ export default function CategoryPageTemplate({
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 </Link>
-                <h2 className="font-serif font-bold text-[20px] sm:text-[22px] leading-[1.18] text-[#990000] hover:text-[#b30000] hover:underline cursor-pointer">
+                <h2 className="font-serif font-bold text-[20px] sm:text-[22px] leading-[1.18] text-[#111111] hover:text-[#333333] hover:underline cursor-pointer">
                   <Link href={`/article/${card1.slug || card1.id}`}>
                     {card1.title}
                   </Link>
@@ -375,7 +375,7 @@ export default function CategoryPageTemplate({
             </div>
 
             {/* Column 2 (Middle): Two Stacked Horizontal Cards (Card 2 & Card 3) */}
-            <div className="px-0 md:px-6 py-6 md:py-0 flex flex-col justify-between md:border-r md:border-gray-300">
+            <div className="px-0 md:px-6 py-6 md:py-0 flex flex-col justify-between md:border-r md:border-dashed md:border-[#CCCCCC]">
               {/* Card 2 (Top Middle) */}
               <article className="flex flex-row items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
@@ -404,7 +404,7 @@ export default function CategoryPageTemplate({
               </article>
 
               {/* Horizontal Divider */}
-              <div className="border-b border-gray-300 my-5" />
+              <div className="border-b border-dashed border-[#CCCCCC] my-5" />
 
               {/* Card 3 (Bottom Middle) */}
               <article className="flex flex-row items-start justify-between gap-3">
@@ -464,7 +464,7 @@ export default function CategoryPageTemplate({
               </article>
 
               {/* Horizontal Divider */}
-              <div className="border-b border-gray-300 my-5" />
+              <div className="border-b border-dashed border-[#CCCCCC] my-5" />
 
               {/* Card 5 (Bottom Right) */}
               <article className="flex flex-row items-start justify-between gap-3">
@@ -502,8 +502,8 @@ export default function CategoryPageTemplate({
               <div className="lg:col-span-8">
                 {/* Header with Page Count */}
                 <div className="border-b border-[#111111] pb-2 mb-6 flex justify-between items-center">
-                  <h2 className="font-serif font-bold text-[18px] uppercase tracking-wider text-[#111111]">
-                    MORE {upperCategory}
+                  <h2 className="font-poppins font-sans font-bold text-[19px] tracking-wide text-[#111111]">
+                    More {categoryTitle}
                   </h2>
                   <span className="font-sans text-[12px] font-semibold text-gray-500">
                     Page {currentPage} of {totalPages}
@@ -511,7 +511,7 @@ export default function CategoryPageTemplate({
                 </div>
 
                 {/* Articles List with horizontal grey border lines */}
-                <div className="divide-y divide-gray-300">
+                <div className="divide-y divide-dashed divide-[#CCCCCC]">
                   {currentMoreNews.map((article, idx) => (
                     <article
                       key={`${article.id}-page${currentPage}-${idx}`}
@@ -609,8 +609,8 @@ export default function CategoryPageTemplate({
                         d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 005.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941"
                       />
                     </svg>
-                    <h3 className="font-serif font-bold text-[15px] uppercase tracking-wider text-[#111111]">
-                      TRENDING IN {upperCategory}
+                    <h3 className="font-poppins font-sans font-bold text-[16px] tracking-wide text-[#111111]">
+                      Trending in {categoryTitle}
                     </h3>
                   </div>
 

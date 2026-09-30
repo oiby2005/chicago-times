@@ -199,37 +199,36 @@ export const StickyHeaderBar: React.FC = () => {
         onClose={() => setIsSearchOverlayOpen(false)}
       />
     <div className="sticky top-0 z-40 w-full bg-white border-b border-[#d4d4d4] shadow-sm transition-all duration-200 select-none">
-      <Container>
+      <div className="w-full max-w-[1280px] mx-auto px-2 relative">
         {/* Top Header Row of Sticky Bar */}
-        <div className="flex items-center justify-between h-12 sm:h-14 md:h-16 border-b border-[#f0f0f0] relative px-2 sm:px-0">
-          {/* Left Action Button: Newsletter */}
-          <div className="hidden md:flex items-center z-10 shrink-0">
+        <div className="flex items-center justify-between h-12 sm:h-14 md:h-16 border-b border-[#f0f0f0] relative">
+          {/* Left Action Button: Newsletter (Matching LogoHeader alignment) */}
+          <div className="hidden md:flex items-center w-[200px] lg:w-[230px] justify-start z-10 shrink-0">
             <Link
               href="/newsletters"
-              className="h-7 sm:h-8 bg-black hover:bg-gray-800 text-white font-sans text-[11px] sm:text-[12px] font-bold px-3 py-1 rounded-none tracking-tight transition-colors whitespace-nowrap flex items-center justify-center leading-none cursor-pointer"
+              className="bg-black hover:bg-gray-900 text-white font-sans text-[11.5px] font-medium px-4 py-1.5 h-auto flex items-center justify-center rounded-none tracking-tight transition-colors whitespace-nowrap cursor-pointer inline-flex leading-none shadow-xs"
               suppressHydrationWarning
             >
               Newsletter
             </Link>
           </div>
 
-          {/* Centered Masthead Logo on desktop, left-aligned on mobile */}
-          <div className="static md:absolute md:left-1/2 md:-translate-x-1/2 shrink-0 flex items-center justify-center">
-            <Link href="/" className="inline-block py-1">
+          {/* Centered Masthead Logo */}
+          <div className="flex-1 text-center py-0 my-0 flex items-center justify-center w-full md:w-auto">
+            <Link href="/" className="inline-block py-0 my-0 leading-none">
               <img
                 src="/images/design-reference/Times Chicago.svg"
                 alt="Times Chicago"
-                className="h-7 sm:h-9 md:h-10 lg:h-11 w-auto object-contain block max-h-12"
+                className="h-7 sm:h-8 md:h-9 lg:h-10 w-auto object-contain block max-h-11"
               />
             </Link>
           </div>
 
-          {/* Right Buttons: Small & Compact (Special Offer & Profile/Sign In) */}
-          <div className="flex items-center space-x-1.5 sm:space-x-2 z-50 shrink-0 relative">
-
+          {/* Right Buttons: Special Offer & Sign In (Matching LogoHeader alignment) */}
+          <div className="hidden md:flex items-center space-x-2.5 w-[230px] lg:w-[270px] justify-end z-10 shrink-0 relative">
             <SpecialOfferPopover>
               <button
-                className="h-6 sm:h-7 bg-[#007cb9] hover:bg-[#006996] text-white font-sans text-[10px] sm:text-[11px] font-bold px-2 sm:px-2.5 rounded-none tracking-tight transition-colors whitespace-nowrap flex items-center justify-center leading-none cursor-pointer shadow-xs"
+                className="bg-[#007cb9] hover:bg-[#006996] text-white font-sans text-[11.5px] font-medium px-4 py-1.5 h-auto flex items-center justify-center rounded-none tracking-tight transition-colors whitespace-nowrap cursor-pointer shadow-xs leading-none"
                 suppressHydrationWarning
               >
                 Special Offer
@@ -240,7 +239,7 @@ export const StickyHeaderBar: React.FC = () => {
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setShowDropdown(!showDropdown)}
-                  className="w-8 h-8 sm:w-9 sm:h-9 bg-[#f3f4f6] hover:bg-[#e5e7eb] border-2 border-[#1e293b] rounded-full flex items-center justify-center relative p-0.5 transition-colors cursor-pointer shadow-xs shrink-0"
+                  className="w-8 h-8 sm:w-9 sm:h-9 bg-[#f3f4f6] hover:bg-[#e5e7eb] border-none rounded-full flex items-center justify-center relative p-0.5 transition-colors cursor-pointer shadow-xs shrink-0"
                   aria-label="User Profile"
                   title={currentUser?.full_name || "User Profile"}
                   suppressHydrationWarning
@@ -263,7 +262,7 @@ export const StickyHeaderBar: React.FC = () => {
             ) : (
               <Link
                 href="/signin"
-                className="h-6 sm:h-7 bg-white hover:bg-gray-50 text-black border border-[#333333] hover:border-black font-sans text-[10px] sm:text-[11px] font-bold px-2 sm:px-2.5 rounded-none tracking-tight transition-colors whitespace-nowrap flex items-center justify-center leading-none cursor-pointer"
+                className="bg-white hover:bg-gray-50 text-black border border-[#333333] hover:border-black font-sans text-[11.5px] font-medium px-4 py-1.5 h-auto flex items-center justify-center rounded-none tracking-tight transition-colors whitespace-nowrap cursor-pointer leading-none"
                 suppressHydrationWarning
               >
                 Sign In
@@ -271,7 +270,7 @@ export const StickyHeaderBar: React.FC = () => {
             )}
           </div>
         </div>
-      </Container>
+      </div>
       <Navbar />
     </div>
     </>

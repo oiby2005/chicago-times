@@ -259,109 +259,107 @@ export default function ReaderDashboard() {
   return (
     <main className="min-h-screen bg-[#f8fafc] text-[#111111] font-sans flex flex-col justify-between select-none">
       <div>
-        {/* ==================== HEADER BAR ==================== */}
-        <header className="bg-white border-b border-[#e2e8f0] sticky top-0 z-40">
-          <div className="w-full max-w-[1440px] mx-auto px-3 sm:px-6 md:px-[1.5cm] h-14 sm:h-16 flex items-center justify-between gap-2">
-            {/* Left: Back to News Link matching Image 1 */}
-            <Link
-              href="/"
-              className="inline-flex items-center space-x-1.5 sm:space-x-2 text-xs sm:text-[13px] font-sans font-bold text-[#506175] hover:text-[#0f172a] transition-colors cursor-pointer whitespace-nowrap shrink-0"
+        {/* ================================================================= */}
+        {/* TOP NAVBAR (Matching Writer Dashboard white palette & layout)    */}
+        {/* ================================================================= */}
+        <header className="bg-white border-b border-[#e2e8f0] h-auto min-h-[82px] px-3 sm:px-6 md:px-8 lg:px-[3.8cm] pt-4 pb-0 flex items-end justify-between sticky top-0 z-30 shadow-2xs">
+          {/* Left Navigation: Back Arrow, Website Logo, READER PORTAL Badge */}
+          <div className="flex items-center space-x-2.5 sm:space-x-4 shrink-0 pb-3">
+            <button
+              onClick={() => router.push("/")}
+              className="p-1 text-black hover:opacity-70 transition-opacity cursor-pointer flex items-center justify-center shrink-0"
+              title="Go to Homepage"
             >
-              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#506175] shrink-0" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                <path d="M19 12H5M12 19l-7-7 7-7" />
+              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
               </svg>
-              <span>Back to News</span>
+            </button>
+
+            {/* Website Logo */}
+            <Link href="/" className="flex items-center shrink min-w-0">
+              <img
+                src="/images/design-reference/Times Chicago.svg"
+                alt="Times Chicago"
+                className="h-7 sm:h-9 md:h-10 w-auto object-contain block"
+              />
             </Link>
 
-            {/* Center: READERS DASHBOARD Title matching Image 1 font & style */}
-            <h1 className="font-serif font-extrabold text-sm xs:text-base sm:text-[19px] md:text-xl tracking-[0.04em] text-[#0b132b] uppercase text-center truncate">
-              READERS DASHBOARD
-            </h1>
+            <span className="hidden sm:inline-flex bg-[#eff6ff] text-[#2563eb] text-[9.5px] sm:text-[10.5px] font-mono font-bold px-2 py-0.5 rounded uppercase tracking-wider select-none shrink-0">
+              READER PORTAL
+            </span>
+          </div>
 
-            {/* Right: User Profile Pill Button matching Image 1 */}
-            <div className="relative" ref={dropdownRef}>
-              <button
-                type="button"
-                onClick={() => setShowDropdown(!showDropdown)}
-                className="border border-[#e2e8f0] bg-white hover:bg-slate-50 rounded-xl px-2 sm:px-3 py-1 sm:py-1.5 flex items-center space-x-1.5 sm:space-x-2.5 shadow-2xs transition-colors cursor-pointer select-none"
-                aria-label="User Profile Dropdown"
-                suppressHydrationWarning
-              >
-                {/* Squircle Avatar Badge matching Image 1 (Photo or Initials) */}
-                <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-[8px] bg-[#ea580c] text-white font-extrabold text-[10px] sm:text-[11px] flex items-center justify-center shrink-0 overflow-hidden">
-                  {currentUser?.avatar_url ? (
-                    <img
-                      src={currentUser.avatar_url}
-                      alt={readerName}
-                      className="w-full h-full object-cover rounded-[8px]"
-                    />
-                  ) : (
-                    <span>{userInitials}</span>
-                  )}
-                </div>
 
-                {/* Reader Name */}
-                <span className="font-sans font-bold text-xs sm:text-[13.5px] text-[#0f172a] lowercase truncate max-w-[65px] xs:max-w-[100px] sm:max-w-none">
-                  {readerName}
-                </span>
 
-                {/* Dropdown Chevron */}
-                <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#64748b] shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                </svg>
-              </button>
-
-              {/* Dropdown Menu Options matching user uploaded screenshot */}
-              {showDropdown && (
-                <div className="absolute right-0 top-full mt-2 w-64 bg-white border border-[#e2e8f0] shadow-2xl rounded-2xl p-4 z-50 animate-in zoom-in-95 duration-100 font-sans text-left">
-                  {/* Top User Info Section */}
-                  <div className="pb-3 border-b border-[#f1f5f9]">
-                    <div className="font-bold text-sm text-[#0f172a] lowercase">{readerName}</div>
-                    <div className="font-mono text-[11px] text-[#64748b] truncate mt-0.5">{currentUser.email || "reader@gmail.com"}</div>
-                    
-                    {/* READER Role Badge */}
-                    <div className="mt-2.5">
-                      <span className="bg-[#eff4f8] text-[#506175] font-sans text-[10px] font-extrabold px-2.5 py-1 rounded-md uppercase tracking-wider inline-block">
-                        {(currentUser.role || "READER").toUpperCase()}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Menu Items */}
-                  <div className="pt-2 space-y-1">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowDropdown(false);
-                        setShowProfileModal(true);
-                      }}
-                      className="w-full flex items-center space-x-3 px-3 py-2.5 hover:bg-slate-50 rounded-xl text-xs font-bold text-[#1e293b] transition-colors cursor-pointer"
-                    >
-                      <svg className="w-4 h-4 text-[#64748b] shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                      </svg>
-                      <span>Profile Settings</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={handleSignOut}
-                      className="w-full flex items-center space-x-3 px-3 py-2.5 hover:bg-red-50 text-[#dc2626] rounded-xl text-xs font-bold transition-colors cursor-pointer"
-                    >
-                      <svg className="w-4 h-4 text-[#dc2626] shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12" />
-                      </svg>
-                      <span>Log Out</span>
-                    </button>
-                  </div>
+          {/* Right User Badge */}
+          <div className="relative shrink-0 pb-3" ref={dropdownRef}>
+            <button
+              onClick={() => setShowDropdown(!showDropdown)}
+              className="flex items-center space-x-2 bg-white hover:bg-gray-50 border border-[#cbd5e1] rounded-xl px-2.5 py-1.5 transition-all cursor-pointer shadow-2xs"
+            >
+              {currentUser?.avatar_url ? (
+                <img
+                  src={currentUser.avatar_url}
+                  alt={readerName}
+                  className="w-7 h-7 rounded-lg object-cover shadow-2xs shrink-0"
+                />
+              ) : (
+                <div className="w-7 h-7 bg-[#ea580c] text-white rounded-lg flex items-center justify-center font-bold text-xs font-sans shadow-2xs shrink-0">
+                  {userInitials}
                 </div>
               )}
-            </div>
+              <span className="font-bold text-[13px] text-[#0f172a] tracking-tight truncate max-w-[120px] sm:max-w-none">{readerName}</span>
+              <svg
+                className={`w-3.5 h-3.5 text-gray-500 transition-transform ${showDropdown ? "rotate-180" : ""}`}
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            {/* Dropdown Menu */}
+            {showDropdown && (
+              <div className="absolute right-0 top-full mt-2 w-60 max-w-[calc(100vw-24px)] bg-white border border-[#e2e8f0] shadow-2xl rounded-xl z-50 overflow-hidden font-sans text-left">
+                <div className="px-4 py-3 border-b border-[#f1f5f9] bg-[#f8fafc]">
+                  <div className="font-bold text-sm text-[#0f172a] truncate">{readerName}</div>
+                  <div className="text-xs text-gray-500 truncate mt-0.5">{currentUser.email || "reader@gmail.com"}</div>
+                </div>
+                <div className="py-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowDropdown(false);
+                      setShowProfileModal(true);
+                    }}
+                    className="w-full flex items-center space-x-3 px-4 py-2.5 text-xs font-bold text-gray-700 hover:bg-gray-50 transition-colors text-left"
+                  >
+                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span>Profile Settings</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSignOut}
+                    className="w-full flex items-center space-x-3 px-4 py-2.5 text-xs font-bold text-red-600 hover:bg-red-50 transition-colors text-left"
+                  >
+                    <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    <span>Sign Out</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </header>
 
         {/* ==================== MAIN READER DASHBOARD BODY ==================== */}
-        <section className="w-full max-w-[1440px] mx-auto px-3.5 sm:px-6 md:px-[1.5cm] pt-4 sm:pt-6 pb-16 font-sans">
+        <section className="w-full px-3 sm:px-6 md:px-8 lg:px-[3.8cm] mt-6 sm:mt-10 pt-4 sm:pt-6 pb-16 font-sans">
           {/* Section Header Row matching Image 1 styling */}
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center space-x-2 shrink-0">

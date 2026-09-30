@@ -53,8 +53,9 @@ export default function GlobalDataSync() {
             );
             const mainV = allSlots.filter(
               (s: any) =>
-                s.id?.includes("videos") ||
-                s.id?.includes("main")
+                s.id?.includes("video") ||
+                s.id?.includes("main") ||
+                (s.subTab || "").toLowerCase() === "videos"
             );
             const pod = allSlots.filter(
               (s: any) =>

@@ -20,7 +20,7 @@ const nextConfig: NextConfig = {
     pagesBufferLength: 50,
   },
   experimental: {
-    optimizePackageImports: ["lucide-react", "clsx", "tailwind-merge"],
+    optimizePackageImports: ["clsx"],
   },
 };
 

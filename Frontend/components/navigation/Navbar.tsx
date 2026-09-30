@@ -245,6 +245,11 @@ export const megaMenuData: Record<string, CategoryMegaMenu> = {
     href: "/editorials",
     columns: [],
   },
+  Interviews: {
+    title: "Interviews",
+    href: "/interviews",
+    columns: [],
+  },
 };
 
 export const allCategories = [
@@ -264,6 +269,7 @@ export const allCategories = [
   "Sports",
   "Lifestyle",
   "Science",
+  "Interviews",
 ];
 
 export function getCategoryRoute(title: string): string {
@@ -286,6 +292,7 @@ export function getCategoryRoute(title: string): string {
     Science: "/science",
     Opinions: "/opinion",
     Editorials: "/editorials",
+    Interviews: "/interviews",
   };
   return map[title] || `/${title.toLowerCase().replace(/[^a-z0-9]/g, "-")}`;
 }
@@ -348,11 +355,12 @@ export const Navbar: React.FC = () => {
               })}
 
               {/* Integrated Search Icon */}
-              <div className="flex items-center flex-shrink-0 relative z-50 pb-1.5 px-2">
+              <div className="flex items-end flex-shrink-0 relative z-50 pb-1.5 px-2.5 h-full">
                 <button
                   onClick={() => router.push("/search")}
                   aria-label="Search"
-                  className="py-1 text-[#444444] hover:text-black transition-colors focus:outline-none cursor-pointer"
+                  className="pb-0.5 pt-1 text-[#444444] hover:text-black transition-colors focus:outline-none cursor-pointer flex items-center justify-center translate-y-[2px]"
+                  suppressHydrationWarning
                 >
                   <svg
                     className="w-3.5 h-3.5"

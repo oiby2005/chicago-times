@@ -92,6 +92,8 @@ const CATEGORY_SLUG_MAP: Record<string, string> = {
   "opinion": "Opinions",
   "editorials": "Editorials",
   "editorial": "Editorials",
+  "interviews": "Interviews",
+  "interview": "Interviews",
 };
 
 function formatCategoryTitle(str?: string): string {

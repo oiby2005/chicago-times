@@ -36,10 +36,17 @@ const kumbh = Kumbh_Sans({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
   title: "Times Chicago - Breaking News, Business, Financial & Economic News",
   description: "Latest news, analysis and comment from Times Chicago.",
   icons: {
-    icon: "/images/design-reference/Fav Icon.jpg",
+    icon: [
+      { url: "/favicon.jpg", type: "image/jpeg" },
+      { url: "/favicon.png", type: "image/png" },
+      { url: "/favicon.ico" }
+    ],
+    shortcut: "/favicon.jpg",
+    apple: "/favicon.jpg",
   },
   openGraph: {
     title: "Breaking News, US News, World News, Politics, Business & Technology | Times Chicago",

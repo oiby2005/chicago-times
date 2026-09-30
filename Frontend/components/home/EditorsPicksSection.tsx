@@ -180,8 +180,7 @@ export const EditorsPicksSection: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-0">
         {/* LEFT & CENTER MAIN PACKAGE */}
         <div 
-          className="lg:col-span-8 pr-0 lg:pr-[0.4cm]"
-          style={{ borderRight: "1.5px solid #CCCCCC" }}
+          className="lg:col-span-8 pr-0 lg:pr-[0.4cm] border-r border-dashed border-[#CCCCCC]"
         >
           {/* Row 1 Top Feature Package */}
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4 pb-4 border-b border-dashed border-[#CCCCCC]">
@@ -205,14 +204,6 @@ export const EditorsPicksSection: React.FC = () => {
                 </p>
               )}
               
-              {hero.sectionTag && (
-                <div className="mt-1.5">
-                  <span className="font-sans font-bold text-[11.5px] text-[#111111]">
-                    {hero.sectionTag}
-                  </span>
-                </div>
-              )}
-              
               <span className="font-mono text-[11px] text-[#666666] mt-1.5 block">
                 {formatTimeAgo(hero.publishedAt)}
               </span>
@@ -231,11 +222,10 @@ export const EditorsPicksSection: React.FC = () => {
           </div>
 
           {/* Row 2 Bottom 2 Side-by-Side Cards */}
-          <div className="pt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="pt-8 mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
             {bottomCards[0] && (
               <article 
-                className="flex items-start space-x-3 pr-0 sm:pr-4"
-                style={{ borderRight: "1.5px solid #CCCCCC" }}
+                className="flex items-start space-x-3 pr-0 sm:pr-4 border-r border-dashed border-[#CCCCCC]"
               >
                 <Link href={`/article/${bottomCards[0].slug}`} className="shrink-0 block w-[160px] sm:w-[185px] h-[100px] sm:h-[115px] overflow-hidden bg-gray-100 border border-gray-200">
                   <img
@@ -251,11 +241,6 @@ export const EditorsPicksSection: React.FC = () => {
                         {bottomCards[0].title}
                       </Link>
                     </h4>
-                    {bottomCards[0].sectionTag && (
-                      <span className="font-sans font-bold text-[11px] text-[#555555] mt-1 block">
-                        {bottomCards[0].sectionTag}
-                      </span>
-                    )}
                   </div>
                   <span className="font-mono text-[11px] text-[#666666] mt-1 block">
                     {formatTimeAgo(bottomCards[0].publishedAt)}
@@ -280,11 +265,6 @@ export const EditorsPicksSection: React.FC = () => {
                         {bottomCards[1].title}
                       </Link>
                     </h4>
-                    {bottomCards[1].sectionTag && (
-                      <span className="font-sans font-bold text-[11px] text-[#555555] mt-1 block">
-                        {bottomCards[1].sectionTag}
-                      </span>
-                    )}
                   </div>
                   <span className="font-mono text-[11px] text-[#666666] mt-1 block">
                     {formatTimeAgo(bottomCards[1].publishedAt)}
@@ -297,13 +277,11 @@ export const EditorsPicksSection: React.FC = () => {
 
         {/* RIGHT SIDEBAR 4 CARDS PACKAGE */}
         <div className="lg:col-span-4 pl-0 lg:pl-[0.4cm] pt-6 lg:pt-0">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div 
-              className="flex flex-col justify-between pr-0 sm:pr-4"
-              style={{ borderRight: "1.5px solid #CCCCCC" }}
-            >
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-0">
+            {/* Column 1 (Left): Top-Left & Bottom-Left */}
+            <div className="flex flex-col justify-between pr-3 border-r border-dashed border-[#CCCCCC]">
               {rightCards[0] && (
-                <article className="pb-3 border-b border-dashed border-[#CCCCCC] flex-1 flex flex-col justify-between">
+                <article className="pb-4 border-b border-dashed border-[#CCCCCC] flex-1 flex flex-col justify-between">
                   <div>
                     <Link href={`/article/${rightCards[0].slug}`} className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 mb-2 group">
                       <img
@@ -312,11 +290,6 @@ export const EditorsPicksSection: React.FC = () => {
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                     </Link>
-                    {rightCards[0].categoryTag && (
-                      <span className="font-sans font-bold text-[10.5px] text-[#C00000] uppercase tracking-wider block mb-1">
-                        {rightCards[0].categoryTag}
-                      </span>
-                    )}
                     <h4 className="font-serif font-bold text-[15px] sm:text-[15.5px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
                       <Link href={`/article/${rightCards[0].slug}`}>
                         {rightCards[0].title}
@@ -330,7 +303,7 @@ export const EditorsPicksSection: React.FC = () => {
               )}
 
               {rightCards[1] && (
-                <article className="pt-3 flex flex-col justify-between flex-1">
+                <article className="pt-4 flex flex-col justify-between flex-1">
                   <div>
                     <Link href={`/article/${rightCards[1].slug}`} className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 mb-2 group">
                       <img
@@ -346,11 +319,6 @@ export const EditorsPicksSection: React.FC = () => {
                     </h4>
                   </div>
                   <div>
-                    {rightCards[1].sectionTag && (
-                      <span className="font-sans font-bold text-[11px] text-[#555555] mt-1 block">
-                        {rightCards[1].sectionTag}
-                      </span>
-                    )}
                     <span className="font-mono text-[11px] text-[#666666] mt-1 block">
                       {formatTimeAgo(rightCards[1].publishedAt)}
                     </span>
@@ -359,9 +327,10 @@ export const EditorsPicksSection: React.FC = () => {
               )}
             </div>
 
-            <div className="flex flex-col justify-between pl-0 sm:pl-2">
+            {/* Column 2 (Right): Top-Right & Bottom-Right */}
+            <div className="flex flex-col justify-between pl-3">
               {rightCards[2] && (
-                <article className="pb-3 border-b border-dashed border-[#CCCCCC] flex-1 flex flex-col justify-between">
+                <article className="pb-4 border-b border-dashed border-[#CCCCCC] flex-1 flex flex-col justify-between">
                   <div>
                     <Link href={`/article/${rightCards[2].slug}`} className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 mb-2 group">
                       <img
@@ -377,11 +346,6 @@ export const EditorsPicksSection: React.FC = () => {
                     </h4>
                   </div>
                   <div>
-                    {rightCards[2].sectionTag && (
-                      <span className="font-sans font-bold text-[11px] text-[#555555] mt-1 block">
-                        {rightCards[2].sectionTag}
-                      </span>
-                    )}
                     <span className="font-mono text-[11px] text-[#666666] mt-1 block">
                       {formatTimeAgo(rightCards[2].publishedAt)}
                     </span>
@@ -390,7 +354,7 @@ export const EditorsPicksSection: React.FC = () => {
               )}
 
               {rightCards[3] && (
-                <article className="pt-3 flex flex-col justify-between flex-1">
+                <article className="pt-4 flex flex-col justify-between flex-1">
                   <div>
                     <Link href={`/article/${rightCards[3].slug}`} className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 mb-2 group">
                       <img
@@ -399,11 +363,6 @@ export const EditorsPicksSection: React.FC = () => {
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                     </Link>
-                    {rightCards[3].categoryTag && (
-                      <span className="font-sans font-bold text-[10.5px] text-[#00558c] uppercase tracking-wider block mb-1">
-                        {rightCards[3].categoryTag}
-                      </span>
-                    )}
                     <h4 className="font-serif font-bold text-[15px] sm:text-[15.5px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
                       <Link href={`/article/${rightCards[3].slug}`}>
                         {rightCards[3].title}
@@ -411,11 +370,6 @@ export const EditorsPicksSection: React.FC = () => {
                     </h4>
                   </div>
                   <div>
-                    {rightCards[3].sectionTag && (
-                      <span className="font-sans font-bold text-[11px] text-[#555555] mt-1 block">
-                        {rightCards[3].sectionTag}
-                      </span>
-                    )}
                     <span className="font-mono text-[11px] text-[#666666] mt-1 block">
                       {formatTimeAgo(rightCards[3].publishedAt)}
                     </span>

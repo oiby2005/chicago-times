@@ -154,13 +154,13 @@ export default function WorldPart2Section() {
   const activeArticles = getPageArticles(currentPage);
 
   return (
-    <section ref={sectionRef} className="w-full bg-white text-[#111111] pt-6 border-t border-gray-300">
+    <section ref={sectionRef} className="w-full bg-white text-[#111111] pt-6 border-t border-dashed border-[#CCCCCC]">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Left Column: MORE NEWS (8 of 12 cols) */}
         <div className="lg:col-span-8">
           {/* Header with lower border line */}
           <div className="border-b border-[#111111] pb-2 mb-6 flex justify-between items-center">
-            <h2 className="font-serif font-bold text-[18px] uppercase tracking-wider text-[#111111]">
+            <h2 className="font-poppins font-sans font-bold text-[18px] uppercase tracking-wider text-[#111111]">
               MORE NEWS
             </h2>
             <span className="font-sans text-[12px] font-semibold text-gray-500">
@@ -169,7 +169,7 @@ export default function WorldPart2Section() {
           </div>
 
           {/* Articles List with visible horizontal grey border lines */}
-          <div className="divide-y divide-gray-300">
+          <div className="divide-y divide-dashed divide-[#CCCCCC]">
             {activeArticles.map((article, idx) => (
               <article key={`${article.id}-page${currentPage}-${idx}`} className="py-5 flex flex-row items-start gap-4 sm:gap-5">
                 <div className="w-[160px] sm:w-[195px] shrink-0">
@@ -263,7 +263,7 @@ export default function WorldPart2Section() {
               >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 005.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
               </svg>
-              <h3 className="font-serif font-bold text-[15px] uppercase tracking-wider text-[#111111]">
+              <h3 className="font-poppins font-sans font-bold text-[15px] uppercase tracking-wider text-[#111111]">
                 TRENDING IN WORLD
               </h3>
             </div>

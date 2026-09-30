@@ -287,7 +287,7 @@ export default function AuthorArticlesList({
     <div ref={topRef} className="w-full select-none">
       {/* Header */}
       <div className="border-b border-[#111111] pb-1.5 mb-6 flex justify-between items-center">
-        <h3 className="font-serif font-bold text-sm sm:text-[15px] uppercase tracking-wider text-[#111111]">
+        <h3 className="font-poppins font-sans font-bold text-sm sm:text-[15px] uppercase tracking-wider text-[#111111]">
           MORE FROM {displayName}
         </h3>
         {!showEmptyState && (

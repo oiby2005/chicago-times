@@ -29,6 +29,8 @@ const ALL_MAIN_CATEGORIES = [
 
 
 
+import ArticleCommentsSection from "@/components/article/ArticleCommentsSection";
+import ImageSeoKeywordsInput from "@/components/article/ImageSeoKeywordsInput";
 import { getAuthorForArticle } from "@/data/authors";
 
 const compressImageFile = (file: File, maxWidth = 800, quality = 0.7): Promise<string> => {
@@ -134,8 +136,15 @@ const safeSavePostsToStorage = (posts: any[]): boolean => {
       fetch("http://localhost:5000/api/posts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(sanitized),
-      }).catch(() => {});
+        body: JSON.stringify(posts),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data && data.success && Array.isArray(data.posts)) {
+            localStorage.setItem("wsj_posts", JSON.stringify(data.posts));
+          }
+        })
+        .catch(() => {});
     } catch (e) {}
     return true;
   } catch (err) {
@@ -210,6 +219,7 @@ export default function CreateNewPostPage() {
     );
   }, [availableSubCategories, subCatSearch]);
   const [tags, setTags] = useState<string[]>([]);
+  const [imageSeoKeywords, setImageSeoKeywords] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
   const [readDuration, setReadDuration] = useState("5 min read");
   const [isExclusive, setIsExclusive] = useState(true);
@@ -296,15 +306,32 @@ export default function CreateNewPostPage() {
         setCurrentUser({ full_name: "Writer User", name: "Writer User", email: "writer@gmail.com", role: "writer" });
       }
 
-      try {
-        const params = new URLSearchParams(window.location.search);
-        const postId = params.get("id");
-        if (postId) {
-          setEditingPostId(postId);
-          const storedPosts = localStorage.getItem("wsj_posts");
-          if (storedPosts) {
-            const posts = JSON.parse(storedPosts);
-            const found = posts.find((p: any) => p.id === postId);
+      const loadPostData = async () => {
+        try {
+          const params = new URLSearchParams(window.location.search);
+          const postId = params.get("id");
+          if (postId) {
+            setEditingPostId(postId);
+            let found: any = null;
+            try {
+              const storedPosts = localStorage.getItem("wsj_posts");
+              if (storedPosts) {
+                const posts = JSON.parse(storedPosts);
+                found = posts.find((p: any) => String(p.id) === String(postId));
+              }
+            } catch (e) {}
+
+            if (!found) {
+              try {
+                const res = await fetch("http://localhost:5000/api/posts");
+                if (res.ok) {
+                  const data = await res.json();
+                  const postsArray = Array.isArray(data) ? data : (data && data.posts && Array.isArray(data.posts) ? data.posts : []);
+                  found = postsArray.find((p: any) => String(p.id) === String(postId));
+                }
+              } catch (e) {}
+            }
+
             if (found) {
               if (found.title) setHeadline(found.title);
               if (found.subheadline) setSubheadline(found.subheadline);
@@ -326,14 +353,21 @@ export default function CreateNewPostPage() {
               } else {
                 setSelectedSubCategories([]);
               }
-              if (found.tags) setTags(found.tags);
+              if (found.tags && Array.isArray(found.tags)) setTags(found.tags);
+              if (found.imageSeoKeywords && Array.isArray(found.imageSeoKeywords)) {
+                setImageSeoKeywords(found.imageSeoKeywords);
+              } else {
+                setImageSeoKeywords([]);
+              }
               if (found.readDuration) setReadDuration(found.readDuration);
             }
           }
+        } catch (e) {
+          console.error("Error initializing edit draft:", e);
         }
-      } catch (e) {
-        console.error("Error initializing edit draft:", e);
-      }
+      };
+
+      loadPostData();
     }
   }, []);
 
@@ -678,10 +712,12 @@ export default function CreateNewPostPage() {
       a.href = url;
       a.target = "_blank";
       a.rel = "noopener noreferrer";
-      a.className = "text-[#111111] font-semibold underline";
-      a.style.color = "#111111";
+      a.className = "text-black font-semibold underline";
+      a.style.color = "#000000";
       a.style.fontWeight = "600";
-      a.style.textDecoration = "underline";
+      a.style.textDecoration = "underline solid 1px";
+      a.style.borderBottom = "none";
+      a.style.boxShadow = "none";
       a.textContent = targetText;
 
       if (range) {
@@ -704,10 +740,12 @@ export default function CreateNewPostPage() {
       a.href = url;
       a.target = "_blank";
       a.rel = "noopener noreferrer";
-      a.className = "text-[#111111] font-semibold underline";
-      a.style.color = "#111111";
+      a.className = "text-black font-semibold underline";
+      a.style.color = "#000000";
       a.style.fontWeight = "600";
-      a.style.textDecoration = "underline";
+      a.style.textDecoration = "underline solid 1px";
+      a.style.borderBottom = "none";
+      a.style.boxShadow = "none";
       a.textContent = linkText.trim();
 
       if (range && editorRef.current.contains(range.commonAncestorContainer)) {
@@ -721,9 +759,24 @@ export default function CreateNewPostPage() {
     anchors.forEach((anc) => {
       anc.setAttribute("target", "_blank");
       anc.setAttribute("rel", "noopener noreferrer");
-      anc.style.color = "#111111";
+      anc.className = "text-black font-semibold underline";
+      anc.style.color = "#000000";
       anc.style.fontWeight = "600";
-      anc.style.textDecoration = "underline";
+      anc.style.textDecoration = "underline solid 1px";
+      anc.style.borderBottom = "none";
+      anc.style.boxShadow = "none";
+
+      // Strip inner <u> tags so multiple underlines do not stack
+      const uElements = anc.querySelectorAll("u");
+      uElements.forEach((u) => {
+        const text = u.textContent || "";
+        u.replaceWith(document.createTextNode(text));
+      });
+      // Unwrap outer <u> parent if it wraps the anchor
+      if (anc.parentElement && anc.parentElement.tagName.toLowerCase() === "u") {
+        const uParent = anc.parentElement;
+        uParent.replaceWith(anc);
+      }
     });
 
     setBodyContent(editorRef.current.innerHTML);
@@ -1055,6 +1108,27 @@ export default function CreateNewPostPage() {
     if (modalImageFile) {
       finalUrl = await compressImageFile(modalImageFile, 800, 0.7);
     }
+
+    // Automatically upload external URL or base64 to Backblaze B2
+    if (finalUrl && !finalUrl.includes("backblazeb2.com") && (finalUrl.startsWith("http://") || finalUrl.startsWith("https://") || finalUrl.startsWith("data:image/"))) {
+      try {
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
+        const res = await fetch(`${backendUrl}/api/upload-url`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: finalUrl, folder: "articles" }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.url) {
+            finalUrl = data.url;
+          }
+        }
+      } catch (uploadErr) {
+        console.warn("Backblaze B2 URL upload notice:", uploadErr);
+      }
+    }
+
     if (!finalUrl || finalUrl.startsWith("blob:")) {
       finalUrl = "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?fm=webp&fit=crop&w=800&q=80";
     }
@@ -1318,6 +1392,7 @@ export default function CreateNewPostPage() {
       category: mainCategory || "Business",
       subCategories: selectedSubCategories,
       tags: tags,
+      imageSeoKeywords: imageSeoKeywords,
       status: "Drafts",
       date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
       readDuration: readDuration || "15 min read",
@@ -1414,6 +1489,7 @@ export default function CreateNewPostPage() {
       category: mainCategory || "Business",
       subCategories: selectedSubCategories,
       tags: tags,
+      imageSeoKeywords: imageSeoKeywords,
       status: "Pending review",
       date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
       readDuration: readDuration || "15 min read",
@@ -2063,6 +2139,7 @@ export default function CreateNewPostPage() {
                               <option value="Research">Research</option>
                               <option value="Opinions">Opinions</option>
                               <option value="Editorials">Editorials</option>
+                              <option value="Interviews">Interviews</option>
                             </select>
                             <div className="pointer-events-none absolute right-3 top-3 text-gray-500">
                               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -2171,21 +2248,18 @@ export default function CreateNewPostPage() {
                           </div>
                         </div>
 
-                        {/* 3. TAGS matching Image 2 */}
                         <div className="space-y-1.5">
                           <label className="block text-[10.5px] font-mono font-bold text-[#94a3b8] uppercase tracking-wider">
                             TAGS
                           </label>
-                          <div className="bg-white border-2 border-[#ea580c] rounded-2xl p-3.5 space-y-3 shadow-sm">
-                            {/* Render Active Dark Navy Tag Pills matching Image 2 */}
+                          <div className="bg-white border-2 border-[#ea580c] rounded-2xl p-3.5 space-y-3 shadow-2xs">
                             {tags.length > 0 && (
                               <div className="flex flex-wrap gap-2">
                                 {tags.map((tag) => (
                                   <span
                                     key={tag}
                                     onClick={() => handleRemoveTag(tag)}
-                                    className="bg-[#0b132b] text-white text-[11px] font-mono font-extrabold px-3 py-1.5 rounded-xl flex items-center space-x-1.5 cursor-pointer hover:bg-[#1e293b] transition-all shadow-sm"
-                                    title="Click to remove tag"
+                                    className="bg-[#0b132b] text-white text-[11px] font-mono font-extrabold px-3 py-1.5 rounded-xl flex items-center space-x-1.5 cursor-pointer hover:bg-[#1e293b] transition-all shadow-xs"
                                   >
                                     <span>#{tag.toUpperCase()}</span>
                                   </span>
@@ -2200,9 +2274,6 @@ export default function CreateNewPostPage() {
                               onKeyDown={handleAddTag}
                               className="w-full bg-transparent border-none outline-none text-sm font-sans font-medium text-[#1e293b] placeholder-[#94a3b8]"
                             />
-                          </div>
-                          <div className="text-[9px] font-mono font-bold text-[#94a3b8] tracking-wider pt-0.5 uppercase">
-                            PRESS ENTER OR COMMA TO ADD • CLICK TAG TO REMOVE • {tags.length} TAGS
                           </div>
                         </div>
 
@@ -2592,32 +2663,9 @@ export default function CreateNewPostPage() {
                   </div>
                 )}
 
-                {/* Comments Section matching Screenshot 5 */}
-                <div className="border-t border-[#e2e8f0] pt-8 mt-10 space-y-4 font-sans">
-                  <div className="flex items-center space-x-2 text-sm font-serif font-bold text-[#0f172a] uppercase">
-                    <svg className="w-4 h-4 text-[#0f172a]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
-                    </svg>
-                    <span>COMMENTS (0)</span>
-                  </div>
-
-                  <div className="flex items-center space-x-2 pt-2">
-                    <input
-                      type="text"
-                      placeholder="Add a comment..."
-                      className="border border-[#cbd5e1] rounded-full px-4 py-2.5 text-xs text-[#1e293b] placeholder-[#94a3b8] focus:outline-none focus:border-slate-500 flex-1"
-                    />
-                    <button
-                      type="button"
-                      className="bg-[#64748b] text-white font-sans font-extrabold text-xs px-5 py-2.5 rounded-xl uppercase tracking-wider hover:bg-slate-700 transition-colors cursor-pointer shrink-0"
-                    >
-                      POST
-                    </button>
-                  </div>
-
-                  <p className="text-xs italic text-[#94a3b8] pt-1">
-                    No comments yet. Be the first to share your thoughts.
-                  </p>
+                {/* Comments Section */}
+                <div className="border-t border-[#e2e8f0] pt-6 mt-8 font-sans">
+                  <ArticleCommentsSection articleSlug="create-post-preview" commentCount={0} />
                 </div>
 
               </div>
@@ -2655,9 +2703,9 @@ export default function CreateNewPostPage() {
       {/* ================================================================= */}
       {showImageModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4">
-          <div className="bg-white rounded-3xl max-w-[520px] w-full p-4 sm:p-7 shadow-2xl space-y-4 font-sans text-left animate-in zoom-in-95 duration-150 border border-slate-100 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-[520px] w-full p-4 sm:p-5 shadow-2xl space-y-3 font-sans text-left animate-in zoom-in-95 duration-150 border border-slate-100 overflow-hidden">
             {/* Header with Icon and Title */}
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center space-x-2.5">
                 <div className="w-8 h-8 rounded-lg bg-[#fff7ed] border border-[#ffedd5] flex items-center justify-center text-[#ea580c]">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -2665,7 +2713,7 @@ export default function CreateNewPostPage() {
                   </svg>
                 </div>
                 <h3 className="text-lg font-serif font-bold text-[#0f172a] tracking-tight">
-                  Insert Article Image
+                  {editingFigureEl ? "Edit Article Image" : "Insert Article Image"}
                 </h3>
               </div>
               <button
@@ -2680,13 +2728,70 @@ export default function CreateNewPostPage() {
             </div>
 
             {/* Form Fields */}
-            <div className="space-y-4 pt-1">
+            <div className="space-y-3 pt-0.5">
+              {/* PASTE IMAGE URL (matching requested design) */}
+              <div className="space-y-1">
+                <label className="block text-[10px] font-mono font-bold text-[#94a3b8] uppercase tracking-wider">
+                  PASTE IMAGE URL
+                </label>
+                <input
+                  type="url"
+                  placeholder="https://..."
+                  value={modalImageUrl}
+                  onChange={(e) => {
+                    setModalImageUrl(e.target.value);
+                    if (e.target.value) setModalImageFile(null);
+                  }}
+                  className="w-full bg-white border border-[#cbd5e1] rounded-xl px-3 py-2 text-xs text-[#1e293b] placeholder-[#94a3b8] focus:outline-none focus:border-[#ea580c] transition-colors font-sans"
+                />
+
+                {/* Live Image Preview & B2 Storage Status */}
+                {modalImageUrl.trim() && (
+                  <div className="mt-1.5 p-2 bg-[#f8fafc] border border-[#cbd5e1] rounded-xl text-center space-y-1">
+                    <div className="text-[10px] font-mono font-bold text-[#64748b] uppercase tracking-wider flex items-center justify-between px-1">
+                      <span>IMAGE PREVIEW</span>
+                      {modalImageUrl.includes("backblazeb2.com") ? (
+                        <span className="text-[#059669] flex items-center gap-1">✓ SAVED TO BACKBLAZE B2</span>
+                      ) : (
+                        <span className="text-[#ea580c] flex items-center gap-1">⚡ WILL SAVE TO BACKBLAZE B2 ON INSERT</span>
+                      )}
+                    </div>
+                    <div className="max-h-36 overflow-hidden rounded-lg border border-slate-200 bg-white flex items-center justify-center p-1 min-h-[60px]">
+                      <img
+                        src={modalImageUrl.trim()}
+                        alt="Pasted Preview"
+                        className="max-h-32 max-w-full object-contain rounded"
+                        onError={(e) => {
+                          const target = e.target as HTMLElement;
+                          target.style.display = "none";
+                          const parent = target.parentElement;
+                          if (parent && !parent.querySelector(".preview-error")) {
+                            const errDiv = document.createElement("div");
+                            errDiv.className = "preview-error text-[11px] font-mono text-amber-600 font-bold py-2";
+                            errDiv.innerText = "⚠️ Image preview loading... (Will save to Backblaze on insert)";
+                            parent.appendChild(errDiv);
+                          }
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* OR UPLOAD FILE Divider */}
+              <div className="relative flex items-center justify-center py-1">
+                <div className="border-t border-[#e2e8f0] w-full"></div>
+                <span className="bg-white px-3 text-[10px] font-mono font-bold text-[#94a3b8] uppercase tracking-wider shrink-0 absolute">
+                  OR UPLOAD FILE
+                </span>
+              </div>
+
               {/* CHOOSE COMPUTER FILE matching Image 1 */}
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 <label className="block text-[10px] font-mono font-bold text-[#94a3b8] uppercase tracking-wider">
                   CHOOSE COMPUTER FILE
                 </label>
-                <div className="border border-dashed border-[#cbd5e1] rounded-xl p-3 bg-[#f8fafc] text-xs font-mono text-[#475569]">
+                <div className="border border-dashed border-[#cbd5e1] rounded-xl p-2.5 bg-[#f8fafc] text-xs font-mono text-[#475569]">
                   <div className="flex items-center space-x-2">
                     <label className="bg-white border border-[#cbd5e1] hover:bg-slate-50 text-[#0f172a] font-bold px-3 py-1.5 rounded-lg cursor-pointer transition-colors shrink-0 shadow-2xs">
                       Choose File
@@ -2707,7 +2812,7 @@ export default function CreateNewPostPage() {
 
                   {/* File Upload Green Success Notice: ONLY shown after a file is selected */}
                   {modalImageFile && (
-                    <div className="text-[10.5px] font-mono font-bold text-[#059669] mt-2 flex items-center space-x-1">
+                    <div className="text-[10.5px] font-mono font-bold text-[#059669] mt-1.5 flex items-center space-x-1">
                       <span>✓</span>
                       <span>
                         FILE "{modalImageFile.name.toUpperCase()}" COMPRESSED AND READY!
@@ -2717,44 +2822,51 @@ export default function CreateNewPostPage() {
                 </div>
               </div>
 
+              {/* IMAGE SEO KEYWORDS (MAX 4 KEYWORDS) */}
+              <ImageSeoKeywordsInput
+                keywords={imageSeoKeywords}
+                onChange={(newKeywords) => setImageSeoKeywords(newKeywords)}
+                maxKeywords={4}
+              />
+
               {/* IMAGE CAPTION / ALT TEXT */}
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 <label className="block text-[10px] font-mono font-bold text-[#94a3b8] uppercase tracking-wider">
-                  IMAGE CAPTION / ALT TEXT
+                  Image Caption (Visible under picture to readers)
                 </label>
                 <input
                   type="text"
-                  placeholder="Describe this image..."
+                  placeholder="Brief description (e.g. President speaking with reporters outside Capitol)"
                   value={modalImageCaption}
                   onChange={(e) => setModalImageCaption(e.target.value)}
-                  className="w-full bg-white border border-[#cbd5e1] rounded-xl px-3.5 py-2.5 text-xs text-[#1e293b] placeholder-[#94a3b8] focus:outline-none focus:border-[#ea580c] transition-colors"
+                  className="w-full bg-white border border-[#cbd5e1] rounded-xl px-3 py-2 text-xs text-[#1e293b] placeholder-[#94a3b8] focus:outline-none focus:border-[#ea580c] transition-colors"
                 />
               </div>
 
               {/* IMAGE CREDIT / SOURCE (OPTIONAL) */}
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 <label className="block text-[10px] font-mono font-bold text-[#94a3b8] uppercase tracking-wider">
-                  IMAGE CREDIT / SOURCE (OPTIONAL)
+                  Image Credit / Source (Optional)
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. Getty Images, AP Photo"
+                  placeholder="e.g. Reuters, AP Photo, Getty Images"
                   value={modalImageCredit}
                   onChange={(e) => setModalImageCredit(e.target.value)}
-                  className="w-full bg-white border border-[#cbd5e1] rounded-xl px-3.5 py-2.5 text-xs text-[#1e293b] placeholder-[#94a3b8] focus:outline-none focus:border-[#ea580c] transition-colors"
+                  className="w-full bg-white border border-[#cbd5e1] rounded-xl px-3 py-2 text-xs text-[#1e293b] placeholder-[#94a3b8] focus:outline-none focus:border-[#ea580c] transition-colors"
                 />
               </div>
 
               {/* IMAGE SIZE & POSITION ALIGNMENT Grid matching Image 3 and Image 4 */}
-              <div className="grid grid-cols-2 gap-3.5 pt-1">
-                <div className="space-y-1.5">
+              <div className="grid grid-cols-2 gap-3 pt-0.5">
+                <div className="space-y-1">
                   <label className="block text-[10px] font-mono font-bold text-[#94a3b8] uppercase tracking-wider">
                     IMAGE SIZE
                   </label>
                   <select
                     value={modalImageSize}
                     onChange={(e) => setModalImageSize(e.target.value)}
-                    className="w-full bg-white border border-[#cbd5e1] rounded-xl px-3 py-2.5 text-xs font-sans text-[#1e293b] focus:outline-none focus:border-[#ea580c] transition-colors cursor-pointer"
+                    className="w-full bg-white border border-[#cbd5e1] rounded-xl px-2.5 py-2 text-xs font-sans text-[#1e293b] focus:outline-none focus:border-[#ea580c] transition-colors cursor-pointer"
                   >
                     <option value="Small (Width: 250px)">Small (Width: 250px)</option>
                     <option value="Medium (Width: 450px)">Medium (Width: 450px)</option>
@@ -2762,14 +2874,14 @@ export default function CreateNewPostPage() {
                   </select>
                 </div>
 
-                <div className="space-y-1.5">
+                <div className="space-y-1">
                   <label className="block text-[10px] font-mono font-bold text-[#94a3b8] uppercase tracking-wider">
                     POSITION ALIGNMENT
                   </label>
                   <select
                     value={modalImageAlign}
                     onChange={(e) => setModalImageAlign(e.target.value)}
-                    className="w-full bg-white border border-[#cbd5e1] rounded-xl px-3 py-2.5 text-xs font-sans text-[#1e293b] focus:outline-none focus:border-[#ea580c] transition-colors cursor-pointer"
+                    className="w-full bg-white border border-[#cbd5e1] rounded-xl px-2.5 py-2 text-xs font-sans text-[#1e293b] focus:outline-none focus:border-[#ea580c] transition-colors cursor-pointer"
                   >
                     <option value="Left (Wrap Text Right)">Left (Wrap Text Right)</option>
                     <option value="Center (No Wrap)">Center (No Wrap)</option>
@@ -2780,20 +2892,20 @@ export default function CreateNewPostPage() {
             </div>
 
             {/* Action Buttons */}
-            <div className="grid grid-cols-2 gap-3 pt-3">
+            <div className="grid grid-cols-2 gap-3 pt-2">
               <button
                 type="button"
                 onClick={() => setShowImageModal(false)}
-                className="w-full bg-[#f1f5f9] hover:bg-slate-200 text-[#475569] font-bold text-xs py-3 rounded-xl transition-colors cursor-pointer uppercase tracking-wider"
+                className="w-full bg-[#f1f5f9] hover:bg-slate-200 text-[#475569] font-bold text-xs py-2.5 rounded-xl transition-colors cursor-pointer uppercase tracking-wider"
               >
                 CANCEL
               </button>
               <button
                 type="button"
                 onClick={handleConfirmInsertImage}
-                className="w-full bg-[#ea580c] hover:bg-[#c2410c] text-white font-bold text-xs py-3 rounded-xl transition-colors cursor-pointer shadow-xs uppercase tracking-wider"
+                className="w-full bg-[#ea580c] hover:bg-[#c2410c] text-white font-bold text-xs py-2.5 rounded-xl transition-all cursor-pointer shadow-md uppercase tracking-wider flex items-center justify-center"
               >
-                INSERT IMAGE
+                <span>{editingFigureEl ? "UPDATE IMAGE" : "INSERT IMAGE"}</span>
               </button>
             </div>
           </div>

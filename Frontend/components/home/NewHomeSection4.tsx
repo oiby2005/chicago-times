@@ -1951,12 +1951,6 @@ export default function NewHomeSection4() {
                     alt="Pizza Hut Storefront"
                     className="w-full h-full object-cover group-hover/vid:scale-105 transition-transform duration-300 opacity-90"
                   />
-                  {/* Play Icon Overlay */}
-                  <div className="absolute inset-0 m-auto w-6 h-6 rounded-full bg-black/75 flex items-center justify-center text-white shadow-xs group-hover/vid:bg-black group-hover/vid:scale-110 transition-all">
-                    <svg className="w-2.5 h-2.5 fill-current ml-0.5" viewBox="0 0 24 24">
-                      <path d="M8 5v14l11-7z" />
-                    </svg>
-                  </div>
                 </Link>
               </article>
 
@@ -1977,12 +1971,6 @@ export default function NewHomeSection4() {
                     alt="Flower Farm Chanel No. 5"
                     className="w-full h-full object-cover group-hover/vid:scale-105 transition-transform duration-300 opacity-90"
                   />
-                  {/* Play Icon Overlay */}
-                  <div className="absolute inset-0 m-auto w-6 h-6 rounded-full bg-black/75 flex items-center justify-center text-white shadow-xs group-hover/vid:bg-black group-hover/vid:scale-110 transition-all">
-                    <svg className="w-2.5 h-2.5 fill-current ml-0.5" viewBox="0 0 24 24">
-                      <path d="M8 5v14l11-7z" />
-                    </svg>
-                  </div>
                 </Link>
               </article>
 
@@ -2003,12 +1991,6 @@ export default function NewHomeSection4() {
                     alt="Pacific Wargames"
                     className="w-full h-full object-cover group-hover/vid:scale-105 transition-transform duration-300 opacity-90"
                   />
-                  {/* Play Icon Overlay */}
-                  <div className="absolute inset-0 m-auto w-6 h-6 rounded-full bg-black/75 flex items-center justify-center text-white shadow-xs group-hover/vid:bg-black group-hover/vid:scale-110 transition-all">
-                    <svg className="w-2.5 h-2.5 fill-current ml-0.5" viewBox="0 0 24 24">
-                      <path d="M8 5v14l11-7z" />
-                    </svg>
-                  </div>
                 </Link>
               </article>
 
@@ -2029,12 +2011,6 @@ export default function NewHomeSection4() {
                     alt="WSJ Opinion Hits and Misses"
                     className="w-full h-full object-cover group-hover/vid:scale-105 transition-transform duration-300 opacity-90"
                   />
-                  {/* Play Icon Overlay */}
-                  <div className="absolute inset-0 m-auto w-6 h-6 rounded-full bg-black/75 flex items-center justify-center text-white shadow-xs group-hover/vid:bg-black group-hover/vid:scale-110 transition-all">
-                    <svg className="w-2.5 h-2.5 fill-current ml-0.5" viewBox="0 0 24 24">
-                      <path d="M8 5v14l11-7z" />
-                    </svg>
-                  </div>
                 </Link>
               </article>
 
@@ -2055,12 +2031,6 @@ export default function NewHomeSection4() {
                     alt="The Evolution of Modern Motorsports"
                     className="w-full h-full object-cover group-hover/vid:scale-105 transition-transform duration-300 opacity-90"
                   />
-                  {/* Play Icon Overlay */}
-                  <div className="absolute inset-0 m-auto w-6 h-6 rounded-full bg-black/75 flex items-center justify-center text-white shadow-xs group-hover/vid:bg-black group-hover/vid:scale-110 transition-all">
-                    <svg className="w-2.5 h-2.5 fill-current ml-0.5" viewBox="0 0 24 24">
-                      <path d="M8 5v14l11-7z" />
-                    </svg>
-                  </div>
                 </Link>
               </article>
             </div>

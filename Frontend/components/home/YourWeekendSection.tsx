@@ -155,12 +155,6 @@ export const YourWeekendSection: React.FC = () => {
                 {hero.summary}
               </p>
             )}
-            {hero.commentCount !== undefined && hero.commentCount > 0 && (
-              <div className="font-sans text-[12px] text-[#777777] flex items-center space-x-1">
-                <span>💬</span>
-                <span>{hero.commentCount}</span>
-              </div>
-            )}
             <span className="font-mono text-[11px] text-[#666666] mt-1 block">
               {formatTimeAgo(hero.publishedAt)}
             </span>
@@ -169,8 +163,7 @@ export const YourWeekendSection: React.FC = () => {
 
         {/* ==================== RIGHT SIDE STORIES (4 of 12 cols ~ 33%) ==================== */}
         <div 
-          className="md:col-span-4 pl-0 md:pl-[0.4cm] flex flex-col justify-between border-t md:border-t-0 pt-4 md:pt-0"
-          style={{ borderLeft: "1px solid #CCCCCC" }}
+          className="md:col-span-4 pl-0 md:pl-[0.4cm] flex flex-col justify-between border-t md:border-t-0 border-l border-dashed border-[#CCCCCC] pt-4 md:pt-0"
         >
           {/* Top Story (Position 2) */}
           <article className="pb-4 border-b border-dashed border-[#CCCCCC] mb-4">
@@ -194,12 +187,6 @@ export const YourWeekendSection: React.FC = () => {
                 {rightTop.summary}
               </p>
             )}
-            {rightTop.commentCount !== undefined && rightTop.commentCount > 0 && (
-              <div className="font-sans text-[12px] text-[#777777] flex items-center space-x-1">
-                <span>💬</span>
-                <span>{rightTop.commentCount}</span>
-              </div>
-            )}
             <span className="font-mono text-[11px] text-[#666666] mt-1 block">
               {formatTimeAgo(rightTop.publishedAt)}
             </span>
@@ -220,12 +207,6 @@ export const YourWeekendSection: React.FC = () => {
               )}
             </div>
             <div>
-              {rightBottom.commentCount !== undefined && rightBottom.commentCount > 0 && (
-                <div className="font-sans text-[12px] text-[#777777] flex items-center space-x-1 mt-2">
-                  <span>💬</span>
-                  <span>{rightBottom.commentCount}</span>
-                </div>
-              )}
               <span className="font-mono text-[11px] text-[#666666] mt-1 block">
                 {formatTimeAgo(rightBottom.publishedAt)}
               </span>

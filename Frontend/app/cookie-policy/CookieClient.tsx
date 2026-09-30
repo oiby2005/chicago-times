@@ -47,23 +47,9 @@ export default function CookieClient() {
           <Container>
             {/* Header / Legal Document Title Bar */}
             <div className="text-center max-w-4xl mx-auto mb-8">
-              <span className="font-sans font-extrabold text-[11px] tracking-[0.22em] text-[#990000] uppercase block mb-2">
-                LEGAL DOCUMENT • COOKIE MANAGEMENT
-              </span>
-
-              <h1 className="font-serif font-black text-[32px] sm:text-[44px] leading-tight text-[#111111] tracking-tight mb-2">
+              <h1 className="font-serif font-black text-[32px] sm:text-[44px] leading-tight text-[#111111] tracking-tight">
                 Cookie Policy
               </h1>
-
-              <span className="font-mono text-[11px] tracking-widest text-[#666666] uppercase block">
-                LAST UPDATED: JUNE 30, 2026
-              </span>
-
-              {/* 100% Matching Double Header Lines */}
-              <div className="w-full flex flex-col gap-[3px] mt-6 mb-8">
-                <div className="w-full h-[1.5px] bg-[#111111]"></div>
-                <div className="w-full h-[1.5px] bg-[#111111]"></div>
-              </div>
             </div>
 
             {/* Main Content 2-Column Grid */}
@@ -80,7 +66,6 @@ export default function CookieClient() {
                     }`}
                   >
                     <div className="flex items-center space-x-2">
-                      <span className="text-[#990000] text-[16px]">🌐</span>
                       <h3 className="font-serif font-bold text-[15px] uppercase tracking-wider text-[#111111]">
                         COOKIE POLICY SECTIONS
                       </h3>

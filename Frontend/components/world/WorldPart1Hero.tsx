@@ -13,10 +13,10 @@ export default function WorldPart1Hero() {
         </h1>
       </div>
 
-      {/* 3-Column Grid with clearly visible vertical grey borders */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-0 pb-8">
+      {/* 3-Column Grid with vertical dashed grey borders */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-0 pb-8 border-b border-dashed border-[#CCCCCC]">
         {/* Column 1 (Left): Two Horizontal Cards */}
-        <div className="pr-0 md:pr-6 pb-6 md:pb-0 flex flex-col justify-between md:border-r md:border-gray-300">
+        <div className="pr-0 md:pr-6 pb-6 md:pb-0 flex flex-col justify-between md:border-r md:border-dashed md:border-[#CCCCCC]">
           {/* Card 1 */}
           <article className="flex flex-row items-start justify-between gap-3">
             <div className="flex-1 min-w-0">
@@ -41,8 +41,8 @@ export default function WorldPart1Hero() {
             </div>
           </article>
 
-          {/* Clearly visible horizontal grey divider line */}
-          <div className="border-b border-gray-300 my-5" />
+          {/* Clearly visible horizontal dashed divider line */}
+          <div className="border-b border-dashed border-[#CCCCCC] my-5" />
 
           {/* Card 2 */}
           <article className="flex flex-row items-start justify-between gap-3">
@@ -70,7 +70,7 @@ export default function WorldPart1Hero() {
         </div>
 
         {/* Column 2 (Middle): Vertical Card */}
-        <div className="px-0 md:px-6 py-6 md:py-0 md:border-r md:border-gray-300">
+        <div className="px-0 md:px-6 py-6 md:py-0 md:border-r md:border-dashed md:border-[#CCCCCC]">
           <article>
             <Link href="/article/us-strategy-in-venezuela-can-washington-help-rebuild-trust" className="block relative aspect-[16/10] w-full mb-3.5 overflow-hidden bg-gray-100 border border-gray-200">
               {/* eslint-disable-next-line @next/next/no-img-element */}

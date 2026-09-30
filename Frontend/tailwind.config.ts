@@ -13,6 +13,7 @@ const config: Config = {
         escrow: ["Escrow Condensed", "Escrow Display Condensed", "var(--font-playfair)", "Playfair Display", "Georgia", "serif"],
         serif: ["Encorpada Classic Compressed Bold", "Escrow Display Condensed Bold", "var(--font-playfair)", "Playfair Display", "Georgia", "serif"],
         sans: ["var(--font-sans)", "Inter", "Helvetica Neue", "Arial", "sans-serif"],
+        poppins: ["Poppins", "var(--font-sans)", "Inter", "sans-serif"],
         retina: ["Retina", "Retina Bold", "Retina-Bold", "var(--font-sans)", "Inter", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"],
         whitney: ["Whitney", "Whitney Book", "Whitney-Book", "Whitney Medium", "Whitney SemiBold", "var(--font-sans)", "Inter", "Helvetica Neue", "Arial", "sans-serif"],
         publica: ["Publica Sans Light", "Publica Sans", "PublicaSans-Light", "PublicaSansLight", "Whitney", "Whitney Book", "var(--font-sans)", "Inter", "Helvetica Neue", "Arial", "sans-serif"],

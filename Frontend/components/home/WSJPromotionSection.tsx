@@ -12,17 +12,17 @@ export const WSJPromotionSection: React.FC = () => {
           <span className="font-sans font-bold text-[11px] uppercase tracking-wider text-[#3B71AC] block mb-1">
             WSJ PROMOTION
           </span>
-          <h3 className="font-serif font-bold text-[26px] sm:text-[32px] leading-tight text-[#111111] mb-3">
+          <h3 className="font-serif font-bold text-[26px] sm:text-[32px] leading-tight text-[#111111] mb-2">
             Special Offer
           </h3>
           <p className="font-sans text-[13.5px] sm:text-[14px] leading-relaxed text-[#444444] max-w-[620px] mb-6">
-            Trust your source. Trust your decisions. Let WSJ’s fact-based journalism help you make sense of what’s already happened and navigate what’s ahead.
+            Trust your source. Trust your city. Get fact-based journalism, local reporting, and the stories that matter across World.
           </p>
         </div>
 
         <div>
           <Link
-            href="/subscription"
+            href="/special-offer"
             className="inline-block bg-[#3B71AC] text-white font-sans font-bold text-[11.5px] sm:text-[12px] uppercase tracking-wider px-5 py-3 hover:bg-[#2F5C8F] transition-colors"
           >
             VIEW MEMBERSHIP OPTIONS

@@ -130,7 +130,7 @@ export const FashionScienceArtsSection: React.FC = () => {
   }, [loadPosts]);
 
   return (
-    <div className="w-full font-sans select-none pt-2 pb-4">
+    <div className="w-full font-sans select-none pt-8 mt-6 pb-4">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
         
         {/* ==================== COLUMN 1: FASHION ==================== */}
