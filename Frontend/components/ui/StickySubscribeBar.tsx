@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 
 export const StickySubscribeBar: React.FC = () => {
   const [isVisible, setIsVisible] = useState(true);
@@ -26,9 +27,13 @@ export const StickySubscribeBar: React.FC = () => {
 
         {/* Right Action Button & Close */}
         <div className="flex items-center space-x-3">
-          <button className="bg-[#007cba] hover:bg-[#006996] text-white font-sans text-xs font-bold px-4 py-2 rounded-xs tracking-tight transition-colors whitespace-nowrap" suppressHydrationWarning>
+          <Link
+            href="/special-offer"
+            className="bg-[#007cba] hover:bg-[#006996] text-white font-sans text-xs font-bold px-4 py-2 rounded-xs tracking-tight transition-colors whitespace-nowrap inline-block"
+            suppressHydrationWarning
+          >
             Subscribe Now
-          </button>
+          </Link>
           <button
             onClick={() => setIsVisible(false)}
             aria-label="Close"

@@ -203,7 +203,7 @@ export const LogoHeader: React.FC = () => {
   );
 
   return (
-    <div className="bg-white h-auto py-2 sm:py-3 relative select-none">
+    <div className="bg-white h-auto py-2 sm:py-3 relative z-50 select-none">
       <SearchOverlay
         isOpen={isSearchOverlayOpen}
         onClose={() => setIsSearchOverlayOpen(false)}
@@ -260,7 +260,7 @@ export const LogoHeader: React.FC = () => {
           </div>
 
           {/* Desktop Right Action Buttons: Special Offer & Sign In (Generous padding on all sides) */}
-          <div className="hidden md:flex items-center space-x-2.5 w-[230px] lg:w-[270px] justify-end pt-1">
+          <div className="hidden md:flex items-center space-x-2.5 w-[230px] lg:w-[270px] justify-end pt-1 relative z-[100]">
             <SpecialOfferPopover>
               <button
                 className="bg-[#007cb9] hover:bg-[#006996] text-white font-sans text-[11.5px] font-medium px-5 py-2 h-auto flex items-center justify-center rounded-none tracking-tight transition-colors whitespace-nowrap cursor-pointer shadow-xs leading-none"
@@ -308,8 +308,8 @@ export const LogoHeader: React.FC = () => {
           </div>
         </div>
 
-        {/* Sub-Utility Edition Navigation: Centered within LogoHeader */}
-        <div className="flex items-center justify-center text-[11px] sm:text-[12px] font-['Century_Gothic','Publica_Sans_Light','Kumbh_Sans',sans-serif] font-normal text-[#333333] tracking-tight select-none z-30 whitespace-nowrap overflow-visible max-w-full my-1 pt-1.5 pb-0.5 px-2">
+        {/* Sub-Utility Edition Navigation */}
+        <div className="flex items-center justify-center -translate-x-[14px] sm:-translate-x-[24px] text-[11px] sm:text-[12px] font-['Century_Gothic','Publica_Sans_Light','Kumbh_Sans',sans-serif] font-normal text-[#333333] tracking-tight select-none z-10 whitespace-nowrap overflow-visible max-w-full my-1 pt-1.5 pb-0.5 px-2">
           {/* Edition Selection Dropdown Card */}
           <div className="relative inline-block" ref={editionRef}>
             <button

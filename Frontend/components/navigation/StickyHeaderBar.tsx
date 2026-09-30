@@ -225,7 +225,7 @@ export const StickyHeaderBar: React.FC = () => {
           </div>
 
           {/* Right Buttons: Special Offer & Sign In (Matching LogoHeader alignment) */}
-          <div className="hidden md:flex items-center space-x-2.5 w-[230px] lg:w-[270px] justify-end z-10 shrink-0 relative">
+          <div className="hidden md:flex items-center space-x-2.5 w-[230px] lg:w-[270px] justify-end z-[100] shrink-0 relative">
             <SpecialOfferPopover>
               <button
                 className="bg-[#007cb9] hover:bg-[#006996] text-white font-sans text-[11.5px] font-medium px-4 py-1.5 h-auto flex items-center justify-center rounded-none tracking-tight transition-colors whitespace-nowrap cursor-pointer shadow-xs leading-none"

@@ -277,106 +277,98 @@ export const EditorsPicksSection: React.FC = () => {
 
         {/* RIGHT SIDEBAR 4 CARDS PACKAGE */}
         <div className="lg:col-span-4 pl-0 lg:pl-[0.4cm] pt-6 lg:pt-0">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-0">
-            {/* Column 1 (Left): Top-Left & Bottom-Left */}
-            <div className="flex flex-col justify-between pr-3 border-r border-dashed border-[#CCCCCC]">
-              {rightCards[0] && (
-                <article className="pb-4 border-b border-dashed border-[#CCCCCC] flex-1 flex flex-col justify-between">
-                  <div>
-                    <Link href={`/article/${rightCards[0].slug}`} className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 mb-2 group">
-                      <img
-                        src={rightCards[0].imageUrl}
-                        alt={rightCards[0].title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
+          <div className="grid grid-cols-2 gap-0">
+            {/* Top-Left (Item 1 of sidebar) */}
+            {rightCards[0] && (
+              <article className="pr-3 pb-4 border-r border-b border-dashed border-[#CCCCCC] flex flex-col justify-between">
+                <div>
+                  <Link href={`/article/${rightCards[0].slug}`} className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 mb-2 group">
+                    <img
+                      src={rightCards[0].imageUrl}
+                      alt={rightCards[0].title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  </Link>
+                  <h4 className="font-serif font-bold text-[15px] sm:text-[15.5px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
+                    <Link href={`/article/${rightCards[0].slug}`}>
+                      {rightCards[0].title}
                     </Link>
-                    <h4 className="font-serif font-bold text-[15px] sm:text-[15.5px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
-                      <Link href={`/article/${rightCards[0].slug}`}>
-                        {rightCards[0].title}
-                      </Link>
-                    </h4>
-                  </div>
-                  <span className="font-mono text-[11px] text-[#666666] mt-1.5 block">
-                    {formatTimeAgo(rightCards[0].publishedAt)}
-                  </span>
-                </article>
-              )}
+                  </h4>
+                </div>
+                <span className="font-mono text-[11px] text-[#666666] mt-1.5 block">
+                  {formatTimeAgo(rightCards[0].publishedAt)}
+                </span>
+              </article>
+            )}
 
-              {rightCards[1] && (
-                <article className="pt-4 flex flex-col justify-between flex-1">
-                  <div>
-                    <Link href={`/article/${rightCards[1].slug}`} className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 mb-2 group">
-                      <img
-                        src={rightCards[1].imageUrl}
-                        alt={rightCards[1].title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
+            {/* Top-Right (Item 2 of sidebar) */}
+            {rightCards[2] && (
+              <article className="pl-3 pb-4 border-b border-dashed border-[#CCCCCC] flex flex-col justify-between">
+                <div>
+                  <Link href={`/article/${rightCards[2].slug}`} className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 mb-2 group">
+                    <img
+                      src={rightCards[2].imageUrl}
+                      alt={rightCards[2].title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  </Link>
+                  <h4 className="font-serif font-bold text-[15px] sm:text-[15.5px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
+                    <Link href={`/article/${rightCards[2].slug}`}>
+                      {rightCards[2].title}
                     </Link>
-                    <h4 className="font-serif font-bold text-[15px] sm:text-[15.5px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
-                      <Link href={`/article/${rightCards[1].slug}`}>
-                        {rightCards[1].title}
-                      </Link>
-                    </h4>
-                  </div>
-                  <div>
-                    <span className="font-mono text-[11px] text-[#666666] mt-1 block">
-                      {formatTimeAgo(rightCards[1].publishedAt)}
-                    </span>
-                  </div>
-                </article>
-              )}
-            </div>
+                  </h4>
+                </div>
+                <span className="font-mono text-[11px] text-[#666666] mt-1.5 block">
+                  {formatTimeAgo(rightCards[2].publishedAt)}
+                </span>
+              </article>
+            )}
 
-            {/* Column 2 (Right): Top-Right & Bottom-Right */}
-            <div className="flex flex-col justify-between pl-3">
-              {rightCards[2] && (
-                <article className="pb-4 border-b border-dashed border-[#CCCCCC] flex-1 flex flex-col justify-between">
-                  <div>
-                    <Link href={`/article/${rightCards[2].slug}`} className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 mb-2 group">
-                      <img
-                        src={rightCards[2].imageUrl}
-                        alt={rightCards[2].title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
+            {/* Bottom-Left (Item 3 of sidebar) */}
+            {rightCards[1] && (
+              <article className="pr-3 pt-4 border-r border-dashed border-[#CCCCCC] flex flex-col justify-between">
+                <div>
+                  <Link href={`/article/${rightCards[1].slug}`} className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 mb-2 group">
+                    <img
+                      src={rightCards[1].imageUrl}
+                      alt={rightCards[1].title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  </Link>
+                  <h4 className="font-serif font-bold text-[15px] sm:text-[15.5px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
+                    <Link href={`/article/${rightCards[1].slug}`}>
+                      {rightCards[1].title}
                     </Link>
-                    <h4 className="font-serif font-bold text-[15px] sm:text-[15.5px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
-                      <Link href={`/article/${rightCards[2].slug}`}>
-                        {rightCards[2].title}
-                      </Link>
-                    </h4>
-                  </div>
-                  <div>
-                    <span className="font-mono text-[11px] text-[#666666] mt-1 block">
-                      {formatTimeAgo(rightCards[2].publishedAt)}
-                    </span>
-                  </div>
-                </article>
-              )}
+                  </h4>
+                </div>
+                <span className="font-mono text-[11px] text-[#666666] mt-1.5 block">
+                  {formatTimeAgo(rightCards[1].publishedAt)}
+                </span>
+              </article>
+            )}
 
-              {rightCards[3] && (
-                <article className="pt-4 flex flex-col justify-between flex-1">
-                  <div>
-                    <Link href={`/article/${rightCards[3].slug}`} className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 mb-2 group">
-                      <img
-                        src={rightCards[3].imageUrl}
-                        alt={rightCards[3].title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
+            {/* Bottom-Right (Item 4 of sidebar) */}
+            {rightCards[3] && (
+              <article className="pl-3 pt-4 flex flex-col justify-between">
+                <div>
+                  <Link href={`/article/${rightCards[3].slug}`} className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 mb-2 group">
+                    <img
+                      src={rightCards[3].imageUrl}
+                      alt={rightCards[3].title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  </Link>
+                  <h4 className="font-serif font-bold text-[15px] sm:text-[15.5px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
+                    <Link href={`/article/${rightCards[3].slug}`}>
+                      {rightCards[3].title}
                     </Link>
-                    <h4 className="font-serif font-bold text-[15px] sm:text-[15.5px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
-                      <Link href={`/article/${rightCards[3].slug}`}>
-                        {rightCards[3].title}
-                      </Link>
-                    </h4>
-                  </div>
-                  <div>
-                    <span className="font-mono text-[11px] text-[#666666] mt-1 block">
-                      {formatTimeAgo(rightCards[3].publishedAt)}
-                    </span>
-                  </div>
-                </article>
-              )}
-            </div>
+                  </h4>
+                </div>
+                <span className="font-mono text-[11px] text-[#666666] mt-1.5 block">
+                  {formatTimeAgo(rightCards[3].publishedAt)}
+                </span>
+              </article>
+            )}
           </div>
         </div>
       </div>
