@@ -5,20 +5,45 @@ import React, { useState } from "react";
 export default function NewsletterSignupBanner() {
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMsg("");
     if (email) {
-      setSubscribed(true);
-      const cleanEmail = email.trim();
+      const cleanEmail = email.trim().toLowerCase();
 
       try {
-        await fetch("http://localhost:5000/api/newsletter", {
+        const stored = localStorage.getItem("wsj_newsletter_subscribers");
+        const list = stored ? JSON.parse(stored) : [];
+        if (list.some((s: any) => (typeof s === "string" ? s : s.email || "").toLowerCase().trim() === cleanEmail)) {
+          setErrorMsg("You have already signed up for the newsletter with this email address. Please try signing up with a different email address.");
+          return;
+        }
+      } catch (e) {}
+
+      try {
+        const res = await fetch("http://localhost:5000/api/newsletter", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email: cleanEmail }),
         });
-      } catch (err) {}
+
+        const data = await res.json().catch(() => null);
+
+        if (!res.ok || (data && !data.success)) {
+          setErrorMsg(
+            data?.message ||
+            "You have already signed up for the newsletter with this email address. Please try signing up with a different email address."
+          );
+          return;
+        }
+      } catch (err) {
+        setErrorMsg("You have already signed up for the newsletter with this email address. Please try signing up with a different email address.");
+        return;
+      }
+
+      setSubscribed(true);
 
       try {
         const stored = localStorage.getItem("wsj_newsletter_subscribers");
@@ -50,6 +75,12 @@ export default function NewsletterSignupBanner() {
       <p className="font-sans text-sm text-[#444444] mt-1.5 mb-4">
         Sign up and stay up to date with our daily newsletter.
       </p>
+
+      {errorMsg && (
+        <div className="text-red-600 font-sans text-xs font-semibold mb-3">
+          {errorMsg}
+        </div>
+      )}
 
       {/* Form or Success State */}
       {subscribed ? (

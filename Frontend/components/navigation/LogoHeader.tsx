@@ -9,6 +9,7 @@ import SpecialOfferPopover from "@/components/navigation/SpecialOfferPopover";
 import ProfileSettingsModal, { UserProfile } from "@/components/ui/ProfileSettingsModal";
 import MobileNavDrawer from "@/components/navigation/MobileNavDrawer";
 import SearchOverlay from "@/components/search/SearchOverlay";
+import { setSiteLanguageEdition, getSavedEdition } from "@/components/ui/GoogleTranslateProvider";
 
 import { getAuthorSlugForUser, getUserDashboardUrl, getAuthorBySlug } from "@/data/authors";
 
@@ -25,6 +26,21 @@ export const LogoHeader: React.FC = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const mobileDropdownRef = useRef<HTMLDivElement>(null);
   const editionRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setSelectedEdition(getSavedEdition());
+    }
+
+    const handleEditionChange = (e: any) => {
+      if (e.detail?.label) {
+        setSelectedEdition(e.detail.label);
+      }
+    };
+
+    window.addEventListener("wsj_edition_changed", handleEditionChange);
+    return () => window.removeEventListener("wsj_edition_changed", handleEditionChange);
+  }, []);
 
   const isAdminDashboard = pathname?.includes("/admin-dashboard");
   const isWriterDashboard = pathname?.includes("/writer-dashboard");
@@ -214,14 +230,15 @@ export const LogoHeader: React.FC = () => {
         currentUser={currentUser}
         onOpenSearch={() => setIsSearchOverlayOpen(true)}
       />
-      <div className="max-w-[1280px] mx-auto px-2 relative">
+      <div className="max-w-[1280px] mx-auto px-4 sm:px-5 md:px-6 relative">
         {/* Main Logo & Auth Action Buttons Row */}
-        <div className="relative flex flex-col md:flex-row items-center justify-between w-full">
-          {/* Hamburger button on mobile / tablet */}
-          <div className="flex md:hidden items-center justify-between w-full pb-1 mb-1 border-b border-gray-200">
+        <div className="relative flex flex-row items-center justify-between w-full pb-2 md:pb-0 border-b md:border-none border-gray-200">
+          
+          {/* Mobile Hamburger button (visible on < md) */}
+          <div className="flex md:hidden items-center justify-start w-10">
             <button
               onClick={() => setIsMobileDrawerOpen(true)}
-              className="p-1.5 text-[#111111] hover:text-gray-700 transition-colors cursor-pointer focus:outline-none"
+              className="p-1 text-[#111111] hover:text-gray-700 transition-colors cursor-pointer focus:outline-none"
               aria-label="Open mobile menu"
               suppressHydrationWarning
             >
@@ -229,20 +246,10 @@ export const LogoHeader: React.FC = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            <button
-              onClick={() => router.push("/search")}
-              className="p-1.5 text-[#111111] hover:text-gray-700 transition-colors cursor-pointer focus:outline-none"
-              aria-label="Search"
-              suppressHydrationWarning
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </button>
           </div>
 
-          {/* Left Action Button: Newsletter (Generous padding on all sides) */}
-          <div className="hidden md:flex items-center w-[200px] lg:w-[230px] justify-start pt-1">
+          {/* Desktop Left Action Button: Newsletter (visible on md+) */}
+          <div className="hidden md:flex items-center w-[220px] lg:w-[260px] justify-start pt-1">
             <Link
               href="/newsletters"
               className="bg-black hover:bg-gray-900 text-white font-sans text-[11.5px] font-medium px-5 py-2 h-auto flex items-center justify-center rounded-none tracking-tight transition-colors whitespace-nowrap cursor-pointer inline-flex leading-none shadow-xs"
@@ -253,14 +260,44 @@ export const LogoHeader: React.FC = () => {
           </div>
 
           {/* Centered Masthead Logo */}
-          <div className="flex-1 text-center py-0 my-0 flex items-center justify-center w-full md:w-auto">
-            <Link href="/" className="inline-block py-0 my-0 leading-none">
+          <div className="flex-1 text-center py-0 my-0 flex items-center justify-center">
+            <Link
+              href={(() => {
+                if (typeof window !== "undefined") {
+                  const path = window.location.pathname;
+                  const match = path.match(/\/admin\/([^/]+)/);
+                  if (match && match[1]) {
+                    return `/admin/${match[1]}`;
+                  }
+                }
+                if (currentUser?.role === "admin") {
+                  const nameStr = currentUser.username || currentUser.name || "admin1";
+                  return `/admin/${nameStr.toLowerCase().trim().replace(/\s+/g, "-")}`;
+                }
+                return "/";
+              })()}
+              className="inline-block py-0 my-0 leading-none"
+            >
               <WSJLogo />
             </Link>
           </div>
 
-          {/* Desktop Right Action Buttons: Special Offer & Sign In (Generous padding on all sides) */}
-          <div className="hidden md:flex items-center space-x-2.5 w-[230px] lg:w-[270px] justify-end pt-1 relative z-[100]">
+          {/* Mobile Search button (visible on < md) */}
+          <div className="flex md:hidden items-center justify-end w-10">
+            <button
+              onClick={() => setIsSearchOverlayOpen(true)}
+              className="p-1 text-[#111111] hover:text-gray-700 transition-colors cursor-pointer focus:outline-none"
+              aria-label="Search"
+              suppressHydrationWarning
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Desktop Right Action Buttons: Special Offer & Sign In (visible on md+) */}
+          <div className="hidden md:flex items-center space-x-2.5 w-[220px] lg:w-[260px] justify-end pt-1 relative z-[100]">
             <SpecialOfferPopover>
               <button
                 className="bg-[#007cb9] hover:bg-[#006996] text-white font-sans text-[11.5px] font-medium px-5 py-2 h-auto flex items-center justify-center rounded-none tracking-tight transition-colors whitespace-nowrap cursor-pointer shadow-xs leading-none"
@@ -309,11 +346,12 @@ export const LogoHeader: React.FC = () => {
         </div>
 
         {/* Sub-Utility Edition Navigation */}
-        <div className="flex items-center justify-center -translate-x-[14px] sm:-translate-x-[24px] text-[11px] sm:text-[12px] font-['Century_Gothic','Publica_Sans_Light','Kumbh_Sans',sans-serif] font-normal text-[#333333] tracking-tight select-none z-10 whitespace-nowrap overflow-visible max-w-full my-1 pt-1.5 pb-0.5 px-2">
+        <div className="flex items-center justify-start sm:justify-center max-w-full overflow-x-auto sm:overflow-visible no-scrollbar w-full text-[11px] sm:text-[12px] font-['Century_Gothic','Publica_Sans_Light','Kumbh_Sans',sans-serif] font-normal text-[#333333] tracking-tight select-none z-30 whitespace-nowrap my-1 pt-1.5 pb-0.5 px-1">
           {/* Edition Selection Dropdown Card */}
           <div className="relative inline-block" ref={editionRef}>
             <button
               type="button"
+              suppressHydrationWarning
               onClick={(e) => {
                 e.stopPropagation();
                 setShowEditionDropdown((prev) => !prev);
@@ -325,16 +363,17 @@ export const LogoHeader: React.FC = () => {
             </button>
 
             {showEditionDropdown && (
-              <div className="absolute left-0 top-[calc(100%+4px)] w-36 bg-white border border-[#e2e8f0] shadow-xl rounded-xl p-2 z-50 text-left animate-in zoom-in-95 duration-100 font-sans">
+              <div className="absolute left-0 top-[calc(100%+6px)] w-40 bg-white border border-[#e2e8f0] shadow-2xl rounded-xl p-2 z-[100] text-left animate-in zoom-in-95 duration-100 font-sans">
                 {["English", "Spanish", "German", "Korean", "Chinese"].map((edition) => (
                   <button
                     key={edition}
                     type="button"
                     onClick={() => {
                       setSelectedEdition(edition);
+                      setSiteLanguageEdition(edition);
                       setShowEditionDropdown(false);
                     }}
-                    className={`w-full text-left px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors cursor-pointer flex items-center justify-between ${
+                    className={`w-full text-left px-3 py-2 text-xs font-semibold rounded-lg transition-colors cursor-pointer flex items-center justify-between ${
                       selectedEdition === edition
                         ? "bg-[#eff6ff] text-[#2563eb]"
                         : "text-[#334155] hover:bg-slate-50"

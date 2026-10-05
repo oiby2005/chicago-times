@@ -2702,10 +2702,10 @@ export default function CreateNewPostPage() {
       {/* INSERT ARTICLE IMAGE MODAL (Exact match to provided screenshot)  */}
       {/* ================================================================= */}
       {showImageModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4">
-          <div className="bg-white rounded-3xl max-w-[520px] w-full p-4 sm:p-5 shadow-2xl space-y-3 font-sans text-left animate-in zoom-in-95 duration-150 border border-slate-100 overflow-hidden">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-[520px] w-full p-4 sm:p-5 shadow-2xl space-y-3 font-sans text-left animate-in zoom-in-95 duration-150 border border-slate-100 max-h-[90vh] flex flex-col my-auto overflow-hidden">
             {/* Header with Icon and Title */}
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3 shrink-0">
               <div className="flex items-center space-x-2.5">
                 <div className="w-8 h-8 rounded-lg bg-[#fff7ed] border border-[#ffedd5] flex items-center justify-center text-[#ea580c]">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -2719,7 +2719,7 @@ export default function CreateNewPostPage() {
               <button
                 type="button"
                 onClick={() => setShowImageModal(false)}
-                className="text-gray-400 hover:text-slate-700 transition-colors p-1 rounded-lg"
+                className="text-gray-400 hover:text-slate-700 transition-colors p-1 rounded-lg cursor-pointer"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -2728,7 +2728,7 @@ export default function CreateNewPostPage() {
             </div>
 
             {/* Form Fields */}
-            <div className="space-y-3 pt-0.5">
+            <div className="space-y-3 pt-0.5 flex-1 overflow-y-auto pr-1">
               {/* PASTE IMAGE URL (matching requested design) */}
               <div className="space-y-1">
                 <label className="block text-[10px] font-mono font-bold text-[#94a3b8] uppercase tracking-wider">
@@ -2892,7 +2892,7 @@ export default function CreateNewPostPage() {
             </div>
 
             {/* Action Buttons */}
-            <div className="grid grid-cols-2 gap-3 pt-2">
+            <div className="grid grid-cols-2 gap-3 pt-2.5 shrink-0 border-t border-slate-100">
               <button
                 type="button"
                 onClick={() => setShowImageModal(false)}

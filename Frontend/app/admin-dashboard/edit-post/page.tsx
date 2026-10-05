@@ -191,6 +191,7 @@ export default function AdminEditPostPage() {
     );
   }, [availableSubCategories, subCatSearch]);
   const [tags, setTags] = useState<string[]>([]);
+  const [homeTags, setHomeTags] = useState<string[]>([]);
   const [imageSeoKeywords, setImageSeoKeywords] = useState<string[]>([]);
   const [targetedEmails, setTargetedEmails] = useState<string[]>([]);
   const [broadcastToSubscribers, setBroadcastToSubscribers] = useState<boolean>(true);
@@ -336,6 +337,25 @@ export default function AdminEditPostPage() {
           } else {
             setTags([]);
           }
+
+          let initialHomeTags: string[] = [];
+          if (found.homeTags) {
+            if (Array.isArray(found.homeTags)) {
+              initialHomeTags = found.homeTags.map((t: string) => t.replace(/^#/, "").trim()).filter(Boolean);
+            } else if (typeof found.homeTags === "string") {
+              initialHomeTags = found.homeTags.split(",").map((t: string) => t.replace(/^#/, "").trim()).filter(Boolean);
+            }
+          }
+          if (initialHomeTags.length === 0 && found.tags) {
+            let foundWriterTags: string[] = [];
+            if (Array.isArray(found.tags)) {
+              foundWriterTags = found.tags.map((t: string) => t.replace(/^#/, "").trim()).filter(Boolean);
+            } else if (typeof found.tags === "string") {
+              foundWriterTags = found.tags.split(",").map((t: string) => t.replace(/^#/, "").trim()).filter(Boolean);
+            }
+            initialHomeTags = foundWriterTags.slice(0, 2);
+          }
+          setHomeTags(initialHomeTags.slice(0, 2));
 
           if (found.imageSeoKeywords && Array.isArray(found.imageSeoKeywords)) {
             setImageSeoKeywords(found.imageSeoKeywords);
@@ -1289,6 +1309,7 @@ export default function AdminEditPostPage() {
       category: mainCategory || "Business",
       subCategories: selectedSubCategories,
       tags: tags,
+      homeTags: homeTags,
       imageSeoKeywords: imageSeoKeywords,
       targetedEmails: targetedEmails,
       broadcastToSubscribers: broadcastToSubscribers,
@@ -2010,6 +2031,91 @@ export default function AdminEditPostPage() {
                           />
                         </div>
 
+                        {/* HOME TAGS SELECTION BOX (PLACED BEFORE HOMEPAGE PLACEMENT INSIDE A CARD BOX) */}
+                        {(() => {
+                          const catLower = (mainCategory || "").toLowerCase().trim();
+                          const placeLower = (homepagePlacement || "").toLowerCase().trim();
+
+                          const isCatEligible =
+                            catLower.includes("world politics") ||
+                            catLower.includes("politics") ||
+                            catLower.includes("ceo") ||
+                            catLower.includes("executive") ||
+                            catLower.includes("sport") ||
+                            catLower.includes("entertain") ||
+                            catLower.includes("lifestyle");
+
+                          const isPlacementEligible =
+                            placeLower.includes("editor") ||
+                            placeLower.includes("pick");
+
+                          const showHomeTags = isCatEligible || isPlacementEligible;
+                          if (!showHomeTags) return null;
+
+                          const allAvailableTags = Array.from(new Set([...tags, ...homeTags]));
+
+                          return (
+                            <div className="border border-[#cbd5e1] bg-[#fffdfa] rounded-2xl p-3.5 space-y-3 text-left">
+                              <div className="flex items-center justify-between">
+                                <label className="block text-[10px] font-mono font-bold text-[#ea580c] uppercase tracking-wider">
+                                  HOME TAGS (MAX 2)
+                                </label>
+                                <span className="text-[10px] font-mono font-bold text-[#64748b]">
+                                  {homeTags.length} / 2
+                                </span>
+                              </div>
+
+                              <p className="text-[10px] font-mono text-[#64748b] leading-relaxed">
+                                Select up to 2 tags to display near this article on the homepage.
+                              </p>
+
+                              {/* Scrollable Tag Checklist with Checkmark Ticks (styled with Orange Accent) */}
+                              <div className="bg-white border border-[#cbd5e1] rounded-xl p-2.5 max-h-[140px] overflow-y-auto space-y-1.5">
+                                {allAvailableTags.length > 0 ? (
+                                  allAvailableTags.map((tag) => {
+                                    const cleanTag = tag.replace(/^#/, "").trim();
+                                    const isChecked = homeTags.includes(cleanTag) || homeTags.includes(tag);
+                                    const isDisabled = !isChecked && homeTags.length >= 2;
+                                    return (
+                                      <label
+                                        key={tag}
+                                        className={`flex items-center space-x-2 px-2 py-1 rounded-lg transition-colors ${
+                                          isChecked
+                                            ? "bg-[#fff7ed] text-[#ea580c] font-bold border border-[#ffedd5] cursor-pointer"
+                                            : isDisabled
+                                            ? "text-[#cbd5e1] opacity-40 cursor-not-allowed"
+                                            : "text-[#475569] font-medium hover:bg-slate-50 cursor-pointer"
+                                        }`}
+                                      >
+                                        <input
+                                          type="checkbox"
+                                          checked={isChecked}
+                                          disabled={isDisabled}
+                                          onChange={() => {
+                                            if (isChecked) {
+                                              setHomeTags(homeTags.filter((t) => t !== cleanTag && t !== tag));
+                                            } else {
+                                              if (homeTags.length < 2) {
+                                                setHomeTags([...homeTags, cleanTag]);
+                                              }
+                                            }
+                                          }}
+                                          className="w-3.5 h-3.5 accent-[#ea580c] rounded border-gray-300 focus:ring-0 cursor-pointer disabled:cursor-not-allowed shrink-0"
+                                        />
+                                        <span className="text-xs font-mono font-semibold">#{cleanTag.toUpperCase()}</span>
+                                      </label>
+                                    );
+                                  })
+                                ) : (
+                                  <div className="py-2 text-center text-xs font-mono text-[#94a3b8] italic">
+                                    No tags added yet. Add tags above to select home tags.
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })()}
+
                         {/* HOMEPAGE PLACEMENT SECTION (Matching Admin Dashboard Published Posts Edit) */}
                         <div className="border border-[#cbd5e1] bg-[#fffdfa] rounded-2xl p-3.5 space-y-2 text-left">
                           <label className="block text-[10px] font-mono font-bold text-[#ea580c] uppercase tracking-wider">
@@ -2399,10 +2505,10 @@ export default function AdminEditPostPage() {
 
       {/* INSERT ARTICLE IMAGE MODAL */}
       {showImageModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4">
-          <div className="bg-white rounded-3xl max-w-[520px] w-full p-4 sm:p-5 shadow-2xl space-y-3 font-sans text-left animate-in zoom-in-95 duration-150 border border-slate-100 overflow-hidden">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-[520px] w-full p-4 sm:p-5 shadow-2xl space-y-3 font-sans text-left animate-in zoom-in-95 duration-150 border border-slate-100 max-h-[90vh] flex flex-col my-auto overflow-hidden">
             {/* Header with Icon and Title */}
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3 shrink-0">
               <div className="flex items-center space-x-2.5">
                 <div className="w-8 h-8 rounded-lg bg-[#fff7ed] border border-[#ffedd5] flex items-center justify-center text-[#ea580c]">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -2416,7 +2522,7 @@ export default function AdminEditPostPage() {
               <button
                 type="button"
                 onClick={() => setShowImageModal(false)}
-                className="text-gray-400 hover:text-slate-700 transition-colors p-1 rounded-lg"
+                className="text-gray-400 hover:text-slate-700 transition-colors p-1 rounded-lg cursor-pointer"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -2425,7 +2531,7 @@ export default function AdminEditPostPage() {
             </div>
 
             {/* Form Fields */}
-            <div className="space-y-3 pt-0.5">
+            <div className="space-y-3 pt-0.5 flex-1 overflow-y-auto pr-1">
               {/* PASTE IMAGE URL (matching requested design) */}
               <div className="space-y-1">
                 <label className="block text-[10px] font-mono font-bold text-[#94a3b8] uppercase tracking-wider">
@@ -2588,7 +2694,7 @@ export default function AdminEditPostPage() {
             </div>
 
             {/* Action Buttons */}
-            <div className="grid grid-cols-2 gap-3 pt-2">
+            <div className="grid grid-cols-2 gap-3 pt-2.5 shrink-0 border-t border-slate-100">
               <button
                 type="button"
                 onClick={() => setShowImageModal(false)}

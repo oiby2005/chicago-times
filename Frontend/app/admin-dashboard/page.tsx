@@ -211,6 +211,7 @@ export default function AdminDashboard() {
     | "Manage Ads"
     | "Contact Us Submissions"
     | "Advertise Leads"
+    | "Subscription Requests"
     | "Database Backups"
     | "Shorts & Reels"
   >("Overview");
@@ -296,7 +297,7 @@ interface AdSlotConfig {
   id: string;
   slotName: string;
   dimension: string;
-  placementGroup: "Homepage" | "Category" | "Author";
+  placementGroup: "Homepage" | "Category" | "Author" | "Article";
   description: string;
   active: boolean;
   actionType: string;
@@ -317,9 +318,21 @@ const SLOT_NAME_MAP: Record<string, string> = {
   cat_slot_1: "Category Page ad 1",
   cat_slot_2: "Category Page ad 2",
   author_slot_1: "Writer Page ad 1",
+  article_slot_1: "Article Page ad 01",
+  article_slot_2: "Article Page ad 02",
+  article_slot_3: "Article Page ad 03",
 };
 
 const normalizeAdSlots = (slots: AdSlotConfig[]): AdSlotConfig[] => {
+  const merged = Array.isArray(slots) ? [...slots] : [];
+  if (typeof DEFAULT_AD_SLOTS !== "undefined" && Array.isArray(DEFAULT_AD_SLOTS)) {
+    DEFAULT_AD_SLOTS.forEach((def) => {
+      if (!merged.some((s) => s.id === def.id)) {
+        merged.push(def);
+      }
+    });
+  }
+
   const DIM_MAP: Record<string, string> = {
     hp_slot_1: "300x300",
     hp_slot_2: "970x175",
@@ -331,12 +344,22 @@ const normalizeAdSlots = (slots: AdSlotConfig[]): AdSlotConfig[] => {
     cat_slot_1: "300x250",
     cat_slot_2: "300x600",
     author_slot_1: "300x250",
+    article_slot_1: "300x300",
+    article_slot_2: "300x300",
+    article_slot_3: "300x300",
   };
 
-  return slots.map((s) => ({
+  const GROUP_MAP: Record<string, "Homepage" | "Category" | "Author" | "Article"> = {
+    article_slot_1: "Article",
+    article_slot_2: "Article",
+    article_slot_3: "Article",
+  };
+
+  return merged.map((s) => ({
     ...s,
     slotName: SLOT_NAME_MAP[s.id] || s.slotName,
     dimension: DIM_MAP[s.id] || s.dimension,
+    placementGroup: GROUP_MAP[s.id] || s.placementGroup || (s.id?.startsWith("article") ? "Article" : "Homepage"),
   }));
 };
 
@@ -461,6 +484,42 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
     selectedArticleSlug: "",
     imageUrl: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?fm=webp&fit=crop&w=300&q=80",
   },
+  {
+    id: "article_slot_1",
+    slotName: "Article Page ad 01",
+    dimension: "300x300",
+    placementGroup: "Article",
+    description: "Displayed inside the right sidebar of all article view pages (Ad Slot 1).",
+    active: true,
+    actionType: "External Link (URL)",
+    targetUrl: "https://www.wsj.com/",
+    selectedArticleSlug: "",
+    imageUrl: "https://images.unsplash.com/photo-1557804506-669a67965ba0?fm=webp&fit=crop&w=300&q=80",
+  },
+  {
+    id: "article_slot_2",
+    slotName: "Article Page ad 02",
+    dimension: "300x300",
+    placementGroup: "Article",
+    description: "Displayed inside the right sidebar of all article view pages (Ad Slot 2).",
+    active: true,
+    actionType: "External Link (URL)",
+    targetUrl: "https://www.wsj.com/",
+    selectedArticleSlug: "",
+    imageUrl: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?fm=webp&fit=crop&w=300&q=80",
+  },
+  {
+    id: "article_slot_3",
+    slotName: "Article Page ad 03",
+    dimension: "300x300",
+    placementGroup: "Article",
+    description: "Displayed inside the right sidebar of all article view pages (Ad Slot 3).",
+    active: true,
+    actionType: "External Link (URL)",
+    targetUrl: "https://www.wsj.com/",
+    selectedArticleSlug: "",
+    imageUrl: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?fm=webp&fit=crop&w=300&q=80",
+  },
 ];
 
   // 3. Published Posts Data (Published Posts tab)
@@ -472,7 +531,7 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
   const [pubSearchQuery, setPubSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   // 4. Manage Ads State
-  const [adSubTab, setAdSubTab] = useState<"ALL" | "HOMEPAGE" | "CATEGORY" | "AUTHOR">("ALL");
+  const [adSubTab, setAdSubTab] = useState<"ALL" | "HOMEPAGE" | "CATEGORY" | "AUTHOR" | "ARTICLE">("ALL");
 
   // 5. Users Desk State
   interface UserDeskItem {
@@ -623,6 +682,16 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
     status?: string;
   }
 
+  interface SubscriptionRequestItem {
+    id: string;
+    created_at?: string;
+    name: string;
+    email: string;
+    phone: string;
+    packageName?: string;
+    status?: string;
+  }
+
   const formatSubmissionDate = (rawDate?: string) => {
     if (!rawDate) return "Just now";
     try {
@@ -658,6 +727,7 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
 
   const [contactSubmissions, setContactSubmissions] = useState<ContactSubmissionItem[]>([]);
   const [advertiseLeads, setAdvertiseLeads] = useState<AdvertiseLeadItem[]>([]);
+  const [subscriptionRequests, setSubscriptionRequests] = useState<SubscriptionRequestItem[]>([]);
 
   const [contactSearchQuery, setContactSearchQuery] = useState("");
   const [contactTypeFilter, setContactTypeFilter] = useState("All Inquiry Types");
@@ -666,6 +736,10 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
   const [advertiseSearchQuery, setAdvertiseSearchQuery] = useState("");
   const [advertiseServiceFilter, setAdvertiseServiceFilter] = useState("All Services");
   const [selectedAdvertiseModal, setSelectedAdvertiseModal] = useState<AdvertiseLeadItem | null>(null);
+
+  const [subscriptionSearchQuery, setSubscriptionSearchQuery] = useState("");
+  const [subscriptionPackageFilter, setSubscriptionPackageFilter] = useState("All Packages");
+  const [selectedSubscriptionModal, setSelectedSubscriptionModal] = useState<SubscriptionRequestItem | null>(null);
 
   const fetchContactSubmissions = async () => {
     try {
@@ -690,6 +764,19 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
       }
     } catch (err) {
       console.error("Failed to fetch advertise leads:", err);
+    }
+  };
+
+  const fetchSubscriptionRequests = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/api/subscriptions").catch(() => null);
+      if (res && res.ok) {
+        const data = await res.json();
+        const list = data.subscriptions || (Array.isArray(data) ? data : []);
+        setSubscriptionRequests(list);
+      }
+    } catch (err) {
+      console.error("Failed to fetch subscription requests:", err);
     }
   };
 
@@ -741,6 +828,56 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
     }
   };
 
+  const confirmDeleteAdvertiseLead = (item: AdvertiseLeadItem) => {
+    setDeleteConfirmModal({
+      isOpen: true,
+      title: "Delete Advertise Lead",
+      message: `Are you sure you want to delete lead for "${item.name}" (${item.company})? This action cannot be undone.`,
+      confirmText: "Delete Lead",
+      onConfirm: async () => {
+        await handleDeleteAdvertiseLead(item.id);
+        setDeleteConfirmModal((prev) => ({ ...prev, isOpen: false }));
+      },
+    });
+  };
+
+  const handleUpdateSubscriptionStatus = async (id: string, newStatus: string) => {
+    setSubscriptionRequests((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, status: newStatus } : item))
+    );
+    try {
+      await fetch(`http://localhost:5000/api/subscriptions/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+    } catch (e) {
+      console.error("Failed to update subscription status:", e);
+    }
+  };
+
+  const handleDeleteSubscriptionRequest = async (id: string) => {
+    setSubscriptionRequests((prev) => prev.filter((item) => item.id !== id));
+    try {
+      await fetch(`http://localhost:5000/api/subscriptions/${id}`, { method: "DELETE" });
+    } catch (e) {
+      console.error("Failed to delete subscription request:", e);
+    }
+  };
+
+  const confirmDeleteSubscription = (item: SubscriptionRequestItem) => {
+    setDeleteConfirmModal({
+      isOpen: true,
+      title: "Delete Subscription Request",
+      message: `Are you sure you want to delete subscription request for "${item.name}" (${item.email})? This action cannot be undone.`,
+      confirmText: "Delete Request",
+      onConfirm: async () => {
+        await handleDeleteSubscriptionRequest(item.id);
+        setDeleteConfirmModal((prev) => ({ ...prev, isOpen: false }));
+      },
+    });
+  };
+
   const filteredContactSubmissions = contactSubmissions.filter((item) => {
     const typeMatch =
       contactTypeFilter === "All Inquiry Types" ||
@@ -767,6 +904,20 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
       (item.requirements || "").toLowerCase().includes(q) ||
       (item.company || "").toLowerCase().includes(q);
     return serviceMatch && searchMatch;
+  });
+
+  const filteredSubscriptionRequests = subscriptionRequests.filter((item) => {
+    const pkgMatch =
+      subscriptionPackageFilter === "All Packages" ||
+      (item.packageName || "").toLowerCase() === subscriptionPackageFilter.toLowerCase();
+    const q = subscriptionSearchQuery.toLowerCase().trim();
+    const searchMatch =
+      !q ||
+      (item.name || "").toLowerCase().includes(q) ||
+      (item.email || "").toLowerCase().includes(q) ||
+      (item.phone || "").toLowerCase().includes(q) ||
+      (item.packageName || "").toLowerCase().includes(q);
+    return pkgMatch && searchMatch;
   });
 
   const fetchBackupsList = async () => {
@@ -1818,12 +1969,22 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
     if (typeof window !== "undefined") {
       try {
         const stored = localStorage.getItem("wsj_ad_slots_config");
+        let parsedList = DEFAULT_AD_SLOTS;
         if (stored) {
           const parsed = JSON.parse(stored);
           if (Array.isArray(parsed) && parsed.length > 0) {
-            return normalizeAdSlots(parsed);
+            const merged = [...parsed];
+            DEFAULT_AD_SLOTS.forEach((def) => {
+              if (!merged.some((m) => m.id === def.id)) {
+                merged.push(def);
+              }
+            });
+            parsedList = merged;
           }
         }
+        const normalized = normalizeAdSlots(parsedList);
+        localStorage.setItem("wsj_ad_slots_config", JSON.stringify(normalized));
+        return normalized;
       } catch (e) {}
     }
     return DEFAULT_AD_SLOTS;
@@ -2567,6 +2728,7 @@ ${divider70}
     fetchUsers();
     fetchContactSubmissions();
     fetchAdvertiseLeads();
+    fetchSubscriptionRequests();
     window.addEventListener("wsj_user_updated", loadUserData);
     window.addEventListener("wsj_users_updated", fetchUsers);
     window.addEventListener("wsj_newsletter_updated", loadSubscribersData);
@@ -2733,20 +2895,6 @@ ${divider70}
     });
   };
 
-  const confirmDeleteAdvertiseLead = (item: AdvertiseLead) => {
-    setDeleteConfirmModal({
-      isOpen: true,
-      title: "Delete Advertising Lead",
-      message: `Are you sure you want to delete the advertising lead for "${item.company || item.name || item.email}"?`,
-      confirmText: "Delete Lead",
-      onConfirm: () => {
-        handleDeleteAdvertiseLead(item.id);
-        setSelectedAdvertiseModal(null);
-        setDeleteConfirmModal(null);
-      },
-    });
-  };
-
   // Handlers for Published Posts
   const handleDeletePost = async (id: string) => {
     const targetId = String(id);
@@ -2813,7 +2961,26 @@ ${divider70}
           {/* Top WSJ Logo / Masthead Header - Divider removed below logo & logo links to admin account homepage */}
           <div className="h-[120px] sm:h-[132px] lg:h-[136px] pt-3.5 sm:pt-6 lg:pt-7 pb-4 px-6 flex items-start justify-between lg:justify-start shrink-0">
             <Link
-              href={currentUser ? getUserDashboardUrl(currentUser) : "/admin-dashboard"}
+              href={(() => {
+                if (currentUser) {
+                  const nameStr = currentUser.username || currentUser.name || currentUser.displayName || "";
+                  if (nameStr) {
+                    return `/admin/${nameStr.toLowerCase().trim().replace(/\s+/g, "-")}`;
+                  }
+                }
+                if (typeof window !== "undefined") {
+                  const userStr = sessionStorage.getItem("wsj_user");
+                  if (userStr) {
+                    try {
+                      const u = JSON.parse(userStr);
+                      if (u && (u.username || u.name)) {
+                        return `/admin/${(u.username || u.name).toLowerCase().trim().replace(/\s+/g, "-")}`;
+                      }
+                    } catch (e) {}
+                  }
+                }
+                return "/admin/admin1";
+              })()}
               className="inline-block hover:opacity-90 transition-opacity mt-3 sm:mt-4 lg:mt-5"
             >
               <img
@@ -3049,6 +3216,34 @@ ${divider70}
                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5h16.5a1.5 1.5 0 011.5 1.5v9.75a1.5 1.5 0 01-1.5 1.5H3.75a1.5 1.5 0 01-1.5-1.5V6a1.5 1.5 0 011.5-1.5z" />
               </svg>
               <span>Advertise Leads</span>
+            </button>
+
+            {/* 8. Subscription Requests */}
+            <button
+              onClick={() => {
+                setActiveTab("Subscription Requests");
+                setIsMobileSidebarOpen(false);
+              }}
+              style={{ fontFamily: "'Century Gothic', 'Publica Sans Light', 'Kumbh Sans', sans-serif" }}
+              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                activeTab === "Subscription Requests"
+                  ? "bg-[#f1f5f9] text-[#64748b] border border-[#cbd5e1] shadow-2xs font-bold"
+                  : "text-[#111111] hover:bg-[#f8fafc] hover:text-[#64748b]"
+              }`}
+            >
+              <svg
+                width={18}
+                height={18}
+                style={{ width: "18px", height: "18px", minWidth: "18px", minHeight: "18px" }}
+                className="shrink-0"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-6h6M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+              </svg>
+              <span>Subscription Requests</span>
             </button>
 
             {/* 8. Database Backups */}
@@ -4328,6 +4523,132 @@ ${divider70}
               </div>
             </div>
           </div>
+        ) : activeTab === "Subscription Requests" ? (
+          /* ============================================================= */
+          /* SUBSCRIPTION REQUESTS VIEW (Matching Image 4)                 */
+          /* ============================================================= */
+          <div className="space-y-6 font-sans">
+            {/* Header + Search/Filter Bar */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-bold text-[#111827] font-sans tracking-tight">
+                  Subscription Requests
+                </h2>
+                <p className="text-xs text-[#6b7280] font-sans mt-0.5">
+                  View and manage digital subscription requests submitted by readers.
+                </p>
+              </div>
+
+              {/* Right Controls: Search bar + Package Filter dropdown */}
+              <div className="flex items-center space-x-3">
+                <input
+                  type="text"
+                  placeholder="Search name, email, phone..."
+                  value={subscriptionSearchQuery}
+                  onChange={(e) => setSubscriptionSearchQuery(e.target.value)}
+                  className="bg-white border border-[#e5e7eb] rounded-xl px-3.5 py-2 text-xs text-[#111827] placeholder-gray-400 focus:outline-none focus:border-[#00558c] w-64 shadow-2xs font-sans"
+                  suppressHydrationWarning
+                />
+
+                <select
+                  value={subscriptionPackageFilter}
+                  onChange={(e) => setSubscriptionPackageFilter(e.target.value)}
+                  className="bg-white border border-[#e5e7eb] rounded-xl px-3.5 py-2 text-xs font-medium text-[#111827] focus:outline-none focus:border-[#00558c] shadow-2xs cursor-pointer font-sans"
+                  suppressHydrationWarning
+                >
+                  <option value="All Packages">All Packages</option>
+                  <option value="Times Chicago Digital">Times Chicago Digital</option>
+                  <option value="Times Chicago Digital Bundle">Times Chicago Digital Bundle</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Subscriptions Data Table */}
+            <div className="bg-white rounded-2xl border border-[#e5e7eb] shadow-2xs overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left font-sans border-collapse">
+                  <thead>
+                    <tr className="border-b border-[#f1f5f9] text-[10px] font-mono font-bold text-[#6b7280] uppercase tracking-wider bg-slate-50/50">
+                      <th className="py-3 px-4">DATE</th>
+                      <th className="py-3 px-4">NAME / COMPANY</th>
+                      <th className="py-3 px-4">EMAIL</th>
+                      <th className="py-3 px-4">PHONE / WHATSAPP</th>
+                      <th className="py-3 px-4">PACKAGE</th>
+                      <th className="py-3 px-4">STATUS</th>
+                      <th className="py-3 px-4 text-center">ACTIONS</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#f1f5f9] text-xs">
+                    {filteredSubscriptionRequests.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="py-10 text-center text-slate-400 font-sans text-xs">
+                          No subscription requests found.
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredSubscriptionRequests.map((item) => (
+                        <tr key={item.id} className="hover:bg-slate-50/70 transition-colors">
+                          <td className="py-4 px-4 text-[#6b7280] whitespace-nowrap font-medium text-[11px]">
+                            {formatSubmissionDate(item.created_at)}
+                          </td>
+                          <td className="py-4 px-4">
+                            <div className="font-bold text-[#111827]">{item.name}</div>
+                          </td>
+                          <td className="py-4 px-4 text-[#4b5563] font-mono text-[11px] whitespace-nowrap">
+                            {item.email}
+                          </td>
+                          <td className="py-4 px-4 text-[11px] text-[#4b5563] whitespace-nowrap">
+                            {item.phone || "N/A"}
+                          </td>
+                          <td className="py-4 px-4 whitespace-nowrap">
+                            <span className="bg-[#eff6ff] text-[#1d4ed8] border border-[#bfdbfe] px-2.5 py-0.5 rounded-full text-[10px] font-bold">
+                              {item.packageName || "Times Chicago Digital"}
+                            </span>
+                          </td>
+                          <td className="py-4 px-4 whitespace-nowrap">
+                            <select
+                              value={item.status || "Pending"}
+                              onChange={(e) => handleUpdateSubscriptionStatus(item.id, e.target.value)}
+                              className="bg-[#f1f5f9] border border-[#cbd5e1] text-[#334155] font-bold rounded-lg text-xs px-2.5 py-1 focus:outline-none cursor-pointer"
+                              suppressHydrationWarning
+                            >
+                              <option value="Pending">Pending</option>
+                              <option value="Contacted">Contacted</option>
+                              <option value="Approved">Approved</option>
+                              <option value="Rejected">Rejected</option>
+                            </select>
+                          </td>
+                          <td className="py-4 px-4 whitespace-nowrap text-center">
+                            <div className="inline-flex items-center space-x-2">
+                              <button
+                                onClick={() => setSelectedSubscriptionModal(item)}
+                                className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+                                title="View Details"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12c.077-.19.152-.38.228-.568C3.805 7.699 7.55 5 12 5c4.45 0 8.195 2.699 9.736 6.432.076.188.151.378.228.568-.077.19-.152.38-.228.568C20.195 16.301 16.45 19 12 19c-4.45 0-8.195-2.699-9.736-6.432a13.313 13.313 0 01-.228-.568z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                              </button>
+                              <button
+                                onClick={() => confirmDeleteSubscription(item)}
+                                className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                                title="Delete Request"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                </svg>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
         ) : activeTab === "Manage Ads" ? (
           /* ============================================================= */
           /* MANAGE ADS VIEW (Matching Reference Screenshots & Color Palette)*/
@@ -4391,15 +4712,28 @@ ${divider70}
               >
                 WRITER PAGE SLOTS ({adSlots.filter((s) => s.placementGroup === "Author").length})
               </button>
+
+              <button
+                type="button"
+                onClick={() => setAdSubTab("ARTICLE")}
+                className={`font-bold tracking-wider uppercase transition-all whitespace-nowrap cursor-pointer pb-2.5 ${
+                  adSubTab === "ARTICLE"
+                    ? "text-[#64748b] border-b-2 border-[#94a3b8] font-extrabold"
+                    : "text-[#111111] hover:text-[#64748b]"
+                }`}
+              >
+                ARTICLE PAGE SLOTS ({adSlots.filter((s) => s.placementGroup === "Article").length})
+              </button>
             </div>
 
-            {/* List of 10 Filtered Ad Slots */}
+            {/* List of Filtered Ad Slots */}
             <div className="space-y-6 pt-2">
               {adSlots
                 .filter((slot) => {
                   if (adSubTab === "HOMEPAGE") return slot.placementGroup === "Homepage";
                   if (adSubTab === "CATEGORY") return slot.placementGroup === "Category";
                   if (adSubTab === "AUTHOR") return slot.placementGroup === "Author";
+                  if (adSubTab === "ARTICLE") return slot.placementGroup === "Article";
                   return true;
                 })
                 .map((slot) => (
@@ -6176,6 +6510,87 @@ ${divider70}
                 className="bg-[#0f172a] hover:bg-slate-800 text-white font-bold text-xs px-6 py-2.5 rounded-xl transition-colors cursor-pointer"
               >
                 CLOSE
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Subscription Request Details Modal */}
+      {selectedSubscriptionModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 font-sans backdrop-blur-xs animate-fade-in">
+          <div className="relative w-full max-w-lg bg-white rounded-2xl p-6 sm:p-8 shadow-2xl border border-slate-200">
+            <button
+              onClick={() => setSelectedSubscriptionModal(null)}
+              className="absolute top-5 right-5 text-slate-400 hover:text-slate-700 p-1.5 rounded-full hover:bg-slate-100 transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            <div className="mb-6">
+              <span className="text-[10px] font-bold text-[#1d4ed8] tracking-widest uppercase bg-[#eff6ff] px-3 py-1 rounded-full inline-block mb-2 border border-[#bfdbfe]">
+                {selectedSubscriptionModal.packageName || "Times Chicago Digital"}
+              </span>
+              <h3 className="text-xl font-bold text-[#111827]">Subscription Request Details</h3>
+              <p className="text-xs text-slate-500 mt-1">
+                {formatModalSubmittedDate(selectedSubscriptionModal.created_at)}
+              </p>
+            </div>
+
+            <div className="space-y-4 text-xs">
+              <div className="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                <div>
+                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">FULL NAME</div>
+                  <div className="font-bold text-slate-900 mt-0.5">{selectedSubscriptionModal.name}</div>
+                </div>
+                <div>
+                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">EMAIL ADDRESS</div>
+                  <div className="font-mono text-slate-800 mt-0.5">{selectedSubscriptionModal.email}</div>
+                </div>
+              </div>
+
+              <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">MOBILE NUMBER</div>
+                <div className="font-bold text-slate-900 mt-0.5">{selectedSubscriptionModal.phone}</div>
+              </div>
+
+              <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">STATUS</div>
+                <select
+                  value={selectedSubscriptionModal.status || "Pending"}
+                  onChange={(e) => {
+                    handleUpdateSubscriptionStatus(selectedSubscriptionModal.id, e.target.value);
+                    setSelectedSubscriptionModal((prev) => prev ? { ...prev, status: e.target.value } : null);
+                  }}
+                  className="bg-white border border-slate-300 text-slate-800 font-bold rounded-lg text-xs px-3 py-1.5 focus:outline-none cursor-pointer"
+                  suppressHydrationWarning
+                >
+                  <option value="Pending">Pending</option>
+                  <option value="Contacted">Contacted</option>
+                  <option value="Approved">Approved</option>
+                  <option value="Rejected">Rejected</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="mt-8 pt-4 border-t border-slate-100 flex justify-between items-center">
+              <button
+                onClick={() => {
+                  const target = selectedSubscriptionModal;
+                  setSelectedSubscriptionModal(null);
+                  confirmDeleteSubscription(target);
+                }}
+                className="text-red-600 hover:text-red-800 font-bold text-xs uppercase tracking-wider px-3 py-2 rounded-lg hover:bg-red-50 transition-colors cursor-pointer"
+              >
+                DELETE REQUEST
+              </button>
+              <button
+                onClick={() => setSelectedSubscriptionModal(null)}
+                className="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-5 py-2.5 rounded-xl transition-colors cursor-pointer"
+              >
+                CLOSE DETAILS
               </button>
             </div>
           </div>

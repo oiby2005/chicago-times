@@ -264,6 +264,70 @@ body.signin-page *,
   overflow: hidden;
 }
 
+/* Google Translate Clean Integration Styles */
+[class*="VIpgJd"],
+.VIpgJd-Z44Wfd-aJ5zKd,
+.VIpgJd-yfvTfm-aJ5zKd,
+.VIpgJd-aJ5zKd-O3B2fe,
+.VIpgJd-gL12kf-L9bF2e,
+.goog-te-gadget-icon,
+.goog-te-gadget-simple,
+.goog-te-banner-frame,
+.goog-te-banner,
+.goog-te-menu-value,
+.goog-tooltip,
+.goog-tooltip:hover,
+.goog-text-highlight,
+.goog-te-balloon-frame,
+.goog-te-spinner-pos,
+#goog-gt-tt,
+#goog-gt-vt,
+#goog-gt- {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+body {
+  top: 0px !important;
+  position: static !important;
+}
+
+iframe.skiptranslate,
+iframe[class*="VIpgJd"] {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+#google_translate_element {
+  position: absolute !important;
+  left: -9999px !important;
+  top: -9999px !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-4 {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 /* Retina Bold Micro-Typography Utility */
 .font-retina {
   font-family: Retina, "Retina Bold", "Retina-Bold", var(--font-sans), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;

@@ -6,26 +6,46 @@ import Link from "next/link";
 interface WorldPoliticsArticle {
   id: string;
   categoryTag?: string;
+  homeTags?: string[];
+  tags?: string[];
   title: string;
   slug: string;
   imageUrl: string;
 }
 
+const parseHomeTags = (p: any): string[] => {
+  if (!p) return [];
+  let tags: string[] = [];
+  if (Array.isArray(p.homeTags) && p.homeTags.length > 0) {
+    tags = p.homeTags;
+  } else if (typeof p.homeTags === "string" && p.homeTags.trim() !== "") {
+    tags = p.homeTags.split(",").map((s: string) => s.trim());
+  } else if (Array.isArray(p.tags) && p.tags.length > 0) {
+    tags = p.tags;
+  } else if (typeof p.tags === "string" && p.tags.trim() !== "") {
+    tags = p.tags.split(",").map((s: string) => s.trim());
+  }
+  return tags.map((t: string) => t.replace(/^#/, "").trim()).filter(Boolean).slice(0, 2);
+};
+
 const defaultArticles: WorldPoliticsArticle[] = [
   {
     id: "wp1",
+    homeTags: ["POLITICS", "GREECE"],
     title: "Check your helicopters, Greece tells pilots after honeymoon crash",
     slug: "check-your-helicopters-greece-tells-pilots-after-honeymoon-crash",
     imageUrl: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?fm=webp&fit=crop&w=600&q=80",
   },
   {
     id: "wp2",
+    homeTags: ["WORLD", "HISTORY"],
     title: "Lawrence of Arabia’s anger at being ‘banned’ from travel abroad",
     slug: "lawrence-of-arabias-anger-at-being-banned-from-travel-abroad",
     imageUrl: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?fm=webp&fit=crop&w=600&q=80",
   },
   {
     id: "wp3",
+    homeTags: ["HEALTH", "AI"],
     title: "By gum, NHS’s AI phone system struggles with Yorkshire accents",
     slug: "by-gum-nhs-ai-phone-system-struggles-with-yorkshire-accents",
     imageUrl: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?fm=webp&fit=crop&w=600&q=80",
@@ -33,6 +53,7 @@ const defaultArticles: WorldPoliticsArticle[] = [
   {
     id: "wp4",
     categoryTag: "THE TIMES DIARY",
+    homeTags: ["DIARY", "POLITICS"],
     title: "Minister literally doesn’t care if you say less or fewer",
     slug: "minister-literally-doesnt-care-if-you-say-less-or-fewer",
     imageUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?fm=webp&fit=crop&w=600&q=80",
@@ -64,6 +85,7 @@ export const WorldPoliticsCategorySection: React.FC = () => {
             title: p.title,
             slug: p.slug || p.id,
             imageUrl: p.thumbnail || "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?fm=webp&fit=crop&w=600&q=80",
+            homeTags: parseHomeTags(p),
           }));
 
           const merged = [...formatted];
@@ -97,40 +119,59 @@ export const WorldPoliticsCategorySection: React.FC = () => {
         </h2>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[0.4cm]">
-        {articles.map((art) => (
-          <article
-            key={art.id}
-            className="flex flex-col justify-start"
-          >
-            {/* Image */}
-            <Link
-              href={`/article/${art.slug}`}
-              className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 mb-2.5 group"
+        {articles.map((art) => {
+          const tags = parseHomeTags(art);
+          return (
+            <article
+              key={art.id}
+              className="flex flex-col justify-start"
             >
-              <img
-                src={art.imageUrl}
-                alt={art.title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-            </Link>
-
-            {/* Optional Category Tag e.g. THE TIMES DIARY */}
-            {art.categoryTag && (
-              <div className="mb-1">
-                <span className="font-sans font-bold text-[11px] tracking-wider text-[#00558c] uppercase">
-                  {art.categoryTag}
-                </span>
-              </div>
-            )}
-
-            {/* Title */}
-            <h3 className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.2] text-[#111111] hover:text-[#333333] hover:underline cursor-pointer">
-              <Link href={`/article/${art.slug}`}>
-                {art.title}
+              {/* Image */}
+              <Link
+                href={`/article/${art.slug}`}
+                className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 mb-2.5 group"
+              >
+                <img
+                  src={art.imageUrl}
+                  alt={art.title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
               </Link>
-            </h3>
-          </article>
-        ))}
+
+              {/* Home Tags */}
+              {tags && tags.length > 0 && (
+                <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+                  {tags.slice(0, 2).map((t, idx) => (
+                    <React.Fragment key={idx}>
+                      {idx > 0 && <span className="text-[#666666] font-bold text-[11px] mx-0.5">|</span>}
+                      <span
+                        className={`${idx === 0 ? "text-[#C00000]" : "text-[#005599]"} font-sans font-bold text-[11px] uppercase tracking-wider block`}
+                      >
+                        {t}
+                      </span>
+                    </React.Fragment>
+                  ))}
+                </div>
+              )}
+
+              {/* Optional Category Tag e.g. THE TIMES DIARY */}
+              {art.categoryTag && (
+                <div className="mb-1">
+                  <span className="font-sans font-bold text-[11px] tracking-wider text-[#00558c] uppercase">
+                    {art.categoryTag}
+                  </span>
+                </div>
+              )}
+
+              {/* Title */}
+              <h3 className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.2] text-[#111111] hover:text-[#333333] hover:underline cursor-pointer">
+                <Link href={`/article/${art.slug}`}>
+                  {art.title}
+                </Link>
+              </h3>
+            </article>
+          );
+        })}
       </div>
     </div>
   );

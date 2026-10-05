@@ -288,9 +288,9 @@ export const EightCategoryGridSection: React.FC = () => {
   }, [loadPosts]);
 
   return (
-    <div className="w-full font-sans select-none pt-4 pb-4">
-      {/* ROW 1: ECONOMY, HEALTH, INVESTING, CRYPTO */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-start mb-8">
+    <div className="w-full font-sans select-none pt-8 pb-4">
+      {/* ROW 1 (MIDDLE SECTION): ECONOMY, HEALTH, INVESTING, CRYPTO */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-start mb-12 pb-6">
         {row1.map((item) => (
           <div key={item.id} className="flex flex-col justify-start">
             <div className="border-t-2 border-black pt-2 mb-3 flex items-center justify-between">

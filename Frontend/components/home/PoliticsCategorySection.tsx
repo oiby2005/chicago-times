@@ -30,6 +30,8 @@ const formatTimeAgo = (timestamp?: number | string): string => {
   return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
 };
 
+const STATIC_BASE_TIME = 1730000000000;
+
 const defaultArticles: PolArticle[] = [
   {
     id: "pol1",
@@ -37,7 +39,7 @@ const defaultArticles: PolArticle[] = [
     slug: "hegseth-strips-security-clearance-biden-air-force-secretary",
     summary: "Frank Kendall, accused of leaking sensitive information, is the latest former defense official to lose access to classified information.",
     imageUrl: "https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?fm=webp&fit=crop&w=600&q=80",
-    publishedAt: Date.now() - 2 * 3600 * 1000,
+    publishedAt: STATIC_BASE_TIME - 2 * 3600 * 1000,
   },
   {
     id: "pol2",
@@ -45,21 +47,21 @@ const defaultArticles: PolArticle[] = [
     slug: "senate-committees-prepare-key-confirmation-hearings",
     summary: "Lawmakers return to Washington with a packed schedule of high-stakes hearings and policy debates.",
     imageUrl: "https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?fm=webp&fit=crop&w=600&q=80",
-    publishedAt: Date.now() - 4 * 3600 * 1000,
+    publishedAt: STATIC_BASE_TIME - 4 * 3600 * 1000,
   },
   {
     id: "pol3",
     title: "Trump Showed Up at a Rally With Lustrous Locks. The Memes Won’t Stop.",
     slug: "trump-showed-up-at-rally-with-lustrous-locks",
     summary: "The president’s hair looked more voluminous at an event in Las Vegas, and the internet was quick to respond.",
-    publishedAt: Date.now() - 7 * 3600 * 1000,
+    publishedAt: STATIC_BASE_TIME - 7 * 3600 * 1000,
   },
   {
     id: "pol4",
     title: "Trump Revives Attempt to Fire Fed Governor Lisa Cook",
     slug: "trump-revives-attempt-to-fire-fed-governor-lisa-cook",
     summary: "The move, outlined in a White House letter to Cook this week, follows a Supreme Court ruling in June that blocked an earlier attempt.",
-    publishedAt: Date.now() - 11 * 3600 * 1000,
+    publishedAt: STATIC_BASE_TIME - 11 * 3600 * 1000,
   },
 ];
 
@@ -126,10 +128,10 @@ export const PoliticsCategorySection: React.FC = () => {
   const col3Bottom = articles[3] || defaultArticles[3];
 
   return (
-    <div className="w-full font-sans select-none pt-3 pb-2 my-0">
+    <div className="w-full font-sans select-none pt-0 pb-2 my-0">
       {/* Section Title */}
       <div className="mb-3">
-        <h2 className="font-serif font-bold text-[24px] sm:text-[28px] text-[#111111] tracking-tight">
+        <h2 className="font-serif font-bold text-[24px] sm:text-[28px] text-[#111111] tracking-tight leading-none">
           <Link href="/politics" className="hover:underline">
             Politics
           </Link>
@@ -141,7 +143,7 @@ export const PoliticsCategorySection: React.FC = () => {
         {/* COLUMN 1 */}
         <article 
           className="pr-0 md:pr-4 flex flex-col justify-start"
-          style={{ borderRight: "1px solid #CCCCCC" }}
+          style={{ borderRight: "1px dashed #CCCCCC" }}
         >
           {col1.imageUrl && (
             <Link
@@ -173,7 +175,7 @@ export const PoliticsCategorySection: React.FC = () => {
         {/* COLUMN 2 */}
         <article 
           className="px-0 md:px-4 py-4 md:py-0 flex flex-col justify-start"
-          style={{ borderRight: "1px solid #CCCCCC" }}
+          style={{ borderRight: "1px dashed #CCCCCC" }}
         >
           {col2.imageUrl && (
             <Link

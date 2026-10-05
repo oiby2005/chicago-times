@@ -140,6 +140,13 @@ export const MAIN_18_CATEGORIES: CategoryGroup[] = [
     icon: "🗞️",
     subcategories: ["Editorials"],
   },
+  {
+    id: "interviews",
+    name: "Interviews",
+    description: "Exclusive conversations, deep-dive Q&As, and discussions with global leaders.",
+    icon: "🎙️",
+    subcategories: ["Interviews"],
+  },
 ];
 
 // Flat array of all subcategories across 18 cards
@@ -202,9 +209,22 @@ export const NewsletterSignInPage: React.FC = () => {
 
     const cleanEmail = email.trim().toLowerCase();
 
+    // 0. Check client-side localStorage cache for duplicates
+    try {
+      const existingJson = localStorage.getItem("wsj_newsletter_subscribers");
+      if (existingJson) {
+        const existingSubs: any[] = JSON.parse(existingJson);
+        const match = existingSubs.find((s: any) => (typeof s === "string" ? s : s.email || "").toLowerCase().trim() === cleanEmail);
+        if (match) {
+          setErrorMessage("You have already signed up for the newsletter with this email address. Please try signing up with a different email address.");
+          return;
+        }
+      }
+    } catch (e) {}
+
     // 1. Save newsletter subscription directly to Express API & MySQL database
     try {
-      await fetch("http://localhost:5000/api/newsletter", {
+      const res = await fetch("http://localhost:5000/api/newsletter", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -212,8 +232,20 @@ export const NewsletterSignInPage: React.FC = () => {
           newsletters: selectedSubs,
         }),
       });
+
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok || (data && !data.success)) {
+        setErrorMessage(
+          data?.message ||
+          "You have already signed up for the newsletter with this email address. Please try signing up with a different email address."
+        );
+        return;
+      }
     } catch (err) {
       console.error("Express API Newsletter fetch error:", err);
+      setErrorMessage("You have already signed up for the newsletter with this email address. Please try signing up with a different email address.");
+      return;
     }
 
     const now = new Date();

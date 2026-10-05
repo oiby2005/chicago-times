@@ -122,13 +122,14 @@ export const APlusMainNewsSection: React.FC<APlusMainNewsSectionProps> = ({
       <div className="mt-3.5 flex items-center justify-between font-sans text-[11.5px] text-[#666666]">
         {/* Left Side: Read Time */}
         <div className="flex items-center space-x-4">
-          <span>{displayReadTime}</span>
+          <span suppressHydrationWarning>{displayReadTime}</span>
         </div>
 
         {/* Right Side: Bookmark & Share Icons */}
         <div className="flex items-center space-x-3.5 text-[#555555]">
           {/* Bookmark Button */}
           <button
+            suppressHydrationWarning
             onClick={() => setIsBookmarked(!isBookmarked)}
             aria-label="Save article"
             className="hover:text-black transition-colors cursor-pointer focus:outline-none"
@@ -149,6 +150,7 @@ export const APlusMainNewsSection: React.FC<APlusMainNewsSectionProps> = ({
 
           {/* Share Button */}
           <button
+            suppressHydrationWarning
             onClick={() => {
               if (navigator.share) {
                 navigator.share({ title, url: window.location.href });

@@ -184,6 +184,8 @@ export default function AdminReviewPostPage() {
     );
   }, [availableSubCategories, subCatSearch]);
   const [tags, setTags] = useState<string[]>([]);
+  const [homeTags, setHomeTags] = useState<string[]>([]);
+  const [homeTagColor, setHomeTagColor] = useState<string>("default");
   const [imageSeoKeywords, setImageSeoKeywords] = useState<string[]>([]);
   const [targetedEmails, setTargetedEmails] = useState<string[]>([]);
   const [broadcastToSubscribers, setBroadcastToSubscribers] = useState<boolean>(true);
@@ -330,6 +332,20 @@ export default function AdminReviewPostPage() {
               setTags(found.tags);
             } else {
               setTags([]);
+            }
+
+            if (found.homeTags && Array.isArray(found.homeTags) && found.homeTags.length > 0) {
+              setHomeTags(found.homeTags.slice(0, 2).map((t: string) => t.replace(/^#/, "").trim()));
+            } else if (found.tags && Array.isArray(found.tags) && found.tags.length > 0) {
+              setHomeTags(found.tags.slice(0, 2).map((t: string) => t.replace(/^#/, "").trim()));
+            } else {
+              setHomeTags([]);
+            }
+
+            if (found.homeTagColor) {
+              setHomeTagColor(found.homeTagColor);
+            } else {
+              setHomeTagColor("default");
             }
 
             if (found.imageSeoKeywords && Array.isArray(found.imageSeoKeywords)) {
@@ -1267,6 +1283,8 @@ export default function AdminReviewPostPage() {
       category: mainCategory || "Business",
       subCategories: selectedSubCategories,
       tags: tags,
+      homeTags: homeTags.slice(0, 2),
+      homeTagColor: homeTagColor,
       imageSeoKeywords: imageSeoKeywords,
       targetedEmails: targetedEmails,
       broadcastToSubscribers: broadcastToSubscribers,
@@ -1994,6 +2012,134 @@ export default function AdminReviewPostPage() {
                           />
                         </div>
 
+                        {/* HOME TAGS SELECTION BOX (PLACED BEFORE HOMEPAGE PLACEMENT INSIDE A CARD BOX) */}
+                        {(() => {
+                          const catLower = (mainCategory || "").toLowerCase().trim();
+                          const placeLower = (homepagePlacement || "").toLowerCase().trim();
+
+                          const isCatEligible =
+                            catLower.includes("world politics") ||
+                            catLower.includes("politics") ||
+                            catLower.includes("ceo") ||
+                            catLower.includes("executive") ||
+                            catLower.includes("sport") ||
+                            catLower.includes("entertain") ||
+                            catLower.includes("lifestyle");
+
+                          const isPlacementEligible =
+                            placeLower.includes("editor") ||
+                            placeLower.includes("pick");
+
+                          const showHomeTags = isCatEligible || isPlacementEligible;
+                          if (!showHomeTags) return null;
+
+                          const allAvailableTags = Array.from(new Set([...tags, ...homeTags]));
+
+                          return (
+                            <div className="border border-[#cbd5e1] bg-[#fffdfa] rounded-2xl p-3.5 space-y-3 text-left">
+                              <div className="flex items-center justify-between">
+                                <label className="block text-[10px] font-mono font-bold text-[#ea580c] uppercase tracking-wider">
+                                  HOME TAGS (MAX 2)
+                                </label>
+                                <span className="text-[10px] font-mono font-bold text-[#64748b]">
+                                  {homeTags.length} / 2
+                                </span>
+                              </div>
+
+                              <p className="text-[10px] font-mono text-[#64748b] leading-relaxed">
+                                Select up to 2 tags to display near this article on the homepage.
+                              </p>
+
+                              {/* Scrollable Tag Checklist with Checkmark Ticks (styled with Orange Accent) */}
+                              <div className="bg-white border border-[#cbd5e1] rounded-xl p-2.5 max-h-[140px] overflow-y-auto space-y-1.5">
+                                {allAvailableTags.length > 0 ? (
+                                  allAvailableTags.map((tag) => {
+                                    const cleanTag = tag.replace(/^#/, "").trim();
+                                    const isChecked = homeTags.includes(cleanTag) || homeTags.includes(tag);
+                                    const isDisabled = !isChecked && homeTags.length >= 2;
+                                    return (
+                                      <label
+                                        key={tag}
+                                        className={`flex items-center space-x-2 px-2 py-1 rounded-lg transition-colors ${
+                                          isChecked
+                                            ? "bg-[#fff7ed] text-[#ea580c] font-bold border border-[#ffedd5] cursor-pointer"
+                                            : isDisabled
+                                            ? "text-[#cbd5e1] opacity-40 cursor-not-allowed"
+                                            : "text-[#475569] font-medium hover:bg-slate-50 cursor-pointer"
+                                        }`}
+                                      >
+                                        <input
+                                          type="checkbox"
+                                          checked={isChecked}
+                                          disabled={isDisabled}
+                                          onChange={() => {
+                                            if (isChecked) {
+                                              setHomeTags(homeTags.filter((t) => t !== cleanTag && t !== tag));
+                                            } else {
+                                              if (homeTags.length < 2) {
+                                                setHomeTags([...homeTags, cleanTag]);
+                                              }
+                                            }
+                                          }}
+                                          className="w-3.5 h-3.5 accent-[#ea580c] rounded border-gray-300 focus:ring-0 cursor-pointer disabled:cursor-not-allowed shrink-0"
+                                        />
+                                        <span className="text-xs font-mono">{cleanTag}</span>
+                                        {isChecked && <span className="text-[11px] text-[#ea580c] font-extrabold ml-auto">✓</span>}
+                                      </label>
+                                    );
+                                  })
+                                ) : (
+                                  <p className="text-[11px] italic text-[#94a3b8] py-1 text-center">No tags available. Add a custom tag below.</p>
+                                )}
+                              </div>
+
+                              {/* Add Custom Home Tag Input */}
+                              {homeTags.length < 2 && (
+                                <div className="pt-0.5">
+                                  <input
+                                    type="text"
+                                    placeholder="Add custom home tag & press Enter..."
+                                    onKeyDown={(e) => {
+                                      if (e.key === "Enter" && e.currentTarget.value.trim()) {
+                                        e.preventDefault();
+                                        const val = e.currentTarget.value.trim().replace(/^#/, "");
+                                        if (val && !homeTags.includes(val) && homeTags.length < 2) {
+                                          setHomeTags([...homeTags, val]);
+                                          if (!tags.includes(val)) setTags([...tags, val]);
+                                          e.currentTarget.value = "";
+                                        }
+                                      }
+                                    }}
+                                    className="w-full bg-white border border-[#cbd5e1] rounded-xl px-3 py-2 text-xs text-[#1e293b] placeholder-[#94a3b8] focus:outline-none focus:border-[#ea580c]"
+                                  />
+                                </div>
+                              )}
+
+                              {/* Selected Home Tags Badges (Styled in Orange) */}
+                              {homeTags.length > 0 && (
+                                <div className="flex items-center gap-1.5 pt-1 flex-wrap">
+                                  <span className="text-[10px] font-mono text-[#64748b] font-bold">Selected:</span>
+                                  {homeTags.map((ht) => {
+                                    const displayTag = ht.replace(/^#/, "").trim();
+                                    return (
+                                      <span key={ht} className="bg-[#fff7ed] text-[#ea580c] border border-[#ffedd5] text-[11px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1">
+                                        {displayTag}
+                                        <button
+                                          type="button"
+                                          onClick={() => setHomeTags(homeTags.filter((x) => x !== ht && x !== displayTag))}
+                                          className="text-[#ea580c] hover:text-red-600 font-bold ml-0.5 cursor-pointer"
+                                        >
+                                          ×
+                                        </button>
+                                      </span>
+                                    );
+                                  })}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()}
+
                         {/* HOMEPAGE PLACEMENT SECTION (Matching User Images 1 & 3) */}
                         <div className="border border-[#cbd5e1] bg-[#fffdfa] rounded-2xl p-3.5 space-y-2 text-left">
                           <label className="block text-[10px] font-mono font-bold text-[#ea580c] uppercase tracking-wider">
@@ -2383,10 +2529,10 @@ export default function AdminReviewPostPage() {
 
       {/* INSERT ARTICLE IMAGE MODAL */}
       {showImageModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4">
-          <div className="bg-white rounded-3xl max-w-[520px] w-full p-4 sm:p-5 shadow-2xl space-y-3 font-sans text-left animate-in zoom-in-95 duration-150 border border-slate-100 overflow-hidden">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-[520px] w-full p-4 sm:p-5 shadow-2xl space-y-3 font-sans text-left animate-in zoom-in-95 duration-150 border border-slate-100 max-h-[90vh] flex flex-col my-auto overflow-hidden">
             {/* Header with Icon and Title */}
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3 shrink-0">
               <div className="flex items-center space-x-2.5">
                 <div className="w-8 h-8 rounded-lg bg-[#fff7ed] border border-[#ffedd5] flex items-center justify-center text-[#ea580c]">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -2400,7 +2546,7 @@ export default function AdminReviewPostPage() {
               <button
                 type="button"
                 onClick={() => setShowImageModal(false)}
-                className="text-gray-400 hover:text-slate-700 transition-colors p-1 rounded-lg"
+                className="text-gray-400 hover:text-slate-700 transition-colors p-1 rounded-lg cursor-pointer"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -2409,7 +2555,7 @@ export default function AdminReviewPostPage() {
             </div>
 
             {/* Form Fields */}
-            <div className="space-y-3 pt-0.5">
+            <div className="space-y-3 pt-0.5 flex-1 overflow-y-auto pr-1">
               {/* PASTE IMAGE URL (matching requested design) */}
               <div className="space-y-1">
                 <label className="block text-[10px] font-mono font-bold text-[#94a3b8] uppercase tracking-wider">
@@ -2572,7 +2718,7 @@ export default function AdminReviewPostPage() {
             </div>
 
             {/* Action Buttons */}
-            <div className="grid grid-cols-2 gap-3 pt-2">
+            <div className="grid grid-cols-2 gap-3 pt-2.5 shrink-0 border-t border-slate-100">
               <button
                 type="button"
                 onClick={() => setShowImageModal(false)}

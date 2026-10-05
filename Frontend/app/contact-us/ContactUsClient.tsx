@@ -274,6 +274,7 @@ export default function ContactUsClient() {
                       onChange={handleChange}
                       placeholder="John Doe"
                       required
+                      suppressHydrationWarning
                       className="w-full px-3.5 py-2.5 border border-gray-300 rounded text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#00558c] transition-colors"
                     />
                   </div>
@@ -289,6 +290,7 @@ export default function ContactUsClient() {
                       onChange={handleChange}
                       placeholder="john.doe@example.com"
                       required
+                      suppressHydrationWarning
                       className="w-full px-3.5 py-2.5 border border-gray-300 rounded text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#00558c] transition-colors"
                     />
                   </div>
@@ -307,6 +309,7 @@ export default function ContactUsClient() {
                       onChange={handleChange}
                       placeholder="+1 (555) 000-0000"
                       required
+                      suppressHydrationWarning
                       className="w-full px-3.5 py-2.5 border border-gray-300 rounded text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#00558c] transition-colors"
                     />
                   </div>
@@ -322,6 +325,7 @@ export default function ContactUsClient() {
                       onChange={handleChange}
                       placeholder="+1 (555) 000-0000"
                       required
+                      suppressHydrationWarning
                       className="w-full px-3.5 py-2.5 border border-gray-300 rounded text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#00558c] transition-colors"
                     />
                   </div>
@@ -339,6 +343,7 @@ export default function ContactUsClient() {
                       value={formData.company}
                       onChange={handleChange}
                       placeholder="Company LLC (Optional)"
+                      suppressHydrationWarning
                       className="w-full px-3.5 py-2.5 border border-gray-300 rounded text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#00558c] transition-colors"
                     />
                   </div>
@@ -352,6 +357,7 @@ export default function ContactUsClient() {
                       value={formData.inquiryType}
                       onChange={handleChange}
                       required
+                      suppressHydrationWarning
                       className="w-full px-3.5 py-2.5 border border-gray-300 rounded text-xs text-gray-900 bg-white focus:outline-none focus:border-[#00558c] transition-colors"
                     >
                       <option value="">-- Select Inquiry Type --</option>
@@ -375,6 +381,7 @@ export default function ContactUsClient() {
                     onChange={handleChange}
                     placeholder="Please enter your detailed query here..."
                     required
+                    suppressHydrationWarning
                     className="w-full px-3.5 py-2.5 border border-gray-300 rounded text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#00558c] transition-colors resize-y"
                   />
                 </div>

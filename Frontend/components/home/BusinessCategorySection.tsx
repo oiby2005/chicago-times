@@ -32,6 +32,8 @@ const formatTimeAgo = (timestamp?: number | string): string => {
   return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
 };
 
+const STATIC_BASE_TIME = 1730000000000;
+
 const defaultArticles: BusinessArticle[] = [
   // Position 1: Left Top
   {
@@ -40,7 +42,7 @@ const defaultArticles: BusinessArticle[] = [
     slug: "business-secretary-wife-favourite-labour-general-secretary",
     summary:
       "No 10 insider Claire Reynolds, who is married to Jonathan Reynolds, is also a close friend of Burnham's chief of staff James Purnell. Former ministers and senior party officials expect her to stand for the powerful internal role, which manages party operations, election strategies, and staff across the nation.",
-    publishedAt: Date.now() - 3 * 3600 * 1000,
+    publishedAt: STATIC_BASE_TIME - 3 * 3600 * 1000,
   },
   // Position 2: Left Middle
   {
@@ -49,7 +51,7 @@ const defaultArticles: BusinessArticle[] = [
     slug: "domestic-abuse-illegal-asylum-seekers-advice-uk-life",
     summary:
       "Nine-page Home Office pamphlet to help behaviour of new arrivals says men and women are equal — critics claim it paints the entire group as a 'menace'. The comprehensive guidance document outlines societal expectations, legal obligations, domestic violence laws, and cultural standards in detail.",
-    publishedAt: Date.now() - 5 * 3600 * 1000,
+    publishedAt: STATIC_BASE_TIME - 5 * 3600 * 1000,
   },
   // Position 3: Left Bottom
   {
@@ -58,7 +60,7 @@ const defaultArticles: BusinessArticle[] = [
     slug: "migrant-who-raped-sleeping-woman-allowed-stay-uk",
     summary:
       "Immigration tribunal ruling fuels calls from the Conservatives and Reform UK for Britain to leave the ECHR. The controversial decision has sparked intense national debate regarding judicial discretion, deportation powers, and human rights legislation across parliament.",
-    publishedAt: Date.now() - 8 * 3600 * 1000,
+    publishedAt: STATIC_BASE_TIME - 8 * 3600 * 1000,
   },
   // Position 4: Center Main Hero
   {
@@ -68,7 +70,7 @@ const defaultArticles: BusinessArticle[] = [
     summary:
       "A photographer spent 36 hours with embattled firefighters who were stretched to their limits as fires ravaged tinderbox hillsides",
     imageUrl: "https://images.unsplash.com/photo-1544717305-2782549b5136?fm=webp&fit=crop&w=800&q=80",
-    publishedAt: Date.now() - 2 * 3600 * 1000,
+    publishedAt: STATIC_BASE_TIME - 2 * 3600 * 1000,
   },
   // Position 5: Center Bottom Left
   {
@@ -76,7 +78,7 @@ const defaultArticles: BusinessArticle[] = [
     title: "New NHS drug for diabetes could cut jabs to one a week",
     slug: "new-nhs-drug-diabetes-cut-jabs-one-week",
     imageUrl: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?fm=webp&fit=crop&w=400&q=80",
-    publishedAt: Date.now() - 14 * 3600 * 1000,
+    publishedAt: STATIC_BASE_TIME - 14 * 3600 * 1000,
   },
   // Position 6: Center Bottom Right
   {
@@ -84,7 +86,7 @@ const defaultArticles: BusinessArticle[] = [
     title: "Israel to investigate its killing of five-year-old girl",
     slug: "israel-investigate-killing-five-year-old-girl",
     imageUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?fm=webp&fit=crop&w=400&q=80",
-    publishedAt: Date.now() - 18 * 3600 * 1000,
+    publishedAt: STATIC_BASE_TIME - 18 * 3600 * 1000,
   },
   // Position 7: Right Top
   {
@@ -92,7 +94,7 @@ const defaultArticles: BusinessArticle[] = [
     title: "Trump declares ‘economic D-Day’ against Iran",
     slug: "trump-declares-economic-d-day-against-iran",
     imageUrl: "https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?fm=webp&fit=crop&w=300&q=80",
-    publishedAt: Date.now() - 4 * 3600 * 1000,
+    publishedAt: STATIC_BASE_TIME - 4 * 3600 * 1000,
   },
   // Position 8: Right Bottom
   {
@@ -100,7 +102,7 @@ const defaultArticles: BusinessArticle[] = [
     title: "Fastest star in the galaxy ‘will reveal black hole’s secrets’",
     slug: "fastest-star-galaxy-will-reveal-black-hole-secrets",
     imageUrl: "https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?fm=webp&fit=crop&w=300&q=80",
-    publishedAt: Date.now() - 29 * 3600 * 1000,
+    publishedAt: STATIC_BASE_TIME - 29 * 3600 * 1000,
   },
 ];
 
@@ -291,9 +293,9 @@ export const BusinessCategorySection: React.FC = () => {
           ))}
         </div>
 
-        {/* Ad 1 (Business Sidebar) - Dynamic flex-1 height stretches ad to bottom divider line */}
-        <div className="mt-1 pt-1 border-t border-dashed border-[#888070] flex-1 flex flex-col h-full">
-          <AdPlaceholder slotId="hp_slot_1" width="w-full" height="h-full min-h-[240px]" resolution="300 × 300" className="my-0 h-full flex-1 flex flex-col" />
+        {/* Ad 1 (Business Sidebar) - Dynamic flex-1 height stretches ad with equal top and bottom whitespace spacing */}
+        <div className="mt-3 pt-6 pb-6 border-t border-dashed border-[#888070] flex-1 flex flex-col h-full items-center justify-center">
+          <AdPlaceholder slotId="hp_slot_1" width="w-full" height="h-full min-h-[240px]" resolution="300 × 300" className="my-0 mb-0 h-full flex-1 flex flex-col" />
         </div>
       </div>
     </div>

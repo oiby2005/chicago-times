@@ -90,6 +90,7 @@ export default function SignInPage() {
           localStorage.setItem("wsj_users_by_email", JSON.stringify(profilesMap));
 
           const targetUrl = getUserRoleUrl(user.role);
+          try { router.prefetch(targetUrl); } catch (e) {}
           router.push(targetUrl);
           return;
         }
@@ -115,6 +116,7 @@ export default function SignInPage() {
         localStorage.setItem("wsj_users_by_email", JSON.stringify(profilesMap));
 
         const targetUrl = getUserRoleUrl(googleUser.role);
+        try { router.prefetch(targetUrl); } catch (e) {}
         router.push(targetUrl);
       }
     } catch (err) {
@@ -265,6 +267,34 @@ export default function SignInPage() {
     }
 
     if (isSignUp) {
+      setLoading(true);
+      const cleanEmail = email.trim().toLowerCase();
+      const cleanPassword = password.trim();
+      const cleanName = fullName.trim();
+
+      try {
+        const res = await fetch("http://localhost:5000/api/users/signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            full_name: cleanName,
+            email: cleanEmail,
+            password: cleanPassword,
+            role: "reader",
+          }),
+        }).catch(() => null);
+
+        if (res && !res.ok) {
+          const data = await res.json().catch(() => null);
+          setLoading(false);
+          setError(data?.message || "Failed to create account. User with this email may already exist.");
+          return;
+        }
+      } catch (err) {
+        console.error("Signup error:", err);
+      }
+
+      setLoading(false);
       setSubmitted(true);
       return;
     }
@@ -309,7 +339,9 @@ export default function SignInPage() {
         }
 
         setLoading(false);
-        router.push(getUserRoleUrl(data.user));
+        const targetUrl = getUserRoleUrl(data.user);
+        try { router.prefetch(targetUrl); } catch (e) {}
+        router.push(targetUrl);
         return;
       } else {
         setLoading(false);

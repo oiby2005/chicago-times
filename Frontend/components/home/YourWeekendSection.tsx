@@ -31,6 +31,8 @@ const formatTimeAgo = (timestamp?: number | string): string => {
   return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
 };
 
+const STATIC_BASE_TIME = 1730000000000;
+
 const defaultArticles: WeekendArticle[] = [
   {
     id: "yw1",
@@ -39,7 +41,7 @@ const defaultArticles: WeekendArticle[] = [
     summary: "New apps, membership clubs and other middlemen are fighting over access to high-spending customers and the eateries they love.",
     imageUrl: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?fm=webp&fit=crop&w=1200&q=80",
     commentCount: 363,
-    publishedAt: Date.now() - 3 * 3600 * 1000,
+    publishedAt: STATIC_BASE_TIME - 3 * 3600 * 1000,
   },
   {
     id: "yw2",
@@ -48,7 +50,7 @@ const defaultArticles: WeekendArticle[] = [
     summary: "The water system in Braham was one of dozens affected after federal agencies warned Iran-linked hackers could target U.S. infrastructure.",
     imageUrl: "https://images.unsplash.com/photo-1508614589041-895b88991e3e?fm=webp&fit=crop&w=600&q=80",
     commentCount: 92,
-    publishedAt: Date.now() - 5 * 3600 * 1000,
+    publishedAt: STATIC_BASE_TIME - 5 * 3600 * 1000,
   },
   {
     id: "yw3",
@@ -56,7 +58,7 @@ const defaultArticles: WeekendArticle[] = [
     slug: "situational-awareness-bets-400-million",
     summary: "The AI-battered hedge fund made a big bet this week in Source Foundry, a private company aiming to reinvent how chips are manufactured.",
     imageUrl: "https://images.unsplash.com/photo-1518770660439-4636190af475?fm=webp&fit=crop&w=600&q=80",
-    publishedAt: Date.now() - 8 * 3600 * 1000,
+    publishedAt: STATIC_BASE_TIME - 8 * 3600 * 1000,
   },
 ];
 

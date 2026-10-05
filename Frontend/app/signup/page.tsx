@@ -244,24 +244,28 @@ export default function SignUpPage() {
           role: "reader",
         }),
       }).catch(() => null);
+      const data = res ? await res.json().catch(() => null) : null;
 
-      if (res && res.ok) {
-        const data = await res.json();
-        if (data.success && data.user) {
-          const userStr = JSON.stringify(data.user);
-          sessionStorage.setItem("wsj_session_active", "true");
-          sessionStorage.setItem("wsj_user", userStr);
-          localStorage.setItem("wsj_user", userStr);
-          try {
-            const map = JSON.parse(localStorage.getItem("wsj_users_by_email") || "{}");
-            map[cleanEmail] = data.user;
-            localStorage.setItem("wsj_users_by_email", JSON.stringify(map));
-          } catch (e) {}
-          window.dispatchEvent(new Event("wsj_user_updated"));
-          setLoading(false);
-          router.push(getUserRoleUrl(data.user));
-          return;
-        }
+      if (res && res.ok && data?.success && data?.user) {
+        const userStr = JSON.stringify(data.user);
+        sessionStorage.setItem("wsj_session_active", "true");
+        sessionStorage.setItem("wsj_user", userStr);
+        localStorage.setItem("wsj_user", userStr);
+        try {
+          const map = JSON.parse(localStorage.getItem("wsj_users_by_email") || "{}");
+          map[cleanEmail] = data.user;
+          localStorage.setItem("wsj_users_by_email", JSON.stringify(map));
+        } catch (e) {}
+        window.dispatchEvent(new Event("wsj_user_updated"));
+        setLoading(false);
+        router.push(getUserRoleUrl(data.user));
+        return;
+      }
+
+      if (res && !res.ok) {
+        setLoading(false);
+        setError(data?.message || "User with this email address already exists. Please sign in or use another email.");
+        return;
       }
     } catch (err) {}
 

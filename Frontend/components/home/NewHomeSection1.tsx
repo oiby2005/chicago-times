@@ -15,7 +15,7 @@ import EditorialsSection from "@/components/home/EditorialsSection";
 import WSJPromotionSection from "@/components/home/WSJPromotionSection";
 import YourWeekendSection from "@/components/home/YourWeekendSection";
 import Ad3Section from "@/components/ui/Ad3Section";
-import { PeopleToKnowTop, PeopleToKnowBottom } from "@/components/home/PeopleToKnowSection";
+import { PeopleToKnowSection } from "@/components/home/PeopleToKnowSection";
 import PoliticsCategorySection from "@/components/home/PoliticsCategorySection";
 import TechCategorySection from "@/components/home/TechCategorySection";
 import MostPopularNewsSection from "@/components/home/MostPopularNewsSection";
@@ -42,22 +42,22 @@ export default function NewHomeSection1() {
     <section className="w-full bg-white text-[#111111] pt-0 pb-6 select-none">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 mb-6 items-stretch border-b border-dashed border-[#888070] pb-4">
         
-        {/* Column 1 (Left 3 of 12 cols ~ 25%): TOP NEWS -> IN DEPTH PANEL */}
-        <div className="col-span-12 lg:col-span-3 pr-0 lg:pr-[0.3cm] flex flex-col justify-between border-r border-dashed border-[#888070]">
-          <TopNewsSection />
-          <div className="my-4 border-b border-dashed border-[#888070] mx-1" />
-          <InDepthPanelSection />
-        </div>
-
-        {/* Column 2 (Center 6 of 12 cols ~ 50%): A+ MAIN NEWS -> MAIN BOTTOM PANEL */}
-        <div className="col-span-12 lg:col-span-6 px-0 lg:px-[0.3cm] py-6 lg:py-0 flex flex-col justify-between border-r border-dashed border-[#888070]">
+        {/* Column 2 (Center 6 of 12 cols ~ 50%): A+ MAIN NEWS -> MAIN BOTTOM PANEL (ORDER-1 ON MOBILE, SHOWS FIRST) */}
+        <div className="col-span-12 lg:col-span-6 px-0 lg:px-[0.3cm] py-2 lg:py-0 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-dashed border-[#888070] order-1 lg:order-2 pb-6 lg:pb-0 mb-6 lg:mb-0">
           <APlusMainNewsSection />
           <div className="my-4 border-b border-dashed border-[#888070] mx-1" />
           <MainBottomPanelSection />
         </div>
 
-        {/* Column 3 (Right 3 of 12 cols ~ 25%): OPINION -> RIGHT MAIN PANEL */}
-        <div className="col-span-12 lg:col-span-3 pl-0 lg:pl-[0.3cm] pt-6 lg:pt-0 flex flex-col justify-between h-full">
+        {/* Column 1 (Left 3 of 12 cols ~ 25%): TOP NEWS -> IN DEPTH PANEL (ORDER-2 ON MOBILE) */}
+        <div className="col-span-12 lg:col-span-3 pr-0 lg:pr-[0.3cm] flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-dashed border-[#888070] order-2 lg:order-1 pb-6 lg:pb-0 mb-6 lg:mb-0">
+          <TopNewsSection />
+          <div className="my-4 border-b border-dashed border-[#888070] mx-1" />
+          <InDepthPanelSection />
+        </div>
+
+        {/* Column 3 (Right 3 of 12 cols ~ 25%): OPINION -> RIGHT MAIN PANEL (ORDER-3 ON MOBILE) */}
+        <div className="col-span-12 lg:col-span-3 pl-0 lg:pl-[0.3cm] pt-2 lg:pt-0 flex flex-col justify-between h-full order-3 lg:order-3">
           <OpinionSection />
           <div className="my-4 border-b border-dashed border-[#888070] mx-1" />
           <RightMainPanelSection />
@@ -86,7 +86,7 @@ export default function NewHomeSection1() {
       </div>
 
       {/* ==================== ROW 7 (UPPER STICKY REGION): PROMOTION, YOUR WEEKEND, AD 03 & PEOPLE TO KNOW TOP (LEFT 9 COLS) | STICKY EDITORIALS (RIGHT 3 COLS ~ 25%) ==================== */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 pt-2 items-start relative">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 pt-2 items-stretch relative">
         {/* Main Content Area (9 of 12 cols): Ends right at dashed line under Trump's Executive Assistant */}
         <div className="col-span-12 lg:col-span-9 pr-0 lg:pr-[0.4cm] mb-0">
           <WSJPromotionSection />
@@ -100,31 +100,30 @@ export default function NewHomeSection1() {
             <Ad3Section />
           </div>
 
-          {/* People to Know Top Part (ends at dashed line under How Trump's...) */}
+          {/* People to Know Section (entire section in Row 7) */}
           <div className="pt-2">
-            <PeopleToKnowTop />
+            <PeopleToKnowSection />
           </div>
         </div>
 
-        {/* Right Sidebar Area (3 of 12 cols ~ 25%): Sticky Editorials STOPS right at that dashed line */}
+        {/* Right Sidebar Area (3 of 12 cols ~ 25%): Sticky Editorials STOPS right at top edge of Most Popular news section */}
         <div className="col-span-12 lg:col-span-3 pl-0 lg:pl-[0.4cm] relative h-full min-h-[100%]">
-          <div className="sticky top-6 z-10 self-start w-full">
+          <div className="sticky top-[90px] z-10 self-start w-full">
             <EditorialsSection />
           </div>
         </div>
       </div>
 
       {/* ==================== ROW 8 & 9 (MIDDLE & TECH REGION): POLITICS & TECH (LEFT 9 COLS) | MOST POPULAR, RECOMMENDED VIDEOS & AD 05 (RIGHT 3 COLS ~ 25%) ==================== */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 pt-0 items-stretch relative">
-        {/* Left 9 Cols: People to Know Bottom -> Politics Category Section -> Sticky Tech Category Section */}
-        <div className="col-span-12 lg:col-span-9 pr-0 lg:pr-[0.4cm] border-r border-dashed border-[#CCCCCC] relative">
-          <PeopleToKnowBottom />
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 pt-4 items-stretch relative">
+        {/* Left 9 Cols: Politics Category Section -> Sticky Tech Category Section */}
+        <div className="col-span-12 lg:col-span-9 pr-0 lg:pr-[0.4cm] relative">
+          {/* Vertical divider starting horizontally level with top edge of 'Politics' text */}
+          <div className="hidden lg:block absolute right-0 top-0 bottom-0 w-[1px] border-r border-dashed border-[#CCCCCC]" />
 
-          <div className="pt-2">
-            <PoliticsCategorySection />
-          </div>
+          <PoliticsCategorySection />
 
-          <div className="sticky top-[105px] z-10 self-start w-full pt-2">
+          <div className="sticky top-[90px] z-10 self-start w-full pt-4">
             <TechCategorySection />
           </div>
         </div>
@@ -163,7 +162,9 @@ export default function NewHomeSection1() {
       {/* ==================== ROW 13: MAIN VIDEO & FASHION/SCIENCE/ARTS (LEFT 9 COLS) + AD 07 & PODCAST (RIGHT 3 COLS) ==================== */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 pt-2 items-stretch relative">
         {/* Left 9 Cols: Main Video Section -> Fashion, Science, Arts 3-col Section */}
-        <div className="col-span-12 lg:col-span-9 pr-0 lg:pr-[0.4cm] border-r border-solid border-[#CCCCCC]">
+        <div className="col-span-12 lg:col-span-9 pr-0 lg:pr-[0.4cm] relative">
+          {/* Vertical divider starting at top edge of Homepage Ad 7 (~46px from top) */}
+          <div className="hidden lg:block absolute right-0 top-[46px] bottom-0 w-[1px] border-r border-dashed border-[#CCCCCC]" />
           <MainVideoSection />
 
           <div className="pt-2">
@@ -172,8 +173,8 @@ export default function NewHomeSection1() {
         </div>
 
         {/* Right 3 Cols: Ad 07 -> Podcast Section (Sticky when active podcasts < 3, static when >= 3) */}
-        <div className="col-span-12 lg:col-span-3 pl-0 lg:pl-[0.4cm] relative h-full">
-          <div className={isPodcastSticky ? "sticky top-20 z-10 self-start w-full" : "relative z-10 self-start w-full"}>
+        <div className="col-span-12 lg:col-span-3 pl-0 lg:pl-[0.4cm] pt-[46px] relative h-full">
+          <div className={isPodcastSticky ? "sticky top-[90px] z-10 self-start w-full" : "relative z-10 self-start w-full"}>
             <Ad7Section />
             <div className="mt-4">
               <PodcastSection onActiveCountChange={(count) => setActivePodcastCount(count)} />
@@ -198,7 +199,7 @@ export default function NewHomeSection1() {
       </div>
 
       {/* ==================== ROW 17: MARKETS & FINANCE CATEGORY SECTION (BLACK UPPER DIVIDER) ==================== */}
-      <div className="pt-4 mt-4 border-t-2 border-black">
+      <div className="pt-6 mt-8 mb-6 border-t-2 border-black">
         <MarketsFinanceCategorySection />
       </div>
 

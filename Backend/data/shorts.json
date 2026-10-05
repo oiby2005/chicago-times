@@ -73,9 +73,9 @@
       "thumbnailUrl": "https://f005.backblazeb2.com/file/timeschicago/cover_images/cover_1790264649293_1790264650510.jpg",
       "duration": "36:35",
       "status": "Active",
-      "audioUrl": "https://dts.podtrac.com/redirect.mp3/pdst.fm/e/pfx.vpixl.com/6qj4J/pscrb.fm/rss/p/nyt.simplecastaudio.com/03d8b493-87fc-4bd1-931f-8a8e9b945d8a/episodes/ce4e04c1-0998-4159-a47b-106499ccdd46/audio/128/default.mp3?aid=rss_feed&awCollectionId=03d8b493-87fc-4bd1-931f-8a8e9b945d8a&awEpisodeId=ce4e04c1-0998-4159-a47b-106499ccdd46&feed=Sl5CSM3S",
+      "audioUrl": "https://play.itunes.apple.com/WebObjects/MZPlay.woa/podcast/hls/playlist.m3u8?cc=US&a=1000791438660&id=1509632706&l=en-us",
       "subTab": "podcast",
-      "createdAt": "2026-09-25T08:19:49.000Z"
+      "createdAt": "2026-10-05T16:22:23.000Z"
     },
     {
       "id": "podcast_slot_2",
@@ -85,74 +85,71 @@
       "title": "Aaron Sorkin Goes Off Script",
       "thumbnailUrl": "https://f005.backblazeb2.com/file/timeschicago/cover_images/cover_1790324389340_1790324389929.jpg",
       "duration": "1:00:45",
-      "status": "Active",
-      "audioUrl": "https://dts.podtrac.com/redirect.mp3/pdst.fm/e/pfx.vpixl.com/6qj4J/pscrb.fm/rss/p/nyt.simplecastaudio.com/03d8b493-87fc-4bd1-931f-8a8e9b945d8a/episodes/c7cf5b73-080f-4159-a6c9-e0bcfa4c5a38/audio/128/default.mp3?aid=rss_feed&awCollectionId=03d8b493-87fc-4bd1-931f-8a8e9b945d8a&awEpisodeId=c7cf5b73-080f-4159-a6c9-e0bcfa4c5a38&feed=Sl5CSM3S",
-      "subTab": "podcast",
-      "createdAt": "2026-09-25T08:19:52.000Z"
+      "status": "Inactive",
+      "audioUrl": "https://play.itunes.apple.com/WebObjects/MZPlay.woa/podcast/hls/playlist.m3u8?cc=US&a=1000790659273&id=1508439129&l=en-us",
+      "createdAt": "2026-10-05T16:22:30.563Z"
     },
     {
       "id": "podcast_slot_3",
       "slotNumber": 3,
-      "videoUrl": "https://podcasts.apple.com/us/podcast/how-a-1-000-year-old-tapestry-took-london-by-storm/id1200361736?i=1000790778095",
+      "videoUrl": "",
       "platform": "Apple Podcasts",
-      "title": "How a 1,000-Year-Old Tapestry Took London by Storm",
-      "thumbnailUrl": "https://f005.backblazeb2.com/file/timeschicago/cover_images/cover_1790324414831_1790324415103.jpg",
-      "duration": "34:48",
-      "status": "Active",
-      "audioUrl": "https://dts.podtrac.com/redirect.mp3/pdst.fm/e/pfx.vpixl.com/6qj4J/pscrb.fm/rss/p/nyt.simplecastaudio.com/03d8b493-87fc-4bd1-931f-8a8e9b945d8a/episodes/3630799e-d379-48d1-b0d4-26203d5e4b2b/audio/128/default.mp3?aid=rss_feed&awCollectionId=03d8b493-87fc-4bd1-931f-8a8e9b945d8a&awEpisodeId=3630799e-d379-48d1-b0d4-26203d5e4b2b&feed=Sl5CSM3S",
-      "createdAt": "2026-09-25T08:20:14.678Z"
+      "title": "[Empty Slot #3]",
+      "thumbnailUrl": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><rect width='100%' height='100%' fill='%23000000'/></svg>",
+      "duration": "0:00",
+      "status": "Inactive"
     }
   ],
   "videos": [
     {
       "id": "video_slot_1",
       "slotNumber": 1,
-      "videoUrl": "https://www.youtube.com/watch?v=Vh5uSwYStgw&pp=ygUIYmJjIG5ld3M%3D",
-      "platform": "Youtube Video",
-      "title": "How to deal with stress - What in the World podcast,  BBC World Service",
-      "thumbnailUrl": "https://f005.backblazeb2.com/file/timeschicago/cover_images/cover_1790325634440_1790325634745.jpg",
-      "duration": "13:41",
+      "videoUrl": "https://www.facebook.com/reel/2014531089247953",
+      "platform": "Facebook Short",
+      "title": "A former Ohio music pastor who once appeared on the TV talent show American Idol has been found guilty of murdering his wife.\n\nRead more: https://bbc.in/4hkNE3t | BBC News",
+      "thumbnailUrl": "https://f005.backblazeb2.com/file/timeschicago/cover_images/cover_1791003496827_1791003496894.jpg",
+      "duration": "0:45",
       "status": "Active",
-      "createdAt": "2026-09-25T08:40:34.423Z"
+      "audioUrl": "",
+      "subTab": "videos",
+      "createdAt": "2026-10-03T05:00:26.000Z"
     },
     {
       "id": "video_slot_2",
       "slotNumber": 2,
-      "videoUrl": "https://www.youtube.com/watch?v=K5etnxTWgog&pp=ygUIYmJjIG5ld3M%3D",
-      "platform": "Youtube Video",
-      "title": "The secret deal that ended the crisis - The Bomb Podcast: Kennedy & Khrushchev, BBC World Service",
-      "thumbnailUrl": "https://f005.backblazeb2.com/file/timeschicago/cover_images/cover_1790324238628_1790324238823.jpg",
-      "duration": "26:05",
+      "videoUrl": "https://www.instagram.com/bbcnews/reel/Dd9b63NFav7/",
+      "platform": "Instagram shorts",
+      "title": "BBC News on Instagram: \"A UK-Iranian dual national has been arrested on suspicion of preparation of terrorist acts in connection with the incident at RAF Fairford, counter-terror police have said.\n \nThe 27-year-old man was arrested in Westminster, London.\n \nA second man, a 26-year-old UK national, has also been questioned under caution, and two properties in the area have been searched.\n \nTap the link in @BBCNews’s bio for more on this breaking news story.\n \n#RAFFairford #Gloucestershire #BBCNews\"",
+      "thumbnailUrl": "https://f005.backblazeb2.com/file/timeschicago/cover_images/cover_1791003558278_1791003558505.jpg",
+      "duration": "0:45",
       "status": "Active",
       "audioUrl": "",
       "subTab": "videos",
-      "createdAt": "2026-09-25T08:18:00.000Z"
+      "createdAt": "2026-10-03T05:00:26.000Z"
     },
     {
       "id": "video_slot_3",
       "slotNumber": 3,
-      "videoUrl": "https://www.youtube.com/watch?v=tZ-Pbwdqlt0&pp=ygUIYmJjIG5ld3M%3D",
+      "videoUrl": "https://www.youtube.com/watch?v=9gVgz394w9A",
       "platform": "Youtube Video",
-      "title": "Can diet improve memory? BBC News Review",
-      "thumbnailUrl": "https://f005.backblazeb2.com/file/timeschicago/cover_images/cover_1790324260698_1790324260919.jpg",
-      "duration": "6:26",
+      "title": "Why UK Prime Minister Andy Burnham's about-turn on Manchester City matters | BBC Newscast",
+      "thumbnailUrl": "https://f005.backblazeb2.com/file/timeschicago/cover_images/cover_1791003626934_1791003627132.jpg",
+      "duration": "25:00",
       "status": "Active",
       "audioUrl": "",
       "subTab": "videos",
-      "createdAt": "2026-09-25T08:18:00.000Z"
+      "createdAt": "2026-10-03T05:00:29.000Z"
     },
     {
       "id": "video_slot_4",
       "slotNumber": 4,
-      "videoUrl": "https://www.youtube.com/watch?v=_clwOC_Yprs&pp=ygUIYmJjIG5ld3M%3D",
-      "platform": "Youtube Video",
-      "title": "Should zoos exist? - What in the World podcast, BBC World Service",
-      "thumbnailUrl": "https://f005.backblazeb2.com/file/timeschicago/cover_images/cover_1790324280687_1790324280897.jpg",
-      "duration": "16:35",
+      "videoUrl": "https://rumble.com/v7g9vka-bintangs-alright-alright.html?e9s=src_v1_rsr%2Csrc_v1_music%2Csrc_v2_hp&pri=3KAcGkYIx3IVkNrjNRivssG22RU",
+      "platform": "Rumble Video",
+      "title": "Bintangs - Alright Alright",
+      "thumbnailUrl": "https://f005.backblazeb2.com/file/timeschicago/cover_images/cover_1791003744829_1791003745580.jpg",
+      "duration": "4:04",
       "status": "Active",
-      "audioUrl": "",
-      "subTab": "videos",
-      "createdAt": "2026-09-25T08:18:03.000Z"
+      "createdAt": "2026-10-03T05:02:24.794Z"
     }
   ]
 }

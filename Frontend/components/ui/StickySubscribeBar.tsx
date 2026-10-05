@@ -9,19 +9,12 @@ export const StickySubscribeBar: React.FC = () => {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-[#d4d4d4] shadow-md py-2.5 px-4 select-none">
-      <div className="max-w-[1280px] mx-auto flex items-center justify-between">
-        {/* Left Icon */}
+    <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-[#d4d4d4] shadow-md py-2.5 select-none">
+      <div className="max-w-[1280px] mx-auto px-4 sm:px-5 md:px-6 flex items-center justify-between">
+        {/* Left Offer Text */}
         <div className="flex items-center space-x-2">
-          <span className="font-serif font-bold text-sm sm:text-base text-black tracking-tight uppercase">
-            Times Chicago
-          </span>
-        </div>
-
-        {/* Center Offer Text */}
-        <div className="text-center">
-          <span className="font-serif font-bold text-lg sm:text-xl text-black tracking-tight">
-            Special Offer $3 USD/Month
+          <span className="font-serif font-bold text-base sm:text-lg text-black tracking-tight">
+            Special Offer $3 USD / Month
           </span>
         </div>
 
@@ -37,7 +30,7 @@ export const StickySubscribeBar: React.FC = () => {
           <button
             onClick={() => setIsVisible(false)}
             aria-label="Close"
-            className="text-gray-500 hover:text-black text-sm font-bold p-1 focus:outline-none"
+            className="text-gray-500 hover:text-black text-sm font-bold p-1 focus:outline-none cursor-pointer"
             suppressHydrationWarning
           >
             ✕

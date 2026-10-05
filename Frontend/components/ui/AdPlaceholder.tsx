@@ -35,6 +35,9 @@ const DEFAULT_SLOT_DIMENSIONS: Record<string, { width: string; height: string; r
   cat_slot_1: { width: "w-full max-w-[300px]", height: "h-[250px]", resolution: "300 × 250" },
   cat_slot_2: { width: "w-full max-w-[300px]", height: "h-[600px]", resolution: "300 × 600" },
   author_slot_1: { width: "w-full max-w-[300px]", height: "h-[250px]", resolution: "300 × 250" },
+  article_slot_1: { width: "w-full max-w-full", height: "h-[300px]", resolution: "300 × 300" },
+  article_slot_2: { width: "w-full max-w-full", height: "h-[300px]", resolution: "300 × 300" },
+  article_slot_3: { width: "w-full max-w-full", height: "h-[300px]", resolution: "300 × 300" },
 };
 
 const SLOT_TITLE_MAP: Record<string, string> = {
@@ -48,6 +51,9 @@ const SLOT_TITLE_MAP: Record<string, string> = {
   cat_slot_1: "Category Page ad 1",
   cat_slot_2: "Category Page ad 2",
   author_slot_1: "Writer Page ad 1",
+  article_slot_1: "Article Page ad 01",
+  article_slot_2: "Article Page ad 02",
+  article_slot_3: "Article Page ad 03",
 };
 
 export const AdPlaceholder: React.FC<AdPlaceholderProps> = ({
@@ -138,7 +144,7 @@ export const AdPlaceholder: React.FC<AdPlaceholderProps> = ({
     }
 
     const ImageElement = (
-      <div className={`flex flex-col w-full ${className.includes("my-") ? "" : "my-3"} ${className}`}>
+      <div className={`flex flex-col w-full ${className.includes("my-") ? "" : "my-3 mb-4"} ${className}`}>
         <div
           style={aspectRatioStyle}
           className={`${width} ${effectiveHeight} relative overflow-hidden rounded-xs border border-[#e2e2e2] shadow-2xs group flex-1 w-full flex flex-col`}
@@ -171,7 +177,7 @@ export const AdPlaceholder: React.FC<AdPlaceholderProps> = ({
   }
 
   return (
-    <div className={`flex flex-col select-none w-full ${className.includes("my-") ? "" : "my-3"} ${className}`}>
+    <div className={`flex flex-col select-none w-full ${className.includes("my-") ? "" : "my-3 mb-4"} ${className}`}>
       {/* Empty Banner Container with title and resolution size */}
       <div
         style={aspectRatioStyle}

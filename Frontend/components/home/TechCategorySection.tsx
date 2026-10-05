@@ -32,6 +32,8 @@ const formatTimeAgo = (timestamp?: number | string): string => {
   return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
 };
 
+const STATIC_BASE_TIME = 1730000000000;
+
 const defaultArticles: TechArticle[] = [
   {
     id: "tech1",
@@ -40,14 +42,14 @@ const defaultArticles: TechArticle[] = [
     slug: "spanish-border-chaos-is-an-illusion",
     summary: "Images of 72,000 migrants stampeding into Ceuta looked like a security collapse. In reality it revealed Europe’s much harder line on immigration.",
     imageUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?fm=webp&fit=crop&w=800&q=80",
-    publishedAt: Date.now() - 3 * 3600 * 1000,
+    publishedAt: STATIC_BASE_TIME - 3 * 3600 * 1000,
   },
   {
     id: "tech2",
     title: "EU’s Internal Borders Start to Harden as Dispute Grows Over Migrants",
     slug: "eus-internal-borders-start-to-harden",
     summary: "Spain introduced new border checks on arrivals from Italy, as a migration dispute between the countries escalated into a tit-for-tat.",
-    publishedAt: Date.now() - 5 * 3600 * 1000,
+    publishedAt: STATIC_BASE_TIME - 5 * 3600 * 1000,
   },
   {
     id: "tech3",
@@ -55,7 +57,7 @@ const defaultArticles: TechArticle[] = [
     slug: "russias-hottest-startup-sanctions-evasion",
     summary: "Founded less than two years ago, A7 says it handles nearly 20% of payments in Russian foreign trade, or more than $100 billion annually.",
     commentsCount: 39,
-    publishedAt: Date.now() - 7 * 3600 * 1000,
+    publishedAt: STATIC_BASE_TIME - 7 * 3600 * 1000,
   },
   {
     id: "tech4",
@@ -63,7 +65,7 @@ const defaultArticles: TechArticle[] = [
     slug: "us-intel-links-russia-explosive-drone",
     summary: "American intelligence had already suggested Putin could test NATO’s resolve with a limited incursion in the coming years.",
     commentsCount: 231,
-    publishedAt: Date.now() - 10 * 3600 * 1000,
+    publishedAt: STATIC_BASE_TIME - 10 * 3600 * 1000,
   },
 ];
 

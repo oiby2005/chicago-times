@@ -10,7 +10,11 @@ import SpecialOfferPopover from "@/components/navigation/SpecialOfferPopover";
 import { getAuthorSlugForUser, getUserDashboardUrl, getAuthorBySlug } from "@/data/authors";
 import { UserProfile } from "@/components/ui/ProfileSettingsModal";
 
-export const StickyHeaderBar: React.FC = () => {
+interface StickyHeaderBarProps {
+  visible?: boolean;
+}
+
+export const StickyHeaderBar: React.FC<StickyHeaderBarProps> = ({ visible = true }) => {
   const [isSticky, setIsSticky] = useState(false);
   const [isSearchOverlayOpen, setIsSearchOverlayOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
@@ -70,7 +74,7 @@ export const StickyHeaderBar: React.FC = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 220) {
+      if (window.scrollY > 220 && visible) {
         setIsSticky(true);
       } else {
         setIsSticky(false);
@@ -78,8 +82,9 @@ export const StickyHeaderBar: React.FC = () => {
     };
 
     window.addEventListener("scroll", handleScroll);
+    handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [visible]);
 
   // Click outside listener to close dropdown on desktop or mobile
   useEffect(() => {
@@ -198,12 +203,12 @@ export const StickyHeaderBar: React.FC = () => {
         isOpen={isSearchOverlayOpen}
         onClose={() => setIsSearchOverlayOpen(false)}
       />
-    <div className="sticky top-0 z-40 w-full bg-white border-b border-[#d4d4d4] shadow-sm transition-all duration-200 select-none">
-      <div className="w-full max-w-[1280px] mx-auto px-2 relative">
+    <div className="fixed top-0 left-0 right-0 z-50 w-full bg-white border-b border-[#d4d4d4] shadow-md transition-all duration-200 select-none animate-in slide-in-from-top-2 duration-150">
+      <div className="w-full max-w-[1280px] mx-auto px-4 sm:px-5 md:px-6 relative">
         {/* Top Header Row of Sticky Bar */}
         <div className="flex items-center justify-between h-12 sm:h-14 md:h-16 border-b border-[#f0f0f0] relative">
           {/* Left Action Button: Newsletter (Matching LogoHeader alignment) */}
-          <div className="hidden md:flex items-center w-[200px] lg:w-[230px] justify-start z-10 shrink-0">
+          <div className="hidden md:flex items-center w-[220px] lg:w-[260px] justify-start z-10 shrink-0">
             <Link
               href="/newsletters"
               className="bg-black hover:bg-gray-900 text-white font-sans text-[11.5px] font-medium px-4 py-1.5 h-auto flex items-center justify-center rounded-none tracking-tight transition-colors whitespace-nowrap cursor-pointer inline-flex leading-none shadow-xs"
@@ -225,7 +230,7 @@ export const StickyHeaderBar: React.FC = () => {
           </div>
 
           {/* Right Buttons: Special Offer & Sign In (Matching LogoHeader alignment) */}
-          <div className="hidden md:flex items-center space-x-2.5 w-[230px] lg:w-[270px] justify-end z-[100] shrink-0 relative">
+          <div className="hidden md:flex items-center space-x-2.5 w-[220px] lg:w-[260px] justify-end z-[100] shrink-0 relative">
             <SpecialOfferPopover>
               <button
                 className="bg-[#007cb9] hover:bg-[#006996] text-white font-sans text-[11.5px] font-medium px-4 py-1.5 h-auto flex items-center justify-center rounded-none tracking-tight transition-colors whitespace-nowrap cursor-pointer shadow-xs leading-none"

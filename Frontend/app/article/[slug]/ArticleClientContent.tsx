@@ -12,10 +12,13 @@ import ArticleTopBar from "@/components/article/ArticleTopBar";
 import ArticleToolbar from "@/components/article/ArticleToolbar";
 import BookmarkButton from "@/components/article/BookmarkButton";
 import ArticleAudioReader from "@/components/article/ArticleAudioReader";
-import RecentInUsSidebar from "@/components/article/RecentInUsSidebar";
+import ArticleUpNextSection from "@/components/article/ArticleUpNextSection";
+import RecentAllCategoriesSidebar from "@/components/article/RecentAllCategoriesSidebar";
+import ArticleSidebarAds from "@/components/article/ArticleSidebarAds";
+import MostPopularNewsSidebar from "@/components/article/MostPopularNewsSidebar";
+import ArticleVideosSection from "@/components/article/ArticleVideosSection";
 import NewsletterSignupBanner from "@/components/article/NewsletterSignupBanner";
 import ArticleCommentsSection from "@/components/article/ArticleCommentsSection";
-import MoreFromWsjSection from "@/components/article/MoreFromWsjSection";
 import ShareCardModal from "@/components/article/ShareCardModal";
 import { getAuthorForArticle } from "@/data/authors";
 import { ensureWebpUrl, migrateLocalStorageToWebP } from "@/lib/webpConverter";
@@ -30,6 +33,31 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
   const [customPost, setCustomPost] = useState<any>(null);
   const [isMainShareOpen, setIsMainShareOpen] = useState(false);
   const [fontSize, setFontSize] = useState<"sm" | "md" | "lg">("md");
+  const [headlinePassed, setHeadlinePassed] = useState(false);
+  const headlineRef = React.useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (headlineRef.current) {
+        const rect = headlineRef.current.getBoundingClientRect();
+        if (rect.bottom < 60) {
+          setHeadlinePassed(true);
+        } else {
+          setHeadlinePassed(false);
+        }
+      } else {
+        if (window.scrollY > 450) {
+          setHeadlinePassed(true);
+        } else {
+          setHeadlinePassed(false);
+        }
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -149,9 +177,11 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
       <div>
         {/* Main Header & Navigation */}
         <Header />
+        <StickyHeaderBar visible={!headlinePassed} />
 
-        {/* Sticky Article Scroll Navbar (Image 1 - Only sticky navbar on article page) */}
+        {/* Sticky Article Scroll Navbar (Appears after scrolling past article title) */}
         <ArticleToolbar
+          visible={headlinePassed}
           articleTitle={title}
           deck={deck}
           bodyContent={bodyHtml || undefined}
@@ -172,13 +202,16 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
               <article className="lg:col-span-8 space-y-5 lg:border-r lg:border-dashed lg:border-[#CCCCCC] lg:pr-10">
                 {/* Category Badge */}
                 <div className="flex items-center space-x-3 mb-3">
-                  <span className="text-[13px] font-serif font-playfair font-bold text-[#666666] tracking-widest uppercase">
+                  <Link
+                    href={`/${category.toLowerCase().replace(/\s+/g, "-")}`}
+                    className="text-[13px] font-serif font-playfair font-bold text-[#666666] hover:text-[#111111] hover:underline tracking-widest uppercase cursor-pointer transition-colors"
+                  >
                     {category}
-                  </span>
+                  </Link>
                 </div>
 
                 {/* Article Headline */}
-                <h1 className="text-3xl sm:text-4xl md:text-[38px] lg:text-[42px] font-serif font-playfair font-bold text-[#111111] leading-tight mb-4">
+                <h1 ref={headlineRef} className="text-3xl sm:text-4xl md:text-[38px] lg:text-[42px] font-serif font-playfair font-bold text-[#111111] leading-tight mb-4">
                   {title}
                 </h1>
 
@@ -192,16 +225,16 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
                 {/* Author Byline & Share + Bookmark Icons */}
                 <div className="pt-2 pb-4 border-b border-dashed border-[#CCCCCC]">
                   <div className="font-sans flex items-center gap-3.5 flex-wrap">
-                    {/* Writer's Circular Headshot Profile Image */}
-                    <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden shrink-0 border border-gray-200 shadow-xs bg-gray-100 flex items-center justify-center">
+                    {/* Writer's Square Headshot Profile Image */}
+                    <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-none overflow-hidden shrink-0 border border-gray-300 shadow-2xs bg-gray-100 flex items-center justify-center">
                       {authorObj.image ? (
                         <img
                           src={authorObj.image}
                           alt={authorObj.name}
-                          className="w-full h-full object-cover rounded-full"
+                          className="w-full h-full object-cover rounded-none"
                         />
                       ) : (
-                        <div className="w-full h-full rounded-full bg-[#111111] text-white flex items-center justify-center font-bold text-sm">
+                        <div className="w-full h-full rounded-none bg-[#111111] text-white flex items-center justify-center font-bold text-sm">
                           {authorObj.name.charAt(0).toUpperCase()}
                         </div>
                       )}
@@ -341,26 +374,35 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
                     commentCount={customPost?.commentsCount || staticArticle.commentCount || 0}
                   />
                 </div>
+
+                {/* Section 5: Up Next Section (Matching Image 4 - Up to 9 articles) */}
+                <div className="w-full clear-both pt-4 mt-4">
+                  <ArticleUpNextSection
+                    categoryName={category}
+                    currentSlug={slug}
+                    currentId={currentArticleData.id}
+                  />
+                </div>
+
+                {/* Section 6: Video Section (Matching Image 1 - 3 Recent Videos) */}
+                <ArticleVideosSection />
               </article>
 
-              {/* Right Column: Recent Sidebar (Span 4) */}
-              <div className="lg:col-span-4 lg:sticky lg:top-6 pl-0 lg:pl-4 mt-8 lg:mt-0">
-                <RecentInUsSidebar
-                  categoryName={category}
+              {/* Right Sidebar Column (Span 4) */}
+              <div className="lg:col-span-4 pl-0 lg:pl-4 mt-8 lg:mt-0">
+                {/* 1. Top: Recent in All Categories (5 most recent articles across any category) */}
+                <RecentAllCategoriesSidebar
                   currentSlug={slug}
                   currentId={currentArticleData.id}
                 />
+
+                {/* 2. Middle: 2 Advertisements (Admin Manageable) */}
+                <ArticleSidebarAds />
+
+                {/* 3. Bottom: Most Popular News (Synchronized with Homepage) */}
+                <MostPopularNewsSidebar />
               </div>
             </div>
-
-            {/* Bottom Full-Width Section: RELATED ARTICLES (Method 1 Tag & Subcategory Matching) */}
-            <MoreFromWsjSection
-              categoryName={category}
-              currentSlug={slug}
-              currentId={currentArticleData.id}
-              tags={tags}
-              subCategories={customPost?.subCategories || []}
-            />
           </Container>
         </div>
       </div>

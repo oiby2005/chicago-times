@@ -27,6 +27,7 @@ const USERS_FILE = path.join(DATA_DIR, 'users.json');
 const ADS_FILE = path.join(DATA_DIR, 'ads.json');
 const SHORTS_FILE = path.join(DATA_DIR, 'shorts.json');
 const COMMENTS_FILE = path.join(DATA_DIR, 'comments.json');
+const SUBSCRIPTIONS_FILE = path.join(DATA_DIR, 'subscription_requests.json');
 
 // Ensure data directory & files exist
 if (!fs.existsSync(DATA_DIR)) {
@@ -49,6 +50,9 @@ if (!fs.existsSync(SHORTS_FILE)) {
 }
 if (!fs.existsSync(COMMENTS_FILE)) {
   fs.writeFileSync(COMMENTS_FILE, JSON.stringify([], null, 2));
+}
+if (!fs.existsSync(SUBSCRIPTIONS_FILE)) {
+  fs.writeFileSync(SUBSCRIPTIONS_FILE, JSON.stringify([], null, 2));
 }
 
 // Helpers for reading/writing persistent data
@@ -1206,6 +1210,43 @@ const formatPostRow = (row) => {
   };
 };
 
+// Centralized Transporter Helper - Prioritizes Gmail App Password if available
+const getEmailTransporter = () => {
+  const gmailUser = process.env.GMAIL_USER;
+  const gmailPass = process.env.GMAIL_APP_PASSWORD;
+  const senderName = process.env.SMTP_SENDER_NAME || 'Times Chicago News';
+
+  if (gmailUser && gmailPass) {
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: { user: gmailUser, pass: gmailPass }
+    });
+    const fromEmail = { name: senderName, address: gmailUser };
+    return { transporter, fromEmail };
+  }
+
+  const host = process.env.SMTP_HOST || process.env.MAIL_HOST;
+  const user = process.env.SMTP_USER || process.env.MAIL_USER;
+  const pass = process.env.SMTP_PASS || process.env.MAIL_PASS;
+  const port = Number(process.env.SMTP_PORT || process.env.MAIL_PORT || 587);
+
+  if (host && user && pass) {
+    const transporter = nodemailer.createTransport({
+      host,
+      port,
+      secure: port === 465,
+      auth: { user, pass },
+      tls: { rejectUnauthorized: false }
+    });
+    const fromEmail = { name: senderName, address: user };
+    return { transporter, fromEmail };
+  }
+
+  const transporter = nodemailer.createTransport({ jsonTransport: true });
+  const fromEmail = { name: senderName, address: 'news@chicagotimes.com' };
+  return { transporter, fromEmail };
+};
+
 // Helper to dispatch targeted email notifications for published articles
 const sendTargetedArticleEmails = async (post) => {
   if (!post || (post.status !== 'Published' && post.status !== 'published')) {
@@ -1213,6 +1254,7 @@ const sendTargetedArticleEmails = async (post) => {
   }
 
   const recipients = new Set();
+  const recipientCategoryMap = new Map();
 
   // 1. Collect custom targeted emails added to this article
   let targetedArr = [];
@@ -1251,9 +1293,9 @@ const sendTargetedArticleEmails = async (post) => {
       }
 
       // Determine article published timestamp & categories
-      const postTime = post.publishedAt
-        ? new Date(post.publishedAt).getTime()
-        : (post.date ? new Date(post.date).getTime() : Date.now());
+      const postTime = (post.justPublished || post.notifySubscribers || post._triggerEmail)
+        ? Date.now()
+        : (post.publishedAt ? new Date(post.publishedAt).getTime() : (post.date ? new Date(post.date).getTime() : Date.now()));
 
       const postCat = (post.category || '').toLowerCase().trim();
       const postSubs = Array.isArray(post.subCategories) ? post.subCategories.map((s) => String(s).toLowerCase().trim()) : [];
@@ -1275,37 +1317,52 @@ const sendTargetedArticleEmails = async (post) => {
         }
 
         // Rule 2: Category check - Article category MUST strictly match subscriber's chosen categories
-        let topics = [];
+        let rawTopics = [];
         if (Array.isArray(sub.newsletters)) {
-          topics = sub.newsletters.map((t) => String(t).toLowerCase().trim());
+          rawTopics = sub.newsletters;
         } else if (typeof sub.newsletters === 'string') {
           try {
             const parsed = JSON.parse(sub.newsletters);
-            if (Array.isArray(parsed)) topics = parsed.map((t) => String(t).toLowerCase().trim());
+            if (Array.isArray(parsed)) rawTopics = parsed;
           } catch (e) {}
         }
 
+        const topics = rawTopics.map((t) => String(t).trim()).filter(Boolean);
         const normTopics = topics.map(normalizeCatStr).filter(Boolean);
         const isAllSelected = normTopics.includes('all') || normTopics.includes('allnewsletters');
 
         let matchesCategory = false;
+        let matchedCategoryName = post.category || 'World';
+
         if (isAllSelected) {
           matchesCategory = true;
-        } else if (normTopics.length > 0) {
-          matchesCategory = normTopics.some((t) =>
-            normPostCategories.some((c) => {
-              if (!c || !t) return false;
-              if (c === t) return true;
-              if (c.length >= 3 && t.length >= 3) {
-                return c.includes(t) || t.includes(c);
+          matchedCategoryName = post.category || 'World';
+        } else if (topics.length > 0) {
+          for (let i = 0; i < topics.length; i++) {
+            const origTopic = topics[i];
+            const normT = normalizeCatStr(origTopic);
+            if (!normT) continue;
+
+            const isMatch = normPostCategories.some((c) => {
+              if (!c || !normT) return false;
+              if (c === normT) return true;
+              if (c.length >= 3 && normT.length >= 3) {
+                return c.includes(normT) || normT.includes(c);
               }
               return false;
-            })
-          );
+            });
+
+            if (isMatch) {
+              matchesCategory = true;
+              matchedCategoryName = origTopic; // Use the exact matching category topic subscriber signed up for
+              break;
+            }
+          }
         }
 
         if (matchesCategory) {
           recipients.add(subEmail);
+          recipientCategoryMap.set(subEmail, matchedCategoryName);
         }
       });
     } catch (err) {
@@ -1323,7 +1380,6 @@ const sendTargetedArticleEmails = async (post) => {
   const articleUrl = `${siteUrl}/article/${post.slug || post.id}`;
   const articleTitle = post.title || 'Untitled Article';
   const articleSubheadline = post.subheadline || post.cardSummary || post.description || '';
-  const articleCategory = (post.category || 'World').toUpperCase();
   const articleAuthor = post.author || 'The Editorial Board';
   
   const formattedDate = new Date(post.publishedAt || Date.now()).toLocaleDateString('en-US', {
@@ -1394,14 +1450,13 @@ const sendTargetedArticleEmails = async (post) => {
     ? rawThumb
     : 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=800&q=80';
 
-  const htmlContent = `
+  const buildEmailHtml = (categoryHeaderStr) => `
     <!DOCTYPE html>
     <html>
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>${articleTitle}</title>
-        <!-- Google Fonts matching website typography (Playfair Display & Source Serif 4) -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&display=swap" rel="stylesheet">
@@ -1438,7 +1493,7 @@ const sendTargetedArticleEmails = async (post) => {
           <tr>
             <td style="padding: 16px 24px 20px 24px; text-align: center;">
               <h1 class="article-title" style="font-family: 'Playfair Display', Georgia, 'Times New Roman', serif; font-size: 30px; font-weight: 900; color: #111111; margin: 12px 0 6px 0; text-transform: uppercase; letter-spacing: 1px;">
-                ${articleCategory}
+                ${categoryHeaderStr}
               </h1>
               <p style="font-family: Arial, sans-serif; font-size: 12px; color: #777777; margin: 0; text-transform: uppercase; letter-spacing: 1.5px;">
                 ${formattedDate}
@@ -1506,45 +1561,20 @@ const sendTargetedArticleEmails = async (post) => {
     </html>
   `;
 
-  const host = process.env.SMTP_HOST || process.env.MAIL_HOST;
-  const user = process.env.SMTP_USER || process.env.MAIL_USER || process.env.GMAIL_USER;
-  const pass = process.env.SMTP_PASS || process.env.MAIL_PASS || process.env.GMAIL_APP_PASSWORD;
-  const port = Number(process.env.SMTP_PORT || process.env.MAIL_PORT || 587);
-
-  let transporter;
-  if (user && pass) {
-    if (host) {
-      transporter = nodemailer.createTransport({
-        host,
-        port,
-        secure: port === 465,
-        auth: { user, pass }
-      });
-    } else {
-      transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: { user, pass }
-      });
-    }
-  } else {
-    transporter = nodemailer.createTransport({ jsonTransport: true });
-    console.log('[EMAIL DISTRIBUTION NOTICE] No SMTP/Gmail credentials in Backend/.env. Set GMAIL_USER & GMAIL_APP_PASSWORD to send live emails.');
-  }
-
-  const fromEmail = process.env.SMTP_FROM || (user ? `"Times Chicago News" <${user}>` : null) || process.env.GMAIL_USER || '"Times Chicago News" <news@chicagotimes.com>';
-
-  const mailOptions = {
-    from: fromEmail,
-    subject: articleTitle,
-    html: htmlContent
-  };
+  const { transporter, fromEmail } = getEmailTransporter();
 
   let sentCount = 0;
   for (const toEmail of finalRecipientList) {
     try {
+      const userMatchedCat = recipientCategoryMap.get(toEmail) || post.category || 'World';
+      const categoryHeaderStr = String(userMatchedCat).toUpperCase();
+      const personalizedHtml = buildEmailHtml(categoryHeaderStr);
+
       await transporter.sendMail({
-        ...mailOptions,
-        to: toEmail
+        from: fromEmail,
+        to: toEmail,
+        subject: articleTitle,
+        html: personalizedHtml
       });
       sentCount++;
     } catch (mailErr) {
@@ -1998,6 +2028,83 @@ app.get('/api/newsletter', async (req, res) => {
   res.status(200).json({ success: true, subscribers });
 });
 
+async function sendUserSignupWelcomeEmail({ name, email }) {
+  try {
+    const { transporter, fromEmail } = getEmailTransporter();
+    const userName = name && name.trim() ? name.trim() : 'Reader';
+
+    const mailOptions = {
+      from: fromEmail,
+      to: email,
+      subject: `Welcome, ${userName}! - Times Chicago`,
+      html: `
+        <div style="background-color: #FCFAF2; padding: 40px 16px; font-family: Arial, sans-serif; min-height: 100%;">
+          <div style="max-width: 620px; margin: 0 auto; background-color: #FCFAF2; border: 1px solid #EAE6DA; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+            
+            <!-- Top Logo Header matching Image 1 -->
+            <div style="padding: 32px 24px 20px 24px; text-align: center; border-bottom: 1px solid #EAE6DA;">
+              <p style="margin: 0 0 16px 0;">
+                <a href="https://timeschicago.com" target="_blank" style="font-family: Arial, sans-serif; font-size: 13px; font-weight: bold; color: #718096 !important; text-decoration: none !important; letter-spacing: 0.5px;">
+                  <span style="color: #718096 !important; text-decoration: none !important;">timeschicago.com</span>
+                </a>
+              </p>
+              <a href="https://timeschicago.com" target="_blank" style="text-decoration: none;">
+                <img src="https://f005.backblazeb2.com/file/timeschicago/branding/exact_timeschicago_logo.jpg" alt="Times Chicago" style="max-width: 280px; width: 100%; height: auto; display: block; margin: 0 auto; border: 0;" />
+              </a>
+            </div>
+            
+            <!-- Main Content Area matching Image 1 Layout & Typography -->
+            <div style="padding: 36px 36px 28px 36px; color: #111111; font-family: Arial, sans-serif; line-height: 1.6;">
+              <h1 style="font-family: Georgia, 'Times New Roman', Times, serif; font-size: 24px; font-weight: bold; color: #111111; margin-top: 0; margin-bottom: 24px; text-align: center;">
+                Welcome, ${userName}!
+              </h1>
+
+              <p style="font-size: 15px; color: #222222; margin-bottom: 18px; line-height: 1.6;">
+                Your account has been successfully created at <strong>Times Chicago</strong>. You now have full access to our premium corporate news portal, executive briefings, reader dashboard, and personalized bookmarks.
+              </p>
+
+              <p style="font-size: 15px; color: #222222; margin-bottom: 32px; line-height: 1.6;">
+                Get started by exploring today's top stories, geopolitical risk analysis, emerging markets, and venture metrics.
+              </p>
+
+              <!-- Call to Action Button matching Image 1 -->
+              <div style="text-align: center; margin: 32px 0 36px 0;">
+                <a href="http://localhost:3000" target="_blank" style="display: inline-block; background-color: #111111; color: #FFFFFF !important; font-family: Arial, sans-serif; font-size: 13px; font-weight: 800; letter-spacing: 1px; text-decoration: none !important; padding: 14px 32px; border-radius: 2px;">
+                  <span style="color: #FFFFFF !important; text-decoration: none !important;">EXPLORE HEADLINES</span>
+                </a>
+              </div>
+
+              <!-- Sign-off matching Image 1 -->
+              <p style="font-size: 14.5px; color: #333333; margin-top: 32px; margin-bottom: 4px;">
+                Best regards,
+              </p>
+              <p style="font-size: 14.5px; color: #111111; font-weight: bold; margin-top: 0; margin-bottom: 0;">
+                The Times Chicago Editorial Desk
+              </p>
+            </div>
+
+            <!-- Footer matching Image 1 -->
+            <div style="padding: 20px 24px; text-align: center; border-top: 1px solid #EAE6DA; font-size: 12px; color: #718096; line-height: 1.5;">
+              <p style="margin: 0 0 6px 0;">
+                &copy; 2026 <strong>Times Chicago</strong> Media Inc. All Rights Reserved.
+              </p>
+              <p style="margin: 0;">
+                You received this email because you registered an account on <a href="https://timeschicago.com" target="_blank" style="color: #4A5568; text-decoration: underline;">timeschicago.com</a>.
+              </p>
+            </div>
+
+          </div>
+        </div>
+      `
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`[USER SIGNUP WELCOME EMAIL SENT] to ${email} (Message ID: ${info?.messageId || 'OK'})`);
+  } catch (err) {
+    console.warn(`[USER SIGNUP WELCOME EMAIL NOTICE] Failed to send email to ${email}:`, err.message);
+  }
+}
+
 app.post('/api/newsletter', async (req, res) => {
   try {
     const { email, newsletters } = req.body;
@@ -2008,33 +2115,62 @@ app.post('/api/newsletter', async (req, res) => {
     const cleanEmail = email.toLowerCase().trim();
     const topicsArr = Array.isArray(newsletters) ? newsletters : ["US", "WORLD", "BUSINESS"];
 
+    // 1. Strict single subscription check per email
+    let isAlreadySubscribed = false;
+    try {
+      const [rows] = await db.query('SELECT id FROM newsletter_subscriptions WHERE LOWER(email) = ?', [cleanEmail]);
+      if (rows && rows.length > 0) {
+        isAlreadySubscribed = true;
+      }
+    } catch (dbErr) {}
+
+    if (!isAlreadySubscribed) {
+      const existingSubscribers = readJSONFile(NEWSLETTER_FILE, []);
+      const match = existingSubscribers.find((s) => (typeof s === 'string' ? s : s.email || '').toLowerCase().trim() === cleanEmail);
+      if (match) {
+        isAlreadySubscribed = true;
+      }
+    }
+
+    if (isAlreadySubscribed) {
+      return res.status(400).json({
+        success: false,
+        isDuplicate: true,
+        message: 'You have already signed up for the newsletter with this email address. Please try signing up with a different email address.'
+      });
+    }
+
+    // 2. Insert new subscriber into MySQL
     const nowISO = new Date().toISOString();
     try {
       await db.query(
-        `INSERT INTO newsletter_subscriptions (email, newsletters, subscribed_at) VALUES (?, ?, NOW()) ON DUPLICATE KEY UPDATE newsletters = VALUES(newsletters), subscribed_at = NOW();`,
+        `INSERT INTO newsletter_subscriptions (email, newsletters, subscribed_at) VALUES (?, ?, NOW());`,
         [cleanEmail, JSON.stringify(topicsArr)]
       );
     } catch (dbErr) {
       console.warn('MySQL Newsletter Insert Notice:', dbErr.message);
     }
 
+    // 3. Save to JSON file fallback
     let subscribers = readJSONFile(NEWSLETTER_FILE, []);
-    const existingIdx = subscribers.findIndex((s) => (typeof s === 'string' ? s : s.email || '').toLowerCase().trim() === cleanEmail);
     const subRecord = {
-      id: existingIdx >= 0 && subscribers[existingIdx].id ? subscribers[existingIdx].id : 'sub_' + Date.now(),
+      id: 'sub_' + Date.now(),
       email: cleanEmail,
       newsletters: topicsArr,
       subscribed_at: nowISO,
       subscribedDate: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     };
-    if (existingIdx >= 0) {
-      subscribers[existingIdx] = subRecord;
-    } else {
-      subscribers.unshift(subRecord);
-    }
+    subscribers.unshift(subRecord);
     writeJSONFile(NEWSLETTER_FILE, subscribers);
 
-    res.status(200).json({ success: true, message: 'Successfully subscribed to newsletter', email: cleanEmail, newsletters: topicsArr });
+    // NOTE: Per user request ("don't send an email when signed in to newsletter"), email is NOT sent on newsletter signup.
+
+    res.status(200).json({
+      success: true,
+      message: 'Successfully subscribed to newsletter',
+      email: cleanEmail,
+      newsletters: topicsArr
+    });
   } catch (error) {
     console.error('Error processing newsletter subscription:', error);
     res.status(500).json({ success: false, message: 'Failed to subscribe' });
@@ -2286,11 +2422,10 @@ app.post('/api/users', async (req, res) => {
   }
 });
 
-// Create New User (Add User button)
-app.post('/api/users/add', async (req, res) => {
+const registerUserHandler = async (req, res) => {
   const bcrypt = require('bcryptjs');
   try {
-    const { name, full_name, email, password, role } = req.body;
+    const { name, full_name, email, password, role } = req.body || {};
     if (!email || !password) {
       return res.status(400).json({ success: false, message: 'Email and password are required.' });
     }
@@ -2340,12 +2475,18 @@ app.post('/api/users/add', async (req, res) => {
       is_default_admin: false,
     };
 
+    // 4. Send Welcome Email matching Image 1 layout & Times Chicago branding
+    sendUserSignupWelcomeEmail({ name: userName, email: cleanEmail }).catch(console.error);
+
     return res.status(201).json({ success: true, message: 'User created successfully', user: newUser });
   } catch (err) {
     console.error('Error adding new user:', err);
     res.status(500).json({ success: false, message: 'Failed to create user.' });
   }
-});
+};
+
+app.post('/api/users/add', registerUserHandler);
+app.post('/api/users/signup', registerUserHandler);
 
 // Edit Existing User
 app.put('/api/users/edit', async (req, res) => {
@@ -2482,6 +2623,9 @@ const SLOT_NAME_MAP = {
   cat_slot_1: 'Category Page ad 1',
   cat_slot_2: 'Category Page ad 2',
   author_slot_1: 'Writer Page ad 1',
+  article_slot_1: 'Article Page ad 01',
+  article_slot_2: 'Article Page ad 02',
+  article_slot_3: 'Article Page ad 03',
 };
 
 app.get('/api/ads', async (req, res) => {
@@ -3345,6 +3489,278 @@ app.delete('/api/advertise-leads/:id', async (req, res) => {
     await ensureAdvertiseLeadsTable();
     await db.query(`DELETE FROM advertise_leads WHERE id = ?`, [id]);
     return res.status(200).json({ success: true, message: 'Lead deleted' });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// --- Subscription Requests API ---
+async function ensureSubscriptionRequestsTable() {
+  try {
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS subscription_requests (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        email VARCHAR(255) NOT NULL,
+        phone VARCHAR(100) NOT NULL,
+        packageName VARCHAR(255) NOT NULL,
+        status VARCHAR(50) DEFAULT 'Pending',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `);
+  } catch (e) {
+    console.warn('Subscription table error:', e.message);
+  }
+}
+
+async function sendSubscriptionConfirmationEmail({ name, email, phone, packageName, isDuplicate = false }) {
+  try {
+    const { transporter, fromEmail } = getEmailTransporter();
+
+    const noticeMessage = isDuplicate
+      ? "You have been requested a subscription plan already and our team will reach you."
+      : "Within 24 hours our team will reach you and activate your subscribe plan.";
+
+    const mailOptions = {
+      from: fromEmail,
+      to: email,
+      subject: `Subscription Request Received - ${packageName} | Times Chicago`,
+      html: `
+        <div style="background-color: #FCFAF2; padding: 40px 16px; font-family: Arial, sans-serif; min-height: 100%;">
+          <div style="max-width: 620px; margin: 0 auto; background-color: #FCFAF2; border: 1px solid #EAE6DA; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+            
+            <!-- Top Logo Header Matching Published Article Email Header -->
+            <div style="padding: 32px 24px 20px 24px; text-align: center; border-bottom: 1px solid #EAE6DA;">
+              <p style="margin: 0 0 16px 0;">
+                <a href="https://timeschicago.com" target="_blank" style="font-family: Arial, sans-serif; font-size: 13px; font-weight: bold; color: #718096 !important; text-decoration: none !important; letter-spacing: 0.5px;">
+                  <span style="color: #718096 !important; text-decoration: none !important;">timeschicago.com</span>
+                </a>
+              </p>
+              <a href="https://timeschicago.com" target="_blank" style="text-decoration: none;">
+                <img src="https://f005.backblazeb2.com/file/timeschicago/branding/exact_timeschicago_logo.jpg" alt="Times Chicago" style="max-width: 280px; width: 100%; height: auto; display: block; margin: 0 auto; border: 0;" />
+              </a>
+            </div>
+            
+            <!-- Main Body Content Matching Image 2 -->
+            <div style="padding: 32px 32px; color: #111111; font-family: Arial, sans-serif; line-height: 1.6;">
+              <h2 style="font-size: 18px; color: #111111; margin-top: 0; font-weight: bold;">Dear ${name},</h2>
+              <p style="font-size: 14.5px; color: #374151; margin-bottom: 24px;">Thank you for your interest in Times Chicago digital subscription for <strong>${packageName}</strong>.</p>
+              
+              <!-- Highlighted Green Box Matching Image 2 -->
+              <div style="background-color: #EFFFEC; border: 1px solid #BFF0B7; border-left: 5px solid #227419; padding: 18px 20px; margin: 24px 0; border-radius: 12px;">
+                <p style="margin: 0; font-weight: bold; color: #227419; font-size: 14.5px; font-family: Arial, sans-serif; line-height: 1.5;">
+                  ${noticeMessage}
+                </p>
+              </div>
+              
+              <!-- REQUEST SUMMARY Heading -->
+              <h3 style="font-size: 12px; font-weight: bold; color: #6b7280; letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid #EAE6DA; padding-bottom: 8px; margin-top: 32px; margin-bottom: 16px;">REQUEST SUMMARY</h3>
+              
+              <table style="width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 28px;">
+                <tr>
+                  <td style="padding: 10px 0; color: #6b7280; width: 150px; border-bottom: 1px solid #F3F0E6;">Selected Package:</td>
+                  <td style="padding: 10px 0; font-weight: bold; color: #111111; border-bottom: 1px solid #F3F0E6;">${packageName}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 0; color: #6b7280; border-bottom: 1px solid #F3F0E6;">Full Name:</td>
+                  <td style="padding: 10px 0; font-weight: bold; color: #111111; border-bottom: 1px solid #F3F0E6;">${name}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 0; color: #6b7280; border-bottom: 1px solid #F3F0E6;">Email Address:</td>
+                  <td style="padding: 10px 0; color: #4f46e5; font-family: monospace; border-bottom: 1px solid #F3F0E6;">${email}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 0; color: #6b7280;">Mobile Number:</td>
+                  <td style="padding: 10px 0; font-weight: bold; color: #111111;">${phone}</td>
+                </tr>
+              </table>
+              
+              <p style="font-size: 13.5px; color: #6b7280; margin-bottom: 0;">If you have any questions, please reply to this email or contact us at <a href="mailto:worldnews@timeschicago.com" style="color: #00558c; text-decoration: underline;">worldnews@timeschicago.com</a>.</p>
+            </div>
+            
+            <!-- Footer Matching Image 2 Exactly -->
+            <div style="padding: 24px; text-align: center; font-family: Arial, sans-serif; font-size: 11.5px; color: #6b7280; border-top: 1px solid #EAE6DA;">
+              <p style="margin: 0 0 6px 0;">&copy; ${new Date().getFullYear()} Times Chicago Media Inc. All Rights Reserved.</p>
+              <p style="margin: 0 0 6px 0;">You received this email because you are on the Times Chicago distribution list.</p>
+              <p style="margin: 0;">To manage your notification preferences, <a href="http://localhost:3000/newsletter" style="color: #dc2626; text-decoration: underline;">click here</a>.</p>
+            </div>
+            
+          </div>
+        </div>
+      `,
+      attachments: []
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`[SUBSCRIPTION EMAIL] Confirmation sent to ${email} (duplicate=${isDuplicate}):`, info.messageId || info);
+    return true;
+  } catch (err) {
+    console.error('[SUBSCRIPTION EMAIL ERROR]', err);
+    return false;
+  }
+}
+
+app.post('/api/subscriptions', async (req, res) => {
+  try {
+    const { name, email, phone, packageName } = req.body || {};
+    if (!name || !email || !phone) {
+      return res.status(400).json({ success: false, message: 'Name, email, and phone number are required' });
+    }
+
+    const cleanEmail = String(email).toLowerCase().trim();
+    const selectedPackage = packageName || 'Times Chicago Digital';
+
+    // Check if subscription request already exists for this email
+    let existingRequests = [];
+    try {
+      await ensureSubscriptionRequestsTable();
+      const [rows] = await db.query(`SELECT * FROM subscription_requests WHERE LOWER(email) = ? ORDER BY id ASC`, [cleanEmail]);
+      if (rows && rows.length > 0) {
+        existingRequests = rows;
+      }
+    } catch (e) {}
+
+    if (existingRequests.length === 0) {
+      const jsonSubs = readJSONFile(SUBSCRIPTIONS_FILE, []);
+      existingRequests = jsonSubs.filter(s => s.email && s.email.toLowerCase().trim() === cleanEmail);
+    }
+
+    const isDuplicate = existingRequests.length > 0;
+
+    if (isDuplicate) {
+      // DO NOT SAVE to DB or JSON file. Only trigger duplicate notice email.
+      sendSubscriptionConfirmationEmail({ name, email: cleanEmail, phone, packageName: selectedPackage, isDuplicate: true }).catch(console.error);
+
+      return res.status(200).json({
+        success: true,
+        isDuplicate: true,
+        message: 'You have already requested a subscription plan from this email. Within 24 hours our team will reach you and will activate your subscription plan.',
+        subscription: existingRequests[0]
+      });
+    }
+
+    const newRecord = {
+      id: Date.now().toString(),
+      name,
+      email: cleanEmail,
+      phone,
+      packageName: selectedPackage,
+      status: 'Pending',
+      created_at: new Date().toISOString()
+    };
+
+    // 1. Save to MySQL Database (only for new emails)
+    try {
+      await ensureSubscriptionRequestsTable();
+      const [result] = await db.query(
+        `INSERT INTO subscription_requests (name, email, phone, packageName, status) VALUES (?, ?, ?, ?, 'Pending')`,
+        [name, cleanEmail, phone, selectedPackage]
+      );
+      if (result && result.insertId) {
+        newRecord.id = String(result.insertId);
+      }
+    } catch (dbErr) {
+      console.warn('MySQL Subscription Save Notice:', dbErr.message);
+    }
+
+    // 2. Save to JSON file fallback (only for new emails)
+    const allSubs = readJSONFile(SUBSCRIPTIONS_FILE, []);
+    allSubs.unshift(newRecord);
+    writeJSONFile(SUBSCRIPTIONS_FILE, allSubs);
+
+    // 3. Trigger confirmation email
+    sendSubscriptionConfirmationEmail({ name, email: cleanEmail, phone, packageName: selectedPackage, isDuplicate: false }).catch(console.error);
+
+    return res.status(200).json({
+      success: true,
+      isDuplicate: false,
+      message: 'Subscription request submitted successfully!',
+      subscription: newRecord
+    });
+  } catch (err) {
+    console.error('Error handling subscription submission:', err);
+    return res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+app.get('/api/subscriptions', async (req, res) => {
+  try {
+    try {
+      await ensureSubscriptionRequestsTable();
+      const [rows] = await db.query(`SELECT * FROM subscription_requests ORDER BY id ASC`);
+      if (rows && rows.length > 0) {
+        // Deduplicate rows by lowercased email (keeping the first request)
+        const seen = new Set();
+        const uniqueRows = [];
+        for (const row of rows) {
+          const lower = (row.email || '').toLowerCase().trim();
+          if (lower && !seen.has(lower)) {
+            seen.add(lower);
+            uniqueRows.push(row);
+          }
+        }
+        return res.status(200).json({ success: true, subscriptions: uniqueRows });
+      }
+    } catch (e) {}
+
+    const subscriptions = readJSONFile(SUBSCRIPTIONS_FILE, []);
+    const seen = new Set();
+    const uniqueSubs = [];
+    // Sort ascending by id/created_at to keep first request
+    const sorted = [...subscriptions].sort((a, b) => (a.id || 0) - (b.id || 0));
+    for (const sub of sorted) {
+      const lower = (sub.email || '').toLowerCase().trim();
+      if (lower && !seen.has(lower)) {
+        seen.add(lower);
+        uniqueSubs.push(sub);
+      }
+    }
+    return res.status(200).json({ success: true, subscriptions: uniqueSubs });
+  } catch (err) {
+    console.error('Error fetching subscription requests:', err);
+    return res.status(500).json({ success: false, subscriptions: [] });
+  }
+});
+
+app.put('/api/subscriptions/:id', async (req, res) => {
+  try {
+    const { status } = req.body || {};
+    const { id } = req.params;
+
+    try {
+      await ensureSubscriptionRequestsTable();
+      await db.query(`UPDATE subscription_requests SET status = ? WHERE id = ?`, [status, id]);
+    } catch (e) {}
+
+    const allSubs = readJSONFile(SUBSCRIPTIONS_FILE, []);
+    const updated = allSubs.map((item) => {
+      if (String(item.id) === String(id)) {
+        return { ...item, status };
+      }
+      return item;
+    });
+    writeJSONFile(SUBSCRIPTIONS_FILE, updated);
+
+    return res.status(200).json({ success: true, message: 'Status updated successfully' });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+app.delete('/api/subscriptions/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    try {
+      await ensureSubscriptionRequestsTable();
+      await db.query(`DELETE FROM subscription_requests WHERE id = ?`, [id]);
+    } catch (e) {}
+
+    let allSubs = readJSONFile(SUBSCRIPTIONS_FILE, []);
+    allSubs = allSubs.filter((item) => String(item.id) !== String(id));
+    writeJSONFile(SUBSCRIPTIONS_FILE, allSubs);
+
+    return res.status(200).json({ success: true, message: 'Subscription request deleted' });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
   }

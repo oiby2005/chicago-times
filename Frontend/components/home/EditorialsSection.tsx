@@ -32,6 +32,8 @@ const formatTimeAgo = (timestamp?: number | string): string => {
   return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
 };
 
+const STATIC_BASE_TIME = 1730000000000;
+
 const defaultArticles: EditorialArticle[] = [
   {
     id: "ed1",
@@ -41,7 +43,7 @@ const defaultArticles: EditorialArticle[] = [
     hasFollowButton: true,
     slug: "trump-should-worry-about-10-year-itch",
     imageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?fm=webp&fit=crop&w=300&q=80",
-    publishedAt: Date.now() - 3 * 3600 * 1000,
+    publishedAt: STATIC_BASE_TIME - 3 * 3600 * 1000,
   },
   {
     id: "ed2",
@@ -51,7 +53,7 @@ const defaultArticles: EditorialArticle[] = [
     hasFollowButton: true,
     slug: "gawking-at-ariana-grande-isnt-noble",
     imageUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?fm=webp&fit=crop&w=300&q=80",
-    publishedAt: Date.now() - 6 * 3600 * 1000,
+    publishedAt: STATIC_BASE_TIME - 6 * 3600 * 1000,
   },
   {
     id: "ed3",
@@ -61,7 +63,7 @@ const defaultArticles: EditorialArticle[] = [
     hasFollowButton: false,
     slug: "no-day-at-the-beach",
     imageUrl: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?fm=webp&fit=crop&w=300&q=80",
-    publishedAt: Date.now() - 9 * 3600 * 1000,
+    publishedAt: STATIC_BASE_TIME - 9 * 3600 * 1000,
   },
 ];
 
@@ -169,7 +171,7 @@ export const EditorialsSection: React.FC = () => {
 
             {/* Separator between items */}
             {idx < articles.length - 1 && (
-              <hr className="border-t border-[#E5E0D5] my-3" />
+              <hr className="border-t border-dashed border-[#CCCCCC] my-3" />
             )}
           </React.Fragment>
         ))}

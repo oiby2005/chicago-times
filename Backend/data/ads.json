@@ -45,7 +45,7 @@
     "actionType": "External Link (URL)",
     "targetUrl": "https://burgerking.lk/",
     "selectedArticleSlug": "1788608833709",
-    "imageUrl": "https://f005.backblazeb2.com/file/timeschicago/ads/ad_hp_slot_1_1789032960864.jpeg"
+    "imageUrl": ""
   },
   {
     "id": "hp_slot_2",
@@ -118,5 +118,44 @@
     "targetUrl": "https://www.pepsi.com/",
     "selectedArticleSlug": "",
     "imageUrl": "https://f005.backblazeb2.com/file/timeschicago/ads/ad_hp_slot_7_1789033130582.jpeg"
+  },
+  {
+    "id": "article_slot_1",
+    "slotName": "Article Page ad 01",
+    "dimension": "300x300",
+    "placementGroup": "Article",
+    "description": "Displayed inside the right sidebar of all article view pages (Ad Slot 1).",
+    "active": true,
+    "actionType": "External Link (URL)",
+    "targetUrl": "https://www.wsj.com/",
+    "selectedArticleSlug": "",
+    "imageUrl": "https://f005.backblazeb2.com/file/timeschicago/ads/ad_article_slot_1_1790858438834.jpeg",
+    "fileName": "300 x 300.jpg"
+  },
+  {
+    "id": "article_slot_2",
+    "slotName": "Article Page ad 02",
+    "dimension": "300x300",
+    "placementGroup": "Article",
+    "description": "Displayed inside the right sidebar of all article view pages (Ad Slot 2).",
+    "active": true,
+    "actionType": "External Link (URL)",
+    "targetUrl": "https://www.wsj.com/",
+    "selectedArticleSlug": "",
+    "imageUrl": "https://f005.backblazeb2.com/file/timeschicago/ads/ad_article_slot_2_1790858454448.jpeg",
+    "fileName": "300 x 320.jpg"
+  },
+  {
+    "id": "article_slot_3",
+    "slotName": "Article Page ad 03",
+    "dimension": "300x300",
+    "placementGroup": "Article",
+    "description": "Displayed inside the right sidebar of all article view pages (Ad Slot 3).",
+    "active": true,
+    "actionType": "External Link (URL)",
+    "targetUrl": "https://www.wsj.com/",
+    "selectedArticleSlug": "",
+    "imageUrl": "https://f005.backblazeb2.com/file/timeschicago/ads/ad_article_slot_3_1790858473049.jpeg",
+    "fileName": "300x 300.jpg"
   }
 ]

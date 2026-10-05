@@ -6,6 +6,8 @@ import Link from "next/link";
 interface PickArticle {
   id: string;
   categoryTag?: string;
+  homeTags?: string[];
+  tags?: string[];
   title: string;
   slug: string;
   summary?: string;
@@ -13,6 +15,21 @@ interface PickArticle {
   sectionTag?: string;
   publishedAt?: number;
 }
+
+const parseHomeTags = (p: any): string[] => {
+  if (!p) return [];
+  let tags: string[] = [];
+  if (Array.isArray(p.homeTags) && p.homeTags.length > 0) {
+    tags = p.homeTags;
+  } else if (typeof p.homeTags === "string" && p.homeTags.trim() !== "") {
+    tags = p.homeTags.split(",").map((s: string) => s.trim());
+  } else if (Array.isArray(p.tags) && p.tags.length > 0) {
+    tags = p.tags;
+  } else if (typeof p.tags === "string" && p.tags.trim() !== "") {
+    tags = p.tags.split(",").map((s: string) => s.trim());
+  }
+  return tags.map((t: string) => t.replace(/^#/, "").trim()).filter(Boolean).slice(0, 2);
+};
 
 const formatTimeAgo = (timestamp?: number | string): string => {
   if (!timestamp) return "2 hours ago";
@@ -32,33 +49,38 @@ const formatTimeAgo = (timestamp?: number | string): string => {
   return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
 };
 
+const STATIC_BASE_TIME = 1730000000000;
+
 const defaultHero: PickArticle = {
   id: "ep1",
   categoryTag: "NEW | INTERVIEW",
+  homeTags: ["INTERVIEW", "HEALTH"],
   title: "Tanya Byron: Stop misusing mental health terms like ‘triggered’",
   slug: "tanya-byron-stop-misusing-mental-health-terms",
   summary: "The clinical psychologist has had enough of people adopting mental health labels to describe normal feelings such as grief, disappointment and sadness. In a wide-ranging discussion, she warns that pathologising everyday emotional ups and downs undermines medical care for severe illnesses while fueling unnecessary anxiety across schools and workplaces.",
   imageUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?fm=webp&fit=crop&w=1000&q=80",
   sectionTag: "Health & Fitness",
-  publishedAt: Date.now() - 3 * 3600 * 1000,
+  publishedAt: STATIC_BASE_TIME - 3 * 3600 * 1000,
 };
 
 const defaultBottomCards: PickArticle[] = [
   {
     id: "ep2",
+    homeTags: ["ROYAL", "FEATURE"],
     title: "Why Earl Spencer is still haunted by the ghost of Diana",
     slug: "why-earl-spencer-is-still-haunted",
     imageUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?fm=webp&fit=crop&w=600&q=80",
     sectionTag: "Royal family",
-    publishedAt: Date.now() - 6 * 3600 * 1000,
+    publishedAt: STATIC_BASE_TIME - 6 * 3600 * 1000,
   },
   {
     id: "ep3",
+    homeTags: ["HEALTH", "PERSONAL"],
     title: "Emma Barnett: Why I had the hysterectomy I never wanted to have",
     slug: "emma-barnett-why-i-had-hysterectomy",
     imageUrl: "https://images.unsplash.com/photo-1580489944761-15a19d654956?fm=webp&fit=crop&w=600&q=80",
     sectionTag: "Health & Fitness",
-    publishedAt: Date.now() - 10 * 3600 * 1000,
+    publishedAt: STATIC_BASE_TIME - 10 * 3600 * 1000,
   },
 ];
 
@@ -66,35 +88,39 @@ const defaultRightCards: PickArticle[] = [
   {
     id: "ep4",
     categoryTag: "NEW",
+    homeTags: ["EXCLUSIVE", "DRUGS"],
     title: "I was an undercover drugs cop. Now I experiment with psychedelics",
     slug: "undercover-drugs-cop-psychedelics",
     imageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?fm=webp&fit=crop&w=400&q=80",
-    publishedAt: Date.now() - 4 * 3600 * 1000,
+    publishedAt: STATIC_BASE_TIME - 4 * 3600 * 1000,
   },
   {
     id: "ep5",
+    homeTags: ["FILM", "MUSIC"],
     title: "The best (and worst) James Bond themes — and who should sing it next",
     slug: "best-worst-james-bond-themes",
     imageUrl: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?fm=webp&fit=crop&w=400&q=80",
     sectionTag: "Film",
-    publishedAt: Date.now() - 9 * 3600 * 1000,
+    publishedAt: STATIC_BASE_TIME - 9 * 3600 * 1000,
   },
   {
     id: "ep6",
+    homeTags: ["BOOKS", "CULTURE"],
     title: "The books we couldn’t finish — from American Psycho and Dubliners to Flesh",
     slug: "the-books-we-couldnt-finish",
     imageUrl: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?fm=webp&fit=crop&w=400&q=80",
     sectionTag: "Books",
-    publishedAt: Date.now() - 16 * 3600 * 1000,
+    publishedAt: STATIC_BASE_TIME - 16 * 3600 * 1000,
   },
   {
     id: "ep7",
     categoryTag: "DEBORAH ROSS",
+    homeTags: ["ROYAL", "OPINION"],
     title: "King Charles won’t slow down and won’t do what he’s told",
     slug: "king-charles-wont-slow-down",
     imageUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?fm=webp&fit=crop&w=400&q=80",
     sectionTag: "Royal family",
-    publishedAt: Date.now() - 27 * 3600 * 1000,
+    publishedAt: STATIC_BASE_TIME - 27 * 3600 * 1000,
   },
 ];
 
@@ -133,6 +159,7 @@ export const EditorsPicksSection: React.FC = () => {
             imageUrl: p.thumbnail || "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?fm=webp&fit=crop&w=1000&q=80",
             sectionTag: p.subCategories?.[0] || p.category,
             publishedAt: p.publishedAt || (p.id && !isNaN(Number(p.id)) ? Number(p.id) : undefined),
+            homeTags: parseHomeTags(p),
           }));
 
           if (formatted[0]) setHero(formatted[0]);
@@ -167,6 +194,25 @@ export const EditorsPicksSection: React.FC = () => {
     return () => window.removeEventListener("wsj_posts_updated", loadPosts);
   }, [loadPosts]);
 
+  const renderHomeTags = (item: PickArticle) => {
+    const tags = parseHomeTags(item);
+    if (!tags || tags.length === 0) return null;
+    return (
+      <div className="flex items-center gap-1.5 mb-1.5 flex-wrap">
+        {tags.slice(0, 2).map((t, idx) => (
+          <React.Fragment key={idx}>
+            {idx > 0 && <span className="text-[#666666] font-bold text-[11px] mx-0.5">|</span>}
+            <span
+              className={`${idx === 0 ? "text-[#C00000]" : "text-[#005599]"} font-sans font-bold text-[11px] uppercase tracking-wider block`}
+            >
+              {t}
+            </span>
+          </React.Fragment>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <section className="w-full font-sans select-none pb-4 pt-1 my-4">
       {/* Section Header */}
@@ -186,25 +232,27 @@ export const EditorsPicksSection: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4 pb-4 border-b border-dashed border-[#CCCCCC]">
             {/* Left Text Block */}
             <div className="md:col-span-5 flex flex-col justify-start">
-              {hero.categoryTag && (
-                <div className="flex items-center space-x-1.5 mb-1.5 font-sans font-bold text-[11px] uppercase tracking-wider">
-                  <span className="text-[#C00000]">{hero.categoryTag}</span>
-                </div>
-              )}
+              {renderHomeTags(hero)}
               
               <h3 className="font-serif font-bold text-[26px] sm:text-[28px] lg:text-[30px] leading-[1.12] text-[#111111] hover:text-[#333333] hover:underline cursor-pointer mb-2">
                 <Link href={`/article/${hero.slug}`}>
                   {hero.title}
                 </Link>
               </h3>
-              
+
               {hero.summary && (
                 <p className="font-sans text-[13px] sm:text-[13.5px] leading-[1.45] text-[#444444] line-clamp-6 mb-2">
                   {hero.summary}
                 </p>
               )}
+
+              {hero.sectionTag && (
+                <span className="font-sans font-bold text-[11.5px] text-[#111111] block mb-1">
+                  {hero.sectionTag}
+                </span>
+              )}
               
-              <span className="font-mono text-[11px] text-[#666666] mt-1.5 block">
+              <span className="font-mono text-[11px] text-[#666666] mt-1 block">
                 {formatTimeAgo(hero.publishedAt)}
               </span>
             </div>
@@ -236,11 +284,17 @@ export const EditorsPicksSection: React.FC = () => {
                 </Link>
                 <div className="flex-1 flex flex-col justify-between h-full min-h-[100px] sm:min-h-[115px]">
                   <div>
+                    {renderHomeTags(bottomCards[0])}
                     <h4 className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
                       <Link href={`/article/${bottomCards[0].slug}`}>
                         {bottomCards[0].title}
                       </Link>
                     </h4>
+                    {bottomCards[0].sectionTag && (
+                      <span className="font-sans font-bold text-[11.5px] text-[#333333] block mt-1">
+                        {bottomCards[0].sectionTag}
+                      </span>
+                    )}
                   </div>
                   <span className="font-mono text-[11px] text-[#666666] mt-1 block">
                     {formatTimeAgo(bottomCards[0].publishedAt)}
@@ -260,11 +314,17 @@ export const EditorsPicksSection: React.FC = () => {
                 </Link>
                 <div className="flex-1 flex flex-col justify-between h-full min-h-[100px] sm:min-h-[115px]">
                   <div>
+                    {renderHomeTags(bottomCards[1])}
                     <h4 className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
                       <Link href={`/article/${bottomCards[1].slug}`}>
                         {bottomCards[1].title}
                       </Link>
                     </h4>
+                    {bottomCards[1].sectionTag && (
+                      <span className="font-sans font-bold text-[11.5px] text-[#333333] block mt-1">
+                        {bottomCards[1].sectionTag}
+                      </span>
+                    )}
                   </div>
                   <span className="font-mono text-[11px] text-[#666666] mt-1 block">
                     {formatTimeAgo(bottomCards[1].publishedAt)}
@@ -276,57 +336,73 @@ export const EditorsPicksSection: React.FC = () => {
         </div>
 
         {/* RIGHT SIDEBAR 4 CARDS PACKAGE */}
-        <div className="lg:col-span-4 pl-0 lg:pl-[0.4cm] pt-6 lg:pt-0">
+        <div className="lg:col-span-4 pl-0 lg:pl-4 pt-6 lg:pt-0">
           <div className="grid grid-cols-2 gap-0">
             {/* Top-Left (Item 1 of sidebar) */}
             {rightCards[0] && (
-              <article className="pr-3 pb-4 border-r border-b border-dashed border-[#CCCCCC] flex flex-col justify-between">
-                <div>
-                  <Link href={`/article/${rightCards[0].slug}`} className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 mb-2 group">
-                    <img
-                      src={rightCards[0].imageUrl}
-                      alt={rightCards[0].title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  </Link>
-                  <h4 className="font-serif font-bold text-[15px] sm:text-[15.5px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
-                    <Link href={`/article/${rightCards[0].slug}`}>
-                      {rightCards[0].title}
+              <article className="pr-3.5 pb-4 border-r border-dashed border-[#CCCCCC] flex flex-col justify-between">
+                <div className="pb-3 border-b border-dashed border-[#CCCCCC] flex-1 flex flex-col justify-between">
+                  <div>
+                    <Link href={`/article/${rightCards[0].slug}`} className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 mb-2 group">
+                      <img
+                        src={rightCards[0].imageUrl}
+                        alt={rightCards[0].title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
                     </Link>
-                  </h4>
+                    {renderHomeTags(rightCards[0])}
+                    <h4 className="font-serif font-bold text-[14.5px] sm:text-[15px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
+                      <Link href={`/article/${rightCards[0].slug}`}>
+                        {rightCards[0].title}
+                      </Link>
+                    </h4>
+                    {rightCards[0].sectionTag && (
+                      <span className="font-sans font-bold text-[11.5px] text-[#333333] block mt-1">
+                        {rightCards[0].sectionTag}
+                      </span>
+                    )}
+                  </div>
+                  <span className="font-mono text-[11px] text-[#666666] mt-1.5 block">
+                    {formatTimeAgo(rightCards[0].publishedAt)}
+                  </span>
                 </div>
-                <span className="font-mono text-[11px] text-[#666666] mt-1.5 block">
-                  {formatTimeAgo(rightCards[0].publishedAt)}
-                </span>
               </article>
             )}
 
             {/* Top-Right (Item 2 of sidebar) */}
             {rightCards[2] && (
-              <article className="pl-3 pb-4 border-b border-dashed border-[#CCCCCC] flex flex-col justify-between">
-                <div>
-                  <Link href={`/article/${rightCards[2].slug}`} className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 mb-2 group">
-                    <img
-                      src={rightCards[2].imageUrl}
-                      alt={rightCards[2].title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  </Link>
-                  <h4 className="font-serif font-bold text-[15px] sm:text-[15.5px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
-                    <Link href={`/article/${rightCards[2].slug}`}>
-                      {rightCards[2].title}
+              <article className="pl-3.5 pb-4 flex flex-col justify-between">
+                <div className="pb-3 border-b border-dashed border-[#CCCCCC] flex-1 flex flex-col justify-between">
+                  <div>
+                    <Link href={`/article/${rightCards[2].slug}`} className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 mb-2 group">
+                      <img
+                        src={rightCards[2].imageUrl}
+                        alt={rightCards[2].title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
                     </Link>
-                  </h4>
+                    {renderHomeTags(rightCards[2])}
+                    <h4 className="font-serif font-bold text-[14.5px] sm:text-[15px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
+                      <Link href={`/article/${rightCards[2].slug}`}>
+                        {rightCards[2].title}
+                      </Link>
+                    </h4>
+                    {rightCards[2].sectionTag && (
+                      <span className="font-sans font-bold text-[11.5px] text-[#333333] block mt-1">
+                        {rightCards[2].sectionTag}
+                      </span>
+                    )}
+                  </div>
+                  <span className="font-mono text-[11px] text-[#666666] mt-1.5 block">
+                    {formatTimeAgo(rightCards[2].publishedAt)}
+                  </span>
                 </div>
-                <span className="font-mono text-[11px] text-[#666666] mt-1.5 block">
-                  {formatTimeAgo(rightCards[2].publishedAt)}
-                </span>
               </article>
             )}
 
             {/* Bottom-Left (Item 3 of sidebar) */}
             {rightCards[1] && (
-              <article className="pr-3 pt-4 border-r border-dashed border-[#CCCCCC] flex flex-col justify-between">
+              <article className="pr-3.5 pt-4 border-r border-dashed border-[#CCCCCC] flex flex-col justify-between">
                 <div>
                   <Link href={`/article/${rightCards[1].slug}`} className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 mb-2 group">
                     <img
@@ -335,11 +411,17 @@ export const EditorsPicksSection: React.FC = () => {
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                   </Link>
-                  <h4 className="font-serif font-bold text-[15px] sm:text-[15.5px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
+                  {renderHomeTags(rightCards[1])}
+                  <h4 className="font-serif font-bold text-[14.5px] sm:text-[15px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
                     <Link href={`/article/${rightCards[1].slug}`}>
                       {rightCards[1].title}
                     </Link>
                   </h4>
+                  {rightCards[1].sectionTag && (
+                    <span className="font-sans font-bold text-[11.5px] text-[#333333] block mt-1">
+                      {rightCards[1].sectionTag}
+                    </span>
+                  )}
                 </div>
                 <span className="font-mono text-[11px] text-[#666666] mt-1.5 block">
                   {formatTimeAgo(rightCards[1].publishedAt)}
@@ -349,7 +431,7 @@ export const EditorsPicksSection: React.FC = () => {
 
             {/* Bottom-Right (Item 4 of sidebar) */}
             {rightCards[3] && (
-              <article className="pl-3 pt-4 flex flex-col justify-between">
+              <article className="pl-3.5 pt-4 flex flex-col justify-between">
                 <div>
                   <Link href={`/article/${rightCards[3].slug}`} className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 mb-2 group">
                     <img
@@ -358,11 +440,17 @@ export const EditorsPicksSection: React.FC = () => {
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                   </Link>
-                  <h4 className="font-serif font-bold text-[15px] sm:text-[15.5px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
+                  {renderHomeTags(rightCards[3])}
+                  <h4 className="font-serif font-bold text-[14.5px] sm:text-[15px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
                     <Link href={`/article/${rightCards[3].slug}`}>
                       {rightCards[3].title}
                     </Link>
                   </h4>
+                  {rightCards[3].sectionTag && (
+                    <span className="font-sans font-bold text-[11.5px] text-[#333333] block mt-1">
+                      {rightCards[3].sectionTag}
+                    </span>
+                  )}
                 </div>
                 <span className="font-mono text-[11px] text-[#666666] mt-1.5 block">
                   {formatTimeAgo(rightCards[3].publishedAt)}

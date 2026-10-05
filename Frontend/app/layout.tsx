@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Source_Serif_4, Inter, Bodoni_Moda, Kumbh_Sans } from "next/font/google";
+import { Suspense } from "react";
+import Script from "next/script";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -63,6 +65,8 @@ export const metadata: Metadata = {
 
 import WebpGlobalInterceptor from "@/components/ui/WebpGlobalInterceptor";
 import GlobalDataSync from "@/components/ui/GlobalDataSync";
+import PageNavigationLoader from "@/components/ui/PageNavigationLoader";
+import GoogleTranslateProvider from "@/components/ui/GoogleTranslateProvider";
 
 export default function RootLayout({
   children,
@@ -71,9 +75,21 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${playfair.variable} ${sourceSerif.variable} ${inter.variable} ${bodoni.variable} ${kumbh.variable}`} suppressHydrationWarning>
+      <head>
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3455329981771469"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
+      </head>
       <body className="min-h-screen max-w-full overflow-x-hidden bg-white font-sans text-[#111111] antialiased flex flex-col" suppressHydrationWarning>
+        <Suspense fallback={null}>
+          <PageNavigationLoader />
+        </Suspense>
         <WebpGlobalInterceptor />
         <GlobalDataSync />
+        <GoogleTranslateProvider />
         {children}
       </body>
     </html>

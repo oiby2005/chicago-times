@@ -48,6 +48,7 @@ interface ArticleToolbarProps {
   onFontSizeChange?: (size: "sm" | "md" | "lg") => void;
   currentFontSize?: "sm" | "md" | "lg";
   article?: any;
+  visible?: boolean;
 }
 
 export default function ArticleToolbar({
@@ -59,6 +60,7 @@ export default function ArticleToolbar({
   onFontSizeChange,
   currentFontSize = "md",
   article,
+  visible = true,
 }: ArticleToolbarProps) {
   const [isSticky, setIsSticky] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
@@ -69,7 +71,7 @@ export default function ArticleToolbar({
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 200) {
+      if (window.scrollY > 200 && visible) {
         setIsSticky(true);
       } else {
         setIsSticky(false);
@@ -77,8 +79,9 @@ export default function ArticleToolbar({
     };
 
     window.addEventListener("scroll", handleScroll);
+    handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [visible]);
 
   const loadUser = () => {
     if (typeof window === "undefined") return;

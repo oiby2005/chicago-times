@@ -1,7 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Container from "@/components/layout/Container";
+import { setSiteLanguageEdition, getSavedEdition } from "@/components/ui/GoogleTranslateProvider";
 
 // NEWS Column 1 (8 items max)
 const newsLinksCol1 = [
@@ -59,20 +60,37 @@ const aboutLinks = [
   { name: "Cookie Policy", href: "/cookie-policy" },
   { name: "Editorial Policy", href: "/editorial-policy" },
   { name: "Advertise with us", href: "/advertise-with-us" },
-  { name: "Leadership", href: "#" },
+  { name: "Leadership", href: "/leadership" },
   { name: "RSS Feed", href: "/rss.xml", target: "_blank" },
 ];
 
-// LANGUAGE EDITIONS Column (non-clickable)
+// LANGUAGE EDITIONS Column
 const editionsLinks = [
-  { name: "English", href: "#", isClickable: false },
-  { name: "Spanish", href: "#", isClickable: false },
-  { name: "German", href: "#", isClickable: false },
-  { name: "Korean", href: "#", isClickable: false },
-  { name: "Chinese", href: "#", isClickable: false },
+  { name: "English" },
+  { name: "Spanish" },
+  { name: "German" },
+  { name: "Korean" },
+  { name: "Chinese" },
 ];
 
 export const Footer: React.FC = () => {
+  const [activeEdition, setActiveEdition] = useState<string>("English");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setActiveEdition(getSavedEdition());
+    }
+
+    const handleEditionChange = (e: any) => {
+      if (e.detail?.label) {
+        setActiveEdition(e.detail.label);
+      }
+    };
+
+    window.addEventListener("wsj_edition_changed", handleEditionChange);
+    return () => window.removeEventListener("wsj_edition_changed", handleEditionChange);
+  }, []);
+
   return (
     <footer className="w-full bg-[#FAF7EE] text-[#111111] border-t border-[#EAE6DA] font-sans select-none pt-10 pb-24">
       <Container>
@@ -167,9 +185,15 @@ export const Footer: React.FC = () => {
             <ul className="space-y-2.5 text-xs text-[#444444]">
               {editionsLinks.map((item) => (
                 <li key={item.name}>
-                  <a href={item.href} className="hover:text-[#00558c] transition-colors block text-[#444444]">
-                    {item.name}
-                  </a>
+                  <button
+                    type="button"
+                    onClick={() => setSiteLanguageEdition(item.name)}
+                    className={`hover:text-[#00558c] transition-colors block text-left text-xs cursor-pointer ${
+                      activeEdition === item.name ? "font-bold text-[#00558c] underline" : "text-[#444444]"
+                    }`}
+                  >
+                    {item.name} Edition
+                  </button>
                 </li>
               ))}
             </ul>

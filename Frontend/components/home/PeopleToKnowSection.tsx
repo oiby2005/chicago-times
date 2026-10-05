@@ -32,6 +32,8 @@ const formatTimeAgo = (timestamp?: number | string): string => {
   return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
 };
 
+const STATIC_BASE_TIME = 1730000000000;
+
 const defaultArticles: PeopleArticle[] = [
   // Position 1: Column 1 Left Hero (California Wildfire)
   {
@@ -40,7 +42,7 @@ const defaultArticles: PeopleArticle[] = [
     slug: "who-pays-for-wildfire-damage-california-cant-agree",
     summary: "Lawmakers balk at Newsom's proposal to limit utilities' wildfire liabilities, sending shares down sharply",
     imageUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?fm=webp&fit=crop&w=600&q=80",
-    publishedAt: Date.now() - 2 * 3600 * 1000,
+    publishedAt: STATIC_BASE_TIME - 2 * 3600 * 1000,
   },
   // Position 2: Column 2 Center Top Article (Seattle and D.C.)
   {
@@ -48,7 +50,7 @@ const defaultArticles: PeopleArticle[] = [
     title: "Seattle and D.C. Are Bucking the Trend by Attracting Families With Kids",
     slug: "seattle-and-dc-are-bucking-the-trend-attracting-families-with-kids",
     summary: "The number of kids rose 10% in both places, even as it fell in most other similar cities",
-    publishedAt: Date.now() - 4 * 3600 * 1000,
+    publishedAt: STATIC_BASE_TIME - 4 * 3600 * 1000,
   },
   // Position 3: Column 3 Right Top Article (The Final Solution...)
   {
@@ -56,7 +58,7 @@ const defaultArticles: PeopleArticle[] = [
     title: "‘The Final Solution to the Jewish Question’ Review: Confronting the Oldest Hatred",
     slug: "the-final-solution-to-the-jewish-question-review",
     summary: "The author of ‘People Love Dead Jews’ argues that rising antisemitism cannot be fought using the methods that have failed before.",
-    publishedAt: Date.now() - 6 * 3600 * 1000,
+    publishedAt: STATIC_BASE_TIME - 6 * 3600 * 1000,
   },
   // Position 4: Column 3 Right Bottom Article (How Trump's...)
   {
@@ -64,7 +66,7 @@ const defaultArticles: PeopleArticle[] = [
     title: "How Trump’s Ever-Present Executive Assistant Became the Talk of Washington",
     slug: "how-trumps-executive-assistant-became-talk-of-washington",
     summary: "Natalie Harp, a personal aide to the president, has become an object of fascination for both the left and right.",
-    publishedAt: Date.now() - 9 * 3600 * 1000,
+    publishedAt: STATIC_BASE_TIME - 9 * 3600 * 1000,
   },
 ];
 

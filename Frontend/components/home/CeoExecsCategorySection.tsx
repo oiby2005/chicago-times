@@ -6,15 +6,33 @@ import Link from "next/link";
 interface CeoArticle {
   id: string;
   categoryTag?: string;
+  homeTags?: string[];
+  tags?: string[];
   title: string;
   slug: string;
   imageUrl: string;
 }
 
+const parseHomeTags = (p: any): string[] => {
+  if (!p) return [];
+  let tags: string[] = [];
+  if (Array.isArray(p.homeTags) && p.homeTags.length > 0) {
+    tags = p.homeTags;
+  } else if (typeof p.homeTags === "string" && p.homeTags.trim() !== "") {
+    tags = p.homeTags.split(",").map((s: string) => s.trim());
+  } else if (Array.isArray(p.tags) && p.tags.length > 0) {
+    tags = p.tags;
+  } else if (typeof p.tags === "string" && p.tags.trim() !== "") {
+    tags = p.tags.split(",").map((s: string) => s.trim());
+  }
+  return tags.map((t: string) => t.replace(/^#/, "").trim()).filter(Boolean).slice(0, 2);
+};
+
 const defaultArticles: CeoArticle[] = [
   {
     id: "ceo1",
     categoryTag: "SHOPPING",
+    homeTags: ["BUSINESS", "WORKWEAR"],
     title: "The workwear brands that mean business",
     slug: "the-workwear-brands-that-mean-business",
     imageUrl: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?fm=webp&fit=crop&w=600&q=80",
@@ -22,6 +40,7 @@ const defaultArticles: CeoArticle[] = [
   {
     id: "ceo2",
     categoryTag: "NEWSLETTER",
+    homeTags: ["LUXX", "NEWSLETTER"],
     title: "Sign up for the Times LUXX newsletter",
     slug: "sign-up-for-the-times-luxx-newsletter",
     imageUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?fm=webp&fit=crop&w=600&q=80",
@@ -29,12 +48,14 @@ const defaultArticles: CeoArticle[] = [
   {
     id: "ceo3",
     categoryTag: "SHOPPING",
+    homeTags: ["SHOPPING", "POSH"],
     title: "The poshest prams to shop now",
     slug: "the-poshest-prams-to-shop-now",
     imageUrl: "https://images.unsplash.com/photo-1519689680058-324335c77eba?fm=webp&fit=crop&w=600&q=80",
   },
   {
     id: "ceo4",
+    homeTags: ["CYCLING", "GEAR"],
     title: "What your posh cycling gear says about you",
     slug: "what-your-posh-cycling-gear-says-about-you",
     imageUrl: "https://images.unsplash.com/photo-1541625602330-2277a4c46182?fm=webp&fit=crop&w=600&q=80",
@@ -67,6 +88,7 @@ export const CeoExecsCategorySection: React.FC = () => {
             title: p.title,
             slug: p.slug || p.id,
             imageUrl: p.thumbnail || "https://images.unsplash.com/photo-1541872703-74c5e44368f9?fm=webp&fit=crop&w=600&q=80",
+            homeTags: parseHomeTags(p),
           }));
 
           const merged = [...formatted];
@@ -103,25 +125,42 @@ export const CeoExecsCategorySection: React.FC = () => {
 
       {/* 4 Cards Row (Positions 1..4 left-to-right) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-start">
-        {articles.map((art) => (
-          <article key={art.id} className="flex flex-col justify-start">
-            <Link
-              href={`/article/${art.slug}`}
-              className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 mb-2 group"
-            >
-              <img
-                src={art.imageUrl}
-                alt={art.title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-            </Link>
-            <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
-              <Link href={`/article/${art.slug}`}>
-                {art.title}
+        {articles.map((art) => {
+          const tags = parseHomeTags(art);
+          return (
+            <article key={art.id} className="flex flex-col justify-start">
+              <Link
+                href={`/article/${art.slug}`}
+                className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 mb-2 group"
+              >
+                <img
+                  src={art.imageUrl}
+                  alt={art.title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
               </Link>
-            </h4>
-          </article>
-        ))}
+              {tags && tags.length > 0 && (
+                <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+                  {tags.slice(0, 2).map((t, idx) => (
+                    <React.Fragment key={idx}>
+                      {idx > 0 && <span className="text-[#666666] font-bold text-[11px] mx-0.5">|</span>}
+                      <span
+                        className={`${idx === 0 ? "text-[#C00000]" : "text-[#005599]"} font-sans font-bold text-[11px] uppercase tracking-wider block`}
+                      >
+                        {t}
+                      </span>
+                    </React.Fragment>
+                  ))}
+                </div>
+              )}
+              <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
+                <Link href={`/article/${art.slug}`}>
+                  {art.title}
+                </Link>
+              </h4>
+            </article>
+          );
+        })}
       </div>
     </div>
   );

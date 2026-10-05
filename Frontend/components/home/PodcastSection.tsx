@@ -400,6 +400,7 @@ export const PodcastSection: React.FC<PodcastSectionProps> = ({ onActiveCountCha
                   allowFullScreen
                 />
                 <button
+                  suppressHydrationWarning
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
@@ -451,6 +452,7 @@ export const PodcastSection: React.FC<PodcastSectionProps> = ({ onActiveCountCha
               {/* Title */}
               <h4 className="font-sans font-bold text-[14px] leading-snug text-[#111111] hover:underline line-clamp-2">
                 <button
+                  suppressHydrationWarning
                   type="button"
                   onClick={() => togglePlay(podcast)}
                   className="text-left cursor-pointer hover:underline"
@@ -467,6 +469,7 @@ export const PodcastSection: React.FC<PodcastSectionProps> = ({ onActiveCountCha
                   <div className="flex items-center space-x-2">
                     {/* Play/Pause Button */}
                     <button
+                      suppressHydrationWarning
                       type="button"
                       onClick={() => togglePlay(podcast)}
                       className="text-[#111111] hover:text-black transition-colors cursor-pointer focus:outline-none p-1"
@@ -485,6 +488,7 @@ export const PodcastSection: React.FC<PodcastSectionProps> = ({ onActiveCountCha
 
                     {/* Restart Button */}
                     <button
+                      suppressHydrationWarning
                       type="button"
                       onClick={(e) => restartSong(podcast, e)}
                       className="w-7 h-7 rounded-full bg-[#EAE5DB] text-[#333333] hover:bg-[#D8D2C4] flex items-center justify-center text-xs cursor-pointer"
@@ -494,7 +498,7 @@ export const PodcastSection: React.FC<PodcastSectionProps> = ({ onActiveCountCha
                     </button>
 
                     {/* Elapsed / Total Time Display */}
-                    <span className="font-mono text-[12px] text-[#444444] font-medium tracking-tight">
+                    <span className="font-mono text-[12px] text-[#444444] font-medium tracking-tight" suppressHydrationWarning>
                       {formatTime(cardCurrentTime)} / {formatTime(cardDurationSec)}
                     </span>
                   </div>
@@ -502,6 +506,7 @@ export const PodcastSection: React.FC<PodcastSectionProps> = ({ onActiveCountCha
                   <div className="flex items-center space-x-2">
                     {ytId && (
                       <button
+                        suppressHydrationWarning
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();

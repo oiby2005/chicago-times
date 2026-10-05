@@ -1,21 +1,52 @@
 [
   {
-    "id": "sub_1790610771695",
-    "email": "worldnews@timeschicago.com",
+    "id": "sub_1791213647803",
+    "email": "ishmithabimsarani@gmail.com",
     "newsletters": [
-      "WORLD"
+      "Interviews"
     ],
-    "subscribed_at": "2026-09-28T18:00:21.916Z",
-    "subscribedDate": "Sep 28, 2026"
+    "subscribed_at": "2026-10-05T15:20:47.798Z",
+    "subscribedDate": "Oct 5, 2026"
   },
   {
-    "id": "sub_1790579060027",
+    "id": "sub_1791213234490",
     "email": "oshidiishmitha@gmail.com",
     "newsletters": [
-      "U.S. News",
-      "International News"
+      "Executive Q&As",
+      "Leader Profiles",
+      "Exclusive Interviews",
+      "Climate"
     ],
-    "subscribed_at": "2026-09-28T07:04:20.024Z",
-    "subscribedDate": "Sep 28, 2026"
+    "subscribed_at": "2026-10-05T15:13:54.476Z",
+    "subscribedDate": "Oct 5, 2026"
+  },
+  {
+    "id": "sub_1791213234478",
+    "email": "oshidiishmitha@gmail.com",
+    "newsletters": [
+      "Executive Q&As",
+      "Leader Profiles",
+      "Exclusive Interviews",
+      "Climate"
+    ],
+    "subscribed_at": "2026-10-05T15:13:54.473Z",
+    "subscribedDate": "Oct 5, 2026"
+  },
+  {
+    "id": "sub_1791176428034",
+    "email": "oshidiyapa190@gmail.com",
+    "newsletters": [
+      "U.S. News",
+      "International News",
+      "Criminal Cases",
+      "Legal Affairs",
+      "Movies",
+      "Television",
+      "Music",
+      "Celebrity",
+      "Architecture"
+    ],
+    "subscribed_at": "2026-10-05T05:00:28.011Z",
+    "subscribedDate": "Oct 5, 2026"
   }
 ]
