@@ -137,7 +137,7 @@ export const MostPopularNewsSidebar: React.FC = () => {
           >
             {/* Left: Title & Time Ago */}
             <div className="flex-1 min-w-0 pr-1">
-              <h4 className="font-serif font-bold text-[15px] sm:text-[16px] text-[#111111] leading-[1.25] group-hover:underline">
+              <h4 className="font-poppins font-medium text-[14px] sm:text-[15px] text-[#111111] leading-snug group-hover:underline">
                 {item.title}
               </h4>
               <span className="font-mono text-[12px] text-[#666666] block mt-1.5">

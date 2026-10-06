@@ -181,7 +181,7 @@ export const RecommendedVideosSection: React.FC = () => {
             <article key={video.id || video.slotNumber} className="flex items-start justify-between gap-3">
               {/* Title with Line Clamp 4 */}
               <h4
-                className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.25] text-[#111111] hover:underline cursor-pointer flex-1"
+                className="font-poppins font-medium text-[14px] sm:text-[15px] leading-snug text-[#111111] hover:underline cursor-pointer flex-1"
                 style={{ display: "-webkit-box", WebkitLineClamp: 4, WebkitBoxOrient: "vertical", overflow: "hidden" }}
               >
                 <a href={video.videoUrl} target="_blank" rel="noopener noreferrer" title={displayTitle}>

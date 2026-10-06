@@ -132,7 +132,7 @@ export const MostPopularNewsSection: React.FC = () => {
             <React.Fragment key={item.id}>
               <article className="flex items-start justify-between space-x-3">
                 <div className="flex-1">
-                  <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.22] text-[#111111] hover:underline cursor-pointer">
+                  <h4 className="font-poppins font-medium text-[14px] sm:text-[15px] leading-snug text-[#111111] hover:underline cursor-pointer">
                     <Link href={`/article/${item.slug}`}>
                       {item.title}
                     </Link>

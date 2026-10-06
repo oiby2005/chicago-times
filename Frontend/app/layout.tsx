@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Source_Serif_4, Inter, Bodoni_Moda, Kumbh_Sans } from "next/font/google";
+import { Playfair_Display, Source_Serif_4, Inter, Bodoni_Moda, Kumbh_Sans, Poppins } from "next/font/google";
 import { Suspense } from "react";
 import Script from "next/script";
 import "./globals.css";
@@ -34,6 +34,13 @@ const kumbh = Kumbh_Sans({
   subsets: ["latin"],
   weight: ["300", "400", "500"],
   variable: "--font-kumbh",
+  display: "swap",
+});
+
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-poppins",
   display: "swap",
 });
 
@@ -74,7 +81,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${playfair.variable} ${sourceSerif.variable} ${inter.variable} ${bodoni.variable} ${kumbh.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${playfair.variable} ${sourceSerif.variable} ${inter.variable} ${bodoni.variable} ${kumbh.variable} ${poppins.variable}`} suppressHydrationWarning>
       <head>
         <Script
           async
