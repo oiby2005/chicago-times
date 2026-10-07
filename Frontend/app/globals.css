@@ -3,6 +3,17 @@
 @tailwind utilities;
 
 @layer base {
+  * ,
+  *::before,
+  *::after {
+    border-radius: 0 !important;
+  }
+
+  rect {
+    rx: 0 !important;
+    ry: 0 !important;
+  }
+
   body {
     @apply bg-white text-[#111111] antialiased selection:bg-gray-200;
     font-family: var(--font-sans), 'Inter', sans-serif;

@@ -14,22 +14,19 @@ interface EditorialArticle {
   publishedAt?: number | string;
 }
 
-const formatTimeAgo = (timestamp?: number | string): string => {
-  if (!timestamp) return "2 hours ago";
-  const now = Date.now();
-  const time = typeof timestamp === "string" ? new Date(timestamp).getTime() : timestamp;
-  if (isNaN(time) || time <= 0) return "2 hours ago";
-  const diffMs = Math.max(0, now - time);
-  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-  if (diffHours < 1) {
-    const diffMins = Math.max(1, Math.floor(diffMs / (1000 * 60)));
-    return `${diffMins} min${diffMins > 1 ? "s" : ""} ago`;
+const getLiveDateTime = (timestamp?: number | string, fallbackDate?: string): string => {
+  let timeMs = 0;
+  if (typeof timestamp === "number" && timestamp > 0) timeMs = timestamp;
+  else if (typeof timestamp === "string" && !isNaN(Number(timestamp)) && Number(timestamp) > 0) timeMs = Number(timestamp);
+  else if (fallbackDate) {
+    const p = Date.parse(fallbackDate);
+    if (!isNaN(p)) timeMs = p;
   }
-  if (diffHours < 24) {
-    return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
-  }
-  const diffDays = Math.floor(diffHours / 24);
-  return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
+  if (!timeMs) timeMs = Date.now() - 3600000 * 4;
+  const d = new Date(timeMs);
+  const dateStr = d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  const timeStr = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+  return `${dateStr} at ${timeStr}`;
 };
 
 const STATIC_BASE_TIME = 1730000000000;
@@ -150,13 +147,9 @@ export const EditorialsSection: React.FC = () => {
                   <span>By {art.author}</span>
                 </div>
 
-                <div className="font-sans text-[11px] text-[#777777]">
-                  {art.date}
+                <div className="font-sans text-[11.5px] font-medium text-[#666666] mt-1">
+                  {getLiveDateTime(art.publishedAt, art.date)}
                 </div>
-
-                <span className="font-mono text-[11px] text-[#666666] mt-1 block">
-                  {formatTimeAgo(art.publishedAt)}
-                </span>
               </div>
 
               {/* Square Thumbnail */}

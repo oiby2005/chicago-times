@@ -35,7 +35,18 @@ export function getRelativeTime(publishedAt?: number | string | null, dateFallba
   } else if (diffHours < 24) {
     return `${diffHours} ${diffHours === 1 ? "hour ago" : "hours ago"}`;
   } else {
-    return `${diffDays} ${diffDays === 1 ? "day ago" : "days ago"}`;
+    const dateObj = new Date(timeMs);
+    const dateStr = dateObj.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+    const timeStr = dateObj.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+    return `${dateStr} at ${timeStr}`;
   }
 }
 

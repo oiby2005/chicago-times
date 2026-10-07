@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import ProfileSettingsModal, { UserProfile } from "@/components/ui/ProfileSettingsModal";
-import { getAuthorSlugForUser } from "@/data/authors";
+import { getAuthorSlugForUser, slugifyAuthorName, getEditPostUrl } from "@/data/authors";
 
 interface PostItem {
   id: string;
@@ -332,7 +332,30 @@ export default function WriterDashboard() {
     loadUser();
     window.addEventListener("wsj_user_updated", loadUser);
     return () => window.removeEventListener("wsj_user_updated", loadUser);
-  }, [router]);
+  }, []);
+
+  const getWriterSlug = () => {
+    const name = currentUser?.full_name || currentUser?.name || (currentUser?.email ? currentUser.email.split("@")[0] : "writer");
+    return slugifyAuthorName(name);
+  };
+
+  const getCreatePostUrl = (postId?: string) => {
+    const slug = getWriterSlug();
+    return `/writer-dashboard/${slug}`;
+  };
+
+  useEffect(() => {
+    if (currentUser) {
+      const slug = getWriterSlug();
+      if (typeof window !== "undefined") {
+        const search = window.location.search || "";
+        const expectedPath = `/writer-dashboard/${slug}`;
+        if (window.location.pathname !== expectedPath) {
+          window.history.replaceState(null, "", `${expectedPath}${search}`);
+        }
+      }
+    }
+  }, [currentUser]);
 
   const displayName = currentUser?.full_name || "";
   const displayEmail = currentUser?.email || "";
@@ -577,7 +600,7 @@ export default function WriterDashboard() {
 
               {/* 2. Create New Post Button (Now second / right position) */}
               <button
-                onClick={() => router.push("/writer-dashboard/create-post")}
+                onClick={() => router.push(getCreatePostUrl())}
                 className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-bold text-xs sm:text-[13px] px-4 py-2 rounded-full flex items-center space-x-1.5 transition-all shadow-sm hover:shadow-md cursor-pointer shrink-0"
               >
                 <span className="text-sm font-bold">+</span>
@@ -683,7 +706,7 @@ export default function WriterDashboard() {
                             <div className="inline-flex items-center justify-end space-x-2.5 sm:space-x-3 whitespace-nowrap">
                               <button
                                 type="button"
-                                onClick={() => router.push(`/writer-dashboard/create-post?id=${post.id}`)}
+                                onClick={() => router.push(getEditPostUrl(post, currentUser))}
                                 className="text-[#2563eb] hover:text-[#1d4ed8] font-bold text-[10.5px] sm:text-[11.5px] font-sans transition-colors cursor-pointer whitespace-nowrap"
                               >
                                 Edit
@@ -733,7 +756,7 @@ export default function WriterDashboard() {
                 </p>
 
                 <button
-                  onClick={() => router.push("/writer-dashboard/create-post")}
+                  onClick={() => router.push(getCreatePostUrl())}
                   className="text-[#2563eb] hover:text-[#1d4ed8] font-bold text-xs sm:text-sm mt-4 flex items-center space-x-1 transition-colors cursor-pointer hover:underline"
                 >
                   <span className="text-base leading-none">+</span>

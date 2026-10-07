@@ -19,7 +19,7 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({
   currentUser,
   onOpenSearch,
 }) => {
-  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
+  const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
 
   // Lock body scroll when drawer is open
   useEffect(() => {
@@ -40,22 +40,19 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({
   const displayEmail = currentUser?.email || "";
 
   const toggleCategory = (cat: string) => {
-    setExpandedCategories((prev) => ({
-      ...prev,
-      [cat]: !prev[cat],
-    }));
+    setExpandedCategory((prev) => (prev === cat ? null : cat));
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex lg:hidden">
+    <div className="fixed inset-0 z-[99999] flex lg:hidden">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/60 transition-opacity backdrop-blur-xs"
+        className="fixed inset-0 bg-black/60 transition-opacity backdrop-blur-xs z-[99999]"
         onClick={onClose}
       />
 
       {/* Slide-out Drawer Menu */}
-      <div className="relative w-full max-w-xs sm:max-w-sm bg-white h-full shadow-2xl flex flex-col justify-between overflow-y-auto select-none z-50 text-[#111111] animate-in slide-in-from-left duration-200">
+      <div className="relative w-full max-w-xs sm:max-w-sm bg-white h-full shadow-2xl flex flex-col justify-between overflow-y-auto select-none z-[100000] text-[#111111] animate-in slide-in-from-left duration-200">
         
         {/* Top Header Row of Drawer */}
         <div className="p-4 border-b border-[#e2e2e2] flex items-center justify-between bg-[#fcfcfc]">
@@ -78,19 +75,19 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({
         </div>
 
         {/* Search Bar Trigger inside Drawer */}
-        <div className="p-4 border-b border-[#f0f0f0]">
+        <div className="px-4 pt-4 pb-3 border-b border-[#f0f0f0] bg-white">
           <button
             onClick={() => {
               onClose();
               onOpenSearch();
             }}
-            className="w-full flex items-center justify-between px-3 py-2 bg-[#f4f4f5] text-[#555555] text-xs font-sans rounded-none hover:bg-[#e4e4e7] transition-colors cursor-pointer"
+            className="w-full flex items-center justify-between px-3.5 py-2.5 bg-[#f4f4f5] border border-[#e4e4e7] text-[#555555] text-xs font-sans rounded-none hover:bg-[#e4e4e7] transition-colors cursor-pointer my-1"
           >
             <span className="flex items-center gap-2">
-              <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <svg className="w-4 h-4 text-gray-500 shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
-              Search Times Chicago...
+              <span>Search Times Chicago...</span>
             </span>
             <span className="text-[10px] text-gray-400 font-mono">⌘K</span>
           </button>
@@ -120,25 +117,52 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({
               const subMenu = megaMenuData[cat];
               const subLinks = subMenu?.columns?.[0]?.links || [];
               const hasSubLinks = subLinks.length > 0;
-              const isExpanded = Boolean(expandedCategories[cat]);
+              const isExpanded = expandedCategory === cat;
 
               return (
                 <li key={cat} className="border-b border-[#f4f4f5] last:border-b-0">
-                  <div className="flex items-center justify-between py-1.5 hover:bg-gray-50 px-1 rounded-sm">
-                    {/* Category Title Link */}
-                    <Link
-                      href={getCategoryRoute(cat)}
-                      onClick={onClose}
-                      className="text-sm font-sans font-semibold text-[#111111] hover:text-[#990000] transition-colors flex-1"
-                    >
-                      {cat}
-                    </Link>
+                  <div
+                    onClick={() => {
+                      if (hasSubLinks) {
+                        toggleCategory(cat);
+                      }
+                    }}
+                    className={`flex items-center justify-between py-2 hover:bg-gray-50 px-1.5 transition-colors cursor-pointer select-none ${
+                      isExpanded ? "bg-[#fafafa]" : ""
+                    }`}
+                  >
+                    {/* Category Title: If hasSubLinks, click toggles accordion; if no subLinks, click navigates */}
+                    {hasSubLinks ? (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleCategory(cat);
+                        }}
+                        className={`text-sm font-sans font-semibold text-left flex-1 cursor-pointer transition-colors ${
+                          isExpanded ? "text-[#990000]" : "text-[#111111] hover:text-[#990000]"
+                        }`}
+                      >
+                        {cat}
+                      </button>
+                    ) : (
+                      <Link
+                        href={getCategoryRoute(cat)}
+                        onClick={onClose}
+                        className="text-sm font-sans font-semibold text-[#111111] hover:text-[#990000] transition-colors flex-1"
+                      >
+                        {cat}
+                      </Link>
+                    )}
 
                     {/* Accordion Expand / Collapse Toggle Caret */}
                     {hasSubLinks && (
                       <button
                         type="button"
-                        onClick={() => toggleCategory(cat)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleCategory(cat);
+                        }}
                         className="p-1 text-gray-500 hover:text-black cursor-pointer focus:outline-none shrink-0"
                         aria-label={`Toggle ${cat} sub-categories`}
                       >

@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { ALL_69_SUBCATEGORIES } from "@/data/subCategories";
 import { convertFileToWebP } from "@/lib/webpConverter";
 
@@ -31,7 +31,7 @@ const ALL_MAIN_CATEGORIES = [
 
 import ArticleCommentsSection from "@/components/article/ArticleCommentsSection";
 import ImageSeoKeywordsInput from "@/components/article/ImageSeoKeywordsInput";
-import { getAuthorForArticle } from "@/data/authors";
+import { getAuthorForArticle, slugifyAuthorName, slugifyArticleTitle } from "@/data/authors";
 
 const compressImageFile = (file: File, maxWidth = 800, quality = 0.7): Promise<string> => {
   return new Promise((resolve) => {
@@ -193,7 +193,11 @@ const safeSavePostsToStorage = (posts: any[]): boolean => {
 
 export default function CreateNewPostPage() {
   const router = useRouter();
+  const routeParams = useParams();
+  const rawSectionParam = typeof routeParams?.section === "string" ? routeParams.section : (Array.isArray(routeParams?.section) ? routeParams.section[0] : "");
+
   const [isMounted, setIsMounted] = useState(false);
+  const [postStatus, setPostStatus] = useState<string>("draft");
 
   React.useEffect(() => {
     setIsMounted(true);
@@ -305,7 +309,65 @@ export default function CreateNewPostPage() {
       } catch (e) {
         setCurrentUser({ full_name: "Writer User", name: "Writer User", email: "writer@gmail.com", role: "writer" });
       }
+    }
+  }, []);
 
+  React.useEffect(() => {
+    const reloadUser = () => {
+      if (typeof window !== "undefined") {
+        try {
+          const storedUser = sessionStorage.getItem("wsj_user");
+          if (storedUser) {
+            let parsed = JSON.parse(storedUser);
+            if (parsed && (parsed.email || parsed.full_name || parsed.name)) {
+              const userEmail = (parsed.email || "writer@gmail.com").toLowerCase().trim();
+              try {
+                const map = JSON.parse(localStorage.getItem("wsj_users_by_email") || "{}");
+                const savedForEmail = map[userEmail];
+                if (savedForEmail) {
+                  parsed = { ...parsed, ...savedForEmail };
+                }
+              } catch (e) {}
+              setCurrentUser({ ...parsed, email: userEmail });
+            }
+          }
+        } catch (e) {}
+      }
+    };
+    if (typeof window !== "undefined") {
+      window.addEventListener("wsj_user_updated", reloadUser);
+      return () => window.removeEventListener("wsj_user_updated", reloadUser);
+    }
+  }, []);
+
+  const getWriterDashboardUrl = (tab?: string) => {
+    const authorName = currentUser?.full_name || currentUser?.name || (currentUser?.email ? currentUser.email.split("@")[0] : "writer");
+    const slug = slugifyAuthorName(authorName);
+    return tab ? `/writer-dashboard/${slug}?tab=${encodeURIComponent(tab)}` : `/writer-dashboard/${slug}`;
+  };
+
+  React.useEffect(() => {
+    if (currentUser) {
+      const authorName = currentUser?.full_name || currentUser?.name || (currentUser?.email ? currentUser.email.split("@")[0] : "writer");
+      const nameSlug = slugifyAuthorName(authorName);
+      const titleSlug = slugifyArticleTitle(headline);
+      const sectionKey = (rawSectionParam || (postStatus ? postStatus.toLowerCase().replace(/\s+/g, "-") : "draft"));
+
+      if (typeof window !== "undefined") {
+        const search = window.location.search || "";
+        let expectedPath = `/writer-dashboard/${nameSlug}/create-post`;
+        if (editingPostId || headline.trim() || rawSectionParam) {
+          expectedPath = `/writer-dashboard/${nameSlug}/${sectionKey}/create-post/${titleSlug}`;
+        }
+        if (window.location.pathname !== expectedPath) {
+          window.history.replaceState(null, "", `${expectedPath}${search}`);
+        }
+      }
+    }
+  }, [currentUser, headline, editingPostId, postStatus, rawSectionParam]);
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
       const loadPostData = async () => {
         try {
           const params = new URLSearchParams(window.location.search);
@@ -333,6 +395,7 @@ export default function CreateNewPostPage() {
             }
 
             if (found) {
+              if (found.status) setPostStatus(found.status);
               if (found.title) setHeadline(found.title);
               if (found.subheadline) setSubheadline(found.subheadline);
               const loadedContent = found.bodyContent || (found.subheadline ? `<p>${found.subheadline}</p>` : "");
@@ -1433,9 +1496,9 @@ export default function CreateNewPostPage() {
 
     setStatusMessage(null);
     if (typeof window !== "undefined") {
-      window.location.href = "/writer-dashboard?tab=Drafts";
+      window.location.href = getWriterDashboardUrl("Drafts");
     } else {
-      router.push("/writer-dashboard?tab=Drafts");
+      router.push(getWriterDashboardUrl("Drafts"));
     }
   };
 
@@ -1531,9 +1594,9 @@ export default function CreateNewPostPage() {
 
     setStatusMessage(null);
     if (typeof window !== "undefined") {
-      window.location.href = "/writer-dashboard?tab=Pending review";
+      window.location.href = getWriterDashboardUrl("Pending review");
     } else {
-      router.push("/writer-dashboard?tab=Pending review");
+      router.push(getWriterDashboardUrl("Pending review"));
     }
   };
 
@@ -1551,7 +1614,7 @@ export default function CreateNewPostPage() {
           {/* Left Side: Cancel Button, Divider, Headline Status */}
           <div className="flex items-center space-x-2 sm:space-x-3">
             <button
-              onClick={() => router.push("/writer-dashboard")}
+              onClick={() => router.push(getWriterDashboardUrl())}
               className="flex items-center space-x-1 sm:space-x-1.5 text-[#94a3b8] hover:text-white font-sans text-[11px] sm:text-xs uppercase tracking-wider font-extrabold transition-colors cursor-pointer"
             >
               <svg width="16" height="16" className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#94a3b8]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">

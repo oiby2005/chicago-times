@@ -92,30 +92,23 @@ export function slugifyAuthorName(name: string): string {
   return clean.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "writer";
 }
 
-export function getAuthorSlugForUser(user: any): string {
-  if (!user) return "/author/writer";
-  const email = (user.email || "").toLowerCase().trim();
-
-  if (typeof window !== "undefined") {
-    try {
-      const profilesMap = JSON.parse(localStorage.getItem("wsj_users_by_email") || "{}");
-      if (email && profilesMap[email]) {
-        const saved = profilesMap[email];
-        const savedName = saved.full_name || saved.name;
-        if (savedName) return `/author/${slugifyAuthorName(savedName)}`;
-      }
-    } catch (e) {}
-  }
-
-  const name = user.full_name || user.name || (email ? email.split("@")[0] : "writer");
-  return `/author/${slugifyAuthorName(name)}`;
+export function slugifyArticleTitle(title: string): string {
+  if (!title || !title.trim()) return "untitled-article";
+  return (
+    title
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "") || "untitled-article"
+  );
 }
 
-export function getUserDashboardUrl(user: any): string {
-  if (!user) return "/signin";
+export function getWriterSlugFromUser(user: any): string {
+  if (!user) return "writer";
   const email = (user.email || "").toLowerCase().trim();
-  let name = user.full_name || user.name || (email ? email.split("@")[0] : "user");
-
+  let name = user.full_name || user.name || (email ? email.split("@")[0] : "writer");
   if (typeof window !== "undefined") {
     try {
       const profilesMap = JSON.parse(localStorage.getItem("wsj_users_by_email") || "{}");
@@ -125,30 +118,62 @@ export function getUserDashboardUrl(user: any): string {
       }
     } catch (e) {}
   }
+  return slugifyAuthorName(name);
+}
 
-  const slug = slugifyAuthorName(name);
+export function getEditPostUrl(post: any, userOrName?: any): string {
+  const name = typeof userOrName === "string" ? userOrName : (userOrName?.full_name || userOrName?.name || "writer");
+  const nameSlug = slugifyAuthorName(name);
+  return `/writer-dashboard/${nameSlug}`;
+}
+
+export function getWriterHomepageUrl(user: any): string {
+  const slug = getWriterSlugFromUser(user);
+  const role = (user?.role || "").toLowerCase();
+  if (role === "admin") return `/admin/${slug}`;
+  if (role === "reader") return `/reader/${slug}`;
+  return `/writer/${slug}`;
+}
+
+export function getWriterArticleUrl(post: any, user?: any): string {
+  const slug = user ? getWriterSlugFromUser(user) : "writer";
+  const titleSlug = slugifyArticleTitle(post?.title || post?.headline || "");
+  const role = (user?.role || "").toLowerCase();
+  if (role === "admin") return `/admin-dashboard/${slug}/article/${titleSlug}`;
+  if (role === "reader") return `/reader/${slug}/article/${titleSlug}`;
+  return `/writer/${slug}/article/${titleSlug}`;
+}
+
+export function getWriterCategoryUrl(categoryNameOrSlug: string, user?: any): string {
+  const slug = user ? getWriterSlugFromUser(user) : "writer";
+  const catSlug = categoryNameOrSlug.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  const role = (user?.role || "").toLowerCase();
+  if (role === "admin") return `/admin-dashboard/${slug}/${catSlug}`;
+  if (role === "reader") return `/reader/${slug}/${catSlug}`;
+  return `/writer/${slug}/${catSlug}`;
+}
+
+export function getAuthorSlugForUser(user: any, targetAuthorName?: string): string {
+  const slug = user ? getWriterSlugFromUser(user) : "writer";
+  const authorSlug = targetAuthorName ? slugifyAuthorName(targetAuthorName) : slug;
+  const role = (user?.role || "").toLowerCase();
+  if (role === "admin") return `/admin-dashboard/${slug}/author/${authorSlug}`;
+  if (role === "reader") return `/reader/${slug}/author/${authorSlug}`;
+  return `/writer/${slug}/author/${authorSlug}`;
+}
+
+export function getUserDashboardUrl(user: any): string {
+  if (!user) return "/signin";
+  const slug = getWriterSlugFromUser(user);
   const role = (user.role || "").toUpperCase();
   if (role === "ADMIN") return `/admin-dashboard/${slug}`;
-  if (role === "READER") return `/reader-dashboard/${slug}`;
+  if (role === "READER") return `/reader/${slug}/saved`;
   return `/writer-dashboard/${slug}`;
 }
 
 export function getUserRoleUrl(user: any): string {
   if (!user) return "/";
-  const email = (user.email || "").toLowerCase().trim();
-  let name = user.full_name || user.name || (email ? email.split("@")[0] : "user");
-
-  if (typeof window !== "undefined") {
-    try {
-      const profilesMap = JSON.parse(localStorage.getItem("wsj_users_by_email") || "{}");
-      if (email && profilesMap[email]) {
-        const saved = profilesMap[email];
-        if (saved.full_name || saved.name) name = saved.full_name || saved.name;
-      }
-    } catch (e) {}
-  }
-
-  const slug = slugifyAuthorName(name);
+  const slug = getWriterSlugFromUser(user);
   const role = (user.role || "").toLowerCase();
   if (role === "admin") return `/admin/${slug}`;
   if (role === "reader") return `/reader/${slug}`;

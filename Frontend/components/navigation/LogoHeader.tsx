@@ -11,7 +11,7 @@ import MobileNavDrawer from "@/components/navigation/MobileNavDrawer";
 import SearchOverlay from "@/components/search/SearchOverlay";
 import { setSiteLanguageEdition, getSavedEdition } from "@/components/ui/GoogleTranslateProvider";
 
-import { getAuthorSlugForUser, getUserDashboardUrl, getAuthorBySlug } from "@/data/authors";
+import { getAuthorSlugForUser, getUserDashboardUrl, getAuthorBySlug, slugifyAuthorName } from "@/data/authors";
 
 export const LogoHeader: React.FC = () => {
   const pathname = usePathname();
@@ -26,6 +26,27 @@ export const LogoHeader: React.FC = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const mobileDropdownRef = useRef<HTMLDivElement>(null);
   const editionRef = useRef<HTMLDivElement>(null);
+  const [logoHref, setLogoHref] = useState("/");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const path = window.location.pathname;
+      const match = path.match(/\/admin\/([^/]+)/);
+      if (match && match[1]) {
+        setLogoHref(`/admin/${match[1]}`);
+        return;
+      }
+    }
+    if (currentUser?.role === "admin") {
+      const nameStr = currentUser.username || currentUser.name || "admin1";
+      setLogoHref(`/admin/${nameStr.toLowerCase().trim().replace(/\s+/g, "-")}`);
+    } else if ((currentUser?.role || "").toLowerCase() === "writer") {
+      const writerName = currentUser.full_name || currentUser.name || "writer";
+      setLogoHref(`/${slugifyAuthorName(writerName)}`);
+    } else {
+      setLogoHref("/");
+    }
+  }, [currentUser, pathname]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -262,20 +283,7 @@ export const LogoHeader: React.FC = () => {
           {/* Centered Masthead Logo */}
           <div className="flex-1 text-center py-0 my-0 flex items-center justify-center">
             <Link
-              href={(() => {
-                if (typeof window !== "undefined") {
-                  const path = window.location.pathname;
-                  const match = path.match(/\/admin\/([^/]+)/);
-                  if (match && match[1]) {
-                    return `/admin/${match[1]}`;
-                  }
-                }
-                if (currentUser?.role === "admin") {
-                  const nameStr = currentUser.username || currentUser.name || "admin1";
-                  return `/admin/${nameStr.toLowerCase().trim().replace(/\s+/g, "-")}`;
-                }
-                return "/";
-              })()}
+              href={logoHref}
               className="inline-block py-0 my-0 leading-none"
             >
               <WSJLogo />
@@ -407,7 +415,7 @@ export const LogoHeader: React.FC = () => {
 
           {/* Upcoming Entrepreneurs */}
           <a
-            href="/upcoming-entrepreneurs"
+            href="/business/entrepreneurship"
             className="hover:underline cursor-pointer font-normal text-[#333333] hover:text-black leading-none"
           >
             Upcoming Entrepreneurs

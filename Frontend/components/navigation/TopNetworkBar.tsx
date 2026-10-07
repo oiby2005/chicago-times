@@ -140,6 +140,7 @@ export const TopNetworkBar: React.FC = () => {
               onClick={() => setShowDropdown(!showDropdown)}
               aria-label="Market overview"
               className="flex items-center space-x-1.5 pr-2 border-r border-[#e5e5e5] cursor-pointer hover:opacity-80 transition-opacity focus:outline-none"
+              suppressHydrationWarning
             >
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#10b981] opacity-75"></span>
@@ -152,7 +153,7 @@ export const TopNetworkBar: React.FC = () => {
 
             {/* Dropdown Full Market Overview Card */}
             {showDropdown && (
-              <div className="absolute left-0 top-full mt-2 w-80 bg-white border border-[#e2e8f0] shadow-2xl rounded-2xl p-4 z-50 text-left animate-in zoom-in-95 duration-100 font-sans">
+              <div className="absolute left-0 top-full mt-2 w-80 bg-white border border-[#e2e8f0] shadow-2xl rounded-none p-4 z-50 text-left animate-in zoom-in-95 duration-100 font-sans">
                 <div className="flex items-center justify-between pb-2.5 border-b border-[#f1f5f9] mb-3">
                   <div className="flex items-center space-x-2">
                     <span className="w-2 h-2 rounded-full bg-[#059669] animate-pulse"></span>
@@ -163,7 +164,7 @@ export const TopNetworkBar: React.FC = () => {
 
                 <div className="space-y-2 max-h-64 overflow-y-auto no-scrollbar pr-1">
                   {markets.map((m) => (
-                    <div key={m.symbol} className="flex items-center justify-between p-2 rounded-xl hover:bg-slate-50 transition-colors border border-[#f8fafc]">
+                    <div key={m.symbol} className="flex items-center justify-between p-2 rounded-none hover:bg-slate-50 transition-colors border border-[#f8fafc]">
                       <div>
                         <div className="font-bold text-xs text-[#1e293b]">{m.symbol}</div>
                         <div className="text-[10px] text-gray-500">{m.name}</div>
@@ -191,13 +192,7 @@ export const TopNetworkBar: React.FC = () => {
             {markets.map((item) => (
               <div
                 key={item.symbol}
-                className={`flex items-center space-x-1 text-[11px] font-sans transition-all duration-300 px-1.5 py-0.5 rounded ${
-                  item.flash === "up"
-                    ? "bg-emerald-100 text-emerald-800 scale-105"
-                    : item.flash === "down"
-                    ? "bg-rose-100 text-rose-800 scale-105"
-                    : ""
-                }`}
+                className="flex items-center space-x-1 text-[11px] font-sans px-1.5 py-0.5"
               >
                 <span className="font-bold text-[#111111]">{item.symbol}</span>
                 <span className={item.isPositive ? "font-bold text-[#047857]" : "font-bold text-[#dc2626]"}>

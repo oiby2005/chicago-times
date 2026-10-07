@@ -178,17 +178,21 @@ export default function AuthorHeader({ author = defaultAuthor }: AuthorHeaderPro
               {profile.role}
             </div>
 
-            {/* 3. ONLY LinkedIn Icon - Centered directly UNDER Name & Role */}
+            {/* 3. ONLY LinkedIn Icon - Centered directly UNDER Name & Role with sharp corners */}
             <div className="flex items-center justify-center pt-1 pb-1">
               <a
                 href={profile.linkedinUrl || "https://www.linkedin.com"}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center justify-center hover:opacity-80 transition-opacity cursor-pointer text-[#0077b5] shrink-0 p-1"
-                title="LinkedIn Profile"
+                className="inline-flex items-center justify-center hover:opacity-90 transition-opacity cursor-pointer shrink-0 rounded-none"
+                title={`${profile.name}'s LinkedIn Profile`}
               >
-                <svg className="w-6 h-6 sm:w-7 sm:h-7 fill-current shrink-0" viewBox="0 0 24 24">
-                  <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                <svg className="w-6 h-6 sm:w-7 sm:h-7 rounded-none" viewBox="0 0 24 24">
+                  <rect width="24" height="24" fill="#0077b5" rx="0" />
+                  <path
+                    d="M8 19H5V8h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3V8h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"
+                    fill="white"
+                  />
                 </svg>
               </a>
             </div>

@@ -31,22 +31,10 @@ const parseHomeTags = (p: any): string[] => {
   return tags.map((t: string) => t.replace(/^#/, "").trim()).filter(Boolean).slice(0, 2);
 };
 
+import { getRelativeTime } from "@/lib/relativeTime";
+
 const formatTimeAgo = (timestamp?: number | string): string => {
-  if (!timestamp) return "2 hours ago";
-  const now = Date.now();
-  const time = typeof timestamp === "string" ? new Date(timestamp).getTime() : timestamp;
-  if (isNaN(time) || time <= 0) return "2 hours ago";
-  const diffMs = Math.max(0, now - time);
-  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-  if (diffHours < 1) {
-    const diffMins = Math.max(1, Math.floor(diffMs / (1000 * 60)));
-    return `${diffMins} min${diffMins > 1 ? "s" : ""} ago`;
-  }
-  if (diffHours < 24) {
-    return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
-  }
-  const diffDays = Math.floor(diffHours / 24);
-  return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
+  return getRelativeTime(timestamp);
 };
 
 const STATIC_BASE_TIME = 1730000000000;
@@ -285,7 +273,7 @@ export const EditorsPicksSection: React.FC = () => {
                 <div className="flex-1 flex flex-col justify-between h-full min-h-[100px] sm:min-h-[115px]">
                   <div>
                     {renderHomeTags(bottomCards[0])}
-                    <h4 className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
+                    <h4 className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.2] text-[#111111] hover:underline cursor-pointer line-clamp-3 overflow-hidden text-ellipsis">
                       <Link href={`/article/${bottomCards[0].slug}`}>
                         {bottomCards[0].title}
                       </Link>
@@ -315,7 +303,7 @@ export const EditorsPicksSection: React.FC = () => {
                 <div className="flex-1 flex flex-col justify-between h-full min-h-[100px] sm:min-h-[115px]">
                   <div>
                     {renderHomeTags(bottomCards[1])}
-                    <h4 className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
+                    <h4 className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.2] text-[#111111] hover:underline cursor-pointer line-clamp-3 overflow-hidden text-ellipsis">
                       <Link href={`/article/${bottomCards[1].slug}`}>
                         {bottomCards[1].title}
                       </Link>
@@ -351,7 +339,7 @@ export const EditorsPicksSection: React.FC = () => {
                       />
                     </Link>
                     {renderHomeTags(rightCards[0])}
-                    <h4 className="font-serif font-bold text-[14.5px] sm:text-[15px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
+                    <h4 className="font-serif font-bold text-[14.5px] sm:text-[15px] leading-[1.2] text-[#111111] hover:underline cursor-pointer line-clamp-3 overflow-hidden text-ellipsis">
                       <Link href={`/article/${rightCards[0].slug}`}>
                         {rightCards[0].title}
                       </Link>
@@ -382,7 +370,7 @@ export const EditorsPicksSection: React.FC = () => {
                       />
                     </Link>
                     {renderHomeTags(rightCards[2])}
-                    <h4 className="font-serif font-bold text-[14.5px] sm:text-[15px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
+                    <h4 className="font-serif font-bold text-[14.5px] sm:text-[15px] leading-[1.2] text-[#111111] hover:underline cursor-pointer line-clamp-3 overflow-hidden text-ellipsis">
                       <Link href={`/article/${rightCards[2].slug}`}>
                         {rightCards[2].title}
                       </Link>
@@ -412,7 +400,7 @@ export const EditorsPicksSection: React.FC = () => {
                     />
                   </Link>
                   {renderHomeTags(rightCards[1])}
-                  <h4 className="font-serif font-bold text-[14.5px] sm:text-[15px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
+                  <h4 className="font-serif font-bold text-[14.5px] sm:text-[15px] leading-[1.2] text-[#111111] hover:underline cursor-pointer line-clamp-3 overflow-hidden text-ellipsis">
                     <Link href={`/article/${rightCards[1].slug}`}>
                       {rightCards[1].title}
                     </Link>
@@ -441,7 +429,7 @@ export const EditorsPicksSection: React.FC = () => {
                     />
                   </Link>
                   {renderHomeTags(rightCards[3])}
-                  <h4 className="font-serif font-bold text-[14.5px] sm:text-[15px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
+                  <h4 className="font-serif font-bold text-[14.5px] sm:text-[15px] leading-[1.2] text-[#111111] hover:underline cursor-pointer line-clamp-3 overflow-hidden text-ellipsis">
                     <Link href={`/article/${rightCards[3].slug}`}>
                       {rightCards[3].title}
                     </Link>

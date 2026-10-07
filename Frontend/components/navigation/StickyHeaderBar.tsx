@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import Container from "@/components/layout/Container";
 import Navbar, { getCategoryRoute } from "@/components/navigation/Navbar";
 import SearchOverlay from "@/components/search/SearchOverlay";
+import MobileNavDrawer from "@/components/navigation/MobileNavDrawer";
 import SpecialOfferPopover from "@/components/navigation/SpecialOfferPopover";
 import { getAuthorSlugForUser, getUserDashboardUrl, getAuthorBySlug } from "@/data/authors";
 import { UserProfile } from "@/components/ui/ProfileSettingsModal";
@@ -17,6 +18,7 @@ interface StickyHeaderBarProps {
 export const StickyHeaderBar: React.FC<StickyHeaderBarProps> = ({ visible = true }) => {
   const [isSticky, setIsSticky] = useState(false);
   const [isSearchOverlayOpen, setIsSearchOverlayOpen] = useState(false);
+  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -203,81 +205,116 @@ export const StickyHeaderBar: React.FC<StickyHeaderBarProps> = ({ visible = true
         isOpen={isSearchOverlayOpen}
         onClose={() => setIsSearchOverlayOpen(false)}
       />
-    <div className="fixed top-0 left-0 right-0 z-50 w-full bg-white border-b border-[#d4d4d4] shadow-md transition-all duration-200 select-none animate-in slide-in-from-top-2 duration-150">
-      <div className="w-full max-w-[1280px] mx-auto px-4 sm:px-5 md:px-6 relative">
-        {/* Top Header Row of Sticky Bar */}
-        <div className="flex items-center justify-between h-12 sm:h-14 md:h-16 border-b border-[#f0f0f0] relative">
-          {/* Left Action Button: Newsletter (Matching LogoHeader alignment) */}
-          <div className="hidden md:flex items-center w-[220px] lg:w-[260px] justify-start z-10 shrink-0">
-            <Link
-              href="/newsletters"
-              className="bg-black hover:bg-gray-900 text-white font-sans text-[11.5px] font-medium px-4 py-1.5 h-auto flex items-center justify-center rounded-none tracking-tight transition-colors whitespace-nowrap cursor-pointer inline-flex leading-none shadow-xs"
-              suppressHydrationWarning
-            >
-              Newsletter
-            </Link>
-          </div>
-
-          {/* Centered Masthead Logo */}
-          <div className="flex-1 text-center py-0 my-0 flex items-center justify-center w-full md:w-auto">
-            <Link href="/" className="inline-block py-0 my-0 leading-none">
-              <img
-                src="/images/design-reference/Times Chicago.svg"
-                alt="Times Chicago"
-                className="h-7 sm:h-8 md:h-9 lg:h-10 w-auto object-contain block max-h-11"
-              />
-            </Link>
-          </div>
-
-          {/* Right Buttons: Special Offer & Sign In (Matching LogoHeader alignment) */}
-          <div className="hidden md:flex items-center space-x-2.5 w-[220px] lg:w-[260px] justify-end z-[100] shrink-0 relative">
-            <SpecialOfferPopover>
+      <div className="fixed top-0 left-0 right-0 z-50 w-full bg-white border-b border-[#d4d4d4] shadow-md transition-all duration-200 select-none animate-in slide-in-from-top-2 duration-150">
+        <div className="w-full max-w-[1280px] mx-auto px-4 sm:px-5 md:px-6 relative">
+          {/* Top Header Row of Sticky Bar */}
+          <div className="flex items-center justify-between h-12 sm:h-14 md:h-16 border-b border-[#f0f0f0] relative">
+            
+            {/* Mobile Hamburger button (visible on < md) */}
+            <div className="flex md:hidden items-center justify-start w-10">
               <button
-                className="bg-[#007cb9] hover:bg-[#006996] text-white font-sans text-[11.5px] font-medium px-4 py-1.5 h-auto flex items-center justify-center rounded-none tracking-tight transition-colors whitespace-nowrap cursor-pointer shadow-xs leading-none"
+                onClick={() => setIsMobileDrawerOpen(true)}
+                className="p-1 text-[#111111] hover:text-gray-700 transition-colors cursor-pointer focus:outline-none"
+                aria-label="Open mobile menu"
                 suppressHydrationWarning
               >
-                Special Offer
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
               </button>
-            </SpecialOfferPopover>
+            </div>
 
-            {isLoggedIn ? (
-              <div className="relative" ref={dropdownRef}>
+            {/* Left Action Button: Newsletter (Matching LogoHeader alignment, visible on md+) */}
+            <div className="hidden md:flex items-center w-[220px] lg:w-[260px] justify-start z-10 shrink-0">
+              <Link
+                href="/newsletters"
+                className="bg-black hover:bg-gray-900 text-white font-sans text-[11.5px] font-medium px-4 py-1.5 h-auto flex items-center justify-center rounded-none tracking-tight transition-colors whitespace-nowrap cursor-pointer inline-flex leading-none shadow-xs"
+                suppressHydrationWarning
+              >
+                Newsletter
+              </Link>
+            </div>
+
+            {/* Centered Masthead Logo */}
+            <div className="flex-1 text-center py-0 my-0 flex items-center justify-center">
+              <Link href="/" className="inline-block py-0 my-0 leading-none">
+                <img
+                  src="/images/design-reference/Times Chicago.svg"
+                  alt="Times Chicago"
+                  className="h-7 sm:h-8 md:h-9 lg:h-10 w-auto object-contain block max-h-11"
+                />
+              </Link>
+            </div>
+
+            {/* Mobile Search button (visible on < md) */}
+            <div className="flex md:hidden items-center justify-end w-10">
+              <button
+                onClick={() => setIsSearchOverlayOpen(true)}
+                className="p-1 text-[#111111] hover:text-gray-700 transition-colors cursor-pointer focus:outline-none"
+                aria-label="Search"
+                suppressHydrationWarning
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Right Buttons: Special Offer & Sign In (Matching LogoHeader alignment, visible on md+) */}
+            <div className="hidden md:flex items-center space-x-2.5 w-[220px] lg:w-[260px] justify-end z-[100] shrink-0 relative">
+              <SpecialOfferPopover>
                 <button
-                  onClick={() => setShowDropdown(!showDropdown)}
-                  className="w-8 h-8 sm:w-9 sm:h-9 bg-[#f3f4f6] hover:bg-[#e5e7eb] border-none rounded-full flex items-center justify-center relative p-0.5 transition-colors cursor-pointer shadow-xs shrink-0"
-                  aria-label="User Profile"
-                  title={currentUser?.full_name || "User Profile"}
+                  className="bg-[#007cb9] hover:bg-[#006996] text-white font-sans text-[11.5px] font-medium px-4 py-1.5 h-auto flex items-center justify-center rounded-none tracking-tight transition-colors whitespace-nowrap cursor-pointer shadow-xs leading-none"
                   suppressHydrationWarning
                 >
-                  {currentUser?.avatar_url ? (
-                    <img
-                      src={currentUser.avatar_url}
-                      alt={currentUser?.full_name || "User Profile"}
-                      className="w-full h-full object-cover rounded-full"
-                    />
-                  ) : (
-                    <svg className="w-4 h-4 text-[#1e293b]" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                    </svg>
-                  )}
-                  <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#00c853] border-2 border-white rounded-full" />
+                  Special Offer
                 </button>
-                {showDropdown && renderDropdownMenu()}
-              </div>
-            ) : (
-              <Link
-                href="/signin"
-                className="bg-white hover:bg-gray-50 text-black border border-[#333333] hover:border-black font-sans text-[11.5px] font-medium px-4 py-1.5 h-auto flex items-center justify-center rounded-none tracking-tight transition-colors whitespace-nowrap cursor-pointer leading-none"
-                suppressHydrationWarning
-              >
-                Sign In
-              </Link>
-            )}
+              </SpecialOfferPopover>
+
+              {isLoggedIn ? (
+                <div className="relative" ref={dropdownRef}>
+                  <button
+                    onClick={() => setShowDropdown(!showDropdown)}
+                    className="w-8 h-8 sm:w-9 sm:h-9 bg-[#f3f4f6] hover:bg-[#e5e7eb] border-none rounded-full flex items-center justify-center relative p-0.5 transition-colors cursor-pointer shadow-xs shrink-0"
+                    aria-label="User Profile"
+                    title={currentUser?.full_name || "User Profile"}
+                    suppressHydrationWarning
+                  >
+                    {currentUser?.avatar_url ? (
+                      <img
+                        src={currentUser.avatar_url}
+                        alt={currentUser?.full_name || "User Profile"}
+                        className="w-full h-full object-cover rounded-full"
+                      />
+                    ) : (
+                      <svg className="w-4 h-4 text-[#1e293b]" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                      </svg>
+                    )}
+                    <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#00c853] border-2 border-white rounded-full" />
+                  </button>
+                  {showDropdown && renderDropdownMenu()}
+                </div>
+              ) : (
+                <Link
+                  href="/signin"
+                  className="bg-white hover:bg-gray-50 text-black border border-[#333333] hover:border-black font-sans text-[11.5px] font-medium px-4 py-1.5 h-auto flex items-center justify-center rounded-none tracking-tight transition-colors whitespace-nowrap cursor-pointer leading-none"
+                  suppressHydrationWarning
+                >
+                  Sign In
+                </Link>
+              )}
+            </div>
           </div>
         </div>
+        <Navbar />
       </div>
-      <Navbar />
-    </div>
+      <MobileNavDrawer
+        isOpen={isMobileDrawerOpen}
+        onClose={() => setIsMobileDrawerOpen(false)}
+        currentUser={currentUser}
+        onOpenSearch={() => setIsSearchOverlayOpen(true)}
+      />
     </>
   );
 };

@@ -10,7 +10,7 @@ export const WSJPromotionSection: React.FC = () => {
       <div className="flex-1 bg-[#FDF4E7] p-6 sm:p-8 flex flex-col justify-between">
         <div>
           <span className="font-sans font-bold text-[11px] uppercase tracking-wider text-[#3B71AC] block mb-1">
-            WSJ PROMOTION
+            TIMES CHICAGO PROMOTION
           </span>
           <h3 className="font-serif font-bold text-[26px] sm:text-[32px] leading-tight text-[#111111] mb-2">
             Special Offer

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Container from "@/components/layout/Container";
 import SearchOverlay from "@/components/search/SearchOverlay";
+import { slugifyAuthorName } from "@/data/authors";
 
 interface MenuSection {
   heading: string;
@@ -272,7 +273,7 @@ export const allCategories = [
   "Interviews",
 ];
 
-export function getCategoryRoute(title: string): string {
+export function getCategoryRoute(title: string, writerPrefix: string = ""): string {
   const map: Record<string, string> = {
     News: "/news",
     Law: "/law",
@@ -294,7 +295,8 @@ export function getCategoryRoute(title: string): string {
     Editorials: "/editorials",
     Interviews: "/interviews",
   };
-  return map[title] || `/${title.toLowerCase().replace(/[^a-z0-9]/g, "-")}`;
+  const base = map[title] || `/${title.toLowerCase().replace(/[^a-z0-9]/g, "-")}`;
+  return writerPrefix ? `${writerPrefix}${base}` : base;
 }
 
 export const Navbar: React.FC = () => {
@@ -303,7 +305,22 @@ export const Navbar: React.FC = () => {
   const [hoveredOffsetLeft, setHoveredOffsetLeft] = useState<number>(0);
   const [hoveredWidth, setHoveredWidth] = useState<number>(0);
   const [isSearchOverlayOpen, setIsSearchOverlayOpen] = useState(false);
+  const [writerPrefix, setWriterPrefix] = useState<string>("");
   const tabRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  useEffect(() => {
+    try {
+      const stored = sessionStorage.getItem("wsj_user") || localStorage.getItem("wsj_user");
+      if (stored) {
+        const u = JSON.parse(stored);
+        if (u && (u.role || "").toLowerCase() === "writer") {
+          const writerName = u.full_name || u.name || (u.email ? u.email.split("@")[0] : "writer");
+          const slug = slugifyAuthorName(writerName);
+          if (slug) setWriterPrefix(`/${slug}`);
+        }
+      }
+    } catch (e) {}
+  }, []);
 
   const currentMenu = activeTab ? megaMenuData[activeTab] : null;
 
@@ -340,7 +357,7 @@ export const Navbar: React.FC = () => {
                     className="relative flex-shrink-0 flex items-end h-full"
                   >
                     <Link
-                      href={getCategoryRoute(title)}
+                      href={getCategoryRoute(title, writerPrefix)}
                       prefetch={false}
                       className={`text-[13px] font-['Century_Gothic','Publica_Sans_Light','Kumbh_Sans',sans-serif] px-2.5 pb-1.5 pt-1 border transition-all whitespace-nowrap leading-none ${
                         isHovered
@@ -408,7 +425,7 @@ export const Navbar: React.FC = () => {
                   {currentMenu.columns[0]?.links?.map((link) => (
                     <Link
                       key={link.name}
-                      href={link.href}
+                      href={writerPrefix ? `${writerPrefix}${link.href}` : link.href}
                       className="block text-[13.5px] font-sans text-[#333333] hover:text-[#990000] hover:underline transition-colors py-0.5"
                     >
                       {link.name}

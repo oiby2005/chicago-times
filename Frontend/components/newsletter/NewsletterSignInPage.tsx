@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import Header from "@/components/navigation/Header";
+import StickyHeaderBar from "@/components/navigation/StickyHeaderBar";
 import Footer from "@/components/layout/Footer";
 
 export interface CategoryGroup {
@@ -297,6 +298,7 @@ export const NewsletterSignInPage: React.FC = () => {
     return (
       <div className="min-h-screen bg-white flex flex-col justify-between selection:bg-gray-200">
         <Header />
+        <StickyHeaderBar />
         <main className="flex-1 w-full bg-white select-none">
           {/* Black & White Gold Banner */}
           <section className="w-full bg-[#f4f4f4] py-6 sm:py-8 text-center border-b border-[#e5e5e5]">
@@ -344,6 +346,7 @@ export const NewsletterSignInPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-white flex flex-col justify-between selection:bg-gray-200">
       <Header />
+      <StickyHeaderBar />
 
       <main className="flex-1 w-full bg-white">
         {/* Top Monochrome Banner matching Image 1 */}

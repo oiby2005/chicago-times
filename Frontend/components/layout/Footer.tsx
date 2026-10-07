@@ -191,6 +191,7 @@ export const Footer: React.FC = () => {
                     className={`hover:text-[#00558c] transition-colors block text-left text-xs cursor-pointer ${
                       activeEdition === item.name ? "font-bold text-[#00558c] underline" : "text-[#444444]"
                     }`}
+                    suppressHydrationWarning
                   >
                     {item.name} Edition
                   </button>

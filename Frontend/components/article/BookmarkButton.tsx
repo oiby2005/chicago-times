@@ -161,7 +161,7 @@ export default function BookmarkButton({ article, variant = "inline" }: Bookmark
     <button
       type="button"
       onClick={handleToggleBookmark}
-      className={`inline-flex items-center justify-center w-8 h-8 sm:w-8.5 sm:h-8.5 rounded-lg border transition-all cursor-pointer shadow-2xs ${
+      className={`inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-none border transition-all cursor-pointer shadow-2xs ${
         isBookmarked
           ? "bg-[#0f172a] text-white border-[#0f172a]"
           : "bg-white hover:bg-slate-100 text-[#334155] border-[#cbd5e1]"

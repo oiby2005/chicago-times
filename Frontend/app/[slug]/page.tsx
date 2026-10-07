@@ -2,11 +2,15 @@ import React from "react";
 import type { Metadata } from "next";
 import CategoryPageTemplate from "@/components/category/CategoryPageTemplate";
 import { getLinkPreviewMetadata } from "@/lib/linkPreview";
+import Header from "@/components/navigation/Header";
+import StickyHeaderBar from "@/components/navigation/StickyHeaderBar";
+import NewHomeBody from "@/components/home/NewHomeBody";
+import StickySubscribeBar from "@/components/ui/StickySubscribeBar";
+import Footer from "@/components/layout/Footer";
 
-interface SubCategoryPageProps {
+interface DynamicSlugPageProps {
   params: Promise<{
-    category: string;
-    slug: string[];
+    slug: string;
   }>;
 }
 
@@ -93,6 +97,8 @@ const CATEGORY_SLUG_MAP: Record<string, string> = {
   "opinion": "Opinions",
   "editorials": "Editorials",
   "editorial": "Editorials",
+  "interviews": "Interviews",
+  "interview": "Interviews",
 };
 
 function formatCategoryTitle(str?: string): string {
@@ -112,43 +118,55 @@ function formatCategoryTitle(str?: string): string {
     .join(" ");
 }
 
-export async function generateMetadata({ params }: SubCategoryPageProps): Promise<Metadata> {
-  const { category, slug } = await params;
-  const lastSlug = slug && slug.length > 0 ? slug[slug.length - 1] : category;
-  const title = formatCategoryTitle(lastSlug);
-  const slugPath = slug
-    ? slug
-        .map((s) => {
-          try {
-            return decodeURIComponent(s);
-          } catch (e) {
-            return s;
-          }
-        })
-        .join("/")
-    : "";
+export async function generateMetadata({ params }: DynamicSlugPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const cleanSlug = (slug || "").toLowerCase().trim();
+
+  if (CATEGORY_SLUG_MAP[cleanSlug]) {
+    const title = formatCategoryTitle(slug);
+    return getLinkPreviewMetadata({
+      type: "category",
+      title: title,
+      urlPath: `/${slug}`,
+    });
+  }
 
   return getLinkPreviewMetadata({
-    type: "category",
-    title: title,
-    urlPath: `/${category}/${slugPath}`,
+    type: "website",
+    title: "Times Chicago - Breaking News, Analysis & Opinion",
+    urlPath: `/${slug}`,
   });
 }
 
-export default async function SubCategoryPage({ params }: SubCategoryPageProps) {
-  const { category, slug } = await params;
+export default async function DynamicSlugPage({ params }: DynamicSlugPageProps) {
+  const { slug } = await params;
 
   if (
-    category === "writer-dashboard" ||
-    category === "author-workspace" ||
-    category === "admin-dashboard" ||
-    category === "reader-dashboard"
+    slug === "writer-dashboard" ||
+    slug === "author-workspace" ||
+    slug === "admin-dashboard" ||
+    slug === "reader-dashboard"
   ) {
     return null;
   }
 
-  const lastSlug = slug && slug.length > 0 ? slug[slug.length - 1] : category;
-  const title = formatCategoryTitle(lastSlug);
+  const cleanSlug = (slug || "").toLowerCase().trim();
+  const isKnownCategory = Boolean(CATEGORY_SLUG_MAP[cleanSlug]);
 
-  return <CategoryPageTemplate categoryTitle={title} />;
+  if (isKnownCategory) {
+    const title = formatCategoryTitle(slug);
+    return <CategoryPageTemplate categoryTitle={title} categorySlug={cleanSlug} />;
+  }
+
+  return (
+    <main className="min-h-screen bg-white flex flex-col justify-between">
+      <div>
+        <Header />
+        <StickyHeaderBar />
+        <NewHomeBody />
+        <StickySubscribeBar />
+      </div>
+      <Footer />
+    </main>
+  );
 }

@@ -1,38 +1,11 @@
 [
   {
-    "id": "35",
-    "name": "qwer",
-    "email": "qwer@g",
-    "phone": "+94 771546268",
-    "packageName": "Times Chicago Digital",
-    "status": "Pending",
-    "created_at": "2026-10-05T14:10:16.000Z"
-  },
-  {
-    "id": "34",
-    "name": "qwert",
-    "email": "aasdfgh@gmail.com",
-    "phone": "+94 771546268g",
-    "packageName": "Times Chicago Digital",
-    "status": "Pending",
-    "created_at": "2026-10-05T14:05:27.916Z"
-  },
-  {
-    "id": "33",
-    "name": "oshidi",
-    "email": "oshidiishmitha@gmail.com",
-    "phone": "0769063403g",
-    "packageName": "Times Chicago Digital",
-    "status": "Pending",
-    "created_at": "2026-10-05T06:33:19.218Z"
-  },
-  {
-    "id": "32",
+    "id": "36",
     "name": "Oshidi Yapa",
     "email": "oshidiyapa190@gmail.com",
-    "phone": "0789212302",
+    "phone": "+94 789212302",
     "packageName": "Times Chicago Digital",
     "status": "Pending",
-    "created_at": "2026-10-05T05:59:21.437Z"
+    "created_at": "2026-10-06T13:00:54.731Z"
   }
 ]

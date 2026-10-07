@@ -197,7 +197,7 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
 
           {/* Section 2: Main Article Content & Sidebar */}
           <Container className="py-8">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
               {/* Left Column: Main Article Body (Span 8) */}
               <article className="lg:col-span-8 space-y-5 lg:border-r lg:border-dashed lg:border-[#CCCCCC] lg:pr-10">
                 {/* Category Badge */}
@@ -258,11 +258,15 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
                             href={authorObj.linkedinUrl}
                             target="_blank"
                             rel="noreferrer"
-                            className="inline-flex items-center justify-center hover:opacity-85 transition-opacity cursor-pointer ml-1"
+                            className="inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-none hover:opacity-90 transition-opacity cursor-pointer ml-1 shrink-0"
                             title={`${authorObj.name}'s LinkedIn Profile`}
                           >
-                            <svg className="w-5 h-5 text-[#0077b5] fill-current" viewBox="0 0 24 24">
-                              <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                            <svg className="w-7 h-7 sm:w-8 sm:h-8 rounded-none" viewBox="0 0 24 24">
+                              <rect width="24" height="24" fill="#0077b5" rx="0" />
+                              <path
+                                d="M8 19H5V8h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3V8h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"
+                                fill="white"
+                              />
                             </svg>
                           </a>
                         )}
@@ -272,7 +276,7 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
                           <button
                             type="button"
                             onClick={() => setIsMainShareOpen(!isMainShareOpen)}
-                            className="inline-flex items-center justify-center w-7 h-7 rounded-lg border border-[#cbd5e1] bg-white hover:bg-slate-100 text-[#334155] hover:text-[#0f172a] transition-colors cursor-pointer shadow-2xs ml-1"
+                            className="inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-none border border-[#cbd5e1] bg-white hover:bg-slate-100 text-[#334155] hover:text-[#0f172a] transition-colors cursor-pointer shadow-2xs ml-1"
                             title="Share Article"
                             aria-label="Share Article"
                             suppressHydrationWarning
@@ -399,8 +403,27 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
                 {/* 2. Middle: 2 Advertisements (Admin Manageable) */}
                 <ArticleSidebarAds />
 
-                {/* 3. Bottom: Most Popular News (Synchronized with Homepage) */}
-                <MostPopularNewsSidebar />
+                {/* 3. Bottom: Most Popular News (Sticky until bottom of videos section) */}
+                <div className="lg:sticky lg:top-[90px] self-start w-full">
+                  <MostPopularNewsSidebar />
+                </div>
+              </div>
+            </div>
+          </Container>
+
+          {/* Subscription Banner Section (White background, mobile, tablet & desktop responsive) */}
+          <Container className="pb-12 pt-4">
+            <div className="w-full bg-white border border-[#e2e8f0] px-4 py-4 sm:px-6 sm:py-5 md:px-8 md:py-6 my-4 font-sans shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-4 overflow-hidden">
+              <h2 className="font-serif font-bold text-base sm:text-lg md:text-xl lg:text-[22px] text-black tracking-tight text-left leading-snug flex-1">
+                Continue reading your article with a Times Chicago subscription
+              </h2>
+              <div className="shrink-0 w-full sm:w-auto text-center sm:text-right">
+                <Link
+                  href="/special-offer"
+                  className="w-full sm:w-auto inline-block bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-bold text-xs sm:text-sm px-7 py-3 rounded-none shadow-xs transition-colors cursor-pointer whitespace-nowrap text-center"
+                >
+                  Subscribe Now
+                </Link>
               </div>
             </div>
           </Container>

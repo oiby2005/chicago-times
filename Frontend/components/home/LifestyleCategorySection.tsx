@@ -44,22 +44,10 @@ const parseHomeTags = (p: any): string[] => {
   return tags.map((t: string) => t.replace(/^#/, "").trim()).filter(Boolean).slice(0, 2);
 };
 
+import { getRelativeTime } from "@/lib/relativeTime";
+
 const formatTimeAgo = (timestamp?: number | string): string => {
-  if (!timestamp) return "2 hours ago";
-  const now = Date.now();
-  const time = typeof timestamp === "string" ? new Date(timestamp).getTime() : timestamp;
-  if (isNaN(time) || time <= 0) return "2 hours ago";
-  const diffMs = Math.max(0, now - time);
-  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-  if (diffHours < 1) {
-    const diffMins = Math.max(1, Math.floor(diffMs / (1000 * 60)));
-    return `${diffMins} min${diffMins > 1 ? "s" : ""} ago`;
-  }
-  if (diffHours < 24) {
-    return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
-  }
-  const diffDays = Math.floor(diffHours / 24);
-  return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
+  return getRelativeTime(timestamp);
 };
 
 const STATIC_BASE_TIME = 1730000000000;
@@ -306,7 +294,7 @@ export const LifestyleCategorySection: React.FC = () => {
               <div className="flex flex-col justify-between flex-1">
                 <div>
                   {renderHomeTags(miniItem1)}
-                  <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-1">
+                  <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-1 line-clamp-3 overflow-hidden text-ellipsis">
                     <Link href={`/article/${miniItem1.slug}`}>
                       {miniItem1.title}
                     </Link>
@@ -340,7 +328,7 @@ export const LifestyleCategorySection: React.FC = () => {
               <div className="flex flex-col justify-between flex-1">
                 <div>
                   {renderHomeTags(miniItem2)}
-                  <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-1">
+                  <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-1 line-clamp-3 overflow-hidden text-ellipsis">
                     <Link href={`/article/${miniItem2.slug}`}>
                       {miniItem2.title}
                     </Link>
@@ -381,7 +369,7 @@ export const LifestyleCategorySection: React.FC = () => {
                     />
                   </Link>
                   {renderHomeTags(sidebarItem1)}
-                  <h4 className="font-serif font-bold text-[14px] sm:text-[15px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-1">
+                  <h4 className="font-serif font-bold text-[14px] sm:text-[15px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-1 line-clamp-3 overflow-hidden text-ellipsis">
                     <Link href={`/article/${sidebarItem1.slug}`}>
                       {sidebarItem1.title}
                     </Link>
@@ -415,7 +403,7 @@ export const LifestyleCategorySection: React.FC = () => {
                     />
                   </Link>
                   {renderHomeTags(sidebarItem2)}
-                  <h4 className="font-serif font-bold text-[14px] sm:text-[15px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-1">
+                  <h4 className="font-serif font-bold text-[14px] sm:text-[15px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-1 line-clamp-3 overflow-hidden text-ellipsis">
                     <Link href={`/article/${sidebarItem2.slug}`}>
                       {sidebarItem2.title}
                     </Link>
@@ -448,7 +436,7 @@ export const LifestyleCategorySection: React.FC = () => {
                   />
                 </Link>
                 {renderHomeTags(sidebarItem3)}
-                <h4 className="font-serif font-bold text-[14px] sm:text-[15px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-1">
+                <h4 className="font-serif font-bold text-[14px] sm:text-[15px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-1 line-clamp-3 overflow-hidden text-ellipsis">
                   <Link href={`/article/${sidebarItem3.slug}`}>
                     {sidebarItem3.title}
                   </Link>
@@ -480,7 +468,7 @@ export const LifestyleCategorySection: React.FC = () => {
                   />
                 </Link>
                 {renderHomeTags(sidebarItem4)}
-                <h4 className="font-serif font-bold text-[14px] sm:text-[15px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-1">
+                <h4 className="font-serif font-bold text-[14px] sm:text-[15px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-1 line-clamp-3 overflow-hidden text-ellipsis">
                   <Link href={`/article/${sidebarItem4.slug}`}>
                     {sidebarItem4.title}
                   </Link>

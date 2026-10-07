@@ -79,13 +79,7 @@ export const MarketTickerBar: React.FC = () => {
             {markets.map((item) => (
               <div
                 key={item.symbol}
-                className={`flex items-center space-x-1.5 text-[11px] font-sans transition-all duration-300 px-1 py-0.5 rounded ${
-                  item.flash === "up"
-                    ? "bg-emerald-100 text-emerald-800"
-                    : item.flash === "down"
-                    ? "bg-rose-100 text-rose-800"
-                    : ""
-                }`}
+                className="flex items-center space-x-1.5 text-[11px] font-sans px-1 py-0.5"
               >
                 <span className="font-semibold text-black">{item.symbol}</span>
                 <span className="font-semibold text-black">
