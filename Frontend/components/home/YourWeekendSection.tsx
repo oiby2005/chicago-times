@@ -167,7 +167,7 @@ export const YourWeekendSection: React.FC = () => {
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               />
             </Link>
-            <h4 className="font-serif font-bold text-[17px] sm:text-[19px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-1.5">
+            <h4 className="font-serif font-bold text-[17px] sm:text-[19px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-1.5" style={{ fontFamily: "Georgia, serif" }}>
               <Link href={`/article/${rightTop.slug}`}>
                 {rightTop.title}
               </Link>
@@ -185,7 +185,7 @@ export const YourWeekendSection: React.FC = () => {
           {/* Bottom Story (Position 3) */}
           <article className="flex-1 flex flex-col justify-between">
             <div>
-              <h4 className="font-serif font-bold text-[17px] sm:text-[19px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-1.5">
+              <h4 className="font-serif font-bold text-[17px] sm:text-[19px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-1.5" style={{ fontFamily: "Georgia, serif" }}>
                 <Link href={`/article/${rightBottom.slug}`}>
                   {rightBottom.title}
                 </Link>

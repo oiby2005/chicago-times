@@ -118,12 +118,15 @@ export const PoliticsCategorySection: React.FC = () => {
   return (
     <div className="w-full font-sans select-none pt-0 pb-2 my-0">
       {/* Section Title */}
-      <div className="mb-3">
-        <h2 className="font-serif font-bold text-[24px] sm:text-[28px] text-[#111111] tracking-tight leading-none">
+      <div className="flex items-center space-x-2 pb-2 mb-3 border-b border-dashed border-[#CCCCCC]">
+        <h2 className="font-serif font-bold text-[24px] sm:text-[28px] text-[#8b6f37] tracking-tight leading-none">
           <Link href="/politics" className="hover:underline">
             Politics
           </Link>
         </h2>
+        <div className="w-6 h-6 rounded-full bg-[#faf6ee] flex items-center justify-center text-[#8b6f37] cursor-pointer hover:bg-[#f3edd9] translate-y-[1px]">
+          <span className="text-[14px] font-bold leading-none">›</span>
+        </div>
       </div>
 
       {/* 3-Column Grid */}
@@ -177,7 +180,7 @@ export const PoliticsCategorySection: React.FC = () => {
               />
             </Link>
           )}
-          <h3 className="font-serif font-bold text-[17px] sm:text-[18px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-1.5">
+          <h3 className="font-serif font-bold text-[17px] sm:text-[18px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-1.5" style={{ fontFamily: "Georgia, serif" }}>
             <Link href={`/article/${col2.slug}`}>
               {col2.title}
             </Link>
@@ -196,7 +199,7 @@ export const PoliticsCategorySection: React.FC = () => {
         <div className="pl-0 md:pl-4 pt-4 md:pt-0 flex flex-col justify-start">
           {/* Top Story */}
           <article className="pb-2.5 mb-2.5 border-b border-dashed border-[#CCCCCC]">
-            <h4 className="font-serif font-bold text-[17px] sm:text-[18px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-1.5">
+            <h4 className="font-serif font-bold text-[17px] sm:text-[18px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-1.5" style={{ fontFamily: "Georgia, serif" }}>
               <Link href={`/article/${col3Top.slug}`}>
                 {col3Top.title}
               </Link>
@@ -213,7 +216,7 @@ export const PoliticsCategorySection: React.FC = () => {
 
           {/* Bottom Story */}
           <article className="pt-0">
-            <h4 className="font-serif font-bold text-[17px] sm:text-[18px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-1.5">
+            <h4 className="font-serif font-bold text-[17px] sm:text-[18px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-1.5" style={{ fontFamily: "Georgia, serif" }}>
               <Link href={`/article/${col3Bottom.slug}`}>
                 {col3Bottom.title}
               </Link>

@@ -1,5 +1,41 @@
 [
   {
+    "id": "article_slot_1",
+    "slotName": "Article Page ad 01",
+    "dimension": "300x300",
+    "placementGroup": "Article",
+    "description": "Displayed inside the right sidebar of all article view pages (Ad Slot 1).",
+    "active": true,
+    "actionType": "External Link (URL)",
+    "targetUrl": "https://www.wsj.com/",
+    "selectedArticleSlug": "",
+    "imageUrl": "https://f005.backblazeb2.com/file/timeschicago/ads/ad_article_slot_1_1790858438834.jpeg"
+  },
+  {
+    "id": "article_slot_2",
+    "slotName": "Article Page ad 02",
+    "dimension": "300x300",
+    "placementGroup": "Article",
+    "description": "Displayed inside the right sidebar of all article view pages (Ad Slot 2).",
+    "active": true,
+    "actionType": "External Link (URL)",
+    "targetUrl": "https://www.wsj.com/",
+    "selectedArticleSlug": "",
+    "imageUrl": "https://f005.backblazeb2.com/file/timeschicago/ads/ad_article_slot_2_1790858454448.jpeg"
+  },
+  {
+    "id": "article_slot_3",
+    "slotName": "Article Page ad 03",
+    "dimension": "300x300",
+    "placementGroup": "Article",
+    "description": "Displayed inside the right sidebar of all article view pages (Ad Slot 3).",
+    "active": true,
+    "actionType": "External Link (URL)",
+    "targetUrl": "https://www.wsj.com/",
+    "selectedArticleSlug": "",
+    "imageUrl": "https://f005.backblazeb2.com/file/timeschicago/ads/ad_article_slot_3_1790858473049.jpeg"
+  },
+  {
     "id": "author_slot_1",
     "slotName": "Writer Page ad 1",
     "dimension": "300x250",
@@ -10,6 +46,18 @@
     "targetUrl": "https://www.wsj.com/",
     "selectedArticleSlug": "1788609863929",
     "imageUrl": "https://f005.backblazeb2.com/file/timeschicago/ads/ad_author_slot_1_1789033222192.jpeg"
+  },
+  {
+    "id": "billionaire_slot_1",
+    "slotName": "Billionaire Page ad 01",
+    "dimension": "970x300",
+    "placementGroup": "Billionaire",
+    "description": "Displayed directly below the 'See List' button on the World's Billionaires List page.",
+    "active": false,
+    "actionType": "External Link (URL)",
+    "targetUrl": "https://www.wsj.com/",
+    "selectedArticleSlug": "",
+    "imageUrl": "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?fm=webp&fit=crop&w=300&h=200&q=80"
   },
   {
     "id": "cat_slot_1",
@@ -120,42 +168,63 @@
     "imageUrl": "https://f005.backblazeb2.com/file/timeschicago/ads/ad_hp_slot_7_1789033130582.jpeg"
   },
   {
-    "id": "article_slot_1",
-    "slotName": "Article Page ad 01",
-    "dimension": "300x300",
-    "placementGroup": "Article",
-    "description": "Displayed inside the right sidebar of all article view pages (Ad Slot 1).",
-    "active": true,
+    "id": "billionaire_slot_2",
+    "slotName": "Billionaire Profile Sidebar Top Ad",
+    "dimension": "300x250",
+    "placementGroup": "Billionaire",
+    "description": "Displayed inside the right sidebar below the top profile photo.",
+    "active": false,
     "actionType": "External Link (URL)",
     "targetUrl": "https://www.wsj.com/",
     "selectedArticleSlug": "",
-    "imageUrl": "https://f005.backblazeb2.com/file/timeschicago/ads/ad_article_slot_1_1790858438834.jpeg",
-    "fileName": "300 x 300.jpg"
+    "imageUrl": "https://images.unsplash.com/photo-1557804506-669a67965ba0?fm=webp&fit=crop&w=300&h=250&q=80"
   },
   {
-    "id": "article_slot_2",
-    "slotName": "Article Page ad 02",
-    "dimension": "300x300",
-    "placementGroup": "Article",
-    "description": "Displayed inside the right sidebar of all article view pages (Ad Slot 2).",
-    "active": true,
+    "id": "billionaire_slot_3",
+    "slotName": "Billionaire Profile Sticky Ad 01",
+    "dimension": "300x250",
+    "placementGroup": "Billionaire",
+    "description": "Displayed in right sidebar, sticky until bottom edge of Other Billionaires section.",
+    "active": false,
     "actionType": "External Link (URL)",
     "targetUrl": "https://www.wsj.com/",
     "selectedArticleSlug": "",
-    "imageUrl": "https://f005.backblazeb2.com/file/timeschicago/ads/ad_article_slot_2_1790858454448.jpeg",
-    "fileName": "300 x 320.jpg"
+    "imageUrl": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?fm=webp&fit=crop&w=300&h=250&q=80"
   },
   {
-    "id": "article_slot_3",
-    "slotName": "Article Page ad 03",
-    "dimension": "300x300",
-    "placementGroup": "Article",
-    "description": "Displayed inside the right sidebar of all article view pages (Ad Slot 3).",
-    "active": true,
+    "id": "billionaire_slot_4",
+    "slotName": "Billionaire Profile Sticky Ad 02",
+    "dimension": "300x250",
+    "placementGroup": "Billionaire",
+    "description": "Displayed in right sidebar, sticky until bottom edge of the middle inline Google ad in More From Times Chicago.",
+    "active": false,
     "actionType": "External Link (URL)",
     "targetUrl": "https://www.wsj.com/",
     "selectedArticleSlug": "",
-    "imageUrl": "https://f005.backblazeb2.com/file/timeschicago/ads/ad_article_slot_3_1790858473049.jpeg",
-    "fileName": "300x 300.jpg"
+    "imageUrl": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?fm=webp&fit=crop&w=300&h=250&q=80"
+  },
+  {
+    "id": "billionaire_slot_5",
+    "slotName": "Billionaire Profile Sticky Ad 03",
+    "dimension": "300x300",
+    "placementGroup": "Billionaire",
+    "description": "Displayed in right sidebar, sticky until bottom edge of the entire main content section.",
+    "active": false,
+    "actionType": "External Link (URL)",
+    "targetUrl": "https://www.wsj.com/",
+    "selectedArticleSlug": "",
+    "imageUrl": "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?fm=webp&fit=crop&w=300&h=300&q=80"
+  },
+  {
+    "id": "billionaire_profile_inline_ad",
+    "slotName": "Billionaire Profile Middle Inline Ad",
+    "dimension": "728x90",
+    "placementGroup": "Billionaire",
+    "description": "Displayed horizontally in the middle of More From Times Chicago section on Billionaire Profile view pages.",
+    "active": false,
+    "actionType": "External Link (URL)",
+    "targetUrl": "https://www.wsj.com/",
+    "selectedArticleSlug": "",
+    "imageUrl": "https://images.unsplash.com/photo-1557804506-669a67965ba0?fm=webp&fit=crop&w=728&h=90&q=80"
   }
 ]

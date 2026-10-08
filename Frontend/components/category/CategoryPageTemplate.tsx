@@ -10,6 +10,7 @@ import StickySubscribeBar from "@/components/ui/StickySubscribeBar";
 import AdPlaceholder from "@/components/ui/AdPlaceholder";
 import { getAuthorForArticle } from "@/data/authors";
 import { getRelativeTime } from "@/lib/relativeTime";
+import { getArticleViews } from "@/lib/viewTracker";
 
 interface CategoryPageTemplateProps {
   categoryTitle?: string;
@@ -311,12 +312,19 @@ export default function CategoryPageTemplate({
     return moreNewsAll.slice(start, start + itemsPerPage);
   }, [moreNewsAll, currentPage]);
 
-  // Requirement 4: For Trending in News, take the FIRST FIVE articles of More News section!
+  // Trending in Category: Top 5 most opened / most read articles in this category sorted by view count
   const trendingArticles = useMemo(() => {
-    const first5OfMore = moreNewsAll.slice(0, 5);
-    if (first5OfMore.length >= 5) return first5OfMore;
-    return [...first5OfMore, ...allCategoryArticles.slice(0, 5 - first5OfMore.length)];
-  }, [moreNewsAll, allCategoryArticles]);
+    const sorted = [...allCategoryArticles].map((item) => {
+      const v = getArticleViews(item.slug || item.id);
+      return {
+        ...item,
+        viewsCount: v,
+        views: `${v} views since publication`,
+      };
+    }).sort((a, b) => b.viewsCount - a.viewsCount);
+
+    return sorted.slice(0, 5);
+  }, [allCategoryArticles]);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {

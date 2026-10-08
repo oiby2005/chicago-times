@@ -122,7 +122,7 @@ export const RecentAllCategoriesSidebar: React.FC<RecentAllCategoriesSidebarProp
       {/* Sidebar Header */}
       <div className="border-b border-dashed border-[#CCCCCC] pb-1.5 mb-4">
         <h3 className="font-sans font-bold text-[12px] tracking-wider uppercase text-[#111111]">
-          Recent Article
+          Recent Articles
         </h3>
       </div>
 

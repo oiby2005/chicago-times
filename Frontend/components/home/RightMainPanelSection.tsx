@@ -86,7 +86,7 @@ export const RightMainPanelSection: React.FC = () => {
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             />
           </Link>
-          <h3 className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.2] text-[#111111] hover:text-[#333333] hover:underline cursor-pointer">
+          <h3 className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.2] text-[#111111] hover:text-[#333333] hover:underline cursor-pointer" style={{ fontFamily: "Georgia, serif" }}>
             <Link href={`/article/${article.slug}`}>
               {article.title}
             </Link>

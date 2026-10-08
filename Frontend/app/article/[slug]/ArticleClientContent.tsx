@@ -23,6 +23,7 @@ import ShareCardModal from "@/components/article/ShareCardModal";
 import { getAuthorForArticle } from "@/data/authors";
 import { ensureWebpUrl, migrateLocalStorageToWebP } from "@/lib/webpConverter";
 import { getRelativeTime, getFormattedDateTime } from "@/lib/relativeTime";
+import { recordArticleView } from "@/lib/viewTracker";
 
 interface ArticleClientContentProps {
   slug: string;
@@ -32,9 +33,46 @@ interface ArticleClientContentProps {
 export default function ArticleClientContent({ slug, initialArticle }: ArticleClientContentProps) {
   const [customPost, setCustomPost] = useState<any>(null);
   const [isMainShareOpen, setIsMainShareOpen] = useState(false);
+  const [showNotificationAlert, setShowNotificationAlert] = useState(false);
   const [fontSize, setFontSize] = useState<"sm" | "md" | "lg">("md");
   const [headlinePassed, setHeadlinePassed] = useState(false);
+  const [isStickyHeader, setIsStickyHeader] = useState(false);
   const headlineRef = React.useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && slug) {
+      recordArticleView(slug);
+    }
+  }, [slug]);
+
+  useEffect(() => {
+    const handleScrollSticky = () => {
+      if (window.scrollY > 220) {
+        setIsStickyHeader(true);
+      } else {
+        setIsStickyHeader(false);
+      }
+    };
+    window.addEventListener("scroll", handleScrollSticky);
+    handleScrollSticky();
+    return () => window.removeEventListener("scroll", handleScrollSticky);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const dismissed = localStorage.getItem("wsj_notification_dismissed");
+      if (!dismissed) {
+        setShowNotificationAlert(true);
+      }
+    }
+  }, []);
+
+  const handleDismissNotification = () => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("wsj_notification_dismissed", "true");
+    }
+    setShowNotificationAlert(false);
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -177,6 +215,51 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
       <div>
         {/* Main Header & Navigation */}
         <Header />
+
+        {/* Top Push Notification Alert Floating Card (Image 1) */}
+        {showNotificationAlert && (
+          <div
+            className={`fixed right-6 z-50 max-w-sm bg-[#FAF8F5] border border-[#E5E0D5] shadow-2xl p-4 font-sans text-xs text-[#1e293b] transition-all duration-200 ${
+              headlinePassed
+                ? "top-[48px]"
+                : isStickyHeader
+                ? "top-[92px]"
+                : "top-[145px]"
+            }`}
+          >
+            <div className="flex items-start space-x-3">
+              <div className="flex-1 min-w-0">
+                <p className="font-bold text-xs text-[#0f172a] mb-1">Stay updated with Times Chicago</p>
+                <p className="text-[11.5px] text-[#475569] leading-relaxed mb-3">
+                  We’d like to send you notifications for the latest breaking news and market updates.
+                </p>
+                <div className="flex items-center space-x-3">
+                  <Link
+                    href="/signup"
+                    onClick={handleDismissNotification}
+                    className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-bold px-3 py-1.5 rounded-none text-xs transition-colors cursor-pointer"
+                  >
+                    Sign Up
+                  </Link>
+                  <button
+                    onClick={handleDismissNotification}
+                    className="text-[#64748b] hover:text-[#0f172a] text-xs font-semibold underline transition-colors cursor-pointer"
+                  >
+                    Dismiss
+                  </button>
+                </div>
+              </div>
+              <button
+                onClick={handleDismissNotification}
+                className="text-[#94a3b8] hover:text-[#0f172a] p-1 leading-none text-sm cursor-pointer"
+                aria-label="Close notification"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        )}
+
         <StickyHeaderBar visible={!headlinePassed} />
 
         {/* Sticky Article Scroll Navbar (Appears after scrolling past article title) */}
@@ -204,7 +287,7 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
                 <div className="flex items-center space-x-3 mb-3">
                   <Link
                     href={`/${category.toLowerCase().replace(/\s+/g, "-")}`}
-                    className="text-[13px] font-serif font-playfair font-bold text-[#666666] hover:text-[#111111] hover:underline tracking-widest uppercase cursor-pointer transition-colors"
+                    className="text-[13px] font-sans font-bold text-[#505e70] hover:text-[#111111] hover:underline tracking-wider uppercase cursor-pointer transition-colors"
                   >
                     {category}
                   </Link>
@@ -224,9 +307,9 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
 
                 {/* Author Byline & Share + Bookmark Icons */}
                 <div className="pt-2 pb-4 border-b border-dashed border-[#CCCCCC]">
-                  <div className="font-sans flex items-center gap-3.5 flex-wrap">
-                    {/* Writer's Square Headshot Profile Image */}
-                    <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-none overflow-hidden shrink-0 border border-gray-300 shadow-2xs bg-gray-100 flex items-center justify-center">
+                  <div className="font-sans flex items-start justify-start gap-3 select-none">
+                    {/* Writer's Profile Image - Height aligned to cover bottom of date line */}
+                    <div className="relative w-[56px] h-[56px] sm:w-[60px] sm:h-[60px] rounded-none overflow-hidden shrink-0 border border-gray-300 shadow-2xs bg-gray-100 flex items-center justify-center">
                       {authorObj.image ? (
                         <img
                           src={authorObj.image}
@@ -241,8 +324,8 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
                     </div>
 
                     {/* Writer Name + Inline Share & Bookmark Icons + Published Date */}
-                    <div>
-                      <div className="text-[14px] font-bold text-[#111111] leading-tight flex items-center gap-2 flex-wrap">
+                    <div className="flex flex-col justify-between h-[56px] sm:h-[60px]">
+                      <div className="text-[14px] font-bold text-[#111111] leading-none flex items-center gap-2">
                         <span>
                           By{" "}
                           <Link
@@ -258,10 +341,10 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
                             href={authorObj.linkedinUrl}
                             target="_blank"
                             rel="noreferrer"
-                            className="inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-none hover:opacity-90 transition-opacity cursor-pointer ml-1 shrink-0"
+                            className="inline-flex items-center justify-center w-8 h-8 rounded-none hover:opacity-90 transition-opacity cursor-pointer shrink-0"
                             title={`${authorObj.name}'s LinkedIn Profile`}
                           >
-                            <svg className="w-7 h-7 sm:w-8 sm:h-8 rounded-none" viewBox="0 0 24 24">
+                            <svg className="w-8 h-8 rounded-none" viewBox="0 0 24 24">
                               <rect width="24" height="24" fill="#0077b5" rx="0" />
                               <path
                                 d="M8 19H5V8h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3V8h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"
@@ -276,7 +359,7 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
                           <button
                             type="button"
                             onClick={() => setIsMainShareOpen(!isMainShareOpen)}
-                            className="inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-none border border-[#cbd5e1] bg-white hover:bg-slate-100 text-[#334155] hover:text-[#0f172a] transition-colors cursor-pointer shadow-2xs ml-1"
+                            className="inline-flex items-center justify-center w-8 h-8 rounded-none border border-[#cbd5e1] bg-white hover:bg-slate-100 text-[#334155] hover:text-[#0f172a] transition-colors cursor-pointer shadow-2xs"
                             title="Share Article"
                             aria-label="Share Article"
                             suppressHydrationWarning
@@ -299,7 +382,7 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
                         <ArticleAudioReader title={title} deck={deck} bodyContent={bodyHtml || undefined} />
                       </div>
 
-                      <div className="text-[13.5px] font-semibold text-[#555555] leading-tight mt-1">
+                      <div className="text-[13.5px] font-semibold text-[#555555] leading-none">
                         {publishedDate}
                       </div>
                     </div>
@@ -328,10 +411,14 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
                 {bodyHtml ? (
                   <div
                     className="article-body-content font-serif text-[17px] sm:text-[18px] text-[#1a1a1a] leading-[1.75] space-y-5 pt-3 w-full clear-both block"
+                    style={{ fontFamily: "Exchange, Georgia, 'Source Serif 4', serif" }}
                     dangerouslySetInnerHTML={{ __html: bodyHtml }}
                   />
                 ) : (
-                  <div className="font-serif text-[17px] sm:text-[18px] text-[#1a1a1a] leading-[1.75] space-y-5 pt-3 w-full clear-both block">
+                  <div
+                    className="article-body-content font-serif text-[17px] sm:text-[18px] text-[#1a1a1a] leading-[1.75] space-y-5 pt-3 w-full clear-both block"
+                    style={{ fontFamily: "Exchange, Georgia, 'Source Serif 4', serif" }}
+                  >
                     <p>Joe Biden’s health has taken a more serious turn.</p>
                     <p>
                       In an interview with the BBC on{" "}
@@ -357,6 +444,30 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
                   </div>
                 )}
 
+                {/* Middle In-Article Google Ad Placeholder */}
+                <div className="my-8 py-5 px-4 border-y border-[#e2e8f0] text-center bg-[#fafafa] flex flex-col items-center justify-center clear-both w-full rounded-none">
+                  <span className="text-[10px] uppercase font-sans tracking-widest text-[#94a3b8] font-bold mb-2">Advertisement</span>
+                  
+                  {/* Google AdSense ins Tag */}
+                  <ins className="adsbygoogle"
+                       style={{ display: "block", textAlign: "center", minWidth: "250px", minHeight: "90px" }}
+                       data-ad-layout="in-article"
+                       data-ad-format="fluid"
+                       data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+                       data-ad-slot="XXXXXXXXXX"
+                       data-ad-test="on"></ins>
+
+                  {/* Localhost Development Visual Test Box */}
+                  <div className="mt-2 w-full max-w-lg border border-dashed border-[#94a3b8] bg-[#f1f5f9] p-4 rounded text-center">
+                    <p className="font-sans text-xs font-bold text-[#1e293b]">
+                      [ Google AdSense Banner Slot - Localhost Test Preview ]
+                    </p>
+                    <p className="font-sans text-[11px] text-[#64748b] mt-1">
+                      Format: Fluid In-Article Ad | Test Mode: <code className="bg-white px-1.5 py-0.5 rounded border border-gray-300 font-mono text-[10.5px]">data-ad-test=&quot;on&quot;</code>
+                    </p>
+                  </div>
+                </div>
+
                 {/* Hashtags Footer Row */}
                 {tags && tags.length > 0 && (
                   <div className="pt-6 border-b border-[#e5e7eb] pb-6 font-sans text-[11px] font-bold text-[#666666] tracking-wider flex flex-wrap gap-2 uppercase clear-both w-full">
@@ -371,8 +482,8 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
                   </div>
                 )}
 
-                {/* Section 4: Article Comments Section */}
-                <div className="w-full clear-both pt-8 mt-6 border-t border-gray-200">
+                {/* Section 4: Article Comments Section (Without top border) */}
+                <div className="w-full clear-both pt-6 mt-4">
                   <ArticleCommentsSection
                     articleSlug={slug}
                     commentCount={customPost?.commentsCount || staticArticle.commentCount || 0}
@@ -420,7 +531,7 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
               <div className="shrink-0 w-full sm:w-auto text-center sm:text-right">
                 <Link
                   href="/special-offer"
-                  className="w-full sm:w-auto inline-block bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-bold text-xs sm:text-sm px-7 py-3 rounded-none shadow-xs transition-colors cursor-pointer whitespace-nowrap text-center"
+                  className="w-full sm:w-auto inline-block bg-black hover:bg-gray-800 text-white font-bold text-xs sm:text-sm px-7 py-3 rounded-none shadow-xs transition-colors cursor-pointer whitespace-nowrap text-center"
                 >
                   Subscribe Now
                 </Link>

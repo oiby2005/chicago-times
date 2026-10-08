@@ -90,12 +90,12 @@ export const MarketsFinanceCategorySection: React.FC = () => {
     <div className="w-full font-sans select-none pt-4 pb-4">
       {/* Header */}
       <div className="flex items-center space-x-2 pb-3 mb-4 border-b border-dashed border-[#CCCCCC]">
-        <h2 className="font-serif font-bold text-[26px] sm:text-[30px] text-[#3A2371] tracking-tight">
+        <h2 className="font-serif font-bold text-[26px] sm:text-[30px] text-[#8b6f37] tracking-tight">
           <Link href="/markets" className="hover:underline">
             Markets & Finance
           </Link>
         </h2>
-        <div className="w-6 h-6 rounded-full bg-[#f4effc] flex items-center justify-center text-[#3A2371] cursor-pointer hover:bg-[#e9defa]">
+        <div className="w-6 h-6 rounded-full bg-[#faf6ee] flex items-center justify-center text-[#8b6f37] cursor-pointer hover:bg-[#f3edd9]">
           <span className="text-[14px] font-bold leading-none">›</span>
         </div>
       </div>
@@ -114,7 +114,7 @@ export const MarketsFinanceCategorySection: React.FC = () => {
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               />
             </Link>
-            <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
+            <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.2] text-[#111111] hover:underline cursor-pointer" style={{ fontFamily: "Georgia, serif" }}>
               <Link href={`/article/${art.slug}`}>
                 {art.title}
               </Link>

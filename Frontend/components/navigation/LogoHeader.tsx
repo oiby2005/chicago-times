@@ -151,8 +151,8 @@ export const LogoHeader: React.FC = () => {
   const editionLinks = [
     { label: "English Edition ▼", href: "#" },
     { label: "Opinions", href: "/opinion" },
-    { label: "Upcoming Entrepreneurs", href: "#" },
-    { label: "Top 20 Billionaires", href: "https://www.forbes.com/billionaires/" },
+    { label: "Upcoming Top 20", href: "#" },
+    { label: "World Billionaires", href: "/top-20-billionaires" },
   ];
 
   const isLoggedIn = currentUser !== null;
@@ -413,26 +413,24 @@ export const LogoHeader: React.FC = () => {
           {/* Gap between Opinions and | (0.4 cm = 15px) & | and Upcoming Entrepreneurs (0.4 cm = 15px) */}
           <span className="ml-[15px] mr-[15px] text-[#999999] font-light text-[10px] leading-none shrink-0">|</span>
 
-          {/* Upcoming Entrepreneurs */}
+          {/* Upcoming Top 20 */}
           <a
             href="/business/entrepreneurship"
             className="hover:underline cursor-pointer font-normal text-[#333333] hover:text-black leading-none"
           >
-            Upcoming Entrepreneurs
+            Upcoming Top 20
           </a>
 
-          {/* Gap between Upcoming Entrepreneurs and | (0.4 cm = 15px) & | and Top 20 Billionaires (0.4 cm = 15px) */}
+          {/* Gap between Upcoming Top 20 and | (0.4 cm = 15px) & | and World Billionaires (0.4 cm = 15px) */}
           <span className="ml-[15px] mr-[15px] text-[#999999] font-light text-[10px] leading-none shrink-0">|</span>
 
-          {/* Top 20 Billionaires */}
-          <a
-            href="https://www.forbes.com/billionaires/"
-            target="_blank"
-            rel="noopener noreferrer"
+          {/* World Billionaires */}
+          <Link
+            href="/top-20-billionaires"
             className="hover:underline cursor-pointer font-normal text-[#333333] hover:text-black leading-none"
           >
-            Top 20 Billionaires
-          </a>
+            World Billionaires
+          </Link>
         </div>
       </div>
 

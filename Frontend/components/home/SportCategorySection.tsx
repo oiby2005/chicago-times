@@ -287,7 +287,7 @@ export const SportCategorySection: React.FC = () => {
               </Link>
               <div className="flex flex-col justify-between flex-1">
                 {renderHomeTags(miniItem1)}
-                <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-1 line-clamp-3 overflow-hidden text-ellipsis">
+                <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-1 line-clamp-3 overflow-hidden text-ellipsis" style={{ fontFamily: "Georgia, serif" }}>
                   <Link href={`/article/${miniItem1.slug}`}>
                     {miniItem1.title}
                   </Link>
@@ -320,7 +320,7 @@ export const SportCategorySection: React.FC = () => {
               <div className="flex flex-col justify-between flex-1">
                 <div>
                   {renderHomeTags(miniItem2)}
-                  <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-1 line-clamp-3 overflow-hidden text-ellipsis">
+                  <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-1 line-clamp-3 overflow-hidden text-ellipsis" style={{ fontFamily: "Georgia, serif" }}>
                     <Link href={`/article/${miniItem2.slug}`}>
                       {miniItem2.title}
                     </Link>
@@ -361,7 +361,7 @@ export const SportCategorySection: React.FC = () => {
                     />
                   </Link>
                   {renderHomeTags(sidebarItem1)}
-                  <h4 className="font-serif font-bold text-[14px] sm:text-[15px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-1 line-clamp-3 overflow-hidden text-ellipsis">
+                  <h4 className="font-serif font-bold text-[14px] sm:text-[15px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-1 line-clamp-3 overflow-hidden text-ellipsis" style={{ fontFamily: "Georgia, serif" }}>
                     <Link href={`/article/${sidebarItem1.slug}`}>
                       {sidebarItem1.title}
                     </Link>
@@ -395,7 +395,7 @@ export const SportCategorySection: React.FC = () => {
                     />
                   </Link>
                   {renderHomeTags(sidebarItem2)}
-                  <h4 className="font-serif font-bold text-[14px] sm:text-[15px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-1 line-clamp-3 overflow-hidden text-ellipsis">
+                  <h4 className="font-serif font-bold text-[14px] sm:text-[15px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-1 line-clamp-3 overflow-hidden text-ellipsis" style={{ fontFamily: "Georgia, serif" }}>
                     <Link href={`/article/${sidebarItem2.slug}`}>
                       {sidebarItem2.title}
                     </Link>
@@ -428,7 +428,7 @@ export const SportCategorySection: React.FC = () => {
                   />
                 </Link>
                 {renderHomeTags(sidebarItem3)}
-                <h4 className="font-serif font-bold text-[14px] sm:text-[15px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-1 line-clamp-3 overflow-hidden text-ellipsis">
+                <h4 className="font-serif font-bold text-[14px] sm:text-[15px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-1 line-clamp-3 overflow-hidden text-ellipsis" style={{ fontFamily: "Georgia, serif" }}>
                   <Link href={`/article/${sidebarItem3.slug}`}>
                     {sidebarItem3.title}
                   </Link>
@@ -460,7 +460,7 @@ export const SportCategorySection: React.FC = () => {
                   />
                 </Link>
                 {renderHomeTags(sidebarItem4)}
-                <h4 className="font-serif font-bold text-[14px] sm:text-[15px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-1 line-clamp-3 overflow-hidden text-ellipsis">
+                <h4 className="font-serif font-bold text-[14px] sm:text-[15px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-1 line-clamp-3 overflow-hidden text-ellipsis" style={{ fontFamily: "Georgia, serif" }}>
                   <Link href={`/article/${sidebarItem4.slug}`}>
                     {sidebarItem4.title}
                   </Link>

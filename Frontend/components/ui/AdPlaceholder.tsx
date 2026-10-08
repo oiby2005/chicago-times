@@ -7,7 +7,7 @@ interface AdSlotConfig {
   id: string;
   slotName: string;
   dimension: string;
-  placementGroup: "Homepage" | "Category" | "Author";
+  placementGroup: "Homepage" | "Category" | "Author" | "Article" | "Billionaire";
   description: string;
   active: boolean;
   actionType: string;
@@ -38,6 +38,12 @@ const DEFAULT_SLOT_DIMENSIONS: Record<string, { width: string; height: string; r
   article_slot_1: { width: "w-full max-w-full", height: "h-[300px]", resolution: "300 × 300" },
   article_slot_2: { width: "w-full max-w-full", height: "h-[300px]", resolution: "300 × 300" },
   article_slot_3: { width: "w-full max-w-full", height: "h-[300px]", resolution: "300 × 300" },
+  billionaire_slot_1: { width: "w-full max-w-[970px]", height: "h-[300px]", resolution: "970 × 300" },
+  billionaire_slot_2: { width: "w-full max-w-[300px]", height: "h-[250px]", resolution: "300 × 250" },
+  billionaire_slot_3: { width: "w-full max-w-[300px]", height: "h-[250px]", resolution: "300 × 250" },
+  billionaire_slot_4: { width: "w-full max-w-[300px]", height: "h-[250px]", resolution: "300 × 250" },
+  billionaire_slot_5: { width: "w-full max-w-[300px]", height: "h-[300px]", resolution: "300 × 300" },
+  billionaire_profile_inline_ad: { width: "w-full max-w-[728px]", height: "h-[90px]", resolution: "728 × 90" },
 };
 
 const SLOT_TITLE_MAP: Record<string, string> = {
@@ -54,6 +60,12 @@ const SLOT_TITLE_MAP: Record<string, string> = {
   article_slot_1: "Article Page ad 01",
   article_slot_2: "Article Page ad 02",
   article_slot_3: "Article Page ad 03",
+  billionaire_slot_1: "Billionaire Page ad 01",
+  billionaire_slot_2: "Billionaire Profile Sidebar Top Ad",
+  billionaire_slot_3: "Billionaire Profile Sticky Ad 01",
+  billionaire_slot_4: "Billionaire Profile Sticky Ad 02",
+  billionaire_slot_5: "Billionaire Profile Sticky Ad 03",
+  billionaire_profile_inline_ad: "Billionaire Profile Middle Inline Ad",
 };
 
 export const AdPlaceholder: React.FC<AdPlaceholderProps> = ({
@@ -73,6 +85,9 @@ export const AdPlaceholder: React.FC<AdPlaceholderProps> = ({
         const parsed: AdSlotConfig[] = JSON.parse(stored);
         const match = parsed.find((s) => s.id === slotId);
         if (match) {
+          if (slotId === "billionaire_slot_1") {
+            match.dimension = "970x300";
+          }
           setSlot(match);
           return;
         }
@@ -101,7 +116,11 @@ export const AdPlaceholder: React.FC<AdPlaceholderProps> = ({
   let effectiveHeight = height;
   let effectiveResolution = resolution;
 
-  const slotDim = slot?.dimension || (slotId ? DEFAULT_SLOT_DIMENSIONS[slotId]?.resolution?.replace(" × ", "x") : null);
+  let slotDim = slot?.dimension || (slotId ? DEFAULT_SLOT_DIMENSIONS[slotId]?.resolution?.replace(" × ", "x") : null);
+
+  if (slotId === "billionaire_slot_1") {
+    slotDim = "970x300";
+  }
 
   if (slotDim && slotDim.includes("x")) {
     const [wStr, hStr] = slotDim.toLowerCase().split("x");
@@ -121,9 +140,16 @@ export const AdPlaceholder: React.FC<AdPlaceholderProps> = ({
     effectiveResolution = defaultInfo.resolution;
   }
 
+  if (slotId === "billionaire_slot_1") {
+    effectiveHeight = "h-[300px]";
+    effectiveResolution = "970 × 300";
+  }
+
   // Aspect ratio styling from slot dimension
   let aspectRatioStyle: React.CSSProperties = {};
-  if (slotDim && slotDim.includes("x")) {
+  if (slotId === "billionaire_slot_1") {
+    aspectRatioStyle = { width: "100%", maxWidth: "970px", height: "300px", aspectRatio: "970 / 300" };
+  } else if (slotDim && slotDim.includes("x")) {
     const [wStr, hStr] = slotDim.toLowerCase().split("x");
     const w = parseInt(wStr, 10);
     const h = parseInt(hStr, 10);
@@ -177,11 +203,11 @@ export const AdPlaceholder: React.FC<AdPlaceholderProps> = ({
   }
 
   return (
-    <div className={`flex flex-col select-none w-full ${className.includes("my-") ? "" : "my-3 mb-4"} ${className}`}>
+    <div className={`flex flex-col items-center justify-center select-none w-full ${className.includes("my-") ? "" : "my-3 mb-4"} ${className}`}>
       {/* Empty Banner Container with title and resolution size */}
       <div
         style={aspectRatioStyle}
-        className={`${width} ${effectiveHeight} flex-1 bg-[#f5f5f5] border border-dashed border-[#cccccc] flex flex-col items-center justify-center text-center p-3 rounded-xs shadow-2xs transition-colors hover:bg-[#eaeaea] gap-1.5`}
+        className={`${width} ${effectiveHeight} mx-auto flex-1 bg-[#f5f5f5] border border-dashed border-[#cccccc] flex flex-col items-center justify-center text-center p-3 rounded-xs shadow-2xs transition-colors hover:bg-[#eaeaea] gap-1.5`}
       >
         {slotTitle && (
           <span className="text-[11px] font-sans font-extrabold text-[#0f172a] uppercase tracking-wider">

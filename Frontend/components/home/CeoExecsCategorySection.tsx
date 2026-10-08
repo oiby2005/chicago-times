@@ -153,7 +153,7 @@ export const CeoExecsCategorySection: React.FC = () => {
                   ))}
                 </div>
               )}
-              <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
+              <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.2] text-[#111111] hover:underline cursor-pointer" style={{ fontFamily: "Georgia, serif" }}>
                 <Link href={`/article/${art.slug}`}>
                   {art.title}
                 </Link>

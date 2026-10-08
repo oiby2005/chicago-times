@@ -112,11 +112,14 @@ export const WorldPoliticsCategorySection: React.FC = () => {
     <div className="w-full font-sans select-none pb-2 my-0">
       {/* Section Header */}
       <div className="flex items-center space-x-2 pb-3 mb-4 border-b border-dashed border-[#CCCCCC]">
-        <h2 className="font-serif font-bold text-[24px] sm:text-[28px] text-[#111111] tracking-tight">
+        <h2 className="font-serif font-bold text-[24px] sm:text-[28px] text-[#b82e2e] tracking-tight">
           <Link href="/world-politics" className="hover:underline">
             World Politics
           </Link>
         </h2>
+        <div className="w-6 h-6 rounded-full bg-[#fcf0f0] flex items-center justify-center text-[#b82e2e] cursor-pointer hover:bg-[#f7dede] translate-y-[3px]">
+          <span className="text-[14px] font-bold leading-none">›</span>
+        </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[0.4cm]">
         {articles.map((art) => {
@@ -164,7 +167,7 @@ export const WorldPoliticsCategorySection: React.FC = () => {
               )}
 
               {/* Title */}
-              <h3 className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.2] text-[#111111] hover:text-[#333333] hover:underline cursor-pointer">
+              <h3 className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.2] text-[#111111] hover:text-[#333333] hover:underline cursor-pointer" style={{ fontFamily: "Georgia, serif" }}>
                 <Link href={`/article/${art.slug}`}>
                   {art.title}
                 </Link>

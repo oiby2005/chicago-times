@@ -224,7 +224,7 @@ export const TopNetworkBar: React.FC = () => {
             type="button"
             onClick={() => handleScroll("right")}
             aria-label="Next market ticker"
-            className="hover:text-black cursor-pointer font-bold leading-none text-black hover:bg-gray-100 p-1 rounded transition-colors"
+            className="hover:text-black cursor-pointer font-bold leading-none text-black hover:bg-gray-100 p-1 pr-0 rounded transition-colors"
             suppressHydrationWarning
           >
             ›

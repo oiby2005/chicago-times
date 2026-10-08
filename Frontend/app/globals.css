@@ -1,3 +1,14 @@
+@import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda&family=Inter&family=Kumbh+Sans:wght@300;400;500&family=Playfair+Display:wght@700;800;900&family=Poppins:wght@400;500;600;700&family=Source+Serif+4:wght@700;800&display=swap');
+
+:root {
+  --font-playfair: 'Playfair Display', serif;
+  --font-sourceserif: 'Source Serif 4', serif;
+  --font-sans: 'Inter', sans-serif;
+  --font-bodoni: 'Bodoni Moda', serif;
+  --font-kumbh: 'Kumbh Sans', sans-serif;
+  --font-poppins: 'Poppins', sans-serif;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -83,23 +94,26 @@
   font-style: normal;
 }
 
-/* Exact WSJ Article Body Typography matching Image 2 (Exchange, Georgia, serif) for text paragraphs only */
+/* Exact WSJ Article Body Typography matching Billionaire Intro Paragraph (Exchange, Georgia, serif) for all article body elements on article pages */
 .editor-body-text,
+.editor-body-text *,
 .editor-body-text p,
 .editor-body-text span:not(figure span):not(.image-caption):not(.image-credit),
 .editor-body-text div:not(figure):not(figure div),
 .editor-reserve-font,
+.editor-reserve-font *,
 .editor-reserve-font p,
 .article-body-text,
+.article-body-text *,
 .article-body-text p,
 .article-body-content,
+.article-body-content *,
 .article-body-content p,
 .preview-body-text,
+.preview-body-text *,
 .preview-body-text p {
   font-family: Exchange, Georgia, 'Source Serif 4', var(--font-sourceserif), serif !important;
-  font-size: inherit !important;
   line-height: 1.75 !important;
-  font-weight: 400 !important;
   letter-spacing: normal !important;
   font-stretch: normal !important;
   color: #1a1a1a !important;

@@ -76,7 +76,9 @@ export default function AuthorClientContent() {
 
               {/* Right Column: Top Right Sidebar with Louis Vuitton Ad Banner */}
               <div className="lg:col-span-4 sticky top-6 pl-0 lg:pl-4 space-y-6">
-                {hasPublishedArticles && <MostReadSidebar />}
+                {hasPublishedArticles && (
+                  <MostReadSidebar authorName={authorData.name} authorEmail={authorData.email} />
+                )}
                 <LouisVuittonAdBanner />
               </div>
             </div>

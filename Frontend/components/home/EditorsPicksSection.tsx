@@ -273,7 +273,7 @@ export const EditorsPicksSection: React.FC = () => {
                 <div className="flex-1 flex flex-col justify-between h-full min-h-[100px] sm:min-h-[115px]">
                   <div>
                     {renderHomeTags(bottomCards[0])}
-                    <h4 className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.2] text-[#111111] hover:underline cursor-pointer line-clamp-3 overflow-hidden text-ellipsis">
+                    <h4 className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.2] text-[#111111] hover:underline cursor-pointer line-clamp-3 overflow-hidden text-ellipsis" style={{ fontFamily: "Georgia, serif" }}>
                       <Link href={`/article/${bottomCards[0].slug}`}>
                         {bottomCards[0].title}
                       </Link>
@@ -303,7 +303,7 @@ export const EditorsPicksSection: React.FC = () => {
                 <div className="flex-1 flex flex-col justify-between h-full min-h-[100px] sm:min-h-[115px]">
                   <div>
                     {renderHomeTags(bottomCards[1])}
-                    <h4 className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.2] text-[#111111] hover:underline cursor-pointer line-clamp-3 overflow-hidden text-ellipsis">
+                    <h4 className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.2] text-[#111111] hover:underline cursor-pointer line-clamp-3 overflow-hidden text-ellipsis" style={{ fontFamily: "Georgia, serif" }}>
                       <Link href={`/article/${bottomCards[1].slug}`}>
                         {bottomCards[1].title}
                       </Link>
@@ -339,7 +339,7 @@ export const EditorsPicksSection: React.FC = () => {
                       />
                     </Link>
                     {renderHomeTags(rightCards[0])}
-                    <h4 className="font-serif font-bold text-[14.5px] sm:text-[15px] leading-[1.2] text-[#111111] hover:underline cursor-pointer line-clamp-3 overflow-hidden text-ellipsis">
+                    <h4 className="font-serif font-bold text-[14.5px] sm:text-[15px] leading-[1.2] text-[#111111] hover:underline cursor-pointer line-clamp-3 overflow-hidden text-ellipsis" style={{ fontFamily: "Georgia, serif" }}>
                       <Link href={`/article/${rightCards[0].slug}`}>
                         {rightCards[0].title}
                       </Link>
@@ -370,7 +370,7 @@ export const EditorsPicksSection: React.FC = () => {
                       />
                     </Link>
                     {renderHomeTags(rightCards[2])}
-                    <h4 className="font-serif font-bold text-[14.5px] sm:text-[15px] leading-[1.2] text-[#111111] hover:underline cursor-pointer line-clamp-3 overflow-hidden text-ellipsis">
+                    <h4 className="font-serif font-bold text-[14.5px] sm:text-[15px] leading-[1.2] text-[#111111] hover:underline cursor-pointer line-clamp-3 overflow-hidden text-ellipsis" style={{ fontFamily: "Georgia, serif" }}>
                       <Link href={`/article/${rightCards[2].slug}`}>
                         {rightCards[2].title}
                       </Link>
@@ -400,7 +400,7 @@ export const EditorsPicksSection: React.FC = () => {
                     />
                   </Link>
                   {renderHomeTags(rightCards[1])}
-                  <h4 className="font-serif font-bold text-[14.5px] sm:text-[15px] leading-[1.2] text-[#111111] hover:underline cursor-pointer line-clamp-3 overflow-hidden text-ellipsis">
+                  <h4 className="font-serif font-bold text-[14.5px] sm:text-[15px] leading-[1.2] text-[#111111] hover:underline cursor-pointer line-clamp-3 overflow-hidden text-ellipsis" style={{ fontFamily: "Georgia, serif" }}>
                     <Link href={`/article/${rightCards[1].slug}`}>
                       {rightCards[1].title}
                     </Link>
@@ -429,7 +429,7 @@ export const EditorsPicksSection: React.FC = () => {
                     />
                   </Link>
                   {renderHomeTags(rightCards[3])}
-                  <h4 className="font-serif font-bold text-[14.5px] sm:text-[15px] leading-[1.2] text-[#111111] hover:underline cursor-pointer line-clamp-3 overflow-hidden text-ellipsis">
+                  <h4 className="font-serif font-bold text-[14.5px] sm:text-[15px] leading-[1.2] text-[#111111] hover:underline cursor-pointer line-clamp-3 overflow-hidden text-ellipsis" style={{ fontFamily: "Georgia, serif" }}>
                     <Link href={`/article/${rightCards[3].slug}`}>
                       {rightCards[3].title}
                     </Link>

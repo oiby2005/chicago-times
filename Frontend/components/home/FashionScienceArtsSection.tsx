@@ -135,13 +135,15 @@ export const FashionScienceArtsSection: React.FC = () => {
         
         {/* ==================== COLUMN 1: FASHION ==================== */}
         <div className="flex flex-col justify-start">
-          <div className="border-t-2 border-black pt-2 mb-3 flex items-center justify-between">
-            <h3 className="font-serif font-bold text-[20px] sm:text-[22px] text-[#111111] tracking-tight">
+          <div className="border-t-2 border-[#8b6f37] pt-2 mb-3 flex items-center justify-between">
+            <h3 className="font-serif font-bold text-[20px] sm:text-[22px] text-[#8b6f37] tracking-tight">
               <Link href="/fashion" className="hover:underline">
                 Fashion
               </Link>
             </h3>
-            <span className="font-sans font-bold text-[16px] text-[#111111] cursor-pointer">›</span>
+            <div className="w-5 h-5 rounded-full bg-[#faf6ee] flex items-center justify-center text-[#8b6f37] cursor-pointer hover:bg-[#f3edd9]">
+              <span className="text-[13px] font-bold leading-none">›</span>
+            </div>
           </div>
 
           {fashionItems[0] && (
@@ -158,7 +160,7 @@ export const FashionScienceArtsSection: React.FC = () => {
           )}
 
           {fashionItems[0] && (
-            <h4 className="font-serif font-bold text-[17px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-3">
+            <h4 className="font-serif font-bold text-[17px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-3" style={{ fontFamily: "Georgia, serif" }}>
               <Link href={`/article/${fashionItems[0].slug}`}>
                 {fashionItems[0].title}
               </Link>
@@ -167,7 +169,7 @@ export const FashionScienceArtsSection: React.FC = () => {
 
           {fashionItems[1] && (
             <div className="pt-1 pb-2">
-              <h5 className="font-serif font-bold text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
+              <h5 className="font-serif font-bold text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer" style={{ fontFamily: "Georgia, serif" }}>
                 <Link href={`/article/${fashionItems[1].slug}`}>
                   {fashionItems[1].title}
                 </Link>
@@ -177,7 +179,7 @@ export const FashionScienceArtsSection: React.FC = () => {
 
           {fashionItems[2] && (
             <div className="pt-1">
-              <h5 className="font-serif font-bold text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
+              <h5 className="font-serif font-bold text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer" style={{ fontFamily: "Georgia, serif" }}>
                 <Link href={`/article/${fashionItems[2].slug}`}>
                   {fashionItems[2].title}
                 </Link>
@@ -188,13 +190,15 @@ export const FashionScienceArtsSection: React.FC = () => {
 
         {/* ==================== COLUMN 2: SCIENCE ==================== */}
         <div className="flex flex-col justify-start">
-          <div className="border-t-2 border-black pt-2 mb-3 flex items-center justify-between">
-            <h3 className="font-serif font-bold text-[20px] sm:text-[22px] text-[#111111] tracking-tight">
+          <div className="border-t-2 border-[#1b7538] pt-2 mb-3 flex items-center justify-between">
+            <h3 className="font-serif font-bold text-[20px] sm:text-[22px] text-[#1b7538] tracking-tight">
               <Link href="/science" className="hover:underline">
                 Science
               </Link>
             </h3>
-            <span className="font-sans font-bold text-[16px] text-[#111111] cursor-pointer">›</span>
+            <div className="w-5 h-5 rounded-full bg-[#f0f7f2] flex items-center justify-center text-[#1b7538] cursor-pointer hover:bg-[#e1f0e5]">
+              <span className="text-[13px] font-bold leading-none">›</span>
+            </div>
           </div>
 
           {scienceItems[0] && (
@@ -211,7 +215,7 @@ export const FashionScienceArtsSection: React.FC = () => {
           )}
 
           {scienceItems[0] && (
-            <h4 className="font-serif font-bold text-[17px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-3">
+            <h4 className="font-serif font-bold text-[17px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-3" style={{ fontFamily: "Georgia, serif" }}>
               <Link href={`/article/${scienceItems[0].slug}`}>
                 {scienceItems[0].title}
               </Link>
@@ -220,7 +224,7 @@ export const FashionScienceArtsSection: React.FC = () => {
 
           {scienceItems[1] && (
             <div className="pt-1 pb-2">
-              <h5 className="font-serif font-bold text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
+              <h5 className="font-serif font-bold text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer" style={{ fontFamily: "Georgia, serif" }}>
                 <Link href={`/article/${scienceItems[1].slug}`}>
                   {scienceItems[1].title}
                 </Link>
@@ -230,7 +234,7 @@ export const FashionScienceArtsSection: React.FC = () => {
 
           {scienceItems[2] && (
             <div className="pt-1">
-              <h5 className="font-serif font-bold text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
+              <h5 className="font-serif font-bold text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer" style={{ fontFamily: "Georgia, serif" }}>
                 <Link href={`/article/${scienceItems[2].slug}`}>
                   {scienceItems[2].title}
                 </Link>
@@ -241,13 +245,15 @@ export const FashionScienceArtsSection: React.FC = () => {
 
         {/* ==================== COLUMN 3: ARTS ==================== */}
         <div className="flex flex-col justify-start">
-          <div className="border-t-2 border-black pt-2 mb-3 flex items-center justify-between">
-            <h3 className="font-serif font-bold text-[20px] sm:text-[22px] text-[#111111] tracking-tight">
+          <div className="border-t-2 border-[#b82e2e] pt-2 mb-3 flex items-center justify-between">
+            <h3 className="font-serif font-bold text-[20px] sm:text-[22px] text-[#b82e2e] tracking-tight">
               <Link href="/arts" className="hover:underline">
                 Arts
               </Link>
             </h3>
-            <span className="font-sans font-bold text-[16px] text-[#111111] cursor-pointer">›</span>
+            <div className="w-5 h-5 rounded-full bg-[#fcf0f0] flex items-center justify-center text-[#b82e2e] cursor-pointer hover:bg-[#f7dede]">
+              <span className="text-[13px] font-bold leading-none">›</span>
+            </div>
           </div>
 
           {artsItems[0] && (
@@ -264,7 +270,7 @@ export const FashionScienceArtsSection: React.FC = () => {
           )}
 
           {artsItems[0] && (
-            <h4 className="font-serif font-bold text-[17px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-3">
+            <h4 className="font-serif font-bold text-[17px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-3" style={{ fontFamily: "Georgia, serif" }}>
               <Link href={`/article/${artsItems[0].slug}`}>
                 {artsItems[0].title}
               </Link>
@@ -273,7 +279,7 @@ export const FashionScienceArtsSection: React.FC = () => {
 
           {artsItems[1] && (
             <div className="pt-1 pb-2">
-              <h5 className="font-serif font-bold text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
+              <h5 className="font-serif font-bold text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer" style={{ fontFamily: "Georgia, serif" }}>
                 <Link href={`/article/${artsItems[1].slug}`}>
                   {artsItems[1].title}
                 </Link>
@@ -283,7 +289,7 @@ export const FashionScienceArtsSection: React.FC = () => {
 
           {artsItems[2] && (
             <div className="pt-1">
-              <h5 className="font-serif font-bold text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
+              <h5 className="font-serif font-bold text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer" style={{ fontFamily: "Georgia, serif" }}>
                 <Link href={`/article/${artsItems[2].slug}`}>
                   {artsItems[2].title}
                 </Link>

@@ -173,7 +173,7 @@ export const PeopleToKnowSection: React.FC = () => {
         <div className="px-0 md:px-4 flex flex-col justify-between h-full border-r border-dashed border-[#CCCCCC]">
           <article className="pb-3 border-b border-dashed border-[#CCCCCC] flex-1 flex flex-col justify-between">
             <div>
-              <h4 className="font-serif font-bold text-[17px] sm:text-[18px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-1.5">
+              <h4 className="font-serif font-bold text-[17px] sm:text-[18px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-1.5" style={{ fontFamily: "Georgia, serif" }}>
                 <Link href={`/article/${centerTop.slug}`}>
                   {centerTop.title}
                 </Link>
@@ -200,7 +200,7 @@ export const PeopleToKnowSection: React.FC = () => {
         <div className="pl-0 md:pl-4 flex flex-col justify-between h-full">
           <article className="pb-3 border-b border-dashed border-[#CCCCCC] flex-1 flex flex-col justify-between">
             <div>
-              <h4 className="font-serif font-bold text-[17px] sm:text-[18px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-1.5">
+              <h4 className="font-serif font-bold text-[17px] sm:text-[18px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-1.5" style={{ fontFamily: "Georgia, serif" }}>
                 <Link href={`/article/${rightTop.slug}`}>
                   {rightTop.title}
                 </Link>
@@ -220,7 +220,7 @@ export const PeopleToKnowSection: React.FC = () => {
 
           <article className="pt-3 flex-1 flex flex-col justify-between">
             <div>
-              <h4 className="font-serif font-bold text-[17px] sm:text-[18px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-1.5">
+              <h4 className="font-serif font-bold text-[17px] sm:text-[18px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-1.5" style={{ fontFamily: "Georgia, serif" }}>
                 <Link href={`/article/${rightBottom.slug}`}>
                   {rightBottom.title}
                 </Link>

@@ -167,19 +167,28 @@ export const BusinessCategorySection: React.FC = () => {
         style={{ borderRight: "1.5px dashed #888070" }}
       >
         {/* Business Category Section Topic Header */}
-        <div className="pb-1 mb-1">
-          <h2 className="font-serif font-bold text-[24px] sm:text-[26px] lg:text-[28px] text-[#111111] leading-none tracking-tight">
+        <div className="flex items-center space-x-2 pb-2 mb-2">
+          <h2 className="font-serif font-bold text-[24px] sm:text-[26px] lg:text-[28px] text-[#1b7538] leading-none tracking-tight">
             <Link href="/business" className="hover:underline">
               Business
             </Link>
           </h2>
+          <div className="w-5 h-5 rounded-full bg-[#f0f7f2] flex items-center justify-center text-[#1b7538] cursor-pointer hover:bg-[#e1f0e5] translate-y-[3px]">
+            <span className="text-[13px] font-bold leading-none">›</span>
+          </div>
         </div>
 
         {/* Articles List with divide-y spacing between articles */}
         <div className="divide-y divide-dashed divide-[#888070]">
           {leftItems.map((art, idx) => (
             <article key={art.id} className={`py-3 ${idx === 0 ? "pt-0" : ""} ${idx === leftItems.length - 1 ? "pb-0" : ""}`}>
-              <h3 className={`font-serif font-bold text-[#111111] hover:text-[#333333] hover:underline cursor-pointer ${idx === 0 ? "text-[22px] sm:text-[24px] lg:text-[26px] leading-[1.12]" : "text-[17px] sm:text-[18px] lg:text-[19px] leading-[1.15]"}`} style={{ whiteSpace: art.customBreakTitle ? "pre-line" : "normal" }}>
+              <h3
+                className={`font-serif font-bold text-[#111111] hover:text-[#333333] hover:underline cursor-pointer ${idx === 0 ? "text-[22px] sm:text-[24px] lg:text-[26px] leading-[1.12]" : "text-[17px] sm:text-[18px] lg:text-[19px] leading-[1.15]"}`}
+                style={{
+                  whiteSpace: art.customBreakTitle ? "pre-line" : "normal",
+                  ...(idx > 0 ? { fontFamily: "Georgia, serif" } : {}),
+                }}
+              >
                 <Link href={`/article/${art.slug}`}>
                   {art.customBreakTitle || art.title}
                 </Link>
@@ -212,7 +221,7 @@ export const BusinessCategorySection: React.FC = () => {
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               />
             </Link>
-            <h2 className="font-serif font-bold text-[19px] sm:text-[20px] leading-[1.18] text-[#111111] hover:text-[#333333] hover:underline cursor-pointer">
+            <h2 className="font-serif font-bold text-[19px] sm:text-[20px] leading-[1.18] text-[#111111] hover:text-[#333333] hover:underline cursor-pointer" style={{ fontFamily: "Georgia, serif" }}>
               <Link href={`/article/${centerHeroItem.slug}`}>
                 {centerHeroItem.title}
               </Link>
@@ -240,7 +249,7 @@ export const BusinessCategorySection: React.FC = () => {
                 />
               </Link>
               <div>
-                <h3 className="font-serif font-bold text-[14.5px] sm:text-[15px] leading-[1.18] text-[#111111] hover:underline cursor-pointer">
+                <h3 className="font-serif font-bold text-[14.5px] sm:text-[15px] leading-[1.18] text-[#111111] hover:underline cursor-pointer" style={{ fontFamily: "Georgia, serif" }}>
                   <Link href={`/article/${art.slug}`}>
                     {art.title}
                   </Link>
@@ -261,7 +270,7 @@ export const BusinessCategorySection: React.FC = () => {
           {rightItems.map((art, idx) => (
             <article key={art.id} className={`py-2.5 ${idx === 0 ? "pt-0" : ""} flex items-start justify-between space-x-3`}>
               <div className="flex-1">
-                <h3 className="font-serif font-bold text-[17px] sm:text-[18px] lg:text-[18.5px] leading-[1.15] text-[#111111] hover:underline cursor-pointer">
+                <h3 className="font-serif font-bold text-[17px] sm:text-[18px] lg:text-[18.5px] leading-[1.15] text-[#111111] hover:underline cursor-pointer" style={{ fontFamily: "Georgia, serif" }}>
                   <Link href={`/article/${art.slug}`}>
                     {art.title}
                   </Link>

@@ -316,7 +316,7 @@ export const EightCategoryGridSection: React.FC = () => {
             )}
 
             {item.articles[0] && (
-              <h4 className="font-serif font-bold text-[17px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-3">
+              <h4 className="font-serif font-bold text-[17px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-3" style={{ fontFamily: "Georgia, serif" }}>
                 <Link href={`/article/${item.articles[0].slug}`}>
                   {item.articles[0].title}
                 </Link>
@@ -325,7 +325,7 @@ export const EightCategoryGridSection: React.FC = () => {
 
             {item.articles[1] && (
               <div className="pt-1 pb-2">
-                <h5 className="font-serif font-bold text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
+                <h5 className="font-serif font-bold text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer" style={{ fontFamily: "Georgia, serif" }}>
                   <Link href={`/article/${item.articles[1].slug}`}>
                     {item.articles[1].title}
                   </Link>
@@ -335,7 +335,7 @@ export const EightCategoryGridSection: React.FC = () => {
 
             {item.articles[2] && (
               <div className="pt-1">
-                <h5 className="font-serif font-bold text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
+                <h5 className="font-serif font-bold text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer" style={{ fontFamily: "Georgia, serif" }}>
                   <Link href={`/article/${item.articles[2].slug}`}>
                     {item.articles[2].title}
                   </Link>
@@ -373,7 +373,7 @@ export const EightCategoryGridSection: React.FC = () => {
             )}
 
             {item.articles[0] && (
-              <h4 className="font-serif font-bold text-[17px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-3">
+              <h4 className="font-serif font-bold text-[17px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-3" style={{ fontFamily: "Georgia, serif" }}>
                 <Link href={`/article/${item.articles[0].slug}`}>
                   {item.articles[0].title}
                 </Link>
@@ -382,7 +382,7 @@ export const EightCategoryGridSection: React.FC = () => {
 
             {item.articles[1] && (
               <div className="pt-1 pb-2">
-                <h5 className="font-serif font-bold text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
+                <h5 className="font-serif font-bold text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer" style={{ fontFamily: "Georgia, serif" }}>
                   <Link href={`/article/${item.articles[1].slug}`}>
                     {item.articles[1].title}
                   </Link>
@@ -392,7 +392,7 @@ export const EightCategoryGridSection: React.FC = () => {
 
             {item.articles[2] && (
               <div className="pt-1">
-                <h5 className="font-serif font-bold text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer">
+                <h5 className="font-serif font-bold text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer" style={{ fontFamily: "Georgia, serif" }}>
                   <Link href={`/article/${item.articles[2].slug}`}>
                     {item.articles[2].title}
                   </Link>

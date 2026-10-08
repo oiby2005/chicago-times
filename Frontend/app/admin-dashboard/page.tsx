@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import ProfileSettingsModal, { UserProfile } from "@/components/ui/ProfileSettingsModal";
 import { getUserDashboardUrl } from "@/data/authors";
+import BillionairesAdminDesk from "@/components/admin/BillionairesAdminDesk";
 
 interface ProjectItem {
   id: string;
@@ -214,6 +215,7 @@ export default function AdminDashboard() {
     | "Subscription Requests"
     | "Database Backups"
     | "Shorts & Reels"
+    | "World Billionaires"
   >("Overview");
 
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -297,7 +299,7 @@ interface AdSlotConfig {
   id: string;
   slotName: string;
   dimension: string;
-  placementGroup: "Homepage" | "Category" | "Author" | "Article";
+  placementGroup: "Homepage" | "Category" | "Author" | "Article" | "Billionaire";
   description: string;
   active: boolean;
   actionType: string;
@@ -321,6 +323,12 @@ const SLOT_NAME_MAP: Record<string, string> = {
   article_slot_1: "Article Page ad 01",
   article_slot_2: "Article Page ad 02",
   article_slot_3: "Article Page ad 03",
+  billionaire_slot_1: "Billionaire Page ad 01",
+  billionaire_slot_2: "Billionaire Profile Sidebar Top Ad",
+  billionaire_slot_3: "Billionaire Profile Sticky Ad 01",
+  billionaire_slot_4: "Billionaire Profile Sticky Ad 02",
+  billionaire_slot_5: "Billionaire Profile Sticky Ad 03",
+  billionaire_profile_inline_ad: "Billionaire Profile Middle Inline Ad",
 };
 
 const normalizeAdSlots = (slots: AdSlotConfig[]): AdSlotConfig[] => {
@@ -347,19 +355,31 @@ const normalizeAdSlots = (slots: AdSlotConfig[]): AdSlotConfig[] => {
     article_slot_1: "300x300",
     article_slot_2: "300x300",
     article_slot_3: "300x300",
+    billionaire_slot_1: "970x300",
+    billionaire_slot_2: "300x250",
+    billionaire_slot_3: "300x250",
+    billionaire_slot_4: "300x250",
+    billionaire_slot_5: "300x300",
+    billionaire_profile_inline_ad: "728x90",
   };
 
-  const GROUP_MAP: Record<string, "Homepage" | "Category" | "Author" | "Article"> = {
+  const GROUP_MAP: Record<string, "Homepage" | "Category" | "Author" | "Article" | "Billionaire"> = {
     article_slot_1: "Article",
     article_slot_2: "Article",
     article_slot_3: "Article",
+    billionaire_slot_1: "Billionaire",
+    billionaire_slot_2: "Billionaire",
+    billionaire_slot_3: "Billionaire",
+    billionaire_slot_4: "Billionaire",
+    billionaire_slot_5: "Billionaire",
+    billionaire_profile_inline_ad: "Billionaire",
   };
 
   return merged.map((s) => ({
     ...s,
     slotName: SLOT_NAME_MAP[s.id] || s.slotName,
     dimension: DIM_MAP[s.id] || s.dimension,
-    placementGroup: GROUP_MAP[s.id] || s.placementGroup || (s.id?.startsWith("article") ? "Article" : "Homepage"),
+    placementGroup: GROUP_MAP[s.id] || s.placementGroup || (s.id?.startsWith("billionaire") ? "Billionaire" : s.id?.startsWith("article") ? "Article" : "Homepage"),
   }));
 };
 
@@ -520,6 +540,78 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
     selectedArticleSlug: "",
     imageUrl: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?fm=webp&fit=crop&w=300&q=80",
   },
+  {
+    id: "billionaire_slot_1",
+    slotName: "Billionaire Page ad 01",
+    dimension: "970x250",
+    placementGroup: "Billionaire",
+    description: "Displayed horizontally full-width directly below the 'See List' button on the World's Billionaires List page.",
+    active: true,
+    actionType: "External Link (URL)",
+    targetUrl: "https://www.wsj.com/",
+    selectedArticleSlug: "",
+    imageUrl: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?fm=webp&fit=crop&w=970&h=250&q=80",
+  },
+  {
+    id: "billionaire_slot_2",
+    slotName: "Billionaire Profile Sidebar Top Ad",
+    dimension: "300x250",
+    placementGroup: "Billionaire",
+    description: "Displayed inside the right sidebar below the top profile photo.",
+    active: true,
+    actionType: "External Link (URL)",
+    targetUrl: "https://www.wsj.com/",
+    selectedArticleSlug: "",
+    imageUrl: "https://images.unsplash.com/photo-1557804506-669a67965ba0?fm=webp&fit=crop&w=300&h=250&q=80",
+  },
+  {
+    id: "billionaire_slot_3",
+    slotName: "Billionaire Profile Sticky Ad 01",
+    dimension: "300x250",
+    placementGroup: "Billionaire",
+    description: "Displayed in right sidebar, sticky until bottom edge of Other Billionaires section.",
+    active: true,
+    actionType: "External Link (URL)",
+    targetUrl: "https://www.wsj.com/",
+    selectedArticleSlug: "",
+    imageUrl: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?fm=webp&fit=crop&w=300&h=250&q=80",
+  },
+  {
+    id: "billionaire_slot_4",
+    slotName: "Billionaire Profile Sticky Ad 02",
+    dimension: "300x250",
+    placementGroup: "Billionaire",
+    description: "Displayed in right sidebar, sticky until bottom edge of the middle inline Google ad in More From Times Chicago.",
+    active: true,
+    actionType: "External Link (URL)",
+    targetUrl: "https://www.wsj.com/",
+    selectedArticleSlug: "",
+    imageUrl: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?fm=webp&fit=crop&w=300&h=250&q=80",
+  },
+  {
+    id: "billionaire_slot_5",
+    slotName: "Billionaire Profile Sticky Ad 03",
+    dimension: "300x300",
+    placementGroup: "Billionaire",
+    description: "Displayed in right sidebar, sticky until bottom edge of the entire main content section.",
+    active: true,
+    actionType: "External Link (URL)",
+    targetUrl: "https://www.wsj.com/",
+    selectedArticleSlug: "",
+    imageUrl: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?fm=webp&fit=crop&w=300&h=300&q=80",
+  },
+  {
+    id: "billionaire_profile_inline_ad",
+    slotName: "Billionaire Profile Middle Inline Ad",
+    dimension: "728x90",
+    placementGroup: "Billionaire",
+    description: "Displayed horizontally in the middle of More From Times Chicago section on Billionaire Profile view pages.",
+    active: true,
+    actionType: "External Link (URL)",
+    targetUrl: "https://www.wsj.com/",
+    selectedArticleSlug: "",
+    imageUrl: "https://images.unsplash.com/photo-1557804506-669a67965ba0?fm=webp&fit=crop&w=728&h=90&q=80",
+  },
 ];
 
   // 3. Published Posts Data (Published Posts tab)
@@ -531,7 +623,7 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
   const [pubSearchQuery, setPubSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   // 4. Manage Ads State
-  const [adSubTab, setAdSubTab] = useState<"ALL" | "HOMEPAGE" | "CATEGORY" | "AUTHOR" | "ARTICLE">("ALL");
+  const [adSubTab, setAdSubTab] = useState<"ALL" | "HOMEPAGE" | "CATEGORY" | "AUTHOR" | "ARTICLE" | "BILLIONAIRE">("ALL");
 
   // 5. Users Desk State
   interface UserDeskItem {
@@ -3301,6 +3393,34 @@ ${divider70}
               </svg>
               <span>Shorts & Reels</span>
             </button>
+
+            {/* 10. World Billionaires */}
+            <button
+              onClick={() => {
+                setActiveTab("World Billionaires");
+                setIsMobileSidebarOpen(false);
+              }}
+              style={{ fontFamily: "'Century Gothic', 'Publica Sans Light', 'Kumbh Sans', sans-serif" }}
+              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                activeTab === "World Billionaires"
+                  ? "bg-[#f1f5f9] text-[#64748b] border border-[#cbd5e1] shadow-2xs font-bold"
+                  : "text-[#111111] hover:bg-[#f8fafc] hover:text-[#64748b]"
+              }`}
+            >
+              <svg
+                width={18}
+                height={18}
+                style={{ width: "18px", height: "18px", minWidth: "18px", minHeight: "18px" }}
+                className="shrink-0"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-6h6M12 3a9 9 0 100 18 9 9 0 000-18z" />
+              </svg>
+              <span>World Billionaires</span>
+            </button>
           </nav>
         </div>
 
@@ -4724,6 +4844,18 @@ ${divider70}
               >
                 ARTICLE PAGE SLOTS ({adSlots.filter((s) => s.placementGroup === "Article").length})
               </button>
+
+              <button
+                type="button"
+                onClick={() => setAdSubTab("BILLIONAIRE")}
+                className={`font-bold tracking-wider uppercase transition-all whitespace-nowrap cursor-pointer pb-2.5 ${
+                  adSubTab === "BILLIONAIRE"
+                    ? "text-[#64748b] border-b-2 border-[#94a3b8] font-extrabold"
+                    : "text-[#111111] hover:text-[#64748b]"
+                }`}
+              >
+                BILLIONAIRE PAGE SLOTS ({adSlots.filter((s) => s.placementGroup === "Billionaire").length})
+              </button>
             </div>
 
             {/* List of Filtered Ad Slots */}
@@ -4734,6 +4866,7 @@ ${divider70}
                   if (adSubTab === "CATEGORY") return slot.placementGroup === "Category";
                   if (adSubTab === "AUTHOR") return slot.placementGroup === "Author";
                   if (adSubTab === "ARTICLE") return slot.placementGroup === "Article";
+                  if (adSubTab === "BILLIONAIRE") return slot.placementGroup === "Billionaire";
                   return true;
                 })
                 .map((slot) => (
@@ -5680,6 +5813,8 @@ ${divider70}
               </div>
             </div>
           </div>
+        ) : activeTab === "World Billionaires" ? (
+          <BillionairesAdminDesk />
         ) : (
           /* Placeholder View for Other Sidebar Tabs */
           <div className="bg-white rounded-3xl p-8 border border-[#e5e7eb] shadow-2xs min-h-[400px] flex flex-col items-center justify-center text-center">
