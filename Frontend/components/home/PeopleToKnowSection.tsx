@@ -134,7 +134,7 @@ export const PeopleToKnowSection: React.FC = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-0 items-stretch">
         {/* COLUMN 1: Left Hero Photo (Top) + Headline/Summary (Bottom) */}
-        <div className="pr-0 md:pr-4 flex flex-col justify-between border-r border-dashed border-[#CCCCCC]">
+        <div className="pr-0 md:pr-4 flex flex-col justify-between border-b md:border-b-0 md:border-r border-dashed border-[#CCCCCC] pb-4 md:pb-0 mb-4 md:mb-0">
           <article className="flex flex-col h-full justify-between">
             <Link
               href={`/article/${leftHero.slug}`}
@@ -170,7 +170,7 @@ export const PeopleToKnowSection: React.FC = () => {
         </div>
 
         {/* COLUMN 2: Center Top Article (Top) + Ad 04 Box (Bottom) */}
-        <div className="px-0 md:px-4 flex flex-col justify-between h-full border-r border-dashed border-[#CCCCCC]">
+        <div className="px-0 md:px-4 py-4 md:py-0 flex flex-col justify-between h-full border-b md:border-b-0 md:border-r border-dashed border-[#CCCCCC] mb-4 md:mb-0 pb-4 md:pb-0">
           <article className="pb-3 border-b border-dashed border-[#CCCCCC] flex-1 flex flex-col justify-between">
             <div>
               <h4 className="font-serif font-bold text-[17px] sm:text-[18px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-1.5" style={{ fontFamily: "Georgia, serif" }}>

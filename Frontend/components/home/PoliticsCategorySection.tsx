@@ -133,8 +133,7 @@ export const PoliticsCategorySection: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-0 items-start">
         {/* COLUMN 1 */}
         <article 
-          className="pr-0 md:pr-4 flex flex-col justify-start"
-          style={{ borderRight: "1px dashed #CCCCCC" }}
+          className="pr-0 md:pr-4 flex flex-col justify-start border-b md:border-b-0 md:border-r border-dashed border-[#CCCCCC] pb-4 md:pb-0 mb-4 md:mb-0"
         >
           {col1.imageUrl && (
             <Link
@@ -165,8 +164,7 @@ export const PoliticsCategorySection: React.FC = () => {
 
         {/* COLUMN 2 */}
         <article 
-          className="px-0 md:px-4 py-4 md:py-0 flex flex-col justify-start"
-          style={{ borderRight: "1px dashed #CCCCCC" }}
+          className="px-0 md:px-4 py-4 md:py-0 flex flex-col justify-start border-b md:border-b-0 md:border-r border-dashed border-[#CCCCCC] pb-4 md:pb-0 mb-4 md:mb-0"
         >
           {col2.imageUrl && (
             <Link

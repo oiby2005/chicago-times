@@ -604,6 +604,7 @@ export const Navbar: React.FC = () => {
                   key={title}
                   ref={(el) => { tabRefs.current[title] = el; }}
                   onMouseEnter={() => {
+                    if (typeof window !== "undefined" && window.innerWidth < 768) return;
                     setActiveTab(title);
                     const currentTabEl = tabRefs.current[title];
                     if (currentTabEl) {
@@ -661,7 +662,7 @@ export const Navbar: React.FC = () => {
           <div
             onMouseEnter={() => setActiveTab(activeTab)}
             onMouseLeave={() => setActiveTab(null)}
-            className="absolute left-0 right-0 w-full top-[36px] bg-[#f9f9f8] border-b border-t border-[#dcd6cd] shadow-xl z-40 py-6 min-h-[190px] transition-all duration-150 animate-fadeIn select-none"
+            className="hidden md:block absolute left-0 right-0 w-full top-[36px] bg-[#f9f9f8] border-b border-t border-[#dcd6cd] shadow-xl z-40 py-6 min-h-[190px] transition-all duration-150 animate-fadeIn select-none"
           >
             <div className="w-full max-w-[1280px] mx-auto px-4 sm:px-5 md:px-6 relative flex flex-col md:flex-row gap-8 items-stretch">
               {/* Seamless patch div: erases the top border line ONLY directly underneath the hovered tab */}

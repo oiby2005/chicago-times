@@ -131,29 +131,16 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({
                       isExpanded ? "bg-[#fafafa]" : ""
                     }`}
                   >
-                    {/* Category Title: If hasSubLinks, click toggles accordion; if no subLinks, click navigates */}
-                    {hasSubLinks ? (
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleCategory(cat);
-                        }}
-                        className={`text-sm font-sans font-semibold text-left flex-1 cursor-pointer transition-colors ${
-                          isExpanded ? "text-[#990000]" : "text-[#111111] hover:text-[#990000]"
-                        }`}
-                      >
-                        {cat}
-                      </button>
-                    ) : (
-                      <Link
-                        href={getCategoryRoute(cat)}
-                        onClick={onClose}
-                        className="text-sm font-sans font-semibold text-[#111111] hover:text-[#990000] transition-colors flex-1"
-                      >
-                        {cat}
-                      </Link>
-                    )}
+                    {/* Category Title: Always navigates to category page when tapped */}
+                    <Link
+                      href={getCategoryRoute(cat)}
+                      onClick={onClose}
+                      className={`text-sm font-sans font-semibold text-left flex-1 cursor-pointer transition-colors ${
+                        isExpanded ? "text-[#990000]" : "text-[#111111] hover:text-[#990000]"
+                      }`}
+                    >
+                      {cat}
+                    </Link>
 
                     {/* Accordion Expand / Collapse Toggle Caret */}
                     {hasSubLinks && (

@@ -561,7 +561,7 @@ export default function BillionaireProfileClient({ id }: { id: string }) {
         {/* ==================== CONTAINER BLOCK 1 (SECTIONS 1 THROUGH 6 & RIGHT SIDEBAR ADS) ==================== */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 my-6">
           {/* Main Content Column (Left & Middle - 8 Cols) with dashed right divider */}
-          <div className="lg:col-span-8 space-y-10 border-r border-dashed border-[#CCCCCC] pr-0 lg:pr-8">
+          <div className="lg:col-span-8 space-y-10 border-b lg:border-b-0 lg:border-r border-dashed border-[#CCCCCC] pr-0 lg:pr-8 pb-8 lg:pb-0">
             {/* 1st Section: "From the Editor" Bullet Points */}
             <div className="w-full bg-white border border-[#E5E0D5] p-6 sm:p-8 shadow-2xs">
               <div className="flex items-center justify-between pb-4 border-b border-[#E5E0D5] mb-5 text-left">
@@ -786,7 +786,7 @@ export default function BillionaireProfileClient({ id }: { id: string }) {
         {/* ==================== CONTAINER BLOCK 2 ("MORE FROM TIMES CHICAGO" & STICKY AD) ==================== */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 my-6">
           {/* Main Content Column (More from Times Chicago with Inline Ad & Pagination) */}
-          <div className="lg:col-span-8 space-y-8 border-r border-dashed border-[#CCCCCC] pr-0 lg:pr-8">
+          <div className="lg:col-span-8 space-y-8 border-b lg:border-b-0 lg:border-r border-dashed border-[#CCCCCC] pr-0 lg:pr-8 pb-8 lg:pb-0">
             <div className="w-full pt-8 pb-4 border-t border-[#111111]">
               <h3
                 className="font-bold text-[20px] text-[#111111] mb-6"

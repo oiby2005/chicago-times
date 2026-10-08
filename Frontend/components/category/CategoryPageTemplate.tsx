@@ -358,7 +358,7 @@ export default function CategoryPageTemplate({
           {/* Part 1: Top 5 Latest Articles Grid (Latest Article in Big Hero Card on Left) */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-0 pb-8 border-b border-dashed border-[#CCCCCC]">
             {/* Column 1 (Left): Center Hero Feature Card for Latest Article (Card 1) */}
-            <div className="pr-0 md:pr-6 pb-6 md:pb-0 md:border-r md:border-dashed md:border-[#CCCCCC]">
+            <div className="pr-0 md:pr-6 pb-5 md:pb-0 md:border-r md:border-dashed md:border-[#CCCCCC]">
               <article>
                 <Link
                   href={`/article/${card1.slug || card1.id}`}
@@ -382,8 +382,11 @@ export default function CategoryPageTemplate({
               </article>
             </div>
 
+            {/* Mobile horizontal dashed divider between Card 1 & Card 2 */}
+            <div className="block md:hidden border-b border-dashed border-[#CCCCCC] my-5" />
+
             {/* Column 2 (Middle): Two Stacked Horizontal Cards (Card 2 & Card 3) */}
-            <div className="px-0 md:px-6 py-6 md:py-0 flex flex-col justify-between md:border-r md:border-dashed md:border-[#CCCCCC]">
+            <div className="px-0 md:px-6 py-0 md:py-0 flex flex-col justify-between md:border-r md:border-dashed md:border-[#CCCCCC]">
               {/* Card 2 (Top Middle) */}
               <article className="flex flex-row items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
@@ -442,8 +445,11 @@ export default function CategoryPageTemplate({
               </article>
             </div>
 
+            {/* Mobile horizontal dashed divider between Card 3 & Card 4 */}
+            <div className="block md:hidden border-b border-dashed border-[#CCCCCC] my-5" />
+
             {/* Column 3 (Right): Two Stacked Horizontal Cards (Card 4 & Card 5) */}
-            <div className="pl-0 md:pl-6 pt-6 md:pt-0 flex flex-col justify-between">
+            <div className="pl-0 md:pl-6 py-0 md:py-0 flex flex-col justify-between">
               {/* Card 4 (Top Right) */}
               <article className="flex flex-row items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">

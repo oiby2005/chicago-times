@@ -163,8 +163,7 @@ export const BusinessCategorySection: React.FC = () => {
     <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-0 font-sans select-none border-b border-dashed border-[#888070] pb-5 items-stretch">
       {/* COLUMN 1 (LEFT ~ 3 of 12 cols): Positions 1, 2, 3 */}
       <div 
-        className="col-span-12 md:col-span-1 lg:col-span-3 pr-0 md:pr-[0.3cm] pb-6 lg:pb-0 flex flex-col justify-start"
-        style={{ borderRight: "1.5px dashed #888070" }}
+        className="col-span-12 md:col-span-1 lg:col-span-3 pr-0 md:pr-[0.3cm] pb-6 lg:pb-0 flex flex-col justify-start border-b lg:border-b-0 lg:border-r border-dashed border-[#888070] mb-5 lg:mb-0"
       >
         {/* Business Category Section Topic Header */}
         <div className="flex items-center space-x-2 pb-2 mb-2">
@@ -181,7 +180,7 @@ export const BusinessCategorySection: React.FC = () => {
         {/* Articles List with divide-y spacing between articles */}
         <div className="divide-y divide-dashed divide-[#888070]">
           {leftItems.map((art, idx) => (
-            <article key={art.id} className={`py-3 ${idx === 0 ? "pt-0" : ""} ${idx === leftItems.length - 1 ? "pb-0" : ""}`}>
+            <article key={art.id} className={`py-4 lg:py-3 ${idx === 0 ? "pt-0" : ""} ${idx === leftItems.length - 1 ? "pb-0 lg:pb-0" : ""}`}>
               <h3
                 className={`font-serif font-bold text-[#111111] hover:text-[#333333] hover:underline cursor-pointer ${idx === 0 ? "text-[22px] sm:text-[24px] lg:text-[26px] leading-[1.12]" : "text-[17px] sm:text-[18px] lg:text-[19px] leading-[1.15]"}`}
                 style={{
@@ -208,12 +207,11 @@ export const BusinessCategorySection: React.FC = () => {
 
       {/* COLUMN 2 (CENTER ~ 5 of 12 cols): Position 4 (Hero) and Positions 5, 6 (Bottom Cards) */}
       <div 
-        className="col-span-12 md:col-span-1 lg:col-span-5 px-0 md:px-[0.3cm] py-6 lg:py-0 flex flex-col justify-start"
-        style={{ borderRight: "1.5px dashed #888070" }}
+        className="col-span-12 md:col-span-1 lg:col-span-5 px-0 md:px-[0.3cm] py-6 lg:py-0 flex flex-col justify-start border-b lg:border-b-0 lg:border-r border-dashed border-[#888070] my-5 lg:my-0 pb-5 lg:pb-0"
       >
         {/* Position 4: Featured Main Hero */}
         {centerHeroItem && (
-          <article className="pb-3 border-b border-dashed border-[#888070]">
+          <article className="pb-4 mb-4 lg:pb-3 lg:mb-3 border-b border-dashed border-[#888070]">
             <Link href={`/article/${centerHeroItem.slug}`} className="block relative w-full h-[5.5cm] sm:h-[5.8cm] lg:h-[5.5cm] overflow-hidden bg-gray-100 mb-2 group">
               <img
                 src={centerHeroItem.imageUrl || "https://images.unsplash.com/photo-1544717305-2782549b5136?fm=webp&fit=crop&w=800&q=80"}
@@ -238,9 +236,9 @@ export const BusinessCategorySection: React.FC = () => {
         )}
 
         {/* Positions 5 & 6: Bottom 2 Side-by-Side Cards (lifted to upper divider) */}
-        <div className="pt-3 grid grid-cols-1 sm:grid-cols-2 gap-[0.3cm]">
+        <div className="pt-1 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-[0.3cm]">
           {centerBottomItems.map((art) => (
-            <article key={art.id} className="flex flex-col justify-start">
+            <article key={art.id} className="flex flex-col justify-start py-2 sm:py-0">
               <Link href={`/article/${art.slug}`} className="block relative aspect-[4/3] w-full overflow-hidden bg-gray-100 border border-gray-200 mb-1.5 group">
                 <img
                   src={art.imageUrl || "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?fm=webp&fit=crop&w=400&q=80"}
@@ -268,7 +266,7 @@ export const BusinessCategorySection: React.FC = () => {
         {/* Positions 7 & 8: Top 2 Thumbnail Stories */}
         <div className="divide-y divide-dashed divide-[#888070]">
           {rightItems.map((art, idx) => (
-            <article key={art.id} className={`py-2.5 ${idx === 0 ? "pt-0" : ""} flex items-start justify-between space-x-3`}>
+            <article key={art.id} className={`py-4 lg:py-2.5 ${idx === 0 ? "pt-0" : ""} flex items-start justify-between space-x-3`}>
               <div className="flex-1">
                 <h3 className="font-serif font-bold text-[17px] sm:text-[18px] lg:text-[18.5px] leading-[1.15] text-[#111111] hover:underline cursor-pointer" style={{ fontFamily: "Georgia, serif" }}>
                   <Link href={`/article/${art.slug}`}>

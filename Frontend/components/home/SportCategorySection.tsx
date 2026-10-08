@@ -229,7 +229,7 @@ export const SportCategorySection: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 items-stretch">
         
         {/* LEFT & CENTER HERO AREA (8 of 12 cols ~ 67%) */}
-        <div className="lg:col-span-8 pr-0 lg:pr-4 flex flex-col justify-start h-full border-r border-dashed border-[#CCCCCC]">
+        <div className="lg:col-span-8 pr-0 lg:pr-4 flex flex-col justify-start h-full border-b lg:border-b-0 lg:border-r border-dashed border-[#CCCCCC] pb-6 lg:pb-0 mb-6 lg:mb-0">
           
           {/* Top Half: Left Headline Text (4 cols) + Large Hero Photo (4 cols) */}
           <div className="grid grid-cols-1 md:grid-cols-8 gap-4 pb-4 border-b border-dashed border-[#CCCCCC]">
@@ -274,7 +274,7 @@ export const SportCategorySection: React.FC = () => {
           {/* Bottom Half: 2 Mini Columns */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-8 mt-4">
             {/* Mini Story 1 */}
-            <div className="flex items-start space-x-3 pr-0 md:pr-3 border-r border-dashed border-[#CCCCCC]">
+            <div className="flex items-start space-x-3 pr-0 md:pr-3 border-b md:border-b-0 md:border-r border-dashed border-[#CCCCCC] pb-4 md:pb-0 mb-4 md:mb-0">
               <Link
                 href={`/article/${miniItem1.slug}`}
                 className="block relative w-[140px] sm:w-[165px] aspect-[16/10] overflow-hidden bg-gray-100 flex-shrink-0 group"
@@ -347,7 +347,7 @@ export const SportCategorySection: React.FC = () => {
           <div className="grid grid-cols-2 gap-0">
             
             {/* Top-Left (Item 1 of sidebar) */}
-            <article className="pr-3.5 pb-4 border-r border-dashed border-[#CCCCCC] flex flex-col justify-between">
+            <article className="pr-2 sm:pr-3.5 pb-4 sm:border-r border-dashed border-[#CCCCCC] flex flex-col justify-between">
               <div className="pb-3 border-b border-dashed border-[#CCCCCC] flex-1 flex flex-col justify-between">
                 <div>
                   <Link
@@ -415,7 +415,7 @@ export const SportCategorySection: React.FC = () => {
             </article>
 
             {/* Bottom-Left (Item 3 of sidebar) */}
-            <article className="pr-3.5 pt-4 border-r border-dashed border-[#CCCCCC] flex flex-col justify-between">
+            <article className="pr-2 sm:pr-3.5 pt-4 sm:border-r border-dashed border-[#CCCCCC] flex flex-col justify-between">
               <div>
                 <Link
                   href={`/article/${sidebarItem3.slug}`}

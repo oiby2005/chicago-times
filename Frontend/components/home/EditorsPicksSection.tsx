@@ -214,7 +214,7 @@ export const EditorsPicksSection: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-0">
         {/* LEFT & CENTER MAIN PACKAGE */}
         <div 
-          className="lg:col-span-8 pr-0 lg:pr-[0.4cm] border-r border-dashed border-[#CCCCCC]"
+          className="lg:col-span-8 pr-0 lg:pr-[0.4cm] border-b lg:border-b-0 lg:border-r border-dashed border-[#CCCCCC] pb-6 lg:pb-0 mb-6 lg:mb-0"
         >
           {/* Row 1 Top Feature Package */}
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4 pb-4 border-b border-dashed border-[#CCCCCC]">
@@ -261,7 +261,7 @@ export const EditorsPicksSection: React.FC = () => {
           <div className="pt-8 mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
             {bottomCards[0] && (
               <article 
-                className="flex items-start space-x-3 pr-0 sm:pr-4 border-r border-dashed border-[#CCCCCC]"
+                className="flex items-start space-x-3 pr-0 sm:pr-4 border-b sm:border-b-0 sm:border-r border-dashed border-[#CCCCCC] pb-4 sm:pb-0 mb-4 sm:mb-0"
               >
                 <Link href={`/article/${bottomCards[0].slug}`} className="shrink-0 block w-[160px] sm:w-[185px] h-[100px] sm:h-[115px] overflow-hidden bg-gray-100 border border-gray-200">
                   <img
@@ -328,7 +328,7 @@ export const EditorsPicksSection: React.FC = () => {
           <div className="grid grid-cols-2 gap-0">
             {/* Top-Left (Item 1 of sidebar) */}
             {rightCards[0] && (
-              <article className="pr-3.5 pb-4 border-r border-dashed border-[#CCCCCC] flex flex-col justify-between">
+              <article className="pr-2 sm:pr-3.5 pb-4 sm:border-r border-dashed border-[#CCCCCC] flex flex-col justify-between">
                 <div className="pb-3 border-b border-dashed border-[#CCCCCC] flex-1 flex flex-col justify-between">
                   <div>
                     <Link href={`/article/${rightCards[0].slug}`} className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 mb-2 group">
@@ -390,7 +390,7 @@ export const EditorsPicksSection: React.FC = () => {
 
             {/* Bottom-Left (Item 3 of sidebar) */}
             {rightCards[1] && (
-              <article className="pr-3.5 pt-4 border-r border-dashed border-[#CCCCCC] flex flex-col justify-between">
+              <article className="pr-2 sm:pr-3.5 pt-4 sm:border-r border-dashed border-[#CCCCCC] flex flex-col justify-between">
                 <div>
                   <Link href={`/article/${rightCards[1].slug}`} className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 mb-2 group">
                     <img
