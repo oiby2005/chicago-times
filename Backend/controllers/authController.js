@@ -58,6 +58,11 @@ const DEFAULT_ACCOUNTS = {
   },
 };
 
+// In-memory failed login attempts & lockout tracking
+const failedAttemptsMap = new Map();
+const MAX_FAILED_ATTEMPTS = 5;
+const LOCKOUT_DURATION_MS = 15 * 60 * 1000; // 15 minutes
+
 // @desc    Authenticate user & get token via active MySQL Database or Default Accounts
 // @route   POST /api/auth/login
 // @access  Public
@@ -75,16 +80,30 @@ const login = async (req, res) => {
     const cleanEmail = email.trim().toLowerCase();
     const cleanPassword = password.trim();
 
-    // 1. Check DEFAULT_ACCOUNTS first for immediate & reliable fallback
+    // Check if account is currently locked out
+    const attemptData = failedAttemptsMap.get(cleanEmail) || { count: 0, lockUntil: 0 };
+    if (attemptData.lockUntil > Date.now()) {
+      const remainingMins = Math.ceil((attemptData.lockUntil - Date.now()) / (60 * 1000));
+      return res.status(429).json({
+        success: false,
+        message: `Website login locked due to 5 consecutive failed attempts. Please wait ${remainingMins} minute(s) before trying again.`,
+      });
+    } else if (attemptData.lockUntil > 0 && Date.now() >= attemptData.lockUntil) {
+      // Lock expired -> reset attempt count
+      failedAttemptsMap.delete(cleanEmail);
+    }
+
+    let isAuthenticated = false;
+    let authUser = null;
+
+    // 1. Check DEFAULT_ACCOUNTS first for default admin users
     const defaultAcc = DEFAULT_ACCOUNTS[cleanEmail];
     if (defaultAcc) {
-      const allowedPasswords = (defaultAcc.passwords || []).map((p) => p.toLowerCase());
-      allowedPasswords.push('admin123', 'admin', '123456');
-      if (allowedPasswords.includes(cleanPassword.toLowerCase())) {
+      const allowedPasswords = (defaultAcc.passwords || []).map((p) => p.trim());
+      if (allowedPasswords.includes(cleanPassword)) {
         const usersMap = readUsersFile();
         const savedProfile = usersMap[cleanEmail];
-        const jwtSecret = process.env.JWT_SECRET || 'wsj_super_secret_jwt_key_2026_key';
-        const finalUser = {
+        authUser = {
           id: savedProfile?.id || defaultAcc.id,
           full_name: savedProfile?.full_name || defaultAcc.full_name,
           email: defaultAcc.email,
@@ -94,135 +113,105 @@ const login = async (req, res) => {
           avatar_url: savedProfile?.avatar_url || defaultAcc.avatar_url || '',
           is_default_admin: Boolean(defaultAcc.is_default_admin),
         };
-        const token = jwt.sign(
-          { id: finalUser.id, email: finalUser.email, role: finalUser.role },
-          jwtSecret,
-          { expiresIn: '24h' }
-        );
-        return res.status(200).json({
-          success: true,
-          message: 'Login successful',
-          token,
-          user: finalUser,
-        });
+        isAuthenticated = true;
       }
     }
 
-    // 2. Query active MySQL Database
-    let rows;
-    let dbConnected = true;
-    try {
-      [rows] = await db.query('SELECT * FROM users WHERE LOWER(email) = ?', [cleanEmail]);
-    } catch (dbErr) {
-      console.error('MySQL DB Connection Failure:', dbErr.message);
-      dbConnected = false;
-    }
+    // 2. Query active MySQL Database if not authenticated via default accounts
+    if (!isAuthenticated) {
+      let rows;
+      let dbConnected = true;
+      try {
+        [rows] = await db.query('SELECT * FROM users WHERE LOWER(email) = ?', [cleanEmail]);
+      } catch (dbErr) {
+        console.error('MySQL DB Connection Failure:', dbErr.message);
+        dbConnected = false;
+      }
 
-    if (dbConnected && rows && rows.length > 0) {
-      const user = rows[0];
+      if (dbConnected && rows && rows.length > 0) {
+        const user = rows[0];
+        let isMatch = false;
+        if (user.password && (user.password.startsWith('$2a$') || user.password.startsWith('$2b$'))) {
+          isMatch = await bcrypt.compare(cleanPassword, user.password);
+        } else if (user.password && user.password === cleanPassword) {
+          isMatch = true;
+        }
 
-      // Verify password (support bcrypt hash or exact plain text fallback)
-      let isMatch = false;
-      if (user.password && (user.password.startsWith('$2a$') || user.password.startsWith('$2b$'))) {
-        isMatch = await bcrypt.compare(cleanPassword, user.password);
-        if (!isMatch) {
-          const candidates = [
-            cleanPassword.toLowerCase(),
-            cleanPassword.toUpperCase(),
-            cleanPassword.charAt(0).toUpperCase() + cleanPassword.slice(1),
-            'Admin123',
-            'admin123',
-            `${user.role}123`,
-            `${(user.role || '').charAt(0).toUpperCase() + (user.role || '').slice(1)}123`,
-          ];
-          for (const cand of candidates) {
-            if (cand && await bcrypt.compare(cand, user.password)) {
-              isMatch = true;
-              break;
-            }
-          }
+        if (isMatch) {
+          try {
+            await db.query('UPDATE users SET updated_at = NOW() WHERE id = ?', [user.id]);
+          } catch (e) {}
+
+          authUser = {
+            id: user.id,
+            full_name: user.full_name,
+            email: user.email,
+            role: user.role,
+            bio: user.bio || '',
+            linkedin: user.linkedin || '',
+            avatar_url: user.avatar_url || '',
+            is_default_admin: Boolean(user.is_default_admin),
+          };
+          isAuthenticated = true;
         }
       }
-      if (!isMatch && user.password && (user.password === cleanPassword || user.password.toLowerCase() === cleanPassword.toLowerCase())) {
-        isMatch = true;
-      }
-      if (!isMatch && ['admin123', 'writer123', 'reader123', '123456'].includes(cleanPassword.toLowerCase())) {
-        isMatch = true;
-      }
+    }
 
-      if (isMatch) {
-        try {
-          await db.query('UPDATE users SET updated_at = NOW() WHERE id = ?', [user.id]);
-        } catch (e) {}
-
-        const jwtSecret = process.env.JWT_SECRET || 'wsj_super_secret_jwt_key_2026_key';
-        const token = jwt.sign(
-          { id: user.id, email: user.email, role: user.role },
-          jwtSecret,
-          { expiresIn: '24h' }
-        );
-
-        const finalUser = {
-          id: user.id,
-          full_name: user.full_name,
-          email: user.email,
-          role: user.role,
-          bio: user.bio || '',
-          linkedin: user.linkedin || '',
-          avatar_url: user.avatar_url || '',
-          is_default_admin: Boolean(user.is_default_admin),
+    // 3. File fallback if DB/default account failed
+    if (!isAuthenticated) {
+      const usersMap = readUsersFile();
+      const savedUser = usersMap[cleanEmail];
+      if (savedUser && savedUser.password && savedUser.password === cleanPassword) {
+        authUser = {
+          id: savedUser.id,
+          full_name: savedUser.full_name,
+          email: savedUser.email,
+          role: savedUser.role,
+          bio: savedUser.bio || '',
+          linkedin: savedUser.linkedin || '',
+          avatar_url: savedUser.avatar_url || '',
+          is_default_admin: Boolean(savedUser.is_default_admin),
         };
-
-        return res.status(200).json({
-          success: true,
-          message: 'Login successful',
-          token,
-          user: finalUser,
-        });
+        isAuthenticated = true;
       }
     }
 
-    // 3. File fallback if DB failed or user password failed in DB
-    const usersMap = readUsersFile();
-    const savedUser = usersMap[cleanEmail];
-    if (savedUser) {
-      const validPasswords = ['admin123', 'writer123', 'reader123', '123456', 'admin'];
-      if (validPasswords.includes(cleanPassword.toLowerCase()) || cleanPassword === (savedUser.password || '')) {
-        const jwtSecret = process.env.JWT_SECRET || 'wsj_super_secret_jwt_key_2026_key';
-        const token = jwt.sign(
-          { id: savedUser.id, email: savedUser.email, role: savedUser.role },
-          jwtSecret,
-          { expiresIn: '24h' }
-        );
-        return res.status(200).json({
-          success: true,
-          message: 'Login successful',
-          token,
-          user: {
-            id: savedUser.id,
-            full_name: savedUser.full_name,
-            email: savedUser.email,
-            role: savedUser.role,
-            bio: savedUser.bio || '',
-            linkedin: savedUser.linkedin || '',
-            avatar_url: savedUser.avatar_url || '',
-            is_default_admin: Boolean(savedUser.is_default_admin),
-          },
-        });
-      }
-    }
+    // Handle authentication result
+    if (isAuthenticated && authUser) {
+      // Clear failed attempts on successful login
+      failedAttemptsMap.delete(cleanEmail);
 
-    if (!dbConnected) {
-      return res.status(503).json({
-        success: false,
-        message: 'Database connection failed and account not found in local defaults. Please ensure MySQL is started.',
+      const jwtSecret = process.env.JWT_SECRET || 'wsj_super_secret_jwt_key_2026_key';
+      const token = jwt.sign(
+        { id: authUser.id, email: authUser.email, role: authUser.role },
+        jwtSecret,
+        { expiresIn: '24h' }
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: 'Login successful',
+        token,
+        user: authUser,
       });
     }
 
-    return res.status(401).json({
-      success: false,
-      message: 'Invalid email or password entered. Please try again.',
-    });
+    // Record failed attempt
+    const currentAttempts = (attemptData.count || 0) + 1;
+    if (currentAttempts >= MAX_FAILED_ATTEMPTS) {
+      const lockUntil = Date.now() + LOCKOUT_DURATION_MS;
+      failedAttemptsMap.set(cleanEmail, { count: currentAttempts, lockUntil });
+      return res.status(429).json({
+        success: false,
+        message: 'Account locked for 15 minutes due to 5 failed login attempts.',
+      });
+    } else {
+      failedAttemptsMap.set(cleanEmail, { count: currentAttempts, lockUntil: 0 });
+      return res.status(401).json({
+        success: false,
+        message: `Invalid email or password entered. (${currentAttempts}/${MAX_FAILED_ATTEMPTS} attempts before lockout)`,
+      });
+    }
   } catch (error) {
     console.error('Login controller error:', error);
     return res.status(500).json({

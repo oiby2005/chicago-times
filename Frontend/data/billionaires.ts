@@ -81,7 +81,7 @@ export const INITIAL_BILLIONAIRES: BillionaireItem[] = [
       { year: 2025, value: 340 },
       { year: 2026, value: 839 },
     ],
-    editorLastUpdated: "Last Updated Sep 15, 2026, 6:30am EDT",
+    editorLastUpdated: "Last Updated Sep 15, 2026, 6:30am",
     editorBulletPoints: [
       "Elon Musk became the world's first trillionaire on June 12 when SpaceX went public.",
       "SpaceX opened its first day of trading as a public company at a valuation of nearly $2 trillion. Musk owns 38% of the company (including options).",
@@ -134,7 +134,7 @@ export const INITIAL_BILLIONAIRES: BillionaireItem[] = [
       { year: 2025, value: 220 },
       { year: 2026, value: 233 },
     ],
-    editorLastUpdated: "Last Updated Oct 1, 2026, 8:15am EDT",
+    editorLastUpdated: "Last Updated Oct 1, 2026, 8:15am",
     editorBulletPoints: [
       "Bernard Arnault oversees the LVMH empire of 75 luxury fashion and cosmetics brands.",
       "His father made a fortune in construction; Arnault used $15 million from that business to buy Christian Dior in 1984.",
@@ -257,6 +257,26 @@ export const INITIAL_BILLIONAIRES: BillionaireItem[] = [
 
 export function getBillionairesList(): BillionaireItem[] {
   if (typeof window === "undefined") return INITIAL_BILLIONAIRES;
+
+  // Background fetch from backend DB
+  fetch("http://localhost:5000/api/billionaires")
+    .then((res) => res.ok ? res.json() : null)
+    .then((data) => {
+      if (data && data.success && Array.isArray(data.billionaires) && data.billionaires.length > 0) {
+        const trimmed = data.billionaires.slice(0, 20).map((item: any, index: number) => ({
+          ...item,
+          rank: index + 1,
+        }));
+        const existing = localStorage.getItem("wsj_billionaires_list");
+        const newStr = JSON.stringify(trimmed);
+        if (existing !== newStr) {
+          localStorage.setItem("wsj_billionaires_list", newStr);
+          window.dispatchEvent(new Event("wsj_billionaires_updated"));
+        }
+      }
+    })
+    .catch(() => {});
+
   try {
     const stored = localStorage.getItem("wsj_billionaires_list");
     if (stored) {
@@ -271,12 +291,34 @@ export function getBillionairesList(): BillionaireItem[] {
 
 export function saveBillionairesList(items: BillionaireItem[]): void {
   if (typeof window === "undefined") return;
+  const trimmed = items.slice(0, 20).map((item, index) => ({
+    ...item,
+    rank: index + 1,
+  }));
+
   try {
-    const trimmed = items.slice(0, 20).map((item, index) => ({
-      ...item,
-      rank: index + 1,
-    }));
     localStorage.setItem("wsj_billionaires_list", JSON.stringify(trimmed));
     window.dispatchEvent(new Event("wsj_billionaires_updated"));
   } catch (e) {}
+
+  // Save to MySQL database & upload headshots to Backblaze B2
+  fetch("http://localhost:5000/api/billionaires", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ billionaires: trimmed }),
+  })
+    .then((res) => res.ok ? res.json() : null)
+    .then((data) => {
+      if (data && data.success && Array.isArray(data.billionaires) && data.billionaires.length > 0) {
+        const updatedWithB2Urls = data.billionaires.slice(0, 20).map((item: any, index: number) => ({
+          ...item,
+          rank: index + 1,
+        }));
+        localStorage.setItem("wsj_billionaires_list", JSON.stringify(updatedWithB2Urls));
+        window.dispatchEvent(new Event("wsj_billionaires_updated"));
+      }
+    })
+    .catch((err) => {
+      console.warn("Backend save database warning:", err);
+    });
 }

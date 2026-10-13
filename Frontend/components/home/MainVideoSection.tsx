@@ -95,8 +95,30 @@ function resolveThumbnail(videoUrl: string, providedThumb?: string): string {
   return "https://images.unsplash.com/photo-1508614589041-895b88991e3e?fm=webp&fit=crop&w=800&q=80";
 }
 
+function getEmbedInfo(url?: string, platform?: string): { isEmbeddable: boolean; embedUrl?: string } {
+  if (!url) return { isEmbeddable: false };
+  const str = `${url || ""} ${platform || ""}`.toLowerCase();
+  if (str.includes("facebook") || str.includes("fb.watch") || str.includes("instagram") || str.includes("instagr.am")) {
+    return { isEmbeddable: false };
+  }
+  const ytMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]+)/i);
+  if (ytMatch && ytMatch[1]) {
+    return { isEmbeddable: true, embedUrl: `https://www.youtube.com/embed/${ytMatch[1]}?autoplay=1&rel=0` };
+  }
+  if (url.includes("rumble.com")) {
+    const rumbleMatch = url.match(/rumble\.com\/(?:embed\/)?([a-zA-Z0-9_-]+)/i);
+    if (rumbleMatch && rumbleMatch[1]) {
+      const rumbleId = rumbleMatch[1];
+      const embedUrl = rumbleId.startsWith("v") ? `https://rumble.com/embed/${rumbleId}/?pub=4` : `https://rumble.com/embed/${rumbleId}/`;
+      return { isEmbeddable: true, embedUrl };
+    }
+  }
+  return { isEmbeddable: false };
+}
+
 export const MainVideoSection: React.FC = () => {
   const [slots, setSlots] = useState<MainVideoSlot[]>(DEFAULT_MAIN_VIDEOS_SLOTS);
+  const [activePlayingSlot, setActivePlayingSlot] = useState<number | null>(null);
 
   const loadSlots = async () => {
     if (typeof window === "undefined") return;
@@ -188,71 +210,136 @@ export const MainVideoSection: React.FC = () => {
   return (
     <div className="w-full font-sans select-none pt-2 pb-4">
       {/* Section Header: Videos */}
-      <div className="flex items-center justify-between pb-2 mb-3 border-b border-dashed border-[#CCCCCC]">
+      <div className="flex items-center justify-between pb-2 mb-[24px] md:mb-3 border-b border-dashed border-[#CCCCCC]">
         <h2 className="font-serif font-bold text-[24px] sm:text-[28px] text-[#111111] tracking-tight">
           Videos
         </h2>
       </div>
 
-      {/* Slot 1: Main Widescreen Featured Video Player Card - Clicking opens link in new tab */}
-      <a
-        href={slot1.videoUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="block relative w-full aspect-[16/9] bg-black overflow-hidden group mb-4 shadow-md rounded-xs text-decoration-none cursor-pointer"
-      >
-        <img
-          src={slot1.thumbnailUrl || "https://images.unsplash.com/photo-1508614589041-895b88991e3e?fm=webp&fit=crop&w=1200&q=80"}
-          alt={slot1Title}
-          className={`w-full h-full ${
-            isVerticalVideo(slot1.videoUrl, slot1.platform) ? "object-contain" : "object-cover"
-          } bg-black opacity-90 group-hover:scale-105 transition-transform duration-300`}
-        />
+      {/* Slot 1: Main Widescreen Featured Video Player Card */}
+      {(() => {
+        const slot1Embed = getEmbedInfo(slot1.videoUrl, slot1.platform);
+        const isSlot1Playing = activePlayingSlot === 1 && slot1Embed.isEmbeddable;
 
-        {/* Play Icon Center */}
-        <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/10 transition-colors">
-          <div className="w-16 h-16 rounded-full bg-white/90 text-black flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
-            <svg className="w-7 h-7 fill-current translate-x-0.5" viewBox="0 0 24 24">
-              <path d="M8 5v14l11-7z" />
-            </svg>
-          </div>
-        </div>
+        if (isSlot1Playing && slot1Embed.embedUrl) {
+          return (
+            <div className="relative w-full aspect-[16/9] bg-black overflow-hidden mb-4 shadow-md rounded-xs">
+              <iframe
+                src={slot1Embed.embedUrl}
+                title={slot1Title}
+                className="w-full h-full border-0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+              <button
+                type="button"
+                onClick={() => setActivePlayingSlot(null)}
+                className="absolute top-3 right-3 bg-black/80 hover:bg-black text-white text-[11px] font-sans font-bold px-3 py-1 rounded-full z-20 shadow-md cursor-pointer flex items-center space-x-1"
+              >
+                <span>✕ Close Video</span>
+              </button>
+            </div>
+          );
+        }
 
-        {/* Top Left: Sound/Platform Pill */}
-        <div className="absolute top-3 left-3 z-10 flex items-center space-x-1.5 bg-white/95 text-black text-[12px] font-sans font-medium px-3 py-1 rounded-full shadow-md">
-          <span className="text-[12px]">
-            🔊 {slot1.platform || "Watch Video"}
-          </span>
-        </div>
-
-        {/* Bottom Video Title & Duration Controls Overlay */}
-        <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/95 via-black/85 to-transparent pt-12 pb-3.5 px-3.5 flex flex-col justify-end text-white text-[12px] font-sans z-10">
-          <h3
-            className="font-serif font-bold text-[18px] sm:text-[20px] text-white leading-tight mb-2 drop-shadow-md group-hover:underline"
-            style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}
+        return (
+          <a
+            href={slot1.videoUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => {
+              if (slot1Embed.isEmbeddable) {
+                e.preventDefault();
+                setActivePlayingSlot(1);
+              }
+            }}
+            className="block relative w-full aspect-[16/9] bg-black overflow-hidden group mb-4 shadow-md rounded-xs text-decoration-none cursor-pointer"
           >
-            {slot1Title}
-          </h3>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <span className="font-mono text-[12px] text-white/90">
-                ⏱ {slot1.duration}
+            <img
+              src={slot1.thumbnailUrl || "https://images.unsplash.com/photo-1508614589041-895b88991e3e?fm=webp&fit=crop&w=1200&q=80"}
+              alt={slot1Title}
+              className={`w-full h-full ${
+                isVerticalVideo(slot1.videoUrl, slot1.platform) ? "object-contain" : "object-cover"
+              } bg-black opacity-90 group-hover:scale-105 transition-transform duration-300`}
+            />
+
+            {/* Play Icon Center */}
+            <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/10 transition-colors">
+              <div className="w-16 h-16 rounded-full bg-white/90 text-black flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
+                <svg className="w-7 h-7 fill-current translate-x-0.5" viewBox="0 0 24 24">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              </div>
+            </div>
+
+            {/* Top Left: Sound/Platform Pill */}
+            <div className="absolute top-3 left-3 z-10 flex items-center space-x-1.5 bg-white/95 text-black text-[12px] font-sans font-medium px-3 py-1 rounded-full shadow-md">
+              <span className="text-[12px]">
+                🔊 {slot1.platform || "Watch Video"}
               </span>
             </div>
-            <span className="text-[11px] font-mono uppercase bg-white/20 backdrop-blur-xs px-2.5 py-0.5 rounded text-white font-bold">
-              Watch Video ↗
-            </span>
-          </div>
-        </div>
-      </a>
 
-      {/* Slots 2-4: 3 Sub-Video Cards Row below slot 1 - Clicking opens link in new tab */}
+            {/* Bottom Video Title & Duration Controls Overlay */}
+            <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/95 via-black/85 to-transparent pt-12 pb-3.5 px-3.5 flex flex-col justify-end text-white text-[12px] font-sans z-10">
+              <h3
+                className="font-serif font-bold text-[18px] sm:text-[20px] text-white leading-tight mb-2 drop-shadow-md group-hover:underline"
+                style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}
+              >
+                {slot1Title}
+              </h3>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <span className="font-mono text-[12px] text-white/90">
+                    ⏱ {slot1.duration}
+                  </span>
+                </div>
+                <span className="text-[11px] font-mono uppercase bg-white/20 backdrop-blur-xs px-2.5 py-0.5 rounded text-white font-bold">
+                  {slot1Embed.isEmbeddable ? "▶ Play Video" : "Watch Video ↗"}
+                </span>
+              </div>
+            </div>
+          </a>
+        );
+      })()}
+
+      {/* Slots 2-4: 3 Sub-Video Cards Row below slot 1 */}
       {subSlots.length > 0 && (
         <div className={`grid grid-cols-1 ${
           subSlots.length === 1 ? "md:grid-cols-1" : subSlots.length === 2 ? "md:grid-cols-2" : "md:grid-cols-3"
-        } gap-4 pt-5 mt-2`}>
+        } gap-[28px] md:gap-4 pt-5 mt-2`}>
           {subSlots.map((video) => {
             const subTitle = cleanVideoTitle(video.title);
+            const videoEmbed = getEmbedInfo(video.videoUrl, video.platform);
+            const isSubPlaying = activePlayingSlot === video.slotNumber && videoEmbed.isEmbeddable;
+
+            if (isSubPlaying && videoEmbed.embedUrl) {
+              return (
+                <div key={video.id || video.slotNumber} className="flex flex-col justify-start">
+                  <div className="relative aspect-[16/9] w-full overflow-hidden bg-black mb-2 rounded-xs shadow-xs">
+                    <iframe
+                      src={videoEmbed.embedUrl}
+                      title={subTitle}
+                      className="w-full h-full border-0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setActivePlayingSlot(null)}
+                      className="absolute top-2 right-2 bg-black/80 hover:bg-black text-white text-[10px] font-sans px-2 py-0.5 rounded-full z-20 shadow-md cursor-pointer"
+                    >
+                      ✕ Close
+                    </button>
+                  </div>
+                  <h4
+                    className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.2] text-[#111111]"
+                    style={{ display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }}
+                  >
+                    {subTitle}
+                  </h4>
+                </div>
+              );
+            }
 
             return (
               <a
@@ -260,6 +347,12 @@ export const MainVideoSection: React.FC = () => {
                 href={video.videoUrl}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={(e) => {
+                  if (videoEmbed.isEmbeddable) {
+                    e.preventDefault();
+                    setActivePlayingSlot(video.slotNumber);
+                  }
+                }}
                 className="flex flex-col justify-start group cursor-pointer text-decoration-none"
               >
                 <div className="block relative aspect-[16/9] w-full overflow-hidden bg-black mb-2 rounded-xs shadow-xs flex items-center justify-center">

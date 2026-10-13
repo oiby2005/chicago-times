@@ -40,45 +40,49 @@ export default function NewHomeSection1() {
 
   return (
     <section className="w-full bg-white text-[#111111] pt-0 pb-6 select-none">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 mb-6 items-stretch border-b border-dashed border-[#888070] pb-4">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 mb-0 lg:mb-6 items-stretch border-b-0 lg:border-b border-dashed border-[#888070] pb-0 lg:pb-4">
         
         {/* Column 2 (Center 6 of 12 cols ~ 50%): A+ MAIN NEWS -> MAIN BOTTOM PANEL (ORDER-1 ON MOBILE, SHOWS FIRST) */}
-        <div className="col-span-12 lg:col-span-6 px-0 lg:px-[0.3cm] py-2 lg:py-0 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-dashed border-[#888070] order-1 lg:order-2 pb-6 lg:pb-0 mb-6 lg:mb-0">
+        <div className="col-span-12 lg:col-span-6 px-0 lg:px-[0.3cm] py-2 lg:py-0 flex flex-col justify-start lg:justify-between border-b lg:border-b-0 lg:border-r border-dashed border-[#888070] order-1 lg:order-2 pb-6 lg:pb-0 mb-6 lg:mb-0">
           <APlusMainNewsSection />
-          <div className="my-4 border-b border-dashed border-[#888070] mx-1" />
+          <div className="pt-[35px] mb-[35px] lg:pt-2 lg:mb-4 lg:pb-0 border-b border-dashed border-[#888070] mx-1" />
           <MainBottomPanelSection />
         </div>
 
         {/* Column 1 (Left 3 of 12 cols ~ 25%): TOP NEWS -> IN DEPTH PANEL (ORDER-2 ON MOBILE) */}
-        <div className="col-span-12 lg:col-span-3 pr-0 lg:pr-[0.3cm] flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-dashed border-[#888070] order-2 lg:order-1 pb-6 lg:pb-0 mb-6 lg:mb-0">
+        <div className="col-span-12 lg:col-span-3 pr-0 lg:pr-[0.3cm] flex flex-col justify-start lg:justify-between border-b lg:border-b-0 lg:border-r border-dashed border-[#888070] order-2 lg:order-1 pb-6 lg:pb-0 mb-6 lg:mb-0">
           <TopNewsSection />
-          <div className="my-4 border-b border-dashed border-[#888070] mx-1" />
+          <div className="pt-[24px] mb-[24px] lg:pt-2 lg:mb-4 lg:pb-0 border-b border-dashed border-[#888070] mx-1" />
           <InDepthPanelSection />
         </div>
 
         {/* Column 3 (Right 3 of 12 cols ~ 25%): OPINION -> RIGHT MAIN PANEL (ORDER-3 ON MOBILE) */}
-        <div className="col-span-12 lg:col-span-3 pl-0 lg:pl-[0.3cm] pt-2 lg:pt-0 flex flex-col justify-between h-full order-3 lg:order-3">
+        <div className="col-span-12 lg:col-span-3 pl-0 lg:pl-[0.3cm] pt-2 lg:pt-0 flex flex-col justify-start lg:justify-between h-full order-3 lg:order-3">
           <OpinionSection />
-          <div className="my-4 border-b border-dashed border-[#888070] mx-1" />
+          <div className="pt-[24px] mb-[24px] lg:mb-4 lg:py-0 border-b border-dashed border-[#888070] mx-1" />
           <RightMainPanelSection />
         </div>
 
       </div>
+
+      {/* Mobile-only single centered dashed divider below Right Main Panel before Business section */}
+      <div className="pt-[24px] mb-[24px] lg:hidden border-b border-dashed border-[#CCCCCC]" />
 
       {/* ==================== ROW 3: BUSINESS CATEGORY SECTION ==================== */}
       <div className="pt-2 pb-4">
         <BusinessCategorySection />
       </div>
 
-      {/* ==================== ROW 4: WORLD POLITICS CATEGORY SECTION ==================== */}
-      <div className="pt-2">
+      {/* ==================== ROW 4: WORLD POLITICS CATEGORY SECTION (NO UPPER BORDER ON MOBILE) ==================== */}
+      <div className="pt-2 border-t-0">
         <WorldPoliticsCategorySection />
       </div>
 
       {/* ==================== ROW 5: AD 02 BANNER SECTION ==================== */}
-      <div className="pt-2">
+      <div className="pt-2 hidden lg:block">
         <Ad2Section />
       </div>
+      <div className="pt-[20px] pb-[20px] lg:hidden border-b border-dashed border-[#CCCCCC]" />
 
       {/* ==================== ROW 6: EDITORS PICKS SECTION ==================== */}
       <div className="pt-2">
@@ -91,14 +95,15 @@ export default function NewHomeSection1() {
         <div className="col-span-12 lg:col-span-9 pr-0 lg:pr-[0.4cm] mb-0">
           <WSJPromotionSection />
           
-          <div className="pt-4 border-t border-dashed border-[#CCCCCC] mt-4">
+          <div className="border-t border-dashed border-[#CCCCCC] mt-[24px] lg:mt-4 pt-[20px] lg:pt-4">
             <YourWeekendSection />
           </div>
 
-          {/* Ad 03 inside main 9-col content area without top/bottom borders */}
-          <div className="py-2">
+          {/* Ad 03 inside main 9-col content area without top/bottom borders (Hidden on mobile) */}
+          <div className="py-2 hidden lg:block">
             <Ad3Section />
           </div>
+          <div className="pt-[20px] pb-[20px] lg:hidden border-b border-dashed border-[#CCCCCC]" />
 
           {/* People to Know Section (entire section in Row 7) */}
           <div className="pt-2">
@@ -107,7 +112,7 @@ export default function NewHomeSection1() {
         </div>
 
         {/* Right Sidebar Area (3 of 12 cols ~ 25%): Sticky Editorials STOPS right at top edge of Most Popular news section */}
-        <div className="col-span-12 lg:col-span-3 pl-0 lg:pl-[0.4cm] relative h-full min-h-[100%]">
+        <div className="col-span-12 lg:col-span-3 pl-0 lg:pl-[0.4cm] relative h-full min-h-[100%] pt-[40px] lg:pt-0">
           <div className="sticky top-[90px] z-10 self-start w-full">
             <EditorialsSection />
           </div>
@@ -115,7 +120,7 @@ export default function NewHomeSection1() {
       </div>
 
       {/* ==================== ROW 8 & 9 (MIDDLE & TECH REGION): POLITICS & TECH (LEFT 9 COLS) | MOST POPULAR, RECOMMENDED VIDEOS & AD 05 (RIGHT 3 COLS ~ 25%) ==================== */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 pt-4 items-stretch relative">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 pt-[40px] lg:pt-4 items-stretch relative">
         {/* Left 9 Cols: Politics Category Section -> Sticky Tech Category Section */}
         <div className="col-span-12 lg:col-span-9 pr-0 lg:pr-[0.4cm] relative">
           {/* Vertical divider starting horizontally level with top edge of 'Politics' text */}
@@ -132,7 +137,7 @@ export default function NewHomeSection1() {
         <div className="col-span-12 lg:col-span-3 pl-0 lg:pl-[0.4cm] flex flex-col justify-between">
           <div>
             <MostPopularNewsSection />
-            <div className="pt-4">
+            <div className="mt-[24px] pt-[24px] border-t border-dashed border-[#CCCCCC]">
               <RecommendedVideosSection />
             </div>
           </div>
@@ -145,17 +150,17 @@ export default function NewHomeSection1() {
       </div>
 
       {/* ==================== ROW 10: SPORT CATEGORY SECTION (EXTENDS ACROSS ALL 12 COLS - LEFT, CENTER, RIGHT SIDEBAR) ==================== */}
-      <div className="pt-4 mt-4">
+      <div className="pt-0 mt-0 lg:pt-4 lg:mt-4">
         <SportCategorySection />
       </div>
 
       {/* ==================== ROW 11: AD 06 BANNER SECTION ==================== */}
-      <div className="pt-2 my-2">
+      <div className="pt-2 my-2 hidden lg:block">
         <Ad6Section />
       </div>
 
       {/* ==================== ROW 12: ENTERTAINMENT CATEGORY SECTION (NO UPPER BORDER) ==================== */}
-      <div className="pt-2">
+      <div className="pt-[35px] lg:pt-2">
         <EntertainmentCategorySection />
       </div>
 
@@ -176,7 +181,7 @@ export default function NewHomeSection1() {
         <div className="col-span-12 lg:col-span-3 pl-0 lg:pl-[0.4cm] pt-[46px] relative h-full">
           <div className={isPodcastSticky ? "sticky top-[90px] z-10 self-start w-full" : "relative z-10 self-start w-full"}>
             <Ad7Section />
-            <div className="mt-4">
+            <div className="mt-[48px] lg:mt-4">
               <PodcastSection onActiveCountChange={(count) => setActivePodcastCount(count)} />
             </div>
           </div>
@@ -184,7 +189,7 @@ export default function NewHomeSection1() {
       </div>
 
       {/* ==================== ROW 14: LIFESTYLE CATEGORY SECTION (EXTENDS ACROSS ALL 12 COLS - NO UPPER BORDER) ==================== */}
-      <div className="pt-2">
+      <div className="pt-[40px] lg:pt-2">
         <LifestyleCategorySection />
       </div>
 

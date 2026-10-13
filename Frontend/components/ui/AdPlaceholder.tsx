@@ -26,24 +26,29 @@ interface AdPlaceholderProps {
 
 const DEFAULT_SLOT_DIMENSIONS: Record<string, { width: string; height: string; resolution: string }> = {
   hp_slot_1: { width: "w-full max-w-[300px]", height: "h-[300px]", resolution: "300 × 300" },
-  hp_slot_2: { width: "w-full max-w-[970px]", height: "h-[175px]", resolution: "970 × 175" },
+  hp_slot_2: { width: "w-full max-w-full", height: "h-[175px]", resolution: "970 × 175" },
   hp_slot_3: { width: "w-full max-w-[970px]", height: "h-[120px]", resolution: "970 × 120" },
   hp_slot_4: { width: "w-full max-w-[300px]", height: "h-[150px]", resolution: "300 × 150" },
   hp_slot_5: { width: "w-full max-w-[300px]", height: "h-[320px]", resolution: "300 × 320" },
-  hp_slot_6: { width: "w-full max-w-[970px]", height: "h-[180px]", resolution: "970 × 180" },
+  hp_slot_6: { width: "w-full max-w-full", height: "h-[180px]", resolution: "970 × 180" },
   hp_slot_7: { width: "w-full max-w-[300px]", height: "h-[320px]", resolution: "300 × 320" },
-  cat_slot_1: { width: "w-full max-w-[300px]", height: "h-[250px]", resolution: "300 × 250" },
-  cat_slot_2: { width: "w-full max-w-[300px]", height: "h-[600px]", resolution: "300 × 600" },
-  author_slot_1: { width: "w-full max-w-[300px]", height: "h-[250px]", resolution: "300 × 250" },
+  cat_slot_1: { width: "w-full max-w-full", height: "h-[250px]", resolution: "300 × 250" },
+  cat_slot_2: { width: "w-full max-w-full", height: "h-[600px]", resolution: "300 × 600" },
+  author_slot_1: { width: "w-full max-w-full", height: "h-[250px]", resolution: "300 × 250" },
   article_slot_1: { width: "w-full max-w-full", height: "h-[300px]", resolution: "300 × 300" },
   article_slot_2: { width: "w-full max-w-full", height: "h-[300px]", resolution: "300 × 300" },
   article_slot_3: { width: "w-full max-w-full", height: "h-[300px]", resolution: "300 × 300" },
   billionaire_slot_1: { width: "w-full max-w-[970px]", height: "h-[300px]", resolution: "970 × 300" },
-  billionaire_slot_2: { width: "w-full max-w-[300px]", height: "h-[250px]", resolution: "300 × 250" },
-  billionaire_slot_3: { width: "w-full max-w-[300px]", height: "h-[250px]", resolution: "300 × 250" },
-  billionaire_slot_4: { width: "w-full max-w-[300px]", height: "h-[250px]", resolution: "300 × 250" },
+  billionaire_slot_2: { width: "w-full", height: "h-[250px]", resolution: "300 × 250" },
+  billionaire_slot_3: { width: "w-full", height: "h-[250px]", resolution: "300 × 250" },
+  billionaire_slot_4: { width: "w-full", height: "h-[250px]", resolution: "300 × 250" },
   billionaire_slot_5: { width: "w-full max-w-[300px]", height: "h-[300px]", resolution: "300 × 300" },
   billionaire_profile_inline_ad: { width: "w-full max-w-[728px]", height: "h-[90px]", resolution: "728 × 90" },
+  entrepreneurs_slot_1: { width: "w-full max-w-[900px]", height: "h-[370px]", resolution: "900 × 370" },
+  entrepreneur_slot_2: { width: "w-full", height: "h-[250px]", resolution: "300 × 250" },
+  entrepreneur_slot_3: { width: "w-full", height: "h-[250px]", resolution: "300 × 250" },
+  entrepreneur_slot_4: { width: "w-full", height: "h-[250px]", resolution: "300 × 250" },
+  entrepreneur_profile_inline_ad: { width: "w-full max-w-[728px]", height: "h-[90px]", resolution: "728 × 90" },
 };
 
 const SLOT_TITLE_MAP: Record<string, string> = {
@@ -66,6 +71,11 @@ const SLOT_TITLE_MAP: Record<string, string> = {
   billionaire_slot_4: "Billionaire Profile Sticky Ad 02",
   billionaire_slot_5: "Billionaire Profile Sticky Ad 03",
   billionaire_profile_inline_ad: "Billionaire Profile Middle Inline Ad",
+  entrepreneurs_slot_1: "Upcoming Top 20 Entrepreneurs Ad",
+  entrepreneur_slot_2: "Entrepreneur Profile Sidebar Top Ad",
+  entrepreneur_slot_3: "Entrepreneur Profile Sticky Ad 01",
+  entrepreneur_slot_4: "Entrepreneur Profile Sticky Ad 02",
+  entrepreneur_profile_inline_ad: "Entrepreneur Profile Middle Inline Ad",
 };
 
 export const AdPlaceholder: React.FC<AdPlaceholderProps> = ({
@@ -143,22 +153,83 @@ export const AdPlaceholder: React.FC<AdPlaceholderProps> = ({
   if (slotId === "billionaire_slot_1") {
     effectiveHeight = "h-[300px]";
     effectiveResolution = "970 × 300";
+  } else if (slotId === "entrepreneurs_slot_1") {
+    effectiveHeight = "h-[370px]";
+    effectiveResolution = "900 × 370";
   }
 
   // Aspect ratio styling from slot dimension
   let aspectRatioStyle: React.CSSProperties = {};
+  const isSidebarSlot =
+    slotId === "billionaire_slot_2" ||
+    slotId === "billionaire_slot_3" ||
+    slotId === "billionaire_slot_4" ||
+    slotId === "entrepreneur_slot_2" ||
+    slotId === "entrepreneur_slot_3" ||
+    slotId === "entrepreneur_slot_4" ||
+    slotId === "cat_slot_1" ||
+    slotId === "cat_slot_2" ||
+    slotId === "author_slot_1" ||
+    slotId === "article_slot_1" ||
+    slotId === "article_slot_2" ||
+    slotId === "article_slot_3";
+
+  const isFullWidthSlot = slotId === "hp_slot_2" || slotId === "hp_slot_6";
+
   if (slotId === "billionaire_slot_1") {
     aspectRatioStyle = { width: "100%", maxWidth: "970px", height: "300px", aspectRatio: "970 / 300" };
+  } else if (slotId === "entrepreneurs_slot_1") {
+    aspectRatioStyle = { width: "100%", maxWidth: "900px", height: "370px", minHeight: "370px", aspectRatio: "900 / 370" };
+  } else if (isSidebarSlot) {
+    let sideH = "250px";
+    if (slotId === "cat_slot_2") sideH = "600px";
+    else if (slotId === "article_slot_1" || slotId === "article_slot_2" || slotId === "article_slot_3") sideH = "300px";
+    aspectRatioStyle = { width: "100%", maxWidth: "100%", height: sideH, minHeight: sideH };
+  } else if (isFullWidthSlot) {
+    const fullH = slotId === "hp_slot_2" ? "175px" : "180px";
+    aspectRatioStyle = { width: "100%", maxWidth: "100%", height: fullH, minHeight: fullH };
   } else if (slotDim && slotDim.includes("x")) {
     const [wStr, hStr] = slotDim.toLowerCase().split("x");
     const w = parseInt(wStr, 10);
     const h = parseInt(hStr, 10);
     if (w && h && slotId !== "hp_slot_1") {
-      aspectRatioStyle = { aspectRatio: `${w} / ${h}` };
+      aspectRatioStyle = { width: "100%", maxWidth: `${w}px`, height: `${h}px`, minHeight: `${h}px`, aspectRatio: `${w} / ${h}` };
     }
   }
 
+  const isGoogleAdSlot = slotId === "billionaire_profile_inline_ad" || slotId === "article_slot_2" || slot?.actionType === "Google AdSense";
+
+  useEffect(() => {
+    if (isGoogleAdSlot && typeof window !== "undefined") {
+      try {
+        ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
+      } catch (e) {}
+    }
+  }, [isGoogleAdSlot]);
+
   const slotTitle = slot?.slotName || (slotId ? SLOT_TITLE_MAP[slotId] : null);
+
+  // If Google AdSense is designated for this slot and no custom image banner override is active:
+  if (isGoogleAdSlot && (!slot || !slot.imageUrl)) {
+    return (
+      <div className={`flex flex-col items-center justify-center select-none w-full ${className.includes("my-") ? "" : "my-3 mb-4"} ${className}`}>
+        <div className="w-full max-w-[728px] mx-auto flex flex-col items-center justify-center text-center p-2 bg-transparent">
+          <span className="text-[10px] font-sans font-bold text-[#94a3b8] uppercase tracking-wider mb-1">
+            {slotTitle || "Google AdSense"}
+          </span>
+          <ins
+            className="adsbygoogle"
+            style={{ display: "block", width: "100%", minHeight: "90px", textAlign: "center" }}
+            data-ad-client="ca-pub-3455329981771469"
+            data-ad-slot={slotId || "billionaire_profile_inline_ad"}
+            data-ad-format="auto"
+            data-full-width-responsive="true"
+            data-ad-test="on"
+          ></ins>
+        </div>
+      </div>
+    );
+  }
 
   // If slot configuration is active and has an image URL:
   if (slot && slot.active && slot.imageUrl) {
@@ -170,7 +241,7 @@ export const AdPlaceholder: React.FC<AdPlaceholderProps> = ({
     }
 
     const ImageElement = (
-      <div className={`flex flex-col w-full ${className.includes("my-") ? "" : "my-3 mb-4"} ${className}`}>
+      <div className={`flex flex-col w-full ${(isSidebarSlot || isFullWidthSlot) ? "my-0" : className.includes("my-") ? "" : "my-3 mb-4"} ${className}`}>
         <div
           style={aspectRatioStyle}
           className={`${width} ${effectiveHeight} relative overflow-hidden rounded-xs border border-[#e2e2e2] shadow-2xs group flex-1 w-full flex flex-col`}
@@ -203,11 +274,11 @@ export const AdPlaceholder: React.FC<AdPlaceholderProps> = ({
   }
 
   return (
-    <div className={`flex flex-col items-center justify-center select-none w-full ${className.includes("my-") ? "" : "my-3 mb-4"} ${className}`}>
+    <div className={`flex flex-col items-center justify-center select-none w-full ${(isSidebarSlot || isFullWidthSlot) ? "my-0" : className.includes("my-") ? "" : "my-3 mb-4"} ${className}`}>
       {/* Empty Banner Container with title and resolution size */}
       <div
         style={aspectRatioStyle}
-        className={`${width} ${effectiveHeight} mx-auto flex-1 bg-[#f5f5f5] border border-dashed border-[#cccccc] flex flex-col items-center justify-center text-center p-3 rounded-xs shadow-2xs transition-colors hover:bg-[#eaeaea] gap-1.5`}
+        className={`${width} ${effectiveHeight} ${(isSidebarSlot || isFullWidthSlot) ? "w-full" : "mx-auto"} flex-1 bg-[#f5f5f5] border border-dashed border-[#cccccc] flex flex-col items-center justify-center text-center p-3 rounded-xs shadow-2xs transition-colors hover:bg-[#eaeaea] gap-1.5`}
       >
         {slotTitle && (
           <span className="text-[11px] font-sans font-extrabold text-[#0f172a] uppercase tracking-wider">

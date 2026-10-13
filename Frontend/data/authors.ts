@@ -122,9 +122,10 @@ export function getWriterSlugFromUser(user: any): string {
 }
 
 export function getEditPostUrl(post: any, userOrName?: any): string {
-  const name = typeof userOrName === "string" ? userOrName : (userOrName?.full_name || userOrName?.name || "writer");
-  const nameSlug = slugifyAuthorName(name);
-  return `/writer-dashboard/${nameSlug}`;
+  if (post && post.id) {
+    return `/author-workspace/create-post?id=${encodeURIComponent(post.id)}`;
+  }
+  return `/author-workspace/create-post`;
 }
 
 export function getWriterHomepageUrl(user: any): string {
@@ -286,7 +287,22 @@ export function getAuthorBySlug(slug: string): Author {
       image: "https://f005.backblazeb2.com/file/timeschicago/avatars/avatar_writer1_gmail_com_1789032192513.webp",
     };
   }
-  if (cleanSlug === "writer") return defaultWritersMap.writer;
+  if (cleanSlug === "writer") {
+    if (typeof window !== "undefined") {
+      try {
+        const storedUser = JSON.parse(localStorage.getItem("wsj_user") || "null");
+        if (storedUser && (storedUser.full_name || storedUser.name)) {
+          const uName = extractSingleAuthorName(storedUser.full_name || storedUser.name);
+          return {
+            ...defaultWritersMap.writer,
+            name: uName,
+            image: storedUser.avatar_url || storedUser.image || defaultWritersMap.writer.image,
+          };
+        }
+      } catch (e) {}
+    }
+    return defaultWritersMap.writer;
+  }
   if (authorsData[cleanSlug]) return authorsData[cleanSlug];
 
   const rawFormatted = cleanSlug
@@ -308,6 +324,34 @@ export function getAuthorBySlug(slug: string): Author {
 }
 
 export function getAuthorForArticle(articleSlugOrId: string, authorName?: string, authorEmail?: string): Author {
+  if (typeof window !== "undefined") {
+    try {
+      const storedUser = JSON.parse(localStorage.getItem("wsj_user") || "null");
+      if (storedUser && (storedUser.full_name || storedUser.name)) {
+        const uName = extractSingleAuthorName(storedUser.full_name || storedUser.name);
+        const uEmail = (storedUser.email || "").toLowerCase().trim();
+        const aEmail = (authorEmail || "").toLowerCase().trim();
+        const aName = (authorName || "").toLowerCase().trim();
+        if (
+          (aEmail && aEmail === uEmail) ||
+          aName === "writer user" ||
+          aName === "by writer user" ||
+          (uEmail === "writer@gmail.com" && (aName.includes("writer") || !authorName))
+        ) {
+          return {
+            slug: slugifyAuthorName(uName),
+            name: uName,
+            email: uEmail,
+            role: (storedUser.role || "WRITER").toUpperCase(),
+            bio: storedUser.bio || defaultWritersMap.writer.bio,
+            image: storedUser.avatar_url || storedUser.image || "",
+            linkedinUrl: storedUser.linkedin || defaultWritersMap.writer.linkedinUrl,
+          };
+        }
+      }
+    } catch (e) {}
+  }
+
   const email = (authorEmail || "").toLowerCase().trim();
   if (email === "writer1@gmail.com") return getAuthorBySlug("writer1");
   if (email === "writer@gmail.com") return getAuthorBySlug("writer");

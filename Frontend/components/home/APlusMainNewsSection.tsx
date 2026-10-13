@@ -90,7 +90,7 @@ export const APlusMainNewsSection: React.FC<APlusMainNewsSectionProps> = ({
 
   return (
     <article className="w-full h-full flex flex-col justify-between font-sans select-none">
-      {/* Featured Main Hero Image expanding horizontally to align with text below */}
+      {/* Featured Main Hero Image (Stays on Top on Mobile & Desktop) */}
       <Link href={`/article/${displaySlug}`} className="block w-full h-[8.4cm] overflow-hidden bg-gray-100 mb-3 group">
         <img
           src={displayImage}
@@ -119,7 +119,7 @@ export const APlusMainNewsSection: React.FC<APlusMainNewsSectionProps> = ({
       </p>
 
       {/* Metadata Row: Comments, Read Time & Action Icons */}
-      <div className="mt-3.5 flex items-center justify-between font-sans text-[11.5px] text-[#666666]">
+      <div className="mt-3.5 lg:mb-2.5 flex items-center justify-between font-sans text-[11.5px] text-[#666666]">
         {/* Left Side: Read Time */}
         <div className="flex items-center space-x-4">
           <span suppressHydrationWarning>{displayReadTime}</span>
@@ -174,6 +174,7 @@ export const APlusMainNewsSection: React.FC<APlusMainNewsSectionProps> = ({
           </button>
         </div>
       </div>
+
     </article>
   );
 };

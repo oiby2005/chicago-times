@@ -4,7 +4,7 @@ const conn = mysql.createConnection({
   host: 'localhost',
   user: 'root',
   password: '',
-  database: 'wsj_db',
+  database: process.env.DB_NAME || 'timeschicago_db',
 });
 
 conn.query('ALTER TABLE users ADD COLUMN is_default_admin TINYINT(1) DEFAULT 0', (err) => {

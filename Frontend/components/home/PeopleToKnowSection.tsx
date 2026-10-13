@@ -134,7 +134,7 @@ export const PeopleToKnowSection: React.FC = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-0 items-stretch">
         {/* COLUMN 1: Left Hero Photo (Top) + Headline/Summary (Bottom) */}
-        <div className="pr-0 md:pr-4 flex flex-col justify-between border-b md:border-b-0 md:border-r border-dashed border-[#CCCCCC] pb-4 md:pb-0 mb-4 md:mb-0">
+        <div className="pr-0 md:pr-4 flex flex-col justify-between border-b md:border-b-0 md:border-r border-dashed border-[#CCCCCC] pb-[30px] md:pb-0 mb-0 md:mb-0">
           <article className="flex flex-col h-full justify-between">
             <Link
               href={`/article/${leftHero.slug}`}
@@ -170,8 +170,8 @@ export const PeopleToKnowSection: React.FC = () => {
         </div>
 
         {/* COLUMN 2: Center Top Article (Top) + Ad 04 Box (Bottom) */}
-        <div className="px-0 md:px-4 py-4 md:py-0 flex flex-col justify-between h-full border-b md:border-b-0 md:border-r border-dashed border-[#CCCCCC] mb-4 md:mb-0 pb-4 md:pb-0">
-          <article className="pb-3 border-b border-dashed border-[#CCCCCC] flex-1 flex flex-col justify-between">
+        <div className="px-0 md:px-4 pt-[30px] md:pt-0 pb-[30px] md:pb-0 flex flex-col justify-between h-full border-b md:border-b-0 md:border-r border-dashed border-[#CCCCCC] mb-0 md:mb-0">
+          <article className="py-0 md:pt-0 md:pb-3 border-b-0 md:border-b border-dashed border-[#CCCCCC] md:h-[205px] md:flex-none flex-1 flex flex-col justify-between">
             <div>
               <h4 className="font-serif font-bold text-[17px] sm:text-[18px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-1.5" style={{ fontFamily: "Georgia, serif" }}>
                 <Link href={`/article/${centerTop.slug}`}>
@@ -191,14 +191,14 @@ export const PeopleToKnowSection: React.FC = () => {
             </div>
           </article>
 
-          <div className="pt-3 flex flex-col justify-end shrink-0">
+          <div className="pt-0 md:pt-3 hidden md:flex flex-1 flex-col justify-end shrink-0">
             <AdPlaceholder slotId="hp_slot_4" width="w-full" height="h-[150px]" resolution="300 × 150" />
           </div>
         </div>
 
         {/* COLUMN 3: Right Top Article (Top) + Right Bottom Story (Bottom) */}
-        <div className="pl-0 md:pl-4 flex flex-col justify-between h-full">
-          <article className="pb-3 border-b border-dashed border-[#CCCCCC] flex-1 flex flex-col justify-between">
+        <div className="pl-0 md:pl-4 pt-[30px] md:pt-0 flex flex-col justify-between h-full">
+          <article className="pb-[30px] md:pb-3 border-b border-dashed border-[#CCCCCC] md:h-[205px] md:flex-none flex-1 flex flex-col justify-between">
             <div>
               <h4 className="font-serif font-bold text-[17px] sm:text-[18px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-1.5" style={{ fontFamily: "Georgia, serif" }}>
                 <Link href={`/article/${rightTop.slug}`}>
@@ -218,7 +218,7 @@ export const PeopleToKnowSection: React.FC = () => {
             </div>
           </article>
 
-          <article className="pt-3 flex-1 flex flex-col justify-between">
+          <article className="pt-[30px] md:pt-3 flex-1 flex flex-col justify-between">
             <div>
               <h4 className="font-serif font-bold text-[17px] sm:text-[18px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-1.5" style={{ fontFamily: "Georgia, serif" }}>
                 <Link href={`/article/${rightBottom.slug}`}>

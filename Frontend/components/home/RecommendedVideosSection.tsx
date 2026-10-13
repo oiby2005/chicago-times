@@ -151,7 +151,7 @@ export const RecommendedVideosSection: React.FC = () => {
   }, []);
 
   return (
-    <div className="w-full font-sans select-none pt-4 pb-2 my-0">
+    <div className="w-full font-sans select-none pt-0 pb-2 my-0">
       {/* Section Title */}
       <div className="mb-4">
         <h3 className="font-sans font-bold text-[20px] text-[#111111] tracking-tight">
@@ -160,8 +160,8 @@ export const RecommendedVideosSection: React.FC = () => {
       </div>
 
       {/* Videos List */}
-      <div className="flex flex-col space-y-4">
-        {videos.map((video) => {
+      <div className="divide-y divide-dashed divide-[#CCCCCC]">
+        {videos.map((video, idx) => {
           const displayTitle = cleanVideoTitle(video.title);
           const pLower = (video.platform || "").toLowerCase();
           const uLower = (video.videoUrl || "").toLowerCase();
@@ -178,7 +178,10 @@ export const RecommendedVideosSection: React.FC = () => {
             uLower.includes("/reel/");
 
           return (
-            <article key={video.id || video.slotNumber} className="flex items-start justify-between gap-3">
+            <article 
+              key={video.id || video.slotNumber} 
+              className={`flex items-start justify-between gap-3 ${idx === 0 ? "pb-[24px]" : idx === videos.length - 1 ? "pt-[24px]" : "py-[24px]"}`}
+            >
               {/* Title with Line Clamp 4 */}
               <h4
                 className="font-poppins font-medium text-[14px] sm:text-[15px] leading-snug text-[#111111] hover:underline cursor-pointer flex-1"
@@ -203,7 +206,6 @@ export const RecommendedVideosSection: React.FC = () => {
                     isShortOrReel ? "object-contain bg-black" : "object-cover object-center"
                   }`}
                 />
-
               </a>
             </article>
           );

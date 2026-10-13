@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "@/components/navigation/Header";
 import StickyHeaderBar from "@/components/navigation/StickyHeaderBar";
 import Footer from "@/components/layout/Footer";
@@ -19,10 +19,82 @@ export default function AdvertiseClient() {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [lockoutSeconds, setLockoutSeconds] = useState(0);
   const [submitStatus, setSubmitStatus] = useState<{
     success?: boolean;
     message?: string;
   } | null>(null);
+
+  const formatLockoutTime = (totalSec: number) => {
+    const hours = Math.floor(totalSec / 3600);
+    const mins = Math.floor((totalSec % 3600) / 60);
+    const secs = totalSec % 60;
+    if (hours > 0) {
+      return `${hours}h ${mins}m ${secs.toString().padStart(2, "0")}s`;
+    }
+    return `${mins}m ${secs.toString().padStart(2, "0")}s`;
+  };
+
+  // Restore persistent lockout on page load / refresh
+  useEffect(() => {
+    try {
+      const storedUntil = localStorage.getItem("wsj_advertise_lockout_until");
+      if (storedUntil) {
+        const until = parseInt(storedUntil, 10);
+        const now = Date.now();
+        if (until > now) {
+          const sec = Math.ceil((until - now) / 1000);
+          setLockoutSeconds(sec);
+          setSubmitStatus({
+            success: false,
+            message: `Too many advertising requests submitted from this connection. Please wait: ${formatLockoutTime(sec)} remaining.`,
+          });
+        } else {
+          localStorage.removeItem("wsj_advertise_lockout_until");
+          setLockoutSeconds(0);
+        }
+      }
+    } catch (e) {}
+  }, []);
+
+  // Live countdown timer ticking down every second
+  useEffect(() => {
+    if (lockoutSeconds <= 0) return;
+
+    const timer = setInterval(() => {
+      try {
+        const storedUntil = localStorage.getItem("wsj_advertise_lockout_until");
+        if (storedUntil) {
+          const until = parseInt(storedUntil, 10);
+          const now = Date.now();
+          if (until > now) {
+            const sec = Math.ceil((until - now) / 1000);
+            setLockoutSeconds(sec);
+            setSubmitStatus({
+              success: false,
+              message: `Too many advertising requests submitted from this connection. Please wait: ${formatLockoutTime(sec)} remaining.`,
+            });
+          } else {
+            localStorage.removeItem("wsj_advertise_lockout_until");
+            setLockoutSeconds(0);
+            setSubmitStatus(null);
+          }
+        } else {
+          setLockoutSeconds((prev) => {
+            if (prev <= 1) {
+              setSubmitStatus(null);
+              return 0;
+            }
+            return prev - 1;
+          });
+        }
+      } catch (e) {
+        setLockoutSeconds((prev) => (prev > 0 ? prev - 1 : 0));
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [lockoutSeconds]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -106,6 +178,10 @@ export default function AdvertiseClient() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (lockoutSeconds > 0) {
+      return;
+    }
+
     if (!formData.name || !formData.company || !formData.email || !formData.details) {
       setSubmitStatus({
         success: false,
@@ -146,6 +222,26 @@ export default function AdvertiseClient() {
         body: JSON.stringify(formData),
       });
       const data = await res.json();
+
+      if (res.status === 429) {
+        const retryHeader = res.headers.get("retry-after");
+        const retrySec = retryHeader ? parseInt(retryHeader, 10) : 60 * 60;
+        const sec = isNaN(retrySec) || retrySec <= 0 ? 60 * 60 : retrySec;
+        const lockoutUntil = Date.now() + sec * 1000;
+        if (typeof window !== "undefined") {
+          localStorage.setItem("wsj_advertise_lockout_until", lockoutUntil.toString());
+        }
+        setLockoutSeconds(sec);
+        setSubmitStatus({
+          success: false,
+          message:
+            data.message ||
+            `Too many advertising requests submitted from this connection. Please wait: ${formatLockoutTime(
+              sec
+            )} remaining.`,
+        });
+        return;
+      }
 
       if (res.ok && data.success) {
         setSubmitStatus({
@@ -278,7 +374,7 @@ export default function AdvertiseClient() {
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-5 font-sans text-xs">
+              <form onSubmit={handleSubmit} suppressHydrationWarning className="space-y-5 font-sans text-xs">
                 {/* Row 1: Name & Company */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
@@ -292,7 +388,9 @@ export default function AdvertiseClient() {
                       onChange={handleChange}
                       placeholder="John Doe"
                       required
-                      className="w-full px-3.5 py-2.5 border border-gray-300 rounded text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#00558c] transition-colors"
+                      disabled={isSubmitting || lockoutSeconds > 0}
+                      suppressHydrationWarning
+                      className="w-full px-3.5 py-2.5 border border-gray-300 rounded text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#00558c] transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
                     />
                   </div>
 
@@ -307,7 +405,9 @@ export default function AdvertiseClient() {
                       onChange={handleChange}
                       placeholder="Company LLC"
                       required
-                      className="w-full px-3.5 py-2.5 border border-gray-300 rounded text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#00558c] transition-colors"
+                      disabled={isSubmitting || lockoutSeconds > 0}
+                      suppressHydrationWarning
+                      className="w-full px-3.5 py-2.5 border border-gray-300 rounded text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#00558c] transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
                     />
                   </div>
                 </div>
@@ -325,7 +425,9 @@ export default function AdvertiseClient() {
                       onChange={handleChange}
                       placeholder="john.doe@example.com"
                       required
-                      className="w-full px-3.5 py-2.5 border border-gray-300 rounded text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#00558c] transition-colors"
+                      disabled={isSubmitting || lockoutSeconds > 0}
+                      suppressHydrationWarning
+                      className="w-full px-3.5 py-2.5 border border-gray-300 rounded text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#00558c] transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
                     />
                   </div>
 
@@ -338,7 +440,9 @@ export default function AdvertiseClient() {
                       value={formData.serviceOption}
                       onChange={handleChange}
                       required
-                      className="w-full px-3.5 py-2.5 border border-gray-300 rounded text-xs text-gray-900 bg-white focus:outline-none focus:border-[#00558c] transition-colors"
+                      disabled={isSubmitting || lockoutSeconds > 0}
+                      suppressHydrationWarning
+                      className="w-full px-3.5 py-2.5 border border-gray-300 rounded text-xs text-gray-900 bg-white focus:outline-none focus:border-[#00558c] transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
                     >
                       <option value="Publish Company Article">Publish Company Article</option>
                       <option value="Publish CEO Profile">Publish CEO Profile</option>
@@ -361,7 +465,9 @@ export default function AdvertiseClient() {
                       onChange={handleChange}
                       placeholder="+1 (555) 000-0000"
                       required
-                      className="w-full px-3.5 py-2.5 border border-gray-300 rounded text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#00558c] transition-colors"
+                      disabled={isSubmitting || lockoutSeconds > 0}
+                      suppressHydrationWarning
+                      className="w-full px-3.5 py-2.5 border border-gray-300 rounded text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#00558c] transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
                     />
                   </div>
 
@@ -376,7 +482,9 @@ export default function AdvertiseClient() {
                       onChange={handleChange}
                       placeholder="+1 (555) 000-0000"
                       required
-                      className="w-full px-3.5 py-2.5 border border-gray-300 rounded text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#00558c] transition-colors"
+                      disabled={isSubmitting || lockoutSeconds > 0}
+                      suppressHydrationWarning
+                      className="w-full px-3.5 py-2.5 border border-gray-300 rounded text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#00558c] transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
                     />
                   </div>
                 </div>
@@ -393,7 +501,9 @@ export default function AdvertiseClient() {
                     onChange={handleChange}
                     placeholder="Please enter details of your advertising requirements, budget, or preferred dates..."
                     required
-                    className="w-full px-3.5 py-2.5 border border-gray-300 rounded text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#00558c] transition-colors resize-y"
+                    disabled={isSubmitting || lockoutSeconds > 0}
+                    suppressHydrationWarning
+                    className="w-full px-3.5 py-2.5 border border-gray-300 rounded text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#00558c] transition-colors resize-y disabled:bg-gray-100 disabled:cursor-not-allowed"
                   />
                 </div>
 
@@ -401,13 +511,27 @@ export default function AdvertiseClient() {
                 <div className="pt-2">
                   <button
                     type="submit"
-                    disabled={isSubmitting}
-                    className="bg-[#00558c] hover:bg-[#00406c] text-white font-bold text-xs uppercase tracking-wider px-6 py-3 rounded flex items-center space-x-2 transition-colors disabled:opacity-50"
+                    disabled={isSubmitting || lockoutSeconds > 0}
+                    suppressHydrationWarning
+                    className={`font-bold text-xs uppercase tracking-wider px-6 py-3 rounded flex items-center space-x-2 transition-colors disabled:opacity-50 ${
+                      lockoutSeconds > 0
+                        ? "bg-red-700 text-white cursor-not-allowed"
+                        : "bg-[#00558c] hover:bg-[#00406c] text-white"
+                    }`}
                   >
-                    <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
-                      <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
-                    </svg>
-                    <span>{isSubmitting ? "SUBMITTING..." : "SUBMIT REQUEST"}</span>
+                    {lockoutSeconds > 0 ? (
+                      <>
+                        <span className="text-sm">🔒</span>
+                        <span>LOCKED ({formatLockoutTime(lockoutSeconds)} REMAINING)</span>
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                          <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+                        </svg>
+                        <span>{isSubmitting ? "SUBMITTING..." : "SUBMIT REQUEST"}</span>
+                      </>
+                    )}
                   </button>
                 </div>
               </form>

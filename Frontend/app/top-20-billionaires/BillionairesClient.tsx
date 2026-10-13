@@ -9,6 +9,7 @@ import StickySubscribeBar from "@/components/ui/StickySubscribeBar";
 import Container from "@/components/layout/Container";
 import AdPlaceholder from "@/components/ui/AdPlaceholder";
 import { BillionaireItem, WealthPoint, getBillionairesList } from "@/data/billionaires";
+import { usePathname } from "next/navigation";
 
 // Explicit Industry Options list as requested
 const INDUSTRY_OPTIONS = [
@@ -65,7 +66,10 @@ function WealthHistoryChart({ history, endYear }: { history?: WealthPoint[]; end
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
   const data = useMemo(() => {
-    if (history && history.length > 0) return history;
+    if (history && history.length > 0) {
+      // Listing pages (/world-billionaire & /upcoming-top-20) display the latest 6 years
+      return history.slice(-6);
+    }
     const targetEndYear = endYear || 2026;
     return [
       { year: targetEndYear - 5, value: 190 },
@@ -100,8 +104,11 @@ function WealthHistoryChart({ history, endYear }: { history?: WealthPoint[]; end
 
   return (
     <div className="flex flex-col items-center md:items-end w-full max-w-[360px] select-none">
-      <h4 className="font-serif font-bold text-[14px] text-[#111111] mb-1 tracking-tight">
-        Billionaires Wealth History
+      <h4
+        className="font-serif font-bold text-[14px] text-[#111111] mb-1 tracking-tight"
+        style={{ fontFamily: "Georgia, serif" }}
+      >
+        World Wealth History
       </h4>
       <div className="relative w-full">
         <svg viewBox={`0 0 ${svgWidth} ${svgHeight}`} className="w-full h-auto overflow-visible">
@@ -197,18 +204,35 @@ function WealthHistoryChart({ history, endYear }: { history?: WealthPoint[]; end
 }
 
 export default function BillionairesClient() {
+  const pathname = usePathname();
+  const isUpcomingPage = pathname?.includes("/upcoming-top-20") || pathname?.includes("/top-20-billionaires");
+  const isWorldBillionairePage = pathname?.includes("/world-billionaire");
+  const basePath = isUpcomingPage ? "/upcoming-top-20" : isWorldBillionairePage ? "/world-billionaire" : "/billionaires";
+  const pageTitle = isUpcomingPage ? "Upcoming Top 20 Billionaires" : "World’s Billionaires List";
+
+  const slugify = (str: string) =>
+    (str || "")
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)+/g, "");
+
   const [billionaires, setBillionaires] = useState<BillionaireItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIndustry, setSelectedIndustry] = useState("");
   const [selectedCountry, setSelectedCountry] = useState("");
   const [selectedGender, setSelectedGender] = useState("");
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
-  // Default to null so NO billionaire profile opens automatically upon page visit
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  // Always keep first profile opened by default, and switch when another profile is clicked
+  const [expandedId, setExpandedId] = useState<string | null>(() => getBillionairesList()[0]?.id || "1");
 
   const loadData = useCallback(() => {
-    setBillionaires(getBillionairesList());
-  }, []);
+    const list = getBillionairesList();
+    setBillionaires(list);
+    if (list.length > 0 && !expandedId) {
+      setExpandedId(list[0].id);
+    }
+  }, [expandedId]);
 
   useEffect(() => {
     loadData();
@@ -256,6 +280,16 @@ export default function BillionairesClient() {
     });
   }, [billionaires, searchQuery, selectedIndustry, selectedCountry, selectedGender]);
 
+  // Keep first profile open when data is ready or when filtering
+  useEffect(() => {
+    if (filteredBillionaires.length > 0) {
+      const exists = filteredBillionaires.some((b) => b.id === expandedId);
+      if (!exists || !expandedId) {
+        setExpandedId(filteredBillionaires[0].id);
+      }
+    }
+  }, [filteredBillionaires, expandedId]);
+
   // Helper to render Change Status icon/indicator
   const renderChangeIndicator = (status: BillionaireItem["changeStatus"]) => {
     switch (status) {
@@ -283,7 +317,7 @@ export default function BillionairesClient() {
         {/* Initial Header Section */}
         <div className="w-full bg-white text-center pt-4 pb-1 sm:pt-8 sm:pb-2">
           <h1 className="font-serif font-black text-[36px] sm:text-[48px] md:text-[56px] leading-tight text-[#111111] tracking-tight">
-            World’s Billionaires List
+            {pageTitle}
           </h1>
           <p className="font-sans font-bold text-[13px] sm:text-[14px] uppercase tracking-widest text-[#888888] mt-2 sm:mt-3 mb-1">
             The Richest In 2026
@@ -305,13 +339,14 @@ export default function BillionairesClient() {
             style={{ fontFamily: "Exchange, Georgia, 'Source Serif 4', serif" }}
             className="font-normal text-[13.5px] sm:text-[14.5px] md:text-[15.5px] lg:text-[16.5px] leading-[1.75] text-[#1a1a1a] text-justify"
           >
-            There has never been a more transformative era for wealth creation. Driven by artificial intelligence innovations, resilient capital markets, and expanding global enterprises, a record 3,428 business leaders, founders, and investors earned a place on this year's <span className="font-normal text-[#1a1a1a]">Times Chicago World's Billionaires List</span> — an increase of 400 over last year. They are richer than ever, worth a record <span className="font-normal text-[#1a1a1a]">$20.1 trillion</span>, up $4 trillion from last year. The U.S. has the most billionaires, with a record 989, including 15 of the top 20 rankings. China (including Hong Kong) follows next with 610, and India (229) ranks a distant third. We used stock prices and exchange rates from March 1, 2026. For daily updated net worths of all billionaires, check out our <Link href="/billionaires/1" className="text-[#2563eb] font-normal hover:underline">real-time billionaires ranking</Link>.
+            There has never been a more transformative era for wealth creation. Driven by artificial intelligence innovations, resilient capital markets, and expanding global enterprises, a record 3,428 business leaders, founders, and investors earned a place on this year's <span className="font-normal text-[#1a1a1a]">Times Chicago World's Billionaires List</span> — an increase of 400 over last year. They are richer than ever, worth a record <span className="font-normal text-[#1a1a1a]">$20.1 trillion</span>, up $4 trillion from last year. The U.S. has the most billionaires, with a record 989, including 15 of the top 20 rankings. China (including Hong Kong) follows next with 610, and India (229) ranks a distant third. We used stock prices and exchange rates from March 1, 2026. For daily updated net worths of all billionaires, check out our <Link href={`${basePath}/1`} className="text-[#111111] font-normal no-underline hover:text-black">real-time billionaires ranking</Link>.
           </p>
 
           {/* See List Button */}
           <div className="flex justify-center mt-6 mb-4">
             <button
               type="button"
+              suppressHydrationWarning
               onClick={() => {
                 const el = document.getElementById("richest-people-table");
                 if (el) {
@@ -367,6 +402,7 @@ export default function BillionairesClient() {
                 <div className="relative">
                   <input
                     type="text"
+                    suppressHydrationWarning
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search this list"
@@ -390,6 +426,7 @@ export default function BillionairesClient() {
                   FILTER BY INDUSTRY
                 </label>
                 <select
+                  suppressHydrationWarning
                   value={selectedIndustry}
                   onChange={(e) => setSelectedIndustry(e.target.value)}
                   className="w-full h-[40px] bg-white border border-[#CCCCCC] px-3 text-[13px] font-sans text-[#111111] focus:outline-none focus:border-black rounded-none cursor-pointer shadow-2xs"
@@ -410,6 +447,7 @@ export default function BillionairesClient() {
                 </label>
                 <div className="flex items-center space-x-2">
                   <select
+                    suppressHydrationWarning
                     value={selectedCountry}
                     onChange={(e) => setSelectedCountry(e.target.value)}
                     className="flex-1 min-w-0 h-[40px] bg-white border border-[#CCCCCC] px-3 text-[13px] font-sans text-[#111111] focus:outline-none focus:border-black rounded-none cursor-pointer shadow-2xs"
@@ -426,6 +464,7 @@ export default function BillionairesClient() {
                     {/* White Filters Button */}
                     <button
                       type="button"
+                      suppressHydrationWarning
                       onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
                       className="h-[40px] bg-white hover:bg-[#F3F4F6] border border-[#CCCCCC] text-[#111111] px-4 font-sans font-bold text-[13px] rounded-xl shadow-2xs flex items-center space-x-1.5 cursor-pointer whitespace-nowrap transition-colors"
                     >
@@ -459,6 +498,7 @@ export default function BillionairesClient() {
                           <label className="flex items-center space-x-3 cursor-pointer select-none">
                             <input
                               type="checkbox"
+                              suppressHydrationWarning
                               checked={selectedGender === "Male"}
                               onChange={(e) => {
                                 if (e.target.checked) setSelectedGender("Male");
@@ -473,6 +513,7 @@ export default function BillionairesClient() {
                           <label className="flex items-center space-x-3 cursor-pointer select-none">
                             <input
                               type="checkbox"
+                              suppressHydrationWarning
                               checked={selectedGender === "Female"}
                               onChange={(e) => {
                                 if (e.target.checked) setSelectedGender("Female");
@@ -491,6 +532,7 @@ export default function BillionairesClient() {
                   {(selectedGender || selectedIndustry || selectedCountry || searchQuery) && (
                     <button
                       type="button"
+                      suppressHydrationWarning
                       onClick={() => {
                         setSelectedGender("");
                         setSelectedIndustry("");
@@ -530,7 +572,7 @@ export default function BillionairesClient() {
                       <React.Fragment key={item.id}>
                         {/* Main Billionaire Row: White background when open */}
                         <tr
-                          onClick={() => setExpandedId(isExpanded ? null : item.id)}
+                          onClick={() => setExpandedId(item.id)}
                           className={`cursor-pointer transition-colors ${
                             isExpanded ? "bg-white" : "hover:bg-[#FAF9F5]"
                           }`}
@@ -586,7 +628,7 @@ export default function BillionairesClient() {
 
                                     <div className="flex items-center justify-center sm:justify-start pt-1">
                                       <Link
-                                        href={`/billionaires/${item.id}`}
+                                        href={`${basePath}/${slugify(item.name)}`}
                                         onClick={(e) => e.stopPropagation()}
                                         className="bg-[#111111] hover:bg-[#333333] text-white font-sans font-bold text-[12px] px-6 py-2.5 rounded-lg shadow-2xs transition-colors whitespace-nowrap inline-block"
                                       >

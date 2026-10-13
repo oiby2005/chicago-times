@@ -6,7 +6,7 @@ async function seedDatabase() {
   const host = process.env.DB_HOST || 'localhost';
   const user = process.env.DB_USER || 'root';
   const password = process.env.DB_PASSWORD || '';
-  const database = process.env.DB_NAME || 'wsj_db';
+  const database = process.env.DB_NAME || 'timeschicago_db';
 
   console.log('Connecting to MySQL server...');
   

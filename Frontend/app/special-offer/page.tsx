@@ -6,6 +6,9 @@ export const metadata = {
   description: "Special Offer: $3 USD/Month for 1 Year. Unlimited access to Times Chicago website, mobile apps, audio articles, puzzles, and more.",
 };
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default function Page() {
   return <SpecialOfferPage />;
 }

@@ -55,7 +55,7 @@ export default function AuthorHeader({ author = defaultAuthor }: AuthorHeaderPro
               role: (u.role || author.role || "WRITER").toUpperCase(),
               bio: u.bio !== undefined && u.bio !== "" ? u.bio : (author?.bio || "Journalist & Writer"),
               image: u.avatar_url || u.image || author?.image || "",
-              email: u.email || author?.email || "info@timeschicago.com",
+              email: u.email || author?.email || "worldnews@timeschicago.com",
               linkedinUrl: u.linkedin || u.linkedinUrl || author?.linkedinUrl || "https://www.linkedin.com",
               twitterUrl: u.twitter || u.twitterUrl || author?.twitterUrl || "https://x.com",
             });
@@ -76,7 +76,7 @@ export default function AuthorHeader({ author = defaultAuthor }: AuthorHeaderPro
           role: (u.role || author.role || "WRITER").toUpperCase(),
           bio: u.bio !== undefined && u.bio !== "" ? u.bio : author?.bio || "Journalist & Writer",
           image: u.avatar_url || u.image || author?.image || "",
-          email: u.email || author?.email || "info@timeschicago.com",
+          email: u.email || author?.email || "worldnews@timeschicago.com",
           linkedinUrl: u.linkedin || u.linkedinUrl || author?.linkedinUrl || "https://www.linkedin.com",
           twitterUrl: u.twitter || u.twitterUrl || author?.twitterUrl || "https://x.com",
         });
@@ -96,7 +96,7 @@ export default function AuthorHeader({ author = defaultAuthor }: AuthorHeaderPro
             role: (u.role || author.role || "WRITER").toUpperCase(),
             bio: u.bio !== undefined && u.bio !== "" ? u.bio : author?.bio || "Journalist & Writer",
             image: u.avatar_url || u.image || author?.image || "",
-            email: u.email || author?.email || "info@timeschicago.com",
+            email: u.email || author?.email || "worldnews@timeschicago.com",
             linkedinUrl: u.linkedin || u.linkedinUrl || author?.linkedinUrl || "https://www.linkedin.com",
             twitterUrl: u.twitter || u.twitterUrl || author?.twitterUrl || "https://x.com",
           });
@@ -108,7 +108,7 @@ export default function AuthorHeader({ author = defaultAuthor }: AuthorHeaderPro
     setProfile({
       ...author,
       name: extractSingleAuthorName(author.name),
-      email: author?.email || "info@timeschicago.com",
+      email: author?.email || "worldnews@timeschicago.com",
       linkedinUrl: author?.linkedinUrl || "https://www.linkedin.com",
       twitterUrl: author?.twitterUrl || "https://x.com",
     });

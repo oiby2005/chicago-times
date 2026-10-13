@@ -61,9 +61,36 @@ function isVerticalVideo(url?: string, platform?: string): boolean {
   return str.includes("facebook") || str.includes("fb_shorts") || str.includes("instagram") || str.includes("reel");
 }
 
-export function ArticleVideosSection() {
+function getEmbedInfo(url?: string, platform?: string): { isEmbeddable: boolean; embedUrl?: string } {
+  if (!url) return { isEmbeddable: false };
+  const str = `${url || ""} ${platform || ""}`.toLowerCase();
+  if (str.includes("facebook") || str.includes("fb.watch") || str.includes("instagram") || str.includes("instagr.am")) {
+    return { isEmbeddable: false };
+  }
+  const ytMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]+)/i);
+  if (ytMatch && ytMatch[1]) {
+    return { isEmbeddable: true, embedUrl: `https://www.youtube.com/embed/${ytMatch[1]}?autoplay=1&rel=0` };
+  }
+  if (url.includes("rumble.com")) {
+    const rumbleMatch = url.match(/rumble\.com\/(?:embed\/)?([a-zA-Z0-9_-]+)/i);
+    if (rumbleMatch && rumbleMatch[1]) {
+      const rumbleId = rumbleMatch[1];
+      const embedUrl = rumbleId.startsWith("v") ? `https://rumble.com/embed/${rumbleId}/?pub=4` : `https://rumble.com/embed/${rumbleId}/`;
+      return { isEmbeddable: true, embedUrl };
+    }
+  }
+  return { isEmbeddable: false };
+}
+
+export interface ArticleVideosSectionProps {
+  hideTopBorder?: boolean;
+  className?: string;
+}
+
+export function ArticleVideosSection({ hideTopBorder = false, className = "" }: ArticleVideosSectionProps) {
   const [videos, setVideos] = useState<ArticleVideoItem[]>(DEFAULT_ARTICLE_VIDEOS);
   const [activeIndex, setActiveIndex] = useState<number>(0);
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
 
   const loadVideos = async () => {
     if (typeof window === "undefined") return;
@@ -146,42 +173,68 @@ export function ArticleVideosSection() {
   }, []);
 
   const activeVideo = videos[activeIndex] || videos[0] || DEFAULT_ARTICLE_VIDEOS[0];
+  const embedInfo = getEmbedInfo(activeVideo.videoUrl, activeVideo.platform);
 
   return (
-    <div className="w-full select-none pt-8 mt-8 border-t border-dashed border-[#CCCCCC]">
+    <div className={`w-full select-none ${hideTopBorder ? "pt-2 mt-2" : "pt-8 mt-8 border-t border-dashed border-[#CCCCCC]"} ${className}`}>
       {/* Title */}
       <h3 className="font-serif font-bold text-xl sm:text-[22px] text-[#111111] leading-tight mb-4">
         Videos
       </h3>
 
-      {/* Main Display Screen: Displays thumbnail with play button; clicking opens video in new tab */}
-      <a
-        href={activeVideo.videoUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="block relative w-full aspect-[16/9] bg-black rounded-xs overflow-hidden mb-4 group shadow-md text-decoration-none cursor-pointer"
-      >
-        <img
-          src={activeVideo.thumbnailUrl}
-          alt={activeVideo.title}
-          className={`w-full h-full ${
-            isVerticalVideo(activeVideo.videoUrl, activeVideo.platform) ? "object-contain" : "object-cover"
-          } bg-black opacity-90 group-hover:scale-105 transition-transform duration-300`}
-        />
-        <div className="absolute inset-0 bg-black/20 flex items-center justify-center group-hover:bg-black/10 transition-colors">
-          <div className="w-14 h-14 rounded-full bg-white/90 text-black flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-            <svg className="w-6 h-6 fill-current translate-x-0.5" viewBox="0 0 24 24">
-              <path d="M8 5v14l11-7z" />
-            </svg>
+      {/* Main Display Screen: Inline iframe player for YouTube/Rumble; New tab redirect for Facebook/Instagram */}
+      {isPlaying && embedInfo.isEmbeddable && embedInfo.embedUrl ? (
+        <div className="relative w-full aspect-[16/9] bg-black rounded-xs overflow-hidden mb-4 shadow-md">
+          <iframe
+            src={embedInfo.embedUrl}
+            title={activeVideo.title}
+            className="w-full h-full border-0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+          <button
+            type="button"
+            onClick={() => setIsPlaying(false)}
+            className="absolute top-3 right-3 bg-black/80 hover:bg-black text-white text-[11px] font-sans font-bold px-3 py-1 rounded-full z-20 shadow-md cursor-pointer"
+          >
+            ✕ Close Video
+          </button>
+        </div>
+      ) : (
+        <a
+          href={activeVideo.videoUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => {
+            if (embedInfo.isEmbeddable) {
+              e.preventDefault();
+              setIsPlaying(true);
+            }
+          }}
+          className="block relative w-full aspect-[16/9] bg-black rounded-xs overflow-hidden mb-4 group shadow-md text-decoration-none cursor-pointer"
+        >
+          <img
+            src={activeVideo.thumbnailUrl}
+            alt={activeVideo.title}
+            className={`w-full h-full ${
+              isVerticalVideo(activeVideo.videoUrl, activeVideo.platform) ? "object-contain" : "object-cover"
+            } bg-black opacity-90 group-hover:scale-105 transition-transform duration-300`}
+          />
+          <div className="absolute inset-0 bg-black/20 flex items-center justify-center group-hover:bg-black/10 transition-colors">
+            <div className="w-14 h-14 rounded-full bg-white/90 text-black flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+              <svg className="w-6 h-6 fill-current translate-x-0.5" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            </div>
           </div>
-        </div>
 
-        {/* Top Left Badge */}
-        <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-xs text-white font-mono text-xs px-3 py-1.5 rounded-full flex items-center gap-2">
-          <span className="w-5 h-5 rounded-full border border-white/40 flex items-center justify-center text-[10px]">▶</span>
-          <span className="font-bold tracking-wider uppercase text-[10px]">{activeVideo.platform || "WATCH VIDEO"}</span>
-        </div>
-      </a>
+          {/* Top Left Badge */}
+          <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-xs text-white font-mono text-xs px-3 py-1.5 rounded-full flex items-center gap-2">
+            <span className="w-5 h-5 rounded-full border border-white/40 flex items-center justify-center text-[10px]">▶</span>
+            <span className="font-bold tracking-wider uppercase text-[10px]">{activeVideo.platform || "WATCH VIDEO"}</span>
+          </div>
+        </a>
+      )}
 
       {/* 3 Titles Selection Row: Clicking shifts the active video */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -192,6 +245,7 @@ export function ArticleVideosSection() {
               key={item.id + "-" + index}
               onClick={() => {
                 setActiveIndex(index);
+                setIsPlaying(false);
               }}
               className="cursor-pointer group pt-2 transition-all"
             >

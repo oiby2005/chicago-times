@@ -65,17 +65,30 @@ export const TopNewsSection: React.FC = () => {
         );
 
         if (topNewsPosts.length > 0) {
+          const extractExcerpt = (p: any): string => {
+            const sub = (p.subheadline || p.cardSummary || "").trim();
+            let bodyText = "";
+            if (p.bodyContent) {
+              bodyText = p.bodyContent.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+            }
+            if (!sub) {
+              return bodyText ? bodyText.slice(0, 240) + "..." : "";
+            }
+            // If summary is short, get additional lines from article body also to fill space
+            if (sub.length < 130 && bodyText) {
+              const remaining = bodyText.replace(sub, "").trim();
+              if (remaining) {
+                return `${sub} ${remaining.slice(0, 150)}...`;
+              }
+            }
+            return sub;
+          };
 
           const formatted: TopNewsArticle[] = topNewsPosts.slice(0, 3).map((p: any) => ({
             id: p.id,
             title: p.title,
             slug: p.slug || p.id,
-            summary:
-              p.subheadline ||
-              p.cardSummary ||
-              (p.bodyContent
-                ? p.bodyContent.replace(/<[^>]+>/g, " ").trim().slice(0, 120) + "..."
-                : ""),
+            summary: extractExcerpt(p),
             commentsCount: p.commentsCount || "0",
             readTime: `${getRelativeTime(p.publishedAt, p.date)} • ${p.readDuration || p.readTime || "5 min read"}`,
           }));
@@ -104,28 +117,31 @@ export const TopNewsSection: React.FC = () => {
   return (
     <div className="w-full h-full flex flex-col justify-between font-sans select-none">
       {/* Section Header */}
-      <div className="border-b border-dashed border-[#D6CEBF] pb-1 mb-2">
+      <div className="pt-[10px] lg:pt-0 border-b-0 lg:border-b border-dashed border-[#D6CEBF] pb-1 lg:pb-1 mb-2 lg:mb-2">
         <h2 className="font-sans font-bold text-[11.5px] tracking-wider text-[#111111] uppercase">
           TOP NEWS
         </h2>
       </div>
 
-      {/* Articles List */}
-      <div className="flex-1 flex flex-col justify-between divide-y divide-dashed divide-[#D6CEBF]">
+      {/* Articles List: Adjusted smoothly to fill available height up to the last divider */}
+      <div className="flex-1 flex flex-col justify-between divide-y divide-dashed divide-[#D6CEBF] lg:pb-2">
         {articles.map((article) => (
-          <article key={article.id} className="py-2.5 first:pt-0 last:pb-0 flex flex-col justify-between">
+          <article
+            key={article.id}
+            className="py-[32px] lg:py-2.5 first:pt-0 first:lg:pt-0.5 last:pb-0 last:lg:pb-1 flex flex-col justify-between"
+          >
             <div>
               <h3 className="font-serif font-bold text-[17px] sm:text-[18px] leading-[1.2] text-[#111111] hover:text-[#333333] hover:underline cursor-pointer" style={{ fontFamily: "Georgia, serif" }}>
                 <Link href={`/article/${article.slug}`}>
                   {article.title}
                 </Link>
               </h3>
-              <p className="font-sans text-[12px] leading-[1.38] text-[#555555] mt-1 line-clamp-3">
+              <p className="font-sans text-[12px] leading-[1.38] text-[#555555] mt-1 line-clamp-3 lg:line-clamp-4">
                 {article.summary}
               </p>
             </div>
             {/* Meta Row: Read Time */}
-            <div className="mt-1.5 flex items-center justify-between font-sans text-[10.5px] text-[#666666]">
+            <div className="mt-1.5 lg:mt-2 flex items-center justify-between font-sans text-[10.5px] text-[#666666]">
               <span>{article.readTime}</span>
             </div>
           </article>

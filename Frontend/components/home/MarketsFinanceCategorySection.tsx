@@ -89,7 +89,7 @@ export const MarketsFinanceCategorySection: React.FC = () => {
   return (
     <div className="w-full font-sans select-none pt-4 pb-4">
       {/* Header */}
-      <div className="flex items-center space-x-2 pb-3 mb-4 border-b border-dashed border-[#CCCCCC]">
+      <div className="flex items-center space-x-2 pb-3 mb-[28px] sm:mb-4 border-b border-dashed border-[#CCCCCC]">
         <h2 className="font-serif font-bold text-[26px] sm:text-[30px] text-[#8b6f37] tracking-tight">
           <Link href="/markets" className="hover:underline">
             Markets & Finance
@@ -101,7 +101,7 @@ export const MarketsFinanceCategorySection: React.FC = () => {
       </div>
 
       {/* 4 Cards Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-start">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[28px] sm:gap-4 items-start">
         {articles.map((art) => (
           <article key={art.id} className="flex flex-col justify-start">
             <Link

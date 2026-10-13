@@ -229,10 +229,10 @@ export const EntertainmentCategorySection: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 items-stretch">
         
         {/* LEFT & CENTER HERO AREA (8 of 12 cols ~ 67%) */}
-        <div className="lg:col-span-8 pr-0 lg:pr-4 flex flex-col justify-start h-full border-b lg:border-b-0 lg:border-r border-dashed border-[#CCCCCC] pb-6 lg:pb-0 mb-6 lg:mb-0">
+        <div className="lg:col-span-8 pr-0 lg:pr-4 flex flex-col justify-start h-full border-b lg:border-b-0 lg:border-r border-dashed border-[#CCCCCC] pb-[28px] lg:pb-0 mb-0 lg:mb-0">
           
           {/* Top Half: Position 1 Hero */}
-          <div className="grid grid-cols-1 md:grid-cols-8 gap-4 pb-4 border-b border-dashed border-[#CCCCCC]">
+          <div className="grid grid-cols-1 md:grid-cols-8 gap-4 pb-[28px] md:pb-4 border-b border-dashed border-[#CCCCCC]">
             {/* Left Headline */}
             <div className="md:col-span-4 flex flex-col justify-start">
               {renderHomeTags(heroItem)}
@@ -272,20 +272,20 @@ export const EntertainmentCategorySection: React.FC = () => {
           </div>
 
           {/* Bottom Half: Positions 2 & 3 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-8 mt-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-0 pt-[28px] md:pt-8 mt-0 md:mt-4">
             {/* Position 2 */}
-            <div className="flex items-start space-x-3 pr-0 md:pr-3 border-b md:border-b-0 md:border-r border-dashed border-[#CCCCCC] pb-4 md:pb-0 mb-4 md:mb-0">
+            <div className="flex items-stretch md:items-start space-x-3 pr-0 md:pr-4 border-b md:border-b-0 md:border-r border-dashed border-[#CCCCCC] pb-[28px] md:pb-0 mb-0 md:mb-0">
               <Link
                 href={`/article/${miniItem1.slug}`}
-                className="block relative w-[140px] sm:w-[165px] aspect-[16/10] overflow-hidden bg-gray-100 flex-shrink-0 group"
+                className="shrink-0 block relative w-[140px] sm:w-[165px] h-auto self-stretch md:self-auto md:aspect-[16/10] overflow-hidden bg-gray-100 group"
               >
                 <img
                   src={miniItem1.imageUrl}
                   alt={miniItem1.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  className="absolute md:static inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
               </Link>
-              <div className="flex flex-col justify-between flex-1">
+              <div className="flex flex-col justify-between flex-1 h-full">
                 <div>
                   {renderHomeTags(miniItem1)}
                   <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-1 line-clamp-3 overflow-hidden text-ellipsis" style={{ fontFamily: "Georgia, serif" }}>
@@ -308,18 +308,18 @@ export const EntertainmentCategorySection: React.FC = () => {
             </div>
 
             {/* Position 3 */}
-            <div className="flex items-start space-x-3 pl-0 md:pl-1">
+            <div className="flex items-stretch md:items-start space-x-3 pt-[28px] md:pt-0 pl-0 md:pl-4">
               <Link
                 href={`/article/${miniItem2.slug}`}
-                className="block relative w-[140px] sm:w-[165px] aspect-[16/10] overflow-hidden bg-gray-100 flex-shrink-0 group"
+                className="shrink-0 block relative w-[140px] sm:w-[165px] h-auto self-stretch md:self-auto md:aspect-[16/10] overflow-hidden bg-gray-100 group"
               >
                 <img
                   src={miniItem2.imageUrl}
                   alt={miniItem2.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  className="absolute md:static inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
               </Link>
-              <div className="flex flex-col justify-between flex-1">
+              <div className="flex flex-col justify-between flex-1 h-full">
                 <div>
                   {renderHomeTags(miniItem2)}
                   <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-1 line-clamp-3 overflow-hidden text-ellipsis" style={{ fontFamily: "Georgia, serif" }}>
@@ -345,12 +345,12 @@ export const EntertainmentCategorySection: React.FC = () => {
         </div>
 
         {/* RIGHT SIDEBAR STORIES AREA (2x2 Grid of 4 Articles) */}
-        <div className="lg:col-span-4 pl-0 lg:pl-4 pt-4 lg:pt-0">
+        <div className="lg:col-span-4 pl-0 lg:pl-4 pt-[28px] lg:pt-0">
           <div className="grid grid-cols-2 gap-0">
             
             {/* Top-Left (Item 1 of sidebar) */}
-            <article className="pr-2 sm:pr-3.5 pb-4 sm:border-r border-dashed border-[#CCCCCC] flex flex-col justify-between">
-              <div className="pb-3 border-b border-dashed border-[#CCCCCC] flex-1 flex flex-col justify-between">
+            <article className="pr-3 sm:pr-3.5 border-r border-dashed border-[#CCCCCC] flex flex-col justify-between">
+              <div className="pb-[28px] md:pb-3 border-b border-dashed border-[#CCCCCC] flex-1 flex flex-col justify-between">
                 <div>
                   <Link
                     href={`/article/${sidebarItem1.slug}`}
@@ -383,8 +383,8 @@ export const EntertainmentCategorySection: React.FC = () => {
             </article>
 
             {/* Top-Right (Item 2 of sidebar) */}
-            <article className="pl-3.5 pb-4 flex flex-col justify-between">
-              <div className="pb-3 border-b border-dashed border-[#CCCCCC] flex-1 flex flex-col justify-between">
+            <article className="pl-3 sm:pl-3.5 flex flex-col justify-between">
+              <div className="pb-[28px] md:pb-3 border-b border-dashed border-[#CCCCCC] flex-1 flex flex-col justify-between">
                 <div>
                   <Link
                     href={`/article/${sidebarItem2.slug}`}
@@ -417,7 +417,7 @@ export const EntertainmentCategorySection: React.FC = () => {
             </article>
 
             {/* Bottom-Left (Item 3 of sidebar) */}
-            <article className="pr-2 sm:pr-3.5 pt-4 sm:border-r border-dashed border-[#CCCCCC] flex flex-col justify-between">
+            <article className="pr-3 sm:pr-3.5 pt-[28px] md:pt-4 border-r border-dashed border-[#CCCCCC] flex flex-col justify-between">
               <div>
                 <Link
                   href={`/article/${sidebarItem3.slug}`}
@@ -449,7 +449,7 @@ export const EntertainmentCategorySection: React.FC = () => {
             </article>
 
             {/* Bottom-Right (Item 4 of sidebar) */}
-            <article className="pl-3.5 pt-4 flex flex-col justify-between">
+            <article className="pl-3 sm:pl-3.5 pt-[28px] md:pt-4 flex flex-col justify-between">
               <div>
                 <Link
                   href={`/article/${sidebarItem4.slug}`}

@@ -111,7 +111,7 @@ export const WorldPoliticsCategorySection: React.FC = () => {
   return (
     <div className="w-full font-sans select-none pb-2 my-0">
       {/* Section Header */}
-      <div className="flex items-center space-x-2 pb-3 mb-4 border-b border-dashed border-[#CCCCCC]">
+      <div className="flex items-center space-x-2 pb-2 lg:pb-3 mb-0 lg:mb-4 border-b border-dashed border-[#CCCCCC]">
         <h2 className="font-serif font-bold text-[24px] sm:text-[28px] text-[#b82e2e] tracking-tight">
           <Link href="/world-politics" className="hover:underline">
             World Politics
@@ -121,7 +121,7 @@ export const WorldPoliticsCategorySection: React.FC = () => {
           <span className="text-[14px] font-bold leading-none">›</span>
         </div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[0.4cm]">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[40px] sm:gap-[0.4cm] pt-3 lg:pt-0">
         {articles.map((art) => {
           const tags = parseHomeTags(art);
           return (

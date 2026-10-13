@@ -76,9 +76,9 @@ export const RightMainPanelSection: React.FC = () => {
   }, [loadRightMain]);
 
   return (
-    <div className="w-full h-full flex flex-col justify-between font-sans select-none space-y-3">
+    <div className="w-full h-full flex flex-col justify-between font-sans select-none space-y-6 lg:space-y-3">
       {articles.map((article) => (
-        <article key={article.id} className="flex flex-col justify-between flex-1">
+        <article key={article.id} className="flex flex-col justify-between flex-1 pb-6 lg:pb-0 border-b lg:border-b-0 border-dashed border-[#CCCCCC] last:border-b-0">
           <Link href={`/article/${article.slug}`} className="block relative aspect-[16/8] w-full overflow-hidden bg-gray-100 mb-1.5 group">
             <img
               src={article.imageUrl}

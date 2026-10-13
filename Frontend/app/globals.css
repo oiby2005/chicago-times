@@ -35,7 +35,10 @@
   }
 }
 
-/* Typographic Style Utilities */
+.font-georgia-serif {
+  font-family: Georgia, 'Times New Roman', serif !important;
+}
+
 @font-face {
   font-family: 'Publica Sans Light';
   src: local('Publica Sans Light'), local('PublicaSans-Light'), local('PublicaSansLight');

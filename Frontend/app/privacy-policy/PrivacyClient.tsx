@@ -14,19 +14,25 @@ interface TocItem {
 
 const TOC_ITEMS: TocItem[] = [
   { id: "intro", label: "Introduction" },
-  { id: "info-we-collect", label: "1. Information We Collect" },
-  { id: "how-we-use", label: "2. How We Use Your Information" },
-  { id: "cookies-tracking", label: "3. Cookies & Tracking" },
-  { id: "newsletter", label: "4. Newsletter Communications" },
-  { id: "sharing-info", label: "5. Sharing of Information" },
-  { id: "data-security", label: "6. Data Security" },
-  { id: "data-retention", label: "7. Data Retention" },
-  { id: "privacy-rights", label: "8. Your Privacy Rights" },
-  { id: "childrens-privacy", label: "9. Children's Privacy" },
-  { id: "third-party-websites", label: "10. Third-Party Websites" },
-  { id: "international-transfers", label: "11. International Data Transfers" },
-  { id: "changes-policy", label: "12. Changes to This Policy" },
-  { id: "contact-us", label: "13. Contact Us" },
+  { id: "who-we-are", label: "1. Who We Are and Scope" },
+  { id: "info-we-collect", label: "2. Categories of Information We Collect" },
+  { id: "how-we-use", label: "3. How We Use Information" },
+  { id: "legal-bases", label: "4. Legal Bases for Processing" },
+  { id: "news-tips", label: "5. News Tips, Sources & Confidentiality" },
+  { id: "cookies-pixels", label: "6. Cookies, Pixels & Technologies" },
+  { id: "newsletters", label: "7. Newsletters and Email" },
+  { id: "how-we-disclose", label: "8. How We Disclose Information" },
+  { id: "advertising-sponsorships", label: "9. Advertising & Third-Party Tools" },
+  { id: "data-retention", label: "10. Data Retention" },
+  { id: "security-measures", label: "11. Security Measures" },
+  { id: "privacy-rights", label: "12. Privacy Rights and Choices" },
+  { id: "children-minors", label: "13. Children and Minors" },
+  { id: "third-party-websites", label: "14. Third-Party Websites & Social Media" },
+  { id: "international-transfers", label: "15. International Data Transfers" },
+  { id: "privacy-signals", label: "16. Do Not Track & Privacy Signals" },
+  { id: "changes-policy", label: "17. Changes to This Privacy Policy" },
+  { id: "contact-requests", label: "18. Contact and Privacy Requests" },
+  { id: "important-notice", label: "19. Important Notice About This Policy" },
 ];
 
 export default function PrivacyClient() {
@@ -55,32 +61,36 @@ export default function PrivacyClient() {
             {/* Header / Legal Document Title Bar */}
             <div className="text-center max-w-4xl mx-auto mb-8">
               <h1 className="font-serif font-black text-[32px] sm:text-[44px] leading-tight text-[#111111] tracking-tight">
-                Privacy Policy
+                PRIVACY POLICY
               </h1>
+              <p className="mt-2 text-xs font-sans text-[#666666]">
+                Effective Date: October 10, 2026
+                <span className="mx-2">|</span>
+                Last Updated: October 10, 2026
+              </p>
             </div>
 
             {/* Main Content 2-Column Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-              
-              {/* ==================== LEFT SIDEBAR: STICKY TABLE OF CONTENTS (4 of 12 cols ~ 33%) ==================== */}
+              {/* ==================== LEFT SIDEBAR: STICKY TABLE OF CONTENTS ==================== */}
               <div className="lg:col-span-4 sticky top-20 z-10 self-start w-full">
-                <div className="bg-white border border-[#E2DDD0] p-4 sm:p-5 shadow-xs">
+                <div className="bg-white border border-[#E2DDD0] p-3 sm:p-4 lg:p-5 shadow-xs">
                   <button
                     type="button"
                     onClick={() => setIsTocOpen(!isTocOpen)}
-                    className={`w-full flex items-center justify-between text-left lg:pb-3 lg:mb-3 lg:border-b lg:border-[#E5E0D3] ${
+                    className={`w-full flex items-center justify-between text-left lg:pb-3 lg:mb-3 lg:border-b lg:border-[#E5E0D3] gap-1.5 ${
                       isTocOpen ? "pb-3 mb-3 border-b border-[#E5E0D3]" : ""
                     }`}
                   >
-                    <div className="flex items-center space-x-2">
-                      <h3 className="font-serif font-bold text-[15px] uppercase tracking-wider text-[#111111]">
+                    <div className="flex items-center min-w-0 pr-1">
+                      <h3 className="font-serif font-bold text-[11px] xs:text-[12px] sm:text-[14px] lg:text-[15px] uppercase tracking-tight sm:tracking-wider text-[#111111] whitespace-nowrap truncate">
                         PRIVACY POLICY SECTIONS
                       </h3>
                     </div>
-                    <div className="flex items-center space-x-1.5 lg:hidden text-[#990000] font-sans text-xs font-bold bg-[#FAF5F5] px-2.5 py-1 rounded border border-[#F5E6E6]">
+                    <div className="flex items-center space-x-1 lg:hidden text-[#990000] font-sans text-[10.5px] xs:text-xs font-bold bg-[#FAF5F5] px-2 py-0.5 sm:px-2.5 sm:py-1 rounded border border-[#F5E6E6] shrink-0 whitespace-nowrap">
                       <span>{isTocOpen ? "Hide" : `Show (${TOC_ITEMS.length} Sections)`}</span>
                       <svg
-                        className={`w-3.5 h-3.5 transition-transform duration-200 ${isTocOpen ? "rotate-180" : ""}`}
+                        className={`w-3 h-3 xs:w-3.5 xs:h-3.5 transition-transform duration-200 shrink-0 ${isTocOpen ? "rotate-180" : ""}`}
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -111,186 +121,317 @@ export default function PrivacyClient() {
                 </div>
               </div>
 
-              {/* ==================== RIGHT MAIN COLUMN: DOCUMENT SECTIONS (8 of 12 cols ~ 67%) ==================== */}
+              {/* ==================== RIGHT MAIN COLUMN: DOCUMENT SECTIONS ==================== */}
               <div className="lg:col-span-8 bg-white border border-[#E2DDD0] p-6 sm:p-10 shadow-xs space-y-8 font-sans text-[14px] leading-relaxed text-[#333333]">
-
                 {/* Introduction */}
                 <section id="intro" className="scroll-mt-28">
-                  <h2 className="font-serif font-bold text-[24px] text-[#111111] pb-2 mb-4 border-b border-[#E5E0D3]">
+                  <h2 className="font-serif font-bold text-[22px] text-[#111111] pb-2 mb-4 border-b border-[#E5E0D3]">
                     Introduction
                   </h2>
-                  <div className="space-y-4">
+                  <p>
+                    This Privacy Policy describes how Times Chicago LLC (&ldquo;Times Chicago,&rdquo; &ldquo;we,&rdquo; &ldquo;us,&rdquo; or &ldquo;our&rdquo;) may collect, receive, use, store, disclose, and otherwise process information in connection with <a href="https://www.timeschicago.com/" className="text-[#00558c] hover:underline">https://www.timeschicago.com/</a> and related digital services, including news articles, newsletters, contact forms, reader communications, interactive features, and any associated services (collectively, the &ldquo;Services&rdquo;). It is intended to provide a detailed explanation of our privacy practices. It must be checked against the Services and technologies actually in use before publication; this document is not a claim that every practice described is currently enabled.
+                  </p>
+                </section>
+
+                {/* 1. Who We Are and Scope of This Policy */}
+                <section id="who-we-are" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                  <h2 className="font-serif font-bold text-[20px] text-[#111111] mb-3">
+                    1. Who We Are and Scope of This Policy
+                  </h2>
+                  <p className="mb-3">
+                    Times Chicago LLC operates the website identified above. This Policy applies to information processed through the Services and to communications you send to us in connection with them. It does not automatically apply to independent third-party websites, services, or platforms that we do not control.
+                  </p>
+                  <p>
+                    If a particular feature has a separate privacy notice, subscription agreement, contest rule, or other specific terms, that notice may supplement this Policy for that feature. If a separate notice conflicts with this Policy, the separate notice will govern to the extent stated in it and permitted by law.
+                  </p>
+                </section>
+
+                {/* 2. Categories of Information We May Collect */}
+                <section id="info-we-collect" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                  <h2 className="font-serif font-bold text-[20px] text-[#111111] mb-3">
+                    2. Categories of Information We May Collect
+                  </h2>
+                  <div className="space-y-3">
                     <p>
-                      <strong className="font-bold text-[#111111]">Times Chicago</strong> (&ldquo;Times Chicago,&rdquo; &ldquo;we,&rdquo; &ldquo;our,&rdquo; or &ldquo;us&rdquo;) respects your privacy and is committed to protecting your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website, use our services, subscribe to our newsletters, submit content, or otherwise interact with our Platform.
+                      <strong className="font-bold text-[#111111]">Information you provide directly.</strong> This may include your name, email address, message contents, newsletter preferences, comments, survey responses, news tips, photographs, videos, documents, story ideas, and other information you choose to submit through forms, email, or other communication channels.
                     </p>
                     <p>
-                      By using the Times Chicago Platform, you agree to the practices described in this Privacy Policy.
+                      <strong className="font-bold text-[#111111]">Technical and device information.</strong> When you visit the Services, our systems or service providers may receive information such as IP address, browser type, operating system, device identifiers, language settings, referring or exit pages, pages viewed, dates and times of visits, approximate location inferred from an IP address, and diagnostic or security logs.
+                    </p>
+                    <p>
+                      <strong className="font-bold text-[#111111]">Usage and interaction information.</strong> Depending on the features enabled, we may collect information about how visitors navigate the website, which pages or links they use, whether content or newsletters are opened, and interactions with embedded media or other website features.
+                    </p>
+                    <p>
+                      <strong className="font-bold text-[#111111]">Cookie and similar technology data.</strong> Cookies, pixels, local storage, tags, or similar tools may be used for essential functionality, preference management, audience measurement, security, advertising, or performance analytics, where enabled and permitted.
+                    </p>
+                    <p>
+                      <strong className="font-bold text-[#111111]">Information from other sources.</strong> We may receive information from vendors, newsletter or hosting providers, analytics services, social media platforms, or other sources when those sources lawfully provide it to us or when you choose to interact with them.
                     </p>
                   </div>
                 </section>
 
-                {/* 1. Information We Collect */}
-                <section id="info-we-collect" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">1.</span> Information We Collect
-                  </h3>
+                {/* 3. How We Use Information */}
+                <section id="how-we-use" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                  <h2 className="font-serif font-bold text-[20px] text-[#111111] mb-3">
+                    3. How We Use Information
+                  </h2>
                   <p className="mb-3">
-                    We may collect the following categories of information:
+                    We may use information for the following purposes, as relevant to the Services:
                   </p>
                   <ul className="list-disc pl-5 space-y-2">
-                    <li>
-                      <strong className="font-bold text-[#111111]">Personal Information:</strong> Full name, email address, phone number (if provided), postal address (if provided), account information, and billing information (when applicable).
-                    </li>
-                    <li>
-                      <strong className="font-bold text-[#111111]">Technical Information:</strong> IP address, browser type, device information, operating system, referring website, pages visited, date and time of access, and cookies.
-                    </li>
-                    <li>
-                      <strong className="font-bold text-[#111111]">Content You Submit:</strong> When you submit articles, comments, press releases, photographs, videos, or other materials, we collect the information necessary to process and publish your submission.
-                    </li>
+                    <li>To operate, maintain, troubleshoot, and improve the website and its features.</li>
+                    <li>To respond to questions, messages, corrections, feedback, press inquiries, and news tips.</li>
+                    <li>To send newsletters or updates when requested and to manage subscriptions and unsubscribe requests.</li>
+                    <li>To review submissions and support editorial, reporting, moderation, and publication workflows.</li>
+                    <li>To understand readership, measure audience engagement, and assess content performance.</li>
+                    <li>To detect, prevent, investigate, and respond to fraud, spam, abuse, security incidents, and technical problems.</li>
+                    <li>To enforce our terms, protect our rights, and protect users, staff, sources, and the public.</li>
+                    <li>To comply with applicable laws, lawful requests, regulatory obligations, and court orders.</li>
+                    <li>To establish, exercise, or defend legal claims and to maintain appropriate business records.</li>
                   </ul>
                 </section>
 
-                {/* 2. How We Use Your Information */}
-                <section id="how-we-use" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">2.</span> How We Use Your Information
-                  </h3>
+                {/* 4. Legal Bases for Processing Where Required */}
+                <section id="legal-bases" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                  <h2 className="font-serif font-bold text-[20px] text-[#111111] mb-3">
+                    4. Legal Bases for Processing Where Required
+                  </h2>
+                  <p className="mb-3">
+                    Depending on the applicable privacy law and the context, our processing may rely on one or more lawful grounds, such as your consent; the need to provide a service or take steps you request; compliance with a legal obligation; our legitimate interests in operating a news publication, securing our services, communicating with readers, and improving our website; or the establishment, exercise, or defence of legal claims.
+                  </p>
                   <p>
-                    We use your information to operate and improve our Platform, publish submitted content, respond to inquiries, process subscriptions or purchases, send newsletters, personalize your experience, detect fraud/security threats, comply with legal obligations, and analyze user engagement.
+                    Where consent is required, you may withdraw it as permitted by law. Withdrawal does not affect processing that took place before withdrawal or processing that relies on another lawful basis.
                   </p>
                 </section>
 
-                {/* 3. Cookies and Tracking Technologies */}
-                <section id="cookies-tracking" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">3.</span> Cookies and Tracking Technologies
-                  </h3>
+                {/* 5. News Tips, Sources, and Confidential Information */}
+                <section id="news-tips" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                  <h2 className="font-serif font-bold text-[20px] text-[#111111] mb-3">
+                    5. News Tips, Sources, and Confidential Information
+                  </h2>
+                  <p className="mb-3">
+                    News tips and editorial submissions may contain personal, confidential, or sensitive information about you or other people. Please consider the risks before sending such material. Standard email and ordinary website forms may not be encrypted end-to-end, anonymous, or suitable for highly sensitive information.
+                  </p>
+                  <p className="mb-3">
+                    Sending a news tip does not automatically create a confidential, privileged, or legally protected journalist-source relationship. Any source-protection obligations depend on the circumstances and applicable law. If confidentiality is important, contact the editorial team before sending sensitive information and ask whether an appropriate secure method is available.
+                  </p>
                   <p>
-                    Times Chicago uses cookies to remember your preferences, improve website functionality, measure traffic, analyze visitor behavior, and deliver relevant advertising. You may disable cookies through your browser settings; however, some features of the Platform may not function properly.
+                    Please do not submit information you are not legally entitled to disclose, or personal information about another person that is unnecessary for the matter you are reporting.
                   </p>
                 </section>
 
-                {/* 4. Newsletter Communications */}
-                <section id="newsletter" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">4.</span> Newsletter Communications
-                  </h3>
-                  <p>
-                    If you subscribe to our newsletter, we may send you news updates, editorial highlights, press releases, and promotional announcements. You may unsubscribe at any time using the &ldquo;Unsubscribe&rdquo; link included in our emails.
+                {/* 6. Cookies, Pixels, and Similar Technologies */}
+                <section id="cookies-pixels" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                  <h2 className="font-serif font-bold text-[20px] text-[#111111] mb-3">
+                    6. Cookies, Pixels, and Similar Technologies
+                  </h2>
+                  <p className="mb-3">
+                    The Services may use cookies or similar technologies to remember settings, maintain site functionality, measure performance, detect abuse, understand audience trends, or support advertising and embedded content, depending on the technologies enabled.
                   </p>
-                </section>
-
-                {/* 5. Sharing of Information */}
-                <section id="sharing-info" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">5.</span> Sharing of Information
-                  </h3>
-                  <p>
-                    We do not sell your personal information. We may share information with trusted service providers, payment processors, website hosting services, analytics providers, email delivery platforms, and government authorities when required by law.
-                  </p>
-                </section>
-
-                {/* 6. Data Security */}
-                <section id="data-security" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">6.</span> Data Security
-                  </h3>
-                  <p>
-                    We implement reasonable administrative, technical, and organizational safeguards designed to protect your personal information from unauthorized access, alteration, disclosure, or destruction. No method of internet transmission can be guaranteed to be completely secure.
-                  </p>
-                </section>
-
-                {/* 7. Data Retention */}
-                <section id="data-retention" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">7.</span> Data Retention
-                  </h3>
-                  <p>
-                    We retain personal information only for as long as necessary to provide our services, meet legal obligations, resolve disputes, and maintain business records. When no longer required, data is securely deleted or anonymized.
-                  </p>
-                </section>
-
-                {/* 8. Your Privacy Rights */}
-                <section id="privacy-rights" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">8.</span> Your Privacy Rights
-                  </h3>
-                  <p>
-                    Depending on applicable law, you may have the right to access your personal information, correct inaccurate information, request deletion of your data, restrict certain processing activities, withdraw consent, or request a copy of your data. Please contact us to exercise these rights.
-                  </p>
-                </section>
-
-                {/* 9. Children's Privacy */}
-                <section id="childrens-privacy" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">9.</span> Children&apos;s Privacy
-                  </h3>
-                  <p>
-                    Times Chicago is not intended for children under the age of 13. We do not knowingly collect personal information from children. If we become aware that such information has been collected, we will take reasonable steps to delete it promptly.
-                  </p>
-                </section>
-
-                {/* 10. Third-Party Websites */}
-                <section id="third-party-websites" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">10.</span> Third-Party Websites
-                  </h3>
-                  <p>
-                    Our Platform may contain links to third-party websites. We are not responsible for the privacy practices, content, or security of external websites. We encourage users to review the privacy policies of those websites before providing personal information.
-                  </p>
-                </section>
-
-                {/* 11. International Data Transfers */}
-                <section id="international-transfers" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">11.</span> International Data Transfers
-                  </h3>
-                  <p>
-                    If you access Times Chicago from outside the United States, your information may be transferred to and processed in the United States or other countries. By using our Platform, you consent to such transfers in accordance with applicable law.
-                  </p>
-                </section>
-
-                {/* 12. Changes to This Privacy Policy */}
-                <section id="changes-policy" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">12.</span> Changes to This Privacy Policy
-                  </h3>
-                  <p>
-                    We may update this Privacy Policy from time to time. The updated version will be posted on this page with a revised &ldquo;Last Updated&rdquo; date. Continued use of the Platform after changes constitute acceptance of the revised policy.
-                  </p>
-                </section>
-
-                {/* 13. Contact Us */}
-                <section id="contact-us" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">13.</span> Contact Us
-                  </h3>
-                  <p className="mb-4">
-                    If you have any questions about this Privacy Policy or our privacy practices, please contact us:
-                  </p>
-
-                  <div className="bg-[#F8F5EC] border border-[#E5E0D3] p-5 font-sans text-[13.5px] text-[#333333]">
-                    <strong className="font-bold text-[#111111] block mb-1 text-[14px]">
-                      Times Chicago
-                    </strong>
-                    <p className="leading-snug text-[#555555]">
-                      2316 Eastgate St #160<br />
-                      Walla Walla, Washington (WA) 99362<br />
-                      United States<br />
-                      Email: <a href="mailto:info@timeschicago.com" className="font-bold text-[#00558C] hover:underline">info@timeschicago.com</a>
-                    </p>
+                  <div className="space-y-2 mb-3">
+                    <p><strong className="font-bold text-[#111111]">Strictly necessary technologies.</strong> These may support security, network management, accessibility, or features you specifically request.</p>
+                    <p><strong className="font-bold text-[#111111]">Preference technologies.</strong> These may remember choices such as language or display settings.</p>
+                    <p><strong className="font-bold text-[#111111]">Analytics technologies.</strong> If enabled, these may help measure visits, page views, referral sources, and general usage patterns.</p>
+                    <p><strong className="font-bold text-[#111111]">Advertising and social technologies.</strong> If enabled, these may measure campaigns, limit repeated advertisements, or support third-party content and social media features.</p>
                   </div>
+                  <p className="mb-3">
+                    You can control cookies through your browser settings and, where provided, the website&apos;s cookie preference tool. Blocking certain technologies may affect website functionality. Where consent, opt-out, or a universal preference signal must be honored under applicable law, the relevant mechanisms should be configured accordingly.
+                  </p>
+                  <p>
+                    Before publication, Times Chicago should identify the specific cookies, pixels, analytics services, advertising providers, and embedded technologies actually used, and provide accurate information about their purposes and retention.
+                  </p>
                 </section>
 
-              </div>
+                {/* 7. Newsletters and Email Communications */}
+                <section id="newsletters" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                  <h2 className="font-serif font-bold text-[20px] text-[#111111] mb-3">
+                    7. Newsletters and Email Communications
+                  </h2>
+                  <p className="mb-3">
+                    If you subscribe to a newsletter or other email update, we may use your email address and subscription preferences to deliver the requested communications and administer your subscription.
+                  </p>
+                  <p className="mb-3">
+                    You may unsubscribe from promotional or newsletter communications through the unsubscribe link included in the message, where available, or by contacting us at <a href="mailto:worldnews@timeschicago.com" className="font-bold text-[#00558c] hover:underline">worldnews@timeschicago.com</a>. We may still send non-promotional messages relating to a request you made or a legal or administrative matter where appropriate.
+                  </p>
+                  <p>
+                    If a third-party provider manages newsletter delivery, that provider may process information on our behalf under its own service terms and privacy safeguards. The provider should be identified in this Policy if used.
+                  </p>
+                </section>
 
+                {/* 8. How We Disclose Information */}
+                <section id="how-we-disclose" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                  <h2 className="font-serif font-bold text-[20px] text-[#111111] mb-3">
+                    8. How We Disclose Information
+                  </h2>
+                  <p className="mb-3">
+                    We may disclose information in the following circumstances, subject to applicable law:
+                  </p>
+                  <ul className="list-disc pl-5 space-y-2 mb-3">
+                    <li><strong className="font-bold text-[#111111]">Service providers.</strong> To vendors that provide hosting, security, website maintenance, email delivery, newsletter management, analytics, technical support, or similar services.</li>
+                    <li><strong className="font-bold text-[#111111]">Editorial and user-directed sharing.</strong> Where you ask us to publish or share a submission, or where publication is part of the service you requested. We will consider the context and any applicable agreement or legal obligation.</li>
+                    <li><strong className="font-bold text-[#111111]">Legal and safety matters.</strong> Where we reasonably believe disclosure is required by law, legal process, or a valid governmental request, or is necessary to protect rights, safety, property, or the integrity of the Services.</li>
+                    <li><strong className="font-bold text-[#111111]">Business transactions.</strong> In connection with a proposed or completed merger, restructuring, financing, acquisition, sale, or transfer of some or all of the relevant business or assets, subject to appropriate safeguards.</li>
+                    <li><strong className="font-bold text-[#111111]">With consent or at your direction.</strong> Where you have requested or authorized a particular disclosure.</li>
+                  </ul>
+                  <p>
+                    We do not make a blanket promise that information is never shared or sold. Any statement about sale, sharing for targeted advertising, or other regulated data use must reflect our actual practices and applicable law.
+                  </p>
+                </section>
+
+                {/* 9. Advertising, Sponsorships, and Third-Party Tools */}
+                <section id="advertising-sponsorships" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                  <h2 className="font-serif font-bold text-[20px] text-[#111111] mb-3">
+                    9. Advertising, Sponsorships, and Third-Party Tools
+                  </h2>
+                  <p className="mb-3">
+                    The Services may contain advertisements, sponsored content, affiliate links, social media features, video players, maps, or other third-party integrations. If enabled, these third parties may collect information directly through their tools and may combine it with information they already hold, subject to their own privacy notices and settings.
+                  </p>
+                  <p>
+                    Times Chicago should identify relevant advertising, analytics, affiliate, and embedded-content providers and explain applicable opt-out or consent choices where required. The presence of a link, advertisement, or sponsor does not necessarily constitute an endorsement.
+                  </p>
+                </section>
+
+                {/* 10. Data Retention */}
+                <section id="data-retention" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                  <h2 className="font-serif font-bold text-[20px] text-[#111111] mb-3">
+                    10. Data Retention
+                  </h2>
+                  <p className="mb-3">
+                    We retain information only for as long as reasonably necessary for the purposes described in this Policy, unless a longer period is required or permitted by law. Retention may depend on the type of information, the purpose for collection, legal obligations, security needs, dispute resolution, and editorial or recordkeeping requirements.
+                  </p>
+                  <p>
+                    For example, correspondence may be retained long enough to respond and maintain business records; subscription data may be retained while a subscription is active and for a reasonable period afterward; and technical logs may be retained for security, diagnostics, and operational purposes. Actual retention periods should be set according to the systems and vendors in use.
+                  </p>
+                </section>
+
+                {/* 11. Security Measures */}
+                <section id="security-measures" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                  <h2 className="font-serif font-bold text-[20px] text-[#111111] mb-3">
+                    11. Security Measures
+                  </h2>
+                  <p className="mb-3">
+                    We may use administrative, technical, and organizational measures designed to protect information against unauthorized access, loss, misuse, alteration, or disclosure. Measures may include access controls, service-provider safeguards, software updates, and security monitoring, depending on the systems used.
+                  </p>
+                  <p>
+                    No method of transmission or electronic storage is completely secure. We cannot guarantee absolute security. If a security incident occurs, we will take steps required by applicable law and appropriate to the circumstances.
+                  </p>
+                </section>
+
+                {/* 12. Privacy Rights and Choices */}
+                <section id="privacy-rights" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                  <h2 className="font-serif font-bold text-[20px] text-[#111111] mb-3">
+                    12. Privacy Rights and Choices
+                  </h2>
+                  <p className="mb-3">
+                    Depending on your location and applicable law, you may have rights to request access to personal information, obtain a portable copy, correct inaccurate information, request deletion, object to or restrict certain processing, withdraw consent, or appeal a decision concerning a privacy request.
+                  </p>
+                  <p className="mb-3">
+                    You may also have rights to opt out of certain sales, sharing, targeted advertising, profiling, or other processing where those concepts and rights apply under the law governing your request. The availability and scope of rights vary by jurisdiction and are subject to legal exceptions.
+                  </p>
+                  <p className="mb-3">
+                    To make a request, email <a href="mailto:worldnews@timeschicago.com" className="font-bold text-[#00558c] hover:underline">worldnews@timeschicago.com</a> and describe the request and the website interaction involved. We may ask for information reasonably necessary to verify your identity and authority, and we will respond within the time required by applicable law. We will not unlawfully discriminate against you for exercising a privacy right.
+                  </p>
+                  <p>
+                    If an authorized agent submits a request on your behalf, we may require proof of the agent&apos;s authority and, where permitted, verification directly with you.
+                  </p>
+                </section>
+
+                {/* 13. Children and Minors */}
+                <section id="children-minors" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                  <h2 className="font-serif font-bold text-[20px] text-[#111111] mb-3">
+                    13. Children and Minors
+                  </h2>
+                  <p className="mb-3">
+                    The Services are intended for a general audience and are not directed to children under 13. We do not knowingly seek to collect personal information from children under 13 through the Services. If you believe a child has submitted personal information, contact us at <a href="mailto:worldnews@timeschicago.com" className="font-bold text-[#00558c] hover:underline">worldnews@timeschicago.com</a> so we can review the situation and take appropriate action.
+                  </p>
+                  <p>
+                    If a feature is designed for children or we learn that we have collected children&apos;s information in circumstances requiring parental consent or additional safeguards, we will address that collection in accordance with applicable law.
+                  </p>
+                </section>
+
+                {/* 14. Third-Party Websites and Social Media */}
+                <section id="third-party-websites" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                  <h2 className="font-serif font-bold text-[20px] text-[#111111] mb-3">
+                    14. Third-Party Websites and Social Media
+                  </h2>
+                  <p>
+                    The Services may link to third-party websites or display content hosted by third parties. Those websites and providers operate independently and have their own privacy policies, security practices, and terms. We are not responsible for their independent practices. Review their notices before providing information or interacting with their features.
+                  </p>
+                </section>
+
+                {/* 15. International Data Transfers */}
+                <section id="international-transfers" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                  <h2 className="font-serif font-bold text-[20px] text-[#111111] mb-3">
+                    15. International Data Transfers
+                  </h2>
+                  <p className="mb-3">
+                    Times Chicago is identified in this Policy as operating from the United States. Depending on your location and our service providers, information may be processed in the United States or other countries whose privacy laws may differ from those where you live.
+                  </p>
+                  <p>
+                    Where applicable law requires safeguards for international transfers, we will use an appropriate transfer mechanism or other lawful basis. The safeguards actually used should be confirmed with the relevant service providers.
+                  </p>
+                </section>
+
+                {/* 16. Do Not Track and Global Privacy Signals */}
+                <section id="privacy-signals" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                  <h2 className="font-serif font-bold text-[20px] text-[#111111] mb-3">
+                    16. Do Not Track and Global Privacy Signals
+                  </h2>
+                  <p>
+                    Some browsers and devices offer privacy signals or settings intended to communicate a user&apos;s preferences. The legal effect of these signals varies by jurisdiction and over time. Where applicable law requires us to recognize a particular signal, we will do so as required. This Policy should be updated to describe the specific signals supported by the website and its consent-management tools.
+                  </p>
+                </section>
+
+                {/* 17. Changes to This Privacy Policy */}
+                <section id="changes-policy" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                  <h2 className="font-serif font-bold text-[20px] text-[#111111] mb-3">
+                    17. Changes to This Privacy Policy
+                  </h2>
+                  <p>
+                    We may update this Policy to reflect changes in our Services, data practices, service providers, or legal requirements. The &ldquo;Last Updated&rdquo; date at the beginning of the Policy indicates when it was most recently revised. Where required by law, we will provide additional notice or obtain consent before implementing material changes.
+                  </p>
+                </section>
+
+                {/* 18. Contact and Privacy Requests */}
+                <section id="contact-requests" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                  <h2 className="font-serif font-bold text-[20px] text-[#111111] mb-3">
+                    18. Contact and Privacy Requests
+                  </h2>
+                  <p className="mb-3">
+                    For privacy questions, requests, or concerns, contact:
+                  </p>
+                  <div className="bg-[#FAF8F5] p-5 border border-[#E5E0D3] space-y-1.5 text-xs sm:text-sm mb-3">
+                    <p><strong className="font-bold text-[#111111]">Times Chicago LLC</strong></p>
+                    <p>1246 J Clark St, Suite 1100</p>
+                    <p>Chicago, IL 60603, United States</p>
+                    <p><strong className="font-bold text-[#111111]">Email:</strong> <a href="mailto:worldnews@timeschicago.com" className="text-[#00558c] hover:underline">worldnews@timeschicago.com</a></p>
+                    <p><strong className="font-bold text-[#111111]">Website:</strong> <a href="https://www.timeschicago.com/" className="text-[#00558c] hover:underline">https://www.timeschicago.com/</a></p>
+                  </div>
+                  <p className="text-xs text-[#666666] italic">
+                    Please do not include passwords, payment-card details, government identification numbers, or other unnecessary sensitive information in an initial email.
+                  </p>
+                </section>
+
+                {/* 19. Important Notice About This Policy */}
+                <section id="important-notice" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                  <h2 className="font-serif font-bold text-[20px] text-[#111111] mb-3">
+                    19. Important Notice About This Policy
+                  </h2>
+                  <p className="mb-3">
+                    This document is a general privacy-policy template, not legal advice. It must be reviewed and customized to match the website&apos;s actual data collection, advertising, analytics, newsletter, hosting, and security practices. Publishing statements that do not match actual practices may mislead visitors or create legal risk.
+                  </p>
+                  <p>
+                    Before publication, confirm the business details, list the actual service providers and technologies, establish retention periods, configure any legally required cookie consent and privacy-request processes, and obtain qualified legal review where appropriate.
+                  </p>
+                </section>
+              </div>
             </div>
           </Container>
         </main>
       </div>
 
-      <StickySubscribeBar />
       <Footer />
+      <StickySubscribeBar />
     </div>
   );
 }

@@ -31,13 +31,48 @@ interface ArticleClientContentProps {
 }
 
 export default function ArticleClientContent({ slug, initialArticle }: ArticleClientContentProps) {
+  const [isMounted, setIsMounted] = useState(false);
   const [customPost, setCustomPost] = useState<any>(null);
   const [isMainShareOpen, setIsMainShareOpen] = useState(false);
   const [showNotificationAlert, setShowNotificationAlert] = useState(false);
   const [fontSize, setFontSize] = useState<"sm" | "md" | "lg">("md");
   const [headlinePassed, setHeadlinePassed] = useState(false);
   const [isStickyHeader, setIsStickyHeader] = useState(false);
+  const [notificationTop, setNotificationTop] = useState(170);
+  const [scrollProgress, setScrollProgress] = useState(0);
   const headlineRef = React.useRef<HTMLHeadingElement>(null);
+
+  // Track scroll progress along the entire article page (0% at top to 100% at bottom)
+  useEffect(() => {
+    const handleScrollProgress = () => {
+      const scrollTop = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+      const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      if (scrollHeight > 0) {
+        const progress = Math.min(100, Math.max(0, (scrollTop / scrollHeight) * 100));
+        setScrollProgress(progress);
+      } else {
+        setScrollProgress(0);
+      }
+    };
+
+    window.addEventListener("scroll", handleScrollProgress, { passive: true });
+    window.addEventListener("resize", handleScrollProgress);
+    handleScrollProgress();
+
+    return () => {
+      window.removeEventListener("scroll", handleScrollProgress);
+      window.removeEventListener("resize", handleScrollProgress);
+    };
+  }, []);
+
+  useEffect(() => {
+    setIsMounted(true);
+    if (typeof window !== "undefined") {
+      try {
+        ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
+      } catch (e) {}
+    }
+  }, []);
 
   useEffect(() => {
     if (typeof window !== "undefined" && slug) {
@@ -60,8 +95,10 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const dismissed = localStorage.getItem("wsj_notification_dismissed");
-      if (!dismissed) {
+      const userStr = sessionStorage.getItem("wsj_user") || localStorage.getItem("wsj_user");
+      const sessionDismissed = sessionStorage.getItem("wsj_notification_dismissed");
+      // Show the alert card when reading an article in a signed-out account unless dismissed in this session
+      if (!userStr && !sessionDismissed) {
         setShowNotificationAlert(true);
       }
     }
@@ -69,7 +106,7 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
 
   const handleDismissNotification = () => {
     if (typeof window !== "undefined") {
-      localStorage.setItem("wsj_notification_dismissed", "true");
+      sessionStorage.setItem("wsj_notification_dismissed", "true");
     }
     setShowNotificationAlert(false);
   };
@@ -96,6 +133,50 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
     handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Dynamically compute exact bottom of active navbar so notification has 0 padding / 0 gap
+  useEffect(() => {
+    const updateNotificationTop = () => {
+      if (typeof window === "undefined") return;
+
+      // 1. Article toolbar is active when headline has passed
+      if (headlinePassed) {
+        const toolbarEl = document.getElementById("article-toolbar-nav");
+        if (toolbarEl) {
+          const rect = toolbarEl.getBoundingClientRect();
+          setNotificationTop(Math.max(0, Math.round(rect.bottom)));
+          return;
+        }
+      }
+
+      // 2. Sticky header bar is active when scrolled past threshold (and before headlinePassed)
+      if (isStickyHeader) {
+        const stickyEl = document.getElementById("sticky-header-bar");
+        if (stickyEl) {
+          const rect = stickyEl.getBoundingClientRect();
+          setNotificationTop(Math.max(0, Math.round(rect.bottom)));
+          return;
+        }
+      }
+
+      // 3. Otherwise, main header nav is visible at normal position
+      const mainNavEl = document.getElementById("main-header-nav");
+      if (mainNavEl) {
+        const rect = mainNavEl.getBoundingClientRect();
+        setNotificationTop(Math.max(0, Math.round(rect.bottom)));
+        return;
+      }
+    };
+
+    updateNotificationTop();
+    window.addEventListener("scroll", updateNotificationTop, { passive: true });
+    window.addEventListener("resize", updateNotificationTop);
+
+    return () => {
+      window.removeEventListener("scroll", updateNotificationTop);
+      window.removeEventListener("resize", updateNotificationTop);
+    };
+  }, [headlinePassed, isStickyHeader]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -212,50 +293,47 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
 
   return (
     <main className="min-h-screen bg-white text-[#111111] font-sans flex flex-col justify-between select-none">
+      {/* Article Reading Scroll Progress Bar (Extends from 0% to 100% when scrolled to bottom) */}
+      <div
+        className="fixed top-0 left-0 right-0 z-[100] h-[3px] sm:h-[3.5px] pointer-events-none select-none bg-transparent"
+        aria-hidden="true"
+      >
+        <div
+          className="h-full bg-[#cc0000] transition-[width] duration-75 ease-out shadow-xs"
+          style={{ width: `${scrollProgress}%` }}
+        />
+      </div>
+
       <div>
         {/* Main Header & Navigation */}
         <Header />
 
-        {/* Top Push Notification Alert Floating Card (Image 1) */}
+        {/* Top Push Notification Alert Floating Card (Matching Image 2) */}
         {showNotificationAlert && (
           <div
-            className={`fixed right-6 z-50 max-w-sm bg-[#FAF8F5] border border-[#E5E0D5] shadow-2xl p-4 font-sans text-xs text-[#1e293b] transition-all duration-200 ${
-              headlinePassed
-                ? "top-[48px]"
-                : isStickyHeader
-                ? "top-[92px]"
-                : "top-[145px]"
-            }`}
+            style={{ top: `${notificationTop}px` }}
+            className="fixed right-4 sm:right-6 z-[999] max-w-[340px] w-[calc(100vw-32px)] sm:w-full bg-[#FAF8F5] border border-[#EBE6DC] shadow-xl p-5 font-sans text-xs text-[#333333] transition-[top] duration-150 rounded-none"
           >
-            <div className="flex items-start space-x-3">
-              <div className="flex-1 min-w-0">
-                <p className="font-bold text-xs text-[#0f172a] mb-1">Stay updated with Times Chicago</p>
-                <p className="text-[11.5px] text-[#475569] leading-relaxed mb-3">
-                  We’d like to send you notifications for the latest breaking news and market updates.
-                </p>
-                <div className="flex items-center space-x-3">
-                  <Link
-                    href="/signup"
-                    onClick={handleDismissNotification}
-                    className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-bold px-3 py-1.5 rounded-none text-xs transition-colors cursor-pointer"
-                  >
-                    Sign Up
-                  </Link>
-                  <button
-                    onClick={handleDismissNotification}
-                    className="text-[#64748b] hover:text-[#0f172a] text-xs font-semibold underline transition-colors cursor-pointer"
-                  >
-                    Dismiss
-                  </button>
-                </div>
-              </div>
+            <p className="font-semibold text-sm text-[#3b3735] mb-1.5 leading-snug">
+              We’d like to send you notifications.
+            </p>
+            <p className="text-[12.5px] text-[#57534e] leading-relaxed mb-4">
+              To get the latest from Times Chicago select “Sign up” and then “Allow”
+            </p>
+            <div className="flex items-center justify-end space-x-4">
               <button
                 onClick={handleDismissNotification}
-                className="text-[#94a3b8] hover:text-[#0f172a] p-1 leading-none text-sm cursor-pointer"
-                aria-label="Close notification"
+                className="text-[#444444] hover:text-black font-bold text-xs cursor-pointer transition-colors"
               >
-                ✕
+                Dismiss
               </button>
+              <Link
+                href="/signup"
+                onClick={handleDismissNotification}
+                className="bg-[#524e4a] hover:bg-[#3d3a37] text-white font-bold text-xs px-5 py-2 rounded-md transition-colors cursor-pointer inline-block text-center"
+              >
+                Sign Up
+              </Link>
             </div>
           </div>
         )}
@@ -300,17 +378,21 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
 
                 {/* Subheadline / Deck */}
                 {deck && (
-                  <p className="font-serif text-base sm:text-lg md:text-[19px] text-[#333333] leading-relaxed">
+                  <p
+                    className="font-georgia-serif text-base sm:text-lg md:text-[19px] text-[#111111] leading-relaxed"
+                    style={{ fontFamily: "Georgia, 'Times New Roman', serif !important", color: "#111111" }}
+                  >
                     {deck}
                   </p>
                 )}
 
                 {/* Author Byline & Share + Bookmark Icons */}
                 <div className="pt-2 pb-4 border-b border-dashed border-[#CCCCCC]">
-                  <div className="font-sans flex items-start justify-start gap-3 select-none">
-                    {/* Writer's Profile Image - Height aligned to cover bottom of date line */}
-                    <div className="relative w-[56px] h-[56px] sm:w-[60px] sm:h-[60px] rounded-none overflow-hidden shrink-0 border border-gray-300 shadow-2xs bg-gray-100 flex items-center justify-center">
-                      {authorObj.image ? (
+                  {/* DESKTOP VIEW (sm:flex) - 100% Locked & Untouched */}
+                  <div className="hidden sm:flex font-sans items-start justify-start gap-3 select-none">
+                    {/* Writer's Profile Image */}
+                    <div className="relative w-[60px] h-[60px] rounded-none overflow-hidden shrink-0 border border-gray-300 shadow-2xs bg-gray-100 flex items-center justify-center">
+                      {isMounted && authorObj.image ? (
                         <img
                           src={authorObj.image}
                           alt={authorObj.name}
@@ -318,13 +400,13 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
                         />
                       ) : (
                         <div className="w-full h-full rounded-none bg-[#111111] text-white flex items-center justify-center font-bold text-sm">
-                          {authorObj.name.charAt(0).toUpperCase()}
+                          {authorObj.name ? authorObj.name.charAt(0).toUpperCase() : "W"}
                         </div>
                       )}
                     </div>
 
                     {/* Writer Name + Inline Share & Bookmark Icons + Published Date */}
-                    <div className="flex flex-col justify-between h-[56px] sm:h-[60px]">
+                    <div className="flex flex-col justify-between h-[60px]">
                       <div className="text-[14px] font-bold text-[#111111] leading-none flex items-center gap-2">
                         <span>
                           By{" "}
@@ -387,6 +469,97 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
                       </div>
                     </div>
                   </div>
+
+                  {/* MOBILE VIEW (<sm) - Organised cleanly with buttons next to date & time */}
+                  <div className="flex sm:hidden font-sans items-start justify-start gap-3 select-none">
+                    {/* Writer's Profile Image - Aspect square, height aligned to buttons bottom edge */}
+                    <div className="relative w-[76px] h-[76px] aspect-square rounded-none overflow-hidden shrink-0 border border-gray-300 shadow-2xs bg-gray-100 flex items-center justify-center">
+                      {isMounted && authorObj.image ? (
+                        <img
+                          src={authorObj.image}
+                          alt={authorObj.name}
+                          className="w-full h-full object-cover rounded-none"
+                        />
+                      ) : (
+                        <div className="w-full h-full rounded-none bg-[#111111] text-white flex items-center justify-center font-bold text-base">
+                          {authorObj.name ? authorObj.name.charAt(0).toUpperCase() : "W"}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Right Column: Row 1 (Name), Row 2 (Date + 3 Buttons), Row 3 (Listen Audio Reader) */}
+                    <div className="flex flex-col justify-between h-[76px] w-full min-w-0">
+                      {/* Row 1: Writer Name */}
+                      <div className="text-[14px] font-bold text-[#111111] leading-none">
+                        <span>
+                          By{" "}
+                          <Link
+                            href={`/author/${authorObj.slug}`}
+                            className="underline hover:text-black cursor-pointer"
+                          >
+                            {authorObj.name}
+                          </Link>
+                        </span>
+                      </div>
+
+                      {/* Row 2: Published Date */}
+                      <div className="text-[12px] font-semibold text-[#555555] leading-none">
+                        {publishedDate}
+                      </div>
+
+                      {/* Row 3: Action Buttons (LinkedIn, Share, Bookmark) + Listen Audio Reader */}
+                      <div className="flex items-center gap-2 flex-nowrap min-w-0">
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          {authorObj.linkedinUrl && (
+                            <a
+                              href={authorObj.linkedinUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center justify-center w-7 h-7 rounded-none hover:opacity-90 transition-opacity cursor-pointer shrink-0"
+                              title={`${authorObj.name}'s LinkedIn Profile`}
+                            >
+                              <svg className="w-7 h-7 rounded-none" viewBox="0 0 24 24">
+                                <rect width="24" height="24" fill="#0077b5" rx="0" />
+                                <path
+                                  d="M8 19H5V8h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3V8h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"
+                                  fill="white"
+                                />
+                              </svg>
+                            </a>
+                          )}
+
+                          {/* Share Icon */}
+                          <div className="relative shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => setIsMainShareOpen(!isMainShareOpen)}
+                              className="inline-flex items-center justify-center w-7 h-7 rounded-none border border-[#cbd5e1] bg-white hover:bg-slate-100 text-[#334155] hover:text-[#0f172a] transition-colors cursor-pointer shadow-2xs"
+                              title="Share Article"
+                              aria-label="Share Article"
+                              suppressHydrationWarning
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                                <path d="M4 19c2.5-2.5 6-4.5 11-4.5v4.5l8-8.5L15 2v4.5C8.5 6.5 4.5 11 4 19z" />
+                              </svg>
+                            </button>
+                            <ShareCardModal
+                              isOpen={isMainShareOpen}
+                              onClose={() => setIsMainShareOpen(false)}
+                              title={title}
+                            />
+                          </div>
+
+                          {/* Bookmark Icon */}
+                          <BookmarkButton article={currentArticleData} variant="inline" />
+                        </div>
+
+                        {/* Listen Audio Reader next to action symbols */}
+                        <div className="[&>div]:border-l [&>div]:border-[#CCCCCC] [&>div]:pl-2.5 [&>div]:ml-0 flex items-center shrink-0">
+                          <ArticleAudioReader title={title} deck={deck} bodyContent={bodyHtml || undefined} />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Hero Image (rendered if not already embedded in bodyHtml) */}
@@ -444,28 +617,18 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
                   </div>
                 )}
 
-                {/* Middle In-Article Google Ad Placeholder */}
-                <div className="my-8 py-5 px-4 border-y border-[#e2e8f0] text-center bg-[#fafafa] flex flex-col items-center justify-center clear-both w-full rounded-none">
-                  <span className="text-[10px] uppercase font-sans tracking-widest text-[#94a3b8] font-bold mb-2">Advertisement</span>
+                {/* Middle In-Article Google Ad Container */}
+                <div className="my-4 py-2 text-center flex flex-col items-center justify-center clear-both w-full">
+                  <span className="text-[10px] uppercase font-sans tracking-widest text-[#94a3b8] font-bold mb-1">Advertisement</span>
                   
                   {/* Google AdSense ins Tag */}
                   <ins className="adsbygoogle"
-                       style={{ display: "block", textAlign: "center", minWidth: "250px", minHeight: "90px" }}
+                       style={{ display: "block", textAlign: "center", width: "100%", maxWidth: "728px" }}
                        data-ad-layout="in-article"
                        data-ad-format="fluid"
-                       data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
-                       data-ad-slot="XXXXXXXXXX"
+                       data-ad-client="ca-pub-3455329981771469"
+                       data-ad-slot="article_middle_inline_ad"
                        data-ad-test="on"></ins>
-
-                  {/* Localhost Development Visual Test Box */}
-                  <div className="mt-2 w-full max-w-lg border border-dashed border-[#94a3b8] bg-[#f1f5f9] p-4 rounded text-center">
-                    <p className="font-sans text-xs font-bold text-[#1e293b]">
-                      [ Google AdSense Banner Slot - Localhost Test Preview ]
-                    </p>
-                    <p className="font-sans text-[11px] text-[#64748b] mt-1">
-                      Format: Fluid In-Article Ad | Test Mode: <code className="bg-white px-1.5 py-0.5 rounded border border-gray-300 font-mono text-[10.5px]">data-ad-test=&quot;on&quot;</code>
-                    </p>
-                  </div>
                 </div>
 
                 {/* Hashtags Footer Row */}
@@ -531,7 +694,7 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
               <div className="shrink-0 w-full sm:w-auto text-center sm:text-right">
                 <Link
                   href="/special-offer"
-                  className="w-full sm:w-auto inline-block bg-black hover:bg-gray-800 text-white font-bold text-xs sm:text-sm px-7 py-3 rounded-none shadow-xs transition-colors cursor-pointer whitespace-nowrap text-center"
+                  className="w-full sm:w-auto inline-block bg-white hover:bg-slate-100 text-[#334155] border border-[#cbd5e1] font-sans font-bold text-xs sm:text-sm px-6 py-2.5 rounded-none shadow-2xs transition-colors cursor-pointer whitespace-nowrap text-center"
                 >
                   Subscribe Now
                 </Link>

@@ -363,7 +363,7 @@ export const PodcastSection: React.FC<PodcastSectionProps> = ({ onActiveCountCha
   };
 
   return (
-    <div className="w-full flex flex-col space-y-4">
+    <div className="w-full flex flex-col space-y-[48px] lg:space-y-4">
       {podcasts.map((podcast, idx) => {
         const podId = podcast.id || `podcast_${idx}`;
         const isPlaying = playingPodcastId === podId && audioRef.current && !audioRef.current.paused;
@@ -560,6 +560,19 @@ export const PodcastSection: React.FC<PodcastSectionProps> = ({ onActiveCountCha
           </div>
         );
       })}
+
+      {/* Bottom Link: View all our podcasts */}
+      <div className="pt-2 text-center">
+        <a
+          href="https://podcasts.apple.com/in/podcast/jadetimes-talks/id1791836245?l=kn"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-sans text-xs font-bold text-[#b8860b] hover:underline uppercase tracking-wider inline-flex items-center space-x-1"
+        >
+          <span>View all our podcasts</span>
+          <span>↗</span>
+        </a>
+      </div>
     </div>
   );
 };

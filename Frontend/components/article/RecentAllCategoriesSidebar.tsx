@@ -154,7 +154,10 @@ export const RecentAllCategoriesSidebar: React.FC<RecentAllCategoriesSidebarProp
                   {item.category}
                 </span>
               )}
-              <h4 className="font-serif font-bold text-[13px] text-[#111111] leading-[1.25] group-hover:underline line-clamp-2">
+              <h4
+                className="font-bold text-[13px] sm:text-[13.5px] text-[#111111] leading-[1.22] group-hover:underline line-clamp-2"
+                style={{ fontFamily: "Georgia, serif" }}
+              >
                 {item.title}
               </h4>
               <span className="font-sans text-[10.5px] text-gray-400 block mt-1">

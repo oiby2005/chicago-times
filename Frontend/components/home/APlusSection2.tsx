@@ -68,7 +68,7 @@ export const APlusSection2: React.FC = () => {
 
   return (
     <div className="w-full font-sans select-none my-4">
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-0 items-stretch border-t border-dashed border-[#CCCCCC] pt-4">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-0 items-stretch border-t-0 md:border-t border-dashed border-[#CCCCCC] pt-0 md:pt-4">
         {/* Left Text Card (6 of 12 cols) */}
         <div className="col-span-12 md:col-span-6 bg-[#F7F4EB] p-6 sm:p-10 flex flex-col justify-center">
           <h2 className="font-serif font-bold text-[26px] sm:text-[34px] leading-[1.15] text-[#111111] hover:underline cursor-pointer mb-4">

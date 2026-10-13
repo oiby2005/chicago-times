@@ -111,7 +111,7 @@ export const YourWeekendSection: React.FC = () => {
   const rightBottom = articles[2] || defaultArticles[2];
 
   return (
-    <section className="w-full font-sans select-none my-4 pt-2">
+    <section className="w-full font-sans select-none my-0 lg:my-4 pt-0 lg:pt-2">
       {/* Section Title */}
       <div className="mb-4">
         <h2 className="font-serif font-bold text-[24px] sm:text-[28px] text-[#111111] tracking-tight">
@@ -153,10 +153,10 @@ export const YourWeekendSection: React.FC = () => {
 
         {/* ==================== RIGHT SIDE STORIES (4 of 12 cols ~ 33%) ==================== */}
         <div 
-          className="md:col-span-4 pl-0 md:pl-[0.4cm] flex flex-col justify-between border-t md:border-t-0 md:border-l border-dashed border-[#CCCCCC] pt-4 md:pt-0"
+          className="md:col-span-4 pl-0 md:pl-[0.4cm] flex flex-col justify-between border-t md:border-t-0 md:border-l border-dashed border-[#CCCCCC] pt-[36px] md:pt-0"
         >
           {/* Top Story (Position 2) */}
-          <article className="pb-4 border-b border-dashed border-[#CCCCCC] mb-4">
+          <article className="pb-[36px] mb-[36px] md:pb-4 md:mb-4 border-b border-dashed border-[#CCCCCC]">
             <Link
               href={`/article/${rightTop.slug}`}
               className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 mb-2.5 group"

@@ -14,23 +14,31 @@ interface TocItem {
 
 const TOC_ITEMS: TocItem[] = [
   { id: "intro", label: "Introduction" },
-  { id: "eligibility", label: "1. Eligibility" },
-  { id: "services", label: "2. Our Services" },
-  { id: "user-accounts", label: "3. User Accounts" },
-  { id: "user-content", label: "4. User Content" },
-  { id: "editorial-independence", label: "5. Editorial Independence" },
-  { id: "intellectual-property", label: "6. Intellectual Property" },
-  { id: "sponsored-content", label: "7. Sponsored Content & Ads" },
-  { id: "third-party-links", label: "8. Third-Party Links" },
-  { id: "copyright-policy", label: "9. Copyright Policy" },
-  { id: "acceptable-use", label: "10. Acceptable Use" },
-  { id: "disclaimer", label: "11. Disclaimer" },
-  { id: "limitation-liability", label: "12. Limitation of Liability" },
-  { id: "indemnification", label: "13. Indemnification" },
-  { id: "privacy-policy", label: "14. Privacy Policy Link" },
-  { id: "changes-services", label: "15. Changes to Services" },
-  { id: "governing-law", label: "16. Governing Law" },
-  { id: "contact-info", label: "17. Contact Information" },
+  { id: "sec-1", label: "1. Company Information & Contact" },
+  { id: "sec-2", label: "2. Eligibility and Lawful Use" },
+  { id: "sec-3", label: "3. Permitted Use" },
+  { id: "sec-4", label: "4. News Content & Editorial Standards" },
+  { id: "sec-5", label: "5. Accuracy and Completeness" },
+  { id: "sec-6", label: "6. No Professional Advice" },
+  { id: "sec-7", label: "7. Intellectual Property" },
+  { id: "sec-8", label: "8. User Submissions" },
+  { id: "sec-9", label: "9. News Tips and Confidentiality" },
+  { id: "sec-10", label: "10. Comments & Interactive Features" },
+  { id: "sec-11", label: "11. Advertising & Sponsored Content" },
+  { id: "sec-12", label: "12. Third-Party Websites" },
+  { id: "sec-13", label: "13. Privacy and Cookies" },
+  { id: "sec-14", label: "14. Accounts and Security" },
+  { id: "sec-15", label: "15. Availability and Changes" },
+  { id: "sec-16", label: "16. Copyright Complaints" },
+  { id: "sec-17", label: "17. Disclaimer of Warranties" },
+  { id: "sec-18", label: "18. Limitation of Liability" },
+  { id: "sec-19", label: "19. Indemnification" },
+  { id: "sec-20", label: "20. Suspension and Termination" },
+  { id: "sec-21", label: "21. Governing Law & Jurisdiction" },
+  { id: "sec-22", label: "22. Changes to These Terms" },
+  { id: "sec-23", label: "23. Severability and No Waiver" },
+  { id: "sec-24", label: "24. Entire Agreement" },
+  { id: "sec-25", label: "25. Contact Us" },
 ];
 
 export default function TermsClient() {
@@ -61,6 +69,9 @@ export default function TermsClient() {
               <h1 className="font-serif font-black text-[32px] sm:text-[44px] leading-tight text-[#111111] tracking-tight">
                 Terms and Conditions
               </h1>
+              <p className="font-serif text-[18px] sm:text-[20px] text-[#444444] mt-2">
+                Times Chicago LLC
+              </p>
             </div>
 
             {/* Main Content 2-Column Grid */}
@@ -68,23 +79,23 @@ export default function TermsClient() {
               
               {/* ==================== LEFT SIDEBAR: STICKY TABLE OF CONTENTS (4 of 12 cols ~ 33%) ==================== */}
               <div className="lg:col-span-4 sticky top-20 z-10 self-start w-full">
-                <div className="bg-white border border-[#E2DDD0] p-4 sm:p-5 shadow-xs">
+                <div className="bg-white border border-[#E2DDD0] p-3 sm:p-4 lg:p-5 shadow-xs">
                   <button
                     type="button"
                     onClick={() => setIsTocOpen(!isTocOpen)}
-                    className={`w-full flex items-center justify-between text-left lg:pb-3 lg:mb-3 lg:border-b lg:border-[#E5E0D3] ${
+                    className={`w-full flex items-center justify-between text-left lg:pb-3 lg:mb-3 lg:border-b lg:border-[#E5E0D3] gap-1.5 ${
                       isTocOpen ? "pb-3 mb-3 border-b border-[#E5E0D3]" : ""
                     }`}
                   >
-                    <div className="flex items-center space-x-2">
-                      <h3 className="font-serif font-bold text-[15px] uppercase tracking-wider text-[#111111]">
+                    <div className="flex items-center min-w-0 pr-1">
+                      <h3 className="font-serif font-bold text-[11px] xs:text-[12px] sm:text-[14px] lg:text-[15px] uppercase tracking-tight sm:tracking-wider text-[#111111] whitespace-nowrap truncate">
                         TABLE OF CONTENTS
                       </h3>
                     </div>
-                    <div className="flex items-center space-x-1.5 lg:hidden text-[#990000] font-sans text-xs font-bold bg-[#FAF5F5] px-2.5 py-1 rounded border border-[#F5E6E6]">
+                    <div className="flex items-center space-x-1 lg:hidden text-[#990000] font-sans text-[10.5px] xs:text-xs font-bold bg-[#FAF5F5] px-2 py-0.5 sm:px-2.5 sm:py-1 rounded border border-[#F5E6E6] shrink-0 whitespace-nowrap">
                       <span>{isTocOpen ? "Hide" : `Show (${TOC_ITEMS.length} Sections)`}</span>
                       <svg
-                        className={`w-3.5 h-3.5 transition-transform duration-200 ${isTocOpen ? "rotate-180" : ""}`}
+                        className={`w-3 h-3 xs:w-3.5 xs:h-3.5 transition-transform duration-200 shrink-0 ${isTocOpen ? "rotate-180" : ""}`}
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -94,7 +105,7 @@ export default function TermsClient() {
                     </div>
                   </button>
 
-                  <nav className={`space-y-0.5 ${isTocOpen ? "block" : "hidden lg:block"}`}>
+                  <nav className={`space-y-0.5 ${isTocOpen ? "block" : "hidden lg:block"} max-h-[70vh] overflow-y-auto no-scrollbar`}>
                     {TOC_ITEMS.map((item) => {
                       const isActive = activeSection === item.id;
                       return (
@@ -118,6 +129,34 @@ export default function TermsClient() {
               {/* ==================== RIGHT MAIN COLUMN: DOCUMENT SECTIONS (8 of 12 cols ~ 67%) ==================== */}
               <div className="lg:col-span-8 bg-white border border-[#E2DDD0] p-6 sm:p-10 shadow-xs space-y-8 font-sans text-[14px] leading-relaxed text-[#333333]">
 
+                {/* Metadata Summary Table */}
+                <div className="border border-[#E2DDD0] overflow-hidden rounded-none">
+                  <table className="w-full text-left text-xs sm:text-[13px] font-sans">
+                    <tbody className="divide-y divide-[#E2DDD0]">
+                      <tr className="bg-[#FAF8F5]">
+                        <th className="py-2.5 px-4 font-bold text-[#111111] w-1/3 border-r border-[#E2DDD0]">Website</th>
+                        <td className="py-2.5 px-4 text-[#00558c]">
+                          <a href="https://www.timeschicago.com/" target="_blank" rel="noopener noreferrer" className="hover:underline">
+                            https://www.timeschicago.com/
+                          </a>
+                        </td>
+                      </tr>
+                      <tr>
+                        <th className="py-2.5 px-4 font-bold text-[#111111] border-r border-[#E2DDD0]">Business Address</th>
+                        <td className="py-2.5 px-4 text-[#333333]">1246 J Clark St, Suite 1100, Chicago, IL 60603, United States</td>
+                      </tr>
+                      <tr className="bg-[#FAF8F5]">
+                        <th className="py-2.5 px-4 font-bold text-[#111111] border-r border-[#E2DDD0]">Effective Date</th>
+                        <td className="py-2.5 px-4 text-[#333333]">October 10, 2026</td>
+                      </tr>
+                      <tr>
+                        <th className="py-2.5 px-4 font-bold text-[#111111] border-r border-[#E2DDD0]">Last Updated</th>
+                        <td className="py-2.5 px-4 text-[#333333]">October 10, 2026</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
                 {/* Introduction */}
                 <section id="intro" className="scroll-mt-28">
                   <h2 className="font-serif font-bold text-[24px] text-[#111111] pb-2 mb-4 border-b border-[#E5E0D3]">
@@ -125,217 +164,298 @@ export default function TermsClient() {
                   </h2>
                   <div className="space-y-4">
                     <p>
-                      Welcome to <strong className="font-bold text-[#111111]">Times Chicago</strong> (&ldquo;Times Chicago,&rdquo; &ldquo;we,&rdquo; &ldquo;our,&rdquo; or &ldquo;us&rdquo;). These Terms and Conditions (&ldquo;Terms&rdquo;) govern your access to and use of the Times Chicago website, mobile services, digital publications, and all related platforms (collectively, the &ldquo;Platform&rdquo;).
+                      These Terms and Conditions (&ldquo;Terms&rdquo;) govern access to and use of Times Chicago LLC&rsquo;s website at{" "}
+                      <a href="https://www.timeschicago.com/" className="text-[#00558c] hover:underline">
+                        https://www.timeschicago.com/
+                      </a>{" "}
+                      and related digital platforms, content, and services (collectively, the &ldquo;Services&rdquo;), including news articles, reporting, commentary, analysis, photographs, videos, graphics, newsletters, and interactive features.
                     </p>
                     <p>
-                      By accessing, browsing, submitting content, or using any part of our Platform, you agree to comply with these Terms. If you do not agree with these Terms, please discontinue use of the Platform immediately.
-                    </p>
-                    <p>
-                      Times Chicago reserves the right to update or modify these Terms at any time. Continued use of the Platform following any updates constitutes acceptance of the revised Terms.
+                      By accessing or using the Services, you agree to these Terms. If you do not agree, please stop using the Services. These Terms should be read together with any applicable Privacy Policy and additional terms presented for a particular feature or service.
                     </p>
                   </div>
                 </section>
 
-                {/* 1. Eligibility */}
-                <section id="eligibility" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                {/* 1. Company Information and Contact */}
+                <section id="sec-1" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
                   <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">1.</span> Eligibility
+                    <span className="text-[#990000] font-bold mr-1">1.</span> Company Information and Contact
+                  </h3>
+                  <div className="space-y-3">
+                    <p className="font-semibold text-[#111111]">Times Chicago LLC</p>
+                    <p>1246 J Clark St, Suite 1100<br />Chicago, IL 60603, United States</p>
+                    <p>Website: <a href="https://www.timeschicago.com/" className="text-[#00558c] hover:underline">https://www.timeschicago.com/</a></p>
+                    <p>General inquiries: use the contact information published on the official website.</p>
+                    <p>Legal and privacy inquiries: use the relevant contact channel published on the official website. Before publication, ensure working contact details are available for legal notices and privacy requests.</p>
+                  </div>
+                </section>
+
+                {/* 2. Eligibility and Lawful Use */}
+                <section id="sec-2" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
+                    <span className="text-[#990000] font-bold mr-1">2.</span> Eligibility and Lawful Use
                   </h3>
                   <p>
-                    You must be at least 18 years old, or have permission from a parent or legal guardian, to use our Platform. By using our services, you represent that you have the legal authority to accept these terms.
+                    You may use the Services only for lawful purposes and in accordance with these Terms. You agree not to misuse the Services, submit fraudulent information, impersonate another person, interfere with other users, or violate applicable laws. If you use the Services on behalf of an organization, you represent that you are authorized to do so.
                   </p>
                 </section>
 
-                {/* 2. Our Services */}
-                <section id="services" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                {/* 3. Permitted Use */}
+                <section id="sec-3" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
                   <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">2.</span> Our Services
+                    <span className="text-[#990000] font-bold mr-1">3.</span> Permitted Use
                   </h3>
-                  <p className="mb-3">
-                    Times Chicago is an independent digital news and media platform providing breaking news, politics, business, technology, science, world news, health, CEO spotlight, opinion articles, press releases, sponsored content, and multimedia publications.
-                  </p>
                   <p>
-                    Our editorial team reserves the right to determine which content is published on our Platform.
+                    You may access and read publicly available content for personal, non-commercial purposes and share links to our pages, provided you do not misrepresent the content or imply an endorsement that does not exist. You must not copy, republish, sell, distribute, scrape, or commercially exploit substantial portions of our content without permission, except where applicable law permits. You must not bypass access controls, disrupt the Services, introduce malware, or attempt unauthorized access.
                   </p>
                 </section>
 
-                {/* 3. User Accounts */}
-                <section id="user-accounts" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                {/* 4. News Content and Editorial Standards */}
+                <section id="sec-4" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
                   <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">3.</span> User Accounts
+                    <span className="text-[#990000] font-bold mr-1">4.</span> News Content and Editorial Standards
                   </h3>
                   <p>
-                    Certain services may require registration. You agree to provide accurate information, maintain the confidentiality of your account, notify us immediately of unauthorized access, and accept responsibility for all activity occurring under your account. We reserve the right to suspend or terminate accounts that violate these Terms.
+                    Times Chicago may publish news, reporting, interviews, analysis, opinion, photographs, videos, graphics, syndicated material, licensed material, and links to third-party sources. We aim to publish relevant and reliable material, but news can develop quickly and information may change. We may update, correct, clarify, edit, or remove content when appropriate. Opinion and sponsored material should be identified where required by law or editorial policy.
                   </p>
                 </section>
 
-                {/* 4. User Content */}
-                <section id="user-content" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                {/* 5. Accuracy and Completeness */}
+                <section id="sec-5" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
                   <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">4.</span> User Content
+                    <span className="text-[#990000] font-bold mr-1">5.</span> Accuracy and Completeness
                   </h3>
-                  <p className="mb-3">
-                    Users may submit articles, press releases, images, videos, comments, or other content. By submitting content, you represent that you own the content, it does not violate intellectual property rights, it is truthful, and it does not contain defamatory or illegal material.
-                  </p>
                   <p>
-                    By submitting content, you grant Times Chicago a worldwide, non-exclusive, royalty-free license to publish, distribute, edit, archive, translate, reproduce, and promote your content across our platforms. We reserve the right to remove submitted content without notice.
+                    We make reasonable efforts to maintain the quality of our content but do not guarantee that every article, statement, statistic, image, quotation, or link is accurate, complete, current, or error-free. To the extent permitted by law, the Services and content are provided without a guarantee of completeness or suitability for a particular purpose. Nothing in these Terms excludes a right or responsibility that cannot legally be excluded.
                   </p>
                 </section>
 
-                {/* 5. Editorial Independence */}
-                <section id="editorial-independence" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                {/* 6. No Professional Advice */}
+                <section id="sec-6" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
                   <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">5.</span> Editorial Independence
+                    <span className="text-[#990000] font-bold mr-1">6.</span> No Professional Advice
                   </h3>
                   <p>
-                    Submission of content does not guarantee publication. Our editorial team may edit articles for clarity, formatting, SEO, and guidelines, add headlines/metadata, decline publication, or remove published content. All editorial decisions are final.
+                    Content is provided for general informational purposes and is not individualized legal, medical, tax, accounting, investment, or other professional advice unless expressly stated otherwise. Financial and market coverage is not an individualized investment recommendation. Consider consulting a qualified professional before making decisions that require specialized advice.
                   </p>
                 </section>
 
-                {/* 6. Intellectual Property */}
-                <section id="intellectual-property" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                {/* 7. Intellectual Property */}
+                <section id="sec-7" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
                   <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">6.</span> Intellectual Property
+                    <span className="text-[#990000] font-bold mr-1">7.</span> Intellectual Property
                   </h3>
                   <p>
-                    Unless otherwise stated, all content on Times Chicago including articles, logos, graphics, videos, photographs, website design, branding, and software is the exclusive property of Times Chicago or its licensors. You may not reproduce, copy, distribute, or commercially exploit any material without prior written permission.
+                    Unless otherwise stated, original content, articles, graphics, logos, design elements, videos, photographs, and other materials on the Services are owned by Times Chicago LLC or used under license and may be protected by intellectual property laws. You may not reproduce, modify, republish, commercially exploit, or redistribute protected material without permission, except as permitted by applicable law. Third-party materials remain subject to their owners&rsquo; rights and applicable licenses.
                   </p>
                 </section>
 
-                {/* 7. Sponsored Content & Advertising */}
-                <section id="sponsored-content" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                {/* 8. User Submissions */}
+                <section id="sec-8" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
                   <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">7.</span> Sponsored Content &amp; Advertising
+                    <span className="text-[#990000] font-bold mr-1">8.</span> User Submissions
                   </h3>
                   <p>
-                    Times Chicago may publish sponsored articles, advertisements, affiliate links, and promotional campaigns. Sponsored material will be clearly identified. Publication of sponsored content does not imply endorsement by Times Chicago.
+                    If you submit news tips, photographs, videos, comments, documents, story ideas, or other materials (&ldquo;User Submissions&rdquo;), you represent that you have the necessary rights and permissions and that the material does not unlawfully infringe another person&rsquo;s rights. You retain ownership of material you own. By submitting material for consideration, you grant Times Chicago LLC a non-exclusive, worldwide, royalty-free license to review, reproduce, edit, adapt, publish, display, distribute, and use the material in connection with editorial operations and the Services, to the extent reasonably necessary for those purposes. A separate written agreement may govern a specific submission. Submission does not guarantee publication, payment, confidentiality, or a response.
                   </p>
                 </section>
 
-                {/* 8. Third-Party Links */}
-                <section id="third-party-links" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                {/* 9. News Tips and Confidentiality */}
+                <section id="sec-9" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
                   <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">8.</span> Third-Party Links
+                    <span className="text-[#990000] font-bold mr-1">9.</span> News Tips and Confidentiality
                   </h3>
                   <p>
-                    Our Platform may contain links to third-party websites. We do not control or endorse those websites and are not responsible for their accuracy, security, privacy practices, or services. Users access third-party websites at their own risk.
+                    Submitting a news tip does not automatically establish a confidential, privileged, or protected journalist-source relationship. Ordinary email and website forms may not be secure or anonymous. Do not submit confidential or sensitive information unless necessary and after considering the risks. If source confidentiality is important, contact the editorial team before sending sensitive material and use an appropriate secure method where available.
                   </p>
                 </section>
 
-                {/* 9. Copyright Policy */}
-                <section id="copyright-policy" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                {/* 10. Comments and Interactive Features */}
+                <section id="sec-10" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
                   <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">9.</span> Copyright Policy
+                    <span className="text-[#990000] font-bold mr-1">10.</span> Comments and Interactive Features
                   </h3>
                   <p>
-                    Times Chicago respects intellectual property rights. If you believe content published on our Platform infringes your copyright, please contact us with details including your name, copyrighted work description, and URI of the material.
+                    If comments, forums, or other interactive features are available, users must not post unlawful, fraudulent, threatening, harassing, defamatory, infringing, or otherwise prohibited material. We may moderate, restrict, remove, or decline to publish content in accordance with applicable law and our editorial policies. Users remain responsible for their submissions.
                   </p>
                 </section>
 
-                {/* 10. Acceptable Use */}
-                <section id="acceptable-use" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                {/* 11. Advertising and Sponsored Content */}
+                <section id="sec-11" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
                   <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">10.</span> Acceptable Use
+                    <span className="text-[#990000] font-bold mr-1">11.</span> Advertising and Sponsored Content
                   </h3>
                   <p>
-                    Users may not upload malicious software, attempt unauthorized access, spam or distribute promotions, impersonate others, or publish misleading information. Violation of this policy may result in immediate termination of access.
+                    The Services may contain advertising, sponsorships, affiliate links, or promotional content. The presence of an advertisement does not necessarily constitute an endorsement. Advertisers and sponsors are responsible for their claims, materials, and legal compliance. Commercial relationships do not automatically guarantee editorial coverage or a favorable editorial outcome. Sponsored material should be identified where required by law.
                   </p>
                 </section>
 
-                {/* 11. Disclaimer */}
-                <section id="disclaimer" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                {/* 12. Third-Party Websites */}
+                <section id="sec-12" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
                   <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">11.</span> Disclaimer
+                    <span className="text-[#990000] font-bold mr-1">12.</span> Third-Party Websites
                   </h3>
-                  <p className="mb-3">
-                    All information is provided on an &ldquo;AS IS&rdquo; and &ldquo;AS AVAILABLE&rdquo; basis. Although Times Chicago strives for accuracy, we make no warranties regarding completeness, timeliness, availability, or reliability. News develops rapidly, and published information may change over time.
-                  </p>
                   <p>
-                    <strong className="font-bold text-[#111111]">Nothing published on this Platform constitutes legal, financial, investment, medical, or professional advice. Users should seek independent professional advice before relying on published information.</strong>
+                    Our Services may link to websites or services operated by third parties. We do not control all third-party content, security, or privacy practices and are not responsible for their independent operation. Links do not necessarily imply endorsement. Your use of third-party services is subject to their own terms and policies.
                   </p>
                 </section>
 
-                {/* 12. Limitation of Liability */}
-                <section id="limitation-liability" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                {/* 13. Privacy and Cookies */}
+                <section id="sec-13" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
                   <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">12.</span> Limitation of Liability
+                    <span className="text-[#990000] font-bold mr-1">13.</span> Privacy and Cookies
                   </h3>
                   <p>
-                    To the fullest extent permitted by law, Times Chicago shall not be liable for any indirect, incidental, consequential, special, or punitive damages arising from the use of or inability to access the Platform, errors/omissions, user-generated content, or website interruptions.
+                    Your use of the Services is also subject to our Privacy Policy, which should be available at a clearly identified location on{" "}
+                    <a href="https://www.timeschicago.com/" className="text-[#00558c] hover:underline">
+                      https://www.timeschicago.com/
+                    </a>. Our website may use cookies, analytics, log files, or similar technologies depending on the features enabled. The Privacy Policy should accurately describe the data actually collected, how it is used and shared, retention, security, and available privacy choices. These Terms do not replace any legally required consent or privacy disclosure.
                   </p>
                 </section>
 
-                {/* 13. Indemnification */}
-                <section id="indemnification" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                {/* 14. Accounts and Security */}
+                <section id="sec-14" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
                   <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">13.</span> Indemnification
+                    <span className="text-[#990000] font-bold mr-1">14.</span> Accounts and Security
                   </h3>
                   <p>
-                    You agree to indemnify and hold harmless Times Chicago, its directors, officers, editors, and affiliates from any claims, damages, liabilities, or expenses arising from your use of the Platform or violation of these Terms.
+                    If accounts are offered, you must provide accurate information and take reasonable steps to protect your credentials. Notify us promptly if you suspect unauthorized account access. You must not access another person&rsquo;s account without authorization. We may restrict access where reasonably necessary to protect users, the Services, or our legal rights.
                   </p>
                 </section>
 
-                {/* 14. Privacy Policy Link */}
-                <section id="privacy-policy" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                {/* 15. Availability and Changes */}
+                <section id="sec-15" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
                   <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">14.</span> Privacy Policy
+                    <span className="text-[#990000] font-bold mr-1">15.</span> Availability and Changes
                   </h3>
                   <p>
-                    Your use of the Platform is also governed by our Privacy Policy, which explains how we collect, use, store, and protect personal information.
+                    We may modify, suspend, discontinue, or restrict any part of the Services for operational, editorial, security, legal, or business reasons. We do not guarantee uninterrupted access or freedom from technical errors. Where required by law, we will provide any required notice of material changes.
                   </p>
                 </section>
 
-                {/* 15. Changes to Services */}
-                <section id="changes-services" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                {/* 16. Copyright and Intellectual Property Complaints */}
+                <section id="sec-16" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
                   <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">15.</span> Changes to Services
+                    <span className="text-[#990000] font-bold mr-1">16.</span> Copyright and Intellectual Property Complaints
                   </h3>
                   <p>
-                    Times Chicago may modify, suspend, discontinue, or update any part of the Platform without prior notice. We shall not be liable for any resulting loss or inconvenience.
+                    If you believe material on the Services infringes your copyright or other rights, contact us through the legal or copyright contact published on the official website. Provide your contact details, identify the work and disputed material (including its URL), explain the basis of your claim, and provide information reasonably establishing your authority. We may investigate and take appropriate action. Formal notices under the U.S. Digital Millennium Copyright Act may have additional requirements; do not assume a general contact channel is a designated DMCA agent.
                   </p>
                 </section>
 
-                {/* 16. Governing Law */}
-                <section id="governing-law" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                {/* 17. Disclaimer of Warranties */}
+                <section id="sec-17" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
                   <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">16.</span> Governing Law
+                    <span className="text-[#990000] font-bold mr-1">17.</span> Disclaimer of Warranties
                   </h3>
                   <p>
-                    These Terms shall be governed by and interpreted under the laws of the State of Washington, United States, without regard to conflict of law principles. Any legal dispute arising from these Terms shall be subject to the exclusive jurisdiction of the state and federal courts located in Washington.
+                    To the fullest extent permitted by applicable law, the Services and content are provided on an &ldquo;as is&rdquo; and &ldquo;as available&rdquo; basis. We do not warrant that the Services will be uninterrupted, secure, error-free, or suitable for every purpose. This section does not limit any warranty or right that cannot lawfully be excluded.
                   </p>
                 </section>
 
-                {/* 17. Contact Information */}
-                <section id="contact-info" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                {/* 18. Limitation of Liability */}
+                <section id="sec-18" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
                   <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">17.</span> Contact Information
+                    <span className="text-[#990000] font-bold mr-1">18.</span> Limitation of Liability
                   </h3>
-                  <p className="mb-4">
-                    For legal inquiries, copyright notices, or questions regarding these Terms, please contact:
+                  <p>
+                    To the fullest extent permitted by law, Times Chicago LLC and its owners, officers, employees, contractors, and service providers will not be liable for indirect, incidental, special, consequential, exemplary, or punitive damages, or for loss of profits, revenue, business opportunities, goodwill, or data arising from use of or inability to use the Services. This section does not exclude or limit liability for fraud, intentional misconduct, gross negligence, or any liability that cannot legally be excluded or limited, and does not restrict non-waivable consumer rights.
                   </p>
+                </section>
 
-                  <div className="bg-[#F8F5EC] border border-[#E5E0D3] p-5 font-sans text-[13.5px] text-[#333333]">
-                    <strong className="font-bold text-[#111111] block mb-1 text-[14px]">
-                      Times Chicago
-                    </strong>
-                    <p className="leading-snug text-[#555555]">
-                      2316 Eastgate St #160<br />
-                      Walla Walla, Washington (WA) 99362<br />
-                      United States<br />
-                      Email: <a href="mailto:info@timeschicago.com" className="font-bold text-[#00558C] hover:underline">info@timeschicago.com</a>
+                {/* 19. Indemnification */}
+                <section id="sec-19" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
+                    <span className="text-[#990000] font-bold mr-1">19.</span> Indemnification
+                  </h3>
+                  <p>
+                    To the extent permitted by law, you are responsible for losses, claims, liabilities, and reasonable expenses arising directly from your unlawful use of the Services, material violation of these Terms, or infringement of another person&rsquo;s rights. This section does not require indemnification for our own conduct where prohibited by law.
+                  </p>
+                </section>
+
+                {/* 20. Suspension and Termination */}
+                <section id="sec-20" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
+                    <span className="text-[#990000] font-bold mr-1">20.</span> Suspension and Termination
+                  </h3>
+                  <p>
+                    We may restrict or terminate access where we reasonably believe a user has materially violated these Terms, created a security risk, engaged in unlawful activity, or misused the Services. Where appropriate and practicable, we may provide notice or an opportunity to address the issue. Accrued rights and provisions that by their nature should survive termination remain unaffected.
+                  </p>
+                </section>
+
+                {/* 21. Governing Law and Jurisdiction */}
+                <section id="sec-21" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
+                    <span className="text-[#990000] font-bold mr-1">21.</span> Governing Law and Jurisdiction
+                  </h3>
+                  <p>
+                    These Terms are governed by the laws of the State of Illinois, without regard to conflict-of-law principles, except where applicable law requires otherwise. Subject to mandatory consumer protections and jurisdictional requirements, disputes will be brought before competent state or federal courts located in Illinois. Nothing in this section prevents a person from exercising rights that applicable law requires or permits.
+                  </p>
+                </section>
+
+                {/* 22. Changes to These Terms */}
+                <section id="sec-22" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
+                    <span className="text-[#990000] font-bold mr-1">22.</span> Changes to These Terms
+                  </h3>
+                  <p>
+                    We may revise these Terms to reflect changes to our Services, operations, or legal requirements. The &ldquo;Last Updated&rdquo; date indicates when they were most recently revised. Where required, material changes will be communicated through the website or another appropriate method. Continued use after revised Terms become effective may constitute acceptance where legally valid.
+                  </p>
+                </section>
+
+                {/* 23. Severability and No Waiver */}
+                <section id="sec-23" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
+                    <span className="text-[#990000] font-bold mr-1">23.</span> Severability and No Waiver
+                  </h3>
+                  <p>
+                    If any provision is found unlawful, invalid, or unenforceable, it will be limited or severed to the minimum extent necessary, and the remaining provisions will continue to apply to the extent permitted by law. A failure or delay in enforcing a provision does not waive the right to enforce it later.
+                  </p>
+                </section>
+
+                {/* 24. Entire Agreement */}
+                <section id="sec-24" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
+                    <span className="text-[#990000] font-bold mr-1">24.</span> Entire Agreement
+                  </h3>
+                  <p>
+                    These Terms, together with the Privacy Policy and any additional terms expressly incorporated by reference, govern your use of the Services. A separate written agreement for a particular service, contributor relationship, subscription, or commercial arrangement will govern to the extent it expressly conflicts with these Terms.
+                  </p>
+                </section>
+
+                {/* 25. Contact Us */}
+                <section id="sec-25" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
+                    <span className="text-[#990000] font-bold mr-1">25.</span> Contact Us
+                  </h3>
+                  <div className="space-y-3">
+                    <p>
+                      For questions about these Terms and Conditions, visit{" "}
+                      <a href="https://www.timeschicago.com/" className="text-[#00558c] hover:underline">
+                        https://www.timeschicago.com/
+                      </a>{" "}
+                      and use the official contact information published there.
+                    </p>
+                    <div className="pt-2 text-xs sm:text-[13px] text-[#555555] space-y-1">
+                      <p className="font-bold text-[#111111]">Times Chicago LLC</p>
+                      <p>1246 J Clark St, Suite 1100</p>
+                      <p>Chicago, IL 60603, United States</p>
+                      <p>Website: <a href="https://www.timeschicago.com/" className="text-[#00558c] hover:underline">https://www.timeschicago.com/</a></p>
+                    </div>
+                    <p className="pt-2 text-xs text-[#777777]">
+                      &copy; 2026 Times Chicago LLC. All rights reserved.
                     </p>
                   </div>
                 </section>
 
               </div>
-
             </div>
           </Container>
         </main>
       </div>
 
-      <StickySubscribeBar />
       <Footer />
+      <StickySubscribeBar />
     </div>
   );
 }

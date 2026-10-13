@@ -194,9 +194,8 @@ export default function AboutUsClient() {
                           Times Chicago Headquarters
                         </strong>
                         <p className="leading-snug text-[#4a5568]">
-                          2316 Eastgate St #160<br />
-                          Walla Walla, Washington (WA) 99362<br />
-                          United States
+                          1246 J Clark St, Suite 1100<br />
+                          Chicago, IL 60603, United States
                         </p>
                       </div>
                     </div>

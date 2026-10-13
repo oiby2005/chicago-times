@@ -26,6 +26,37 @@ export default function SignInPage() {
 
   useEffect(() => {
     document.body.classList.add("signin-page");
+
+    // Check and restore persistent 15-minute lockout upon page refresh
+    if (typeof window !== "undefined") {
+      try {
+        const storedAttempts = parseInt(localStorage.getItem("wsj_failed_attempts") || "0", 10);
+        if (storedAttempts) setFailedAttempts(storedAttempts);
+
+        const storedUntil = localStorage.getItem("wsj_lockout_until");
+        if (storedUntil) {
+          const until = parseInt(storedUntil, 10);
+          const now = Date.now();
+          if (until > now) {
+            const sec = Math.ceil((until - now) / 1000);
+            setRemainingSeconds(sec);
+            const mins = Math.floor(sec / 60);
+            const secs = sec % 60;
+            setError(`Too many failed sign-in attempts. Locked for: ${mins}m ${secs.toString().padStart(2, "0")}s`);
+          } else {
+            localStorage.removeItem("wsj_lockout_until");
+            localStorage.removeItem("wsj_failed_attempts");
+            setRemainingSeconds(0);
+            setFailedAttempts(0);
+          }
+        }
+        const searchParams = new URLSearchParams(window.location.search);
+        if (searchParams.get("error") === "subscribe") {
+          setError("You need to sign in to subscribe.");
+        }
+      } catch (e) {}
+    }
+
     return () => {
       document.body.classList.remove("signin-page");
     };
@@ -115,7 +146,8 @@ export default function SignInPage() {
         profilesMap[emailClean] = googleUser;
         localStorage.setItem("wsj_users_by_email", JSON.stringify(profilesMap));
 
-        const targetUrl = getUserRoleUrl(googleUser.role);
+        const redirectParam = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("redirect") : null;
+        const targetUrl = redirectParam || getUserRoleUrl(googleUser.role);
         try { router.prefetch(targetUrl); } catch (e) {}
         router.push(targetUrl);
       }
@@ -223,6 +255,56 @@ export default function SignInPage() {
     return `${mins}m ${secs.toString().padStart(2, "0")}s`;
   };
 
+  // Active countdown timer ticking down every second
+  useEffect(() => {
+    if (remainingSeconds <= 0) return;
+
+    const timer = setInterval(() => {
+      try {
+        const storedUntil = localStorage.getItem("wsj_lockout_until");
+        if (storedUntil) {
+          const until = parseInt(storedUntil, 10);
+          const now = Date.now();
+          if (until > now) {
+            const sec = Math.ceil((until - now) / 1000);
+            setRemainingSeconds(sec);
+            setError(`Too many failed sign-in attempts. Locked for: ${formatLockoutTime(sec)}`);
+          } else {
+            localStorage.removeItem("wsj_lockout_until");
+            localStorage.removeItem("wsj_failed_attempts");
+            setRemainingSeconds(0);
+            setFailedAttempts(0);
+            setError("");
+          }
+        } else {
+          setRemainingSeconds((prev) => {
+            if (prev <= 1) {
+              setError("");
+              return 0;
+            }
+            return prev - 1;
+          });
+        }
+      } catch (e) {
+        setRemainingSeconds((prev) => (prev > 0 ? prev - 1 : 0));
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [remainingSeconds]);
+
+  const handleLockout = (customMsg?: string) => {
+    const lockoutUntil = Date.now() + 15 * 60 * 1000; // 15 minutes
+    if (typeof window !== "undefined") {
+      localStorage.setItem("wsj_lockout_until", lockoutUntil.toString());
+      localStorage.setItem("wsj_failed_attempts", "5");
+    }
+    setFailedAttempts(5);
+    setRemainingSeconds(15 * 60);
+    const msg = customMsg || `Too many failed sign-in attempts. Locked for: ${formatLockoutTime(15 * 60)}`;
+    setError(msg);
+  };
+
   const handleFailedAttempt = () => {
     const newCount = failedAttempts + 1;
     setFailedAttempts(newCount);
@@ -232,14 +314,9 @@ export default function SignInPage() {
     }
 
     if (newCount >= 5) {
-      const lockoutUntil = Date.now() + 15 * 60 * 1000; // 15 minutes
-      if (typeof window !== "undefined") {
-        localStorage.setItem("wsj_lockout_until", lockoutUntil.toString());
-      }
-      setRemainingSeconds(15 * 60);
-      setError("Invalid email or password");
+      handleLockout();
     } else {
-      setError("Invalid email or password");
+      setError(`Invalid email or password entered. (${newCount}/5 attempts before lockout)`);
     }
   };
 
@@ -339,13 +416,17 @@ export default function SignInPage() {
         }
 
         setLoading(false);
-        const targetUrl = getUserRoleUrl(data.user);
+        const redirectParam = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("redirect") : null;
+        const targetUrl = redirectParam || getUserRoleUrl(data.user);
         try { router.prefetch(targetUrl); } catch (e) {}
         router.push(targetUrl);
         return;
       } else {
         setLoading(false);
-        setError(data.message || "Invalid email or password.");
+        if (res.status === 429) {
+          handleLockout(data.message || "Too many sign-in attempts from this connection. Please wait 15 minutes before trying again.");
+          return;
+        }
         handleFailedAttempt();
         return;
       }
@@ -414,7 +495,14 @@ export default function SignInPage() {
             ) : (
               <form onSubmit={handleSubmit} className="space-y-2.5 sm:space-y-3.5" noValidate suppressHydrationWarning>
                 {error && (
-                  <div className="text-xs font-sans text-red-600 text-center font-semibold mb-1">
+                  <div
+                    suppressHydrationWarning
+                    className={`text-xs font-sans text-center font-semibold mb-1 p-2.5 rounded-lg transition-all ${
+                      isLockedOut
+                        ? "bg-red-50 text-red-700 border border-red-200 shadow-2xs"
+                        : "text-red-600"
+                    }`}
+                  >
                     {error}
                   </div>
                 )}

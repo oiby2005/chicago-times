@@ -6,8 +6,10 @@ const nodemailer = require('nodemailer');
 require('dotenv').config();
 
 const authRoutes = require('./routes/authRoutes');
+const { contactLimiter, advertiseLimiter, subscribeLimiter } = require('./middlewares/rateLimiter');
 
 const app = express();
+app.set('trust proxy', 1);
 const PORT = process.env.PORT || 5000;
 
 // Middleware
@@ -1835,6 +1837,53 @@ app.post('/api/posts/notify', async (req, res) => {
   }
 });
 
+// Increment article view count endpoint
+app.post('/api/posts/view', async (req, res) => {
+  try {
+    const { slug, id } = req.body || {};
+    const targetKey = String(slug || id || '').toLowerCase().trim();
+    if (!targetKey) {
+      return res.status(400).json({ success: false, message: 'slug or id required' });
+    }
+
+    let updatedViews = 1;
+
+    // 1. Update in posts.json
+    let filePosts = readJSONFile(POSTS_FILE, []);
+    let matchedPost = null;
+    filePosts.forEach((p) => {
+      if (!p) return;
+      const pSlug = String(p.slug || '').toLowerCase().trim();
+      const pId = String(p.id || '').toLowerCase().trim();
+      const pTitleSlug = p.title
+        ? String(p.title).toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+        : '';
+      if (pSlug === targetKey || pId === targetKey || pTitleSlug === targetKey) {
+        p.views = (Number(p.views) || 0) + 1;
+        updatedViews = p.views;
+        matchedPost = p;
+      }
+    });
+    if (matchedPost) {
+      writeJSONFile(POSTS_FILE, filePosts);
+    }
+
+    // 2. Update in MySQL if table exists
+    try {
+      if (matchedPost) {
+        await db.query('UPDATE posts SET views = views + 1 WHERE id = ?', [matchedPost.id]);
+      } else {
+        await db.query('UPDATE posts SET views = views + 1 WHERE id = ? OR slug = ?', [targetKey, targetKey]);
+      }
+    } catch (e) {}
+
+    return res.status(200).json({ success: true, views: updatedViews });
+  } catch (err) {
+    console.error('Error incrementing view count:', err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 // Delete post endpoint (Active MySQL DB + Backup)
 app.delete('/api/posts/:id', async (req, res) => {
   try {
@@ -2105,7 +2154,7 @@ async function sendUserSignupWelcomeEmail({ name, email }) {
   }
 }
 
-app.post('/api/newsletter', async (req, res) => {
+app.post('/api/newsletter', subscribeLimiter, async (req, res) => {
   try {
     const { email, newsletters } = req.body;
     if (!email || !email.includes('@')) {
@@ -2398,6 +2447,42 @@ app.post('/api/users', async (req, res) => {
       );
     } catch (dbErr) {
       console.warn("MySQL Profile Update Notice:", dbErr.message);
+    }
+
+    // Cascade user full_name and avatar change to all matching posts in MySQL and posts.json
+    if (fullName) {
+      const oldName = userData.old_full_name || userData.previous_name || '';
+      try {
+        await db.query(
+          `UPDATE posts SET author = ? WHERE LOWER(authorEmail) = ? OR (author = ? AND ? != '') OR (LOWER(author) = 'writer user' AND ? = 'writer@gmail.com')`,
+          [fullName, email, oldName, oldName, email]
+        );
+      } catch (postDbErr) {
+        console.warn("MySQL Posts Author Update Notice:", postDbErr.message);
+      }
+
+      try {
+        let postsList = readJSONFile(POSTS_FILE, []);
+        if (Array.isArray(postsList)) {
+          let changed = false;
+          postsList = postsList.map((p) => {
+            const pEmail = String(p.authorEmail || '').toLowerCase().trim();
+            const pAuthor = String(p.author || '').trim();
+            if (
+              pEmail === email ||
+              (oldName && pAuthor === oldName) ||
+              (email === 'writer@gmail.com' && pAuthor.toLowerCase() === 'writer user')
+            ) {
+              changed = true;
+              return { ...p, author: fullName, authorEmail: email };
+            }
+            return p;
+          });
+          if (changed) {
+            writeJSONFile(POSTS_FILE, postsList);
+          }
+        }
+      } catch (fileErr) {}
     }
 
     const usersMap = readJSONFile(USERS_FILE, {});
@@ -2720,6 +2805,403 @@ app.post('/api/ads', async (req, res) => {
 });
 
 
+
+// ==========================================
+// BILLIONAIRES API ENDPOINTS (MySQL DB + Backblaze B2 Storage)
+// ==========================================
+const BILLIONAIRES_FILE = path.join(DATA_DIR, 'billionaires.json');
+
+async function initBillionairesTable() {
+  try {
+    const tableSchema = `
+      id VARCHAR(64) PRIMARY KEY,
+      rank INT NOT NULL,
+      name VARCHAR(255) NOT NULL,
+      net_worth VARCHAR(64) NOT NULL,
+      change_status VARCHAR(32) DEFAULT 'UP',
+      age VARCHAR(32) DEFAULT '',
+      country VARCHAR(255) DEFAULT '',
+      source VARCHAR(255) DEFAULT '',
+      industry VARCHAR(255) DEFAULT '',
+      photo_url TEXT,
+      highlight_text TEXT,
+      end_year INT DEFAULT 2026,
+      title_role VARCHAR(255) DEFAULT '',
+      real_time_net_worth VARCHAR(64) DEFAULT '',
+      real_time_change VARCHAR(128) DEFAULT '',
+      real_time_as_of VARCHAR(64) DEFAULT '',
+      list_net_worth_as_of VARCHAR(64) DEFAULT '',
+      photo_credit VARCHAR(255) DEFAULT '',
+      editor_last_updated VARCHAR(255) DEFAULT '',
+      editor_bullet_points LONGTEXT,
+      in_their_own_words_quote TEXT,
+      self_made_score VARCHAR(32) DEFAULT '',
+      philanthropy_score VARCHAR(32) DEFAULT '',
+      residence VARCHAR(255) DEFAULT '',
+      citizenship VARCHAR(255) DEFAULT '',
+      marital_status VARCHAR(128) DEFAULT '',
+      children VARCHAR(32) DEFAULT '',
+      education TEXT,
+      did_you_know_facts LONGTEXT,
+      wealth_history LONGTEXT,
+      data LONGTEXT,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    `;
+    await db.query(`CREATE TABLE IF NOT EXISTS billionaires (${tableSchema})`);
+    await db.query(`CREATE TABLE IF NOT EXISTS wsj_billionaires (${tableSchema})`);
+  } catch (err) {
+    console.warn('MySQL initBillionairesTable Notice:', err.message);
+  }
+}
+initBillionairesTable();
+
+// GET /api/billionaires - Retrieve billionaires list from MySQL DB / persistent storage
+app.get('/api/billionaires', async (req, res) => {
+  try {
+    let list = [];
+    try {
+      const [rows] = await db.query('SELECT * FROM billionaires ORDER BY rank ASC');
+      if (rows && rows.length > 0) {
+        list = rows.map((r) => {
+          const item = typeof r.data === 'string' ? JSON.parse(r.data) : (r.data || {});
+          return {
+            ...item,
+            id: String(r.id || item.id),
+            rank: Number(r.rank || item.rank || 1),
+            name: r.name || item.name || '',
+            netWorth: r.net_worth || item.netWorth || '',
+            changeStatus: r.change_status || item.changeStatus || 'UP',
+            age: r.age || item.age || '',
+            country: r.country || item.country || '',
+            source: r.source || item.source || '',
+            industry: r.industry || item.industry || '',
+            photoUrl: r.photo_url || item.photoUrl || '',
+            highlightText: r.highlight_text || item.highlightText || '',
+            endYear: Number(r.end_year || item.endYear || 2026),
+            titleRole: r.title_role || item.titleRole || '',
+            realTimeNetWorth: r.real_time_net_worth || item.realTimeNetWorth || '',
+            realTimeChange: r.real_time_change || item.realTimeChange || '',
+            realTimeAsOf: r.real_time_as_of || item.realTimeAsOf || '',
+            listNetWorthAsOf: r.list_net_worth_as_of || item.listNetWorthAsOf || '',
+            photoCredit: r.photo_credit || item.photoCredit || '',
+            editorLastUpdated: r.editor_last_updated || item.editorLastUpdated || '',
+            editorBulletPoints: typeof r.editor_bullet_points === 'string' ? JSON.parse(r.editor_bullet_points) : (r.editor_bullet_points || item.editorBulletPoints || []),
+            inTheirOwnWordsQuote: r.in_their_own_words_quote || item.inTheirOwnWordsQuote || '',
+            selfMadeScore: r.self_made_score || item.selfMadeScore || '',
+            philanthropyScore: r.philanthropy_score || item.philanthropyScore || '',
+            residence: r.residence || item.residence || '',
+            citizenship: r.citizenship || item.citizenship || '',
+            maritalStatus: r.marital_status || item.maritalStatus || '',
+            children: r.children || item.children || '',
+            education: r.education || item.education || '',
+            didYouKnowFacts: typeof r.did_you_know_facts === 'string' ? JSON.parse(r.did_you_know_facts) : (r.did_you_know_facts || item.didYouKnowFacts || []),
+            wealthHistory: typeof r.wealth_history === 'string' ? JSON.parse(r.wealth_history) : (r.wealth_history || item.wealthHistory || []),
+          };
+        });
+      }
+    } catch (dbErr) {
+      console.warn('MySQL GET billionaires warning, falling back to JSON:', dbErr.message);
+    }
+
+    if (!list || list.length === 0) {
+      list = readJSONFile(BILLIONAIRES_FILE, []);
+    }
+
+    return res.status(200).json({ success: true, billionaires: list });
+  } catch (error) {
+    console.error('Error fetching billionaires:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch billionaires' });
+  }
+});
+
+// POST /api/billionaires - Save/update billionaires list in MySQL DB & upload images to Backblaze B2
+app.post('/api/billionaires', async (req, res) => {
+  try {
+    let items = req.body;
+    if (req.body && req.body.billionaires) {
+      items = req.body.billionaires;
+    }
+    if (!Array.isArray(items)) {
+      return res.status(400).json({ success: false, message: 'Invalid payload: expected an array of billionaires' });
+    }
+
+    // Limit to max 20
+    const processedItems = items.slice(0, 20);
+
+    for (let i = 0; i < processedItems.length; i++) {
+      const b = processedItems[i];
+      b.rank = i + 1;
+
+      // Image upload to Backblaze B2 under 'billionaires' folder if photoUrl is provided
+      if (b.photoUrl && typeof b.photoUrl === 'string') {
+        const rawPhoto = b.photoUrl.trim();
+        if (rawPhoto.startsWith('data:image/')) {
+          try {
+            const b2Url = await uploadBase64ToB2(rawPhoto, `headshot_${b.id || Date.now()}_${i}.webp`, 'billionaires');
+            if (b2Url) b.photoUrl = b2Url;
+          } catch (b2Err) {
+            console.error('B2 uploadBase64ToB2 error for billionaire:', b2Err);
+          }
+        } else if (
+          !rawPhoto.includes('backblazeb2.com') &&
+          !rawPhoto.includes('localhost:') &&
+          !rawPhoto.includes('127.0.0.1:') &&
+          (rawPhoto.startsWith('http://') || rawPhoto.startsWith('https://'))
+        ) {
+          try {
+            const b2Url = await uploadRemoteUrlToB2(rawPhoto, `headshot_${b.id || Date.now()}_${i}`, 'billionaires');
+            if (b2Url) b.photoUrl = b2Url;
+          } catch (b2Err) {
+            console.error('B2 uploadRemoteUrlToB2 error for billionaire:', b2Err);
+          }
+        }
+      }
+    }
+
+    // 1. Save to MySQL DB (billionaires & wsj_billionaires tables with dedicated columns)
+    try {
+      await db.query('DELETE FROM billionaires');
+      await db.query('DELETE FROM wsj_billionaires');
+      for (const item of processedItems) {
+        const insertSql = `
+          INSERT INTO billionaires (
+            id, rank, name, net_worth, change_status, age, country, source, industry,
+            photo_url, highlight_text, end_year, title_role, real_time_net_worth,
+            real_time_change, real_time_as_of, list_net_worth_as_of, photo_credit,
+            editor_last_updated, editor_bullet_points, in_their_own_words_quote,
+            self_made_score, philanthropy_score, residence, citizenship, marital_status,
+            children, education, did_you_know_facts, wealth_history, data
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+        const insertSqlWsj = `
+          INSERT INTO wsj_billionaires (
+            id, rank, name, net_worth, change_status, age, country, source, industry,
+            photo_url, highlight_text, end_year, title_role, real_time_net_worth,
+            real_time_change, real_time_as_of, list_net_worth_as_of, photo_credit,
+            editor_last_updated, editor_bullet_points, in_their_own_words_quote,
+            self_made_score, philanthropy_score, residence, citizenship, marital_status,
+            children, education, did_you_know_facts, wealth_history, data
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+        const params = [
+          String(item.id),
+          Number(item.rank || 1),
+          String(item.name || ''),
+          String(item.netWorth || ''),
+          String(item.changeStatus || 'UP'),
+          String(item.age || ''),
+          String(item.country || ''),
+          String(item.source || ''),
+          String(item.industry || ''),
+          String(item.photoUrl || ''),
+          String(item.highlightText || ''),
+          Number(item.endYear || 2026),
+          String(item.titleRole || ''),
+          String(item.realTimeNetWorth || ''),
+          String(item.realTimeChange || ''),
+          String(item.realTimeAsOf || ''),
+          String(item.listNetWorthAsOf || ''),
+          String(item.photoCredit || ''),
+          String(item.editorLastUpdated || ''),
+          JSON.stringify(item.editorBulletPoints || []),
+          String(item.inTheirOwnWordsQuote || ''),
+          String(item.selfMadeScore || ''),
+          String(item.philanthropyScore || ''),
+          String(item.residence || ''),
+          String(item.citizenship || ''),
+          String(item.maritalStatus || ''),
+          String(item.children || ''),
+          String(item.education || ''),
+          JSON.stringify(item.didYouKnowFacts || []),
+          JSON.stringify(item.wealthHistory || []),
+          JSON.stringify(item)
+        ];
+        await db.query(insertSql, params);
+        await db.query(insertSqlWsj, params);
+      }
+    } catch (dbErr) {
+      console.warn('MySQL Save Billionaires Notice:', dbErr.message);
+    }
+
+    // 2. Save to JSON File
+    writeJSONFile(BILLIONAIRES_FILE, processedItems);
+
+    return res.status(200).json({ success: true, billionaires: processedItems });
+  } catch (error) {
+    console.error('Error saving billionaires to database:', error);
+    res.status(500).json({ success: false, message: 'Failed to save billionaires' });
+  }
+});
+
+// ==========================================
+// UPCOMING TOP 20 ENTREPRENEURS API ENDPOINTS
+// ==========================================
+const ENTREPRENEURS_FILE = path.join(DATA_DIR, 'entrepreneurs.json');
+
+async function initEntrepreneursTable() {
+  try {
+    const tableSchema = `
+      id VARCHAR(64) PRIMARY KEY,
+      rank INT NOT NULL,
+      name VARCHAR(255) NOT NULL,
+      title_role VARCHAR(255) DEFAULT '',
+      bio TEXT,
+      website VARCHAR(255) DEFAULT '',
+      photo_url TEXT,
+      age VARCHAR(32) DEFAULT '',
+      country VARCHAR(255) DEFAULT '',
+      source VARCHAR(255) DEFAULT '',
+      industry VARCHAR(255) DEFAULT '',
+      gender VARCHAR(32) DEFAULT '',
+      net_worth_millions VARCHAR(64) DEFAULT '',
+      companies LONGTEXT,
+      data LONGTEXT,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    `;
+    await db.query(`CREATE TABLE IF NOT EXISTS entrepreneurs (${tableSchema})`);
+  } catch (err) {
+    console.warn('MySQL initEntrepreneursTable Notice:', err.message);
+  }
+}
+initEntrepreneursTable();
+
+// GET /api/entrepreneurs - Retrieve entrepreneurs list from MySQL DB / persistent storage
+app.get('/api/entrepreneurs', async (req, res) => {
+  try {
+    let list = [];
+    try {
+      const [rows] = await db.query('SELECT * FROM entrepreneurs ORDER BY rank ASC');
+      if (rows && rows.length > 0) {
+        list = rows.map((r) => {
+          const item = typeof r.data === 'string' ? JSON.parse(r.data) : (r.data || {});
+          return {
+            ...item,
+            id: String(r.id || item.id),
+            rank: Number(r.rank || item.rank || 1),
+            name: r.name || item.name || '',
+            titleRole: r.title_role || item.titleRole || '',
+            bio: r.bio || item.bio || '',
+            website: r.website || item.website || '',
+            photoUrl: r.photo_url || item.photoUrl || '',
+            age: r.age || item.age || '',
+            country: r.country || item.country || '',
+            source: r.source || item.source || '',
+            industry: r.industry || item.industry || '',
+            gender: r.gender || item.gender || '',
+            netWorthMillions: r.net_worth_millions || item.netWorthMillions || '',
+            companies: typeof r.companies === 'string' ? JSON.parse(r.companies) : (r.companies || item.companies || []),
+          };
+        });
+      }
+    } catch (dbErr) {
+      console.warn('MySQL GET entrepreneurs warning, falling back to JSON:', dbErr.message);
+    }
+
+    if (!list || list.length === 0) {
+      list = readJSONFile(ENTREPRENEURS_FILE, []);
+    }
+
+    return res.status(200).json({ success: true, entrepreneurs: list });
+  } catch (error) {
+    console.error('Error fetching entrepreneurs:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch entrepreneurs' });
+  }
+});
+
+// POST /api/entrepreneurs - Save/update entrepreneurs list in MySQL DB & upload images to Backblaze B2
+app.post('/api/entrepreneurs', async (req, res) => {
+  try {
+    let items = req.body;
+    if (req.body && req.body.entrepreneurs) {
+      items = req.body.entrepreneurs;
+    }
+    if (!Array.isArray(items)) {
+      return res.status(400).json({ success: false, message: 'Invalid payload: expected an array of entrepreneurs' });
+    }
+
+    const processedItems = items.slice(0, 20);
+
+    for (let i = 0; i < processedItems.length; i++) {
+      const b = processedItems[i];
+      b.rank = i + 1;
+
+      // Upload headshot to Backblaze B2 if base64 or remote URL
+      const rawPhoto = b.photoUrl;
+      if (rawPhoto && typeof rawPhoto === 'string') {
+        if (rawPhoto.startsWith('data:image/')) {
+          try {
+            const b2Url = await uploadBase64ToB2(rawPhoto, `entrepreneur_${b.id || Date.now()}_${i}.webp`, 'entrepreneurs');
+            if (b2Url) b.photoUrl = b2Url;
+          } catch (b2Err) {
+            console.error('B2 uploadBase64ToB2 error for entrepreneur:', b2Err);
+          }
+        } else if (rawPhoto.startsWith('http') && !rawPhoto.includes('backblazeb2.com') && !rawPhoto.includes('f005.backblazeb2.com')) {
+          try {
+            const b2Url = await uploadRemoteUrlToB2(rawPhoto, `entrepreneur_${b.id || Date.now()}_${i}`, 'entrepreneurs');
+            if (b2Url) b.photoUrl = b2Url;
+          } catch (b2Err) {
+            console.error('B2 uploadRemoteUrlToB2 error for entrepreneur:', b2Err);
+          }
+        }
+      }
+
+      // Process companies logos if base64
+      if (Array.isArray(b.companies)) {
+        for (let j = 0; j < b.companies.length; j++) {
+          const comp = b.companies[j];
+          if (comp.logoUrl && typeof comp.logoUrl === 'string' && comp.logoUrl.startsWith('data:image/')) {
+            try {
+              const compLogoUrl = await uploadBase64ToB2(comp.logoUrl, `company_logo_${b.id}_${j}.webp`, 'entrepreneurs/companies');
+              if (compLogoUrl) comp.logoUrl = compLogoUrl;
+            } catch (err) {}
+          }
+        }
+      }
+    }
+
+    // 1. Save to MySQL DB
+    try {
+      await db.query('DELETE FROM entrepreneurs');
+      const insertSql = `
+        INSERT INTO entrepreneurs (
+          id, rank, name, title_role, bio, website, photo_url,
+          age, country, source, industry, gender, net_worth_millions,
+          companies, data
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `;
+      for (const item of processedItems) {
+        const params = [
+          String(item.id),
+          Number(item.rank),
+          String(item.name || ''),
+          String(item.titleRole || ''),
+          String(item.bio || ''),
+          String(item.website || ''),
+          String(item.photoUrl || ''),
+          String(item.age || ''),
+          String(item.country || ''),
+          String(item.source || ''),
+          String(item.industry || ''),
+          String(item.gender || ''),
+          String(item.netWorthMillions || ''),
+          JSON.stringify(item.companies || []),
+          JSON.stringify(item)
+        ];
+        await db.query(insertSql, params);
+      }
+    } catch (dbErr) {
+      console.warn('MySQL Save Entrepreneurs Notice:', dbErr.message);
+    }
+
+    // 2. Save to JSON File fallback
+    writeJSONFile(ENTREPRENEURS_FILE, processedItems);
+
+    return res.status(200).json({ success: true, entrepreneurs: processedItems });
+  } catch (error) {
+    console.error('Error saving entrepreneurs to database:', error);
+    res.status(500).json({ success: false, message: 'Failed to save entrepreneurs' });
+  }
+});
 
 // ==========================================
 // DATABASE BACKUPS & CLOUD RESTORE API ENDPOINTS
@@ -3334,6 +3816,7 @@ async function ensureContactSubmissionsTable() {
       { name: 'details', type: "TEXT" },
       { name: 'status', type: "VARCHAR(50) DEFAULT 'New'" },
       { name: 'created_at', type: "TIMESTAMP DEFAULT CURRENT_TIMESTAMP" },
+      { name: 'user_email', type: "VARCHAR(255)" },
     ];
 
     for (const col of columnsToAdd) {
@@ -3346,16 +3829,16 @@ async function ensureContactSubmissionsTable() {
   }
 }
 
-app.post('/api/contact', async (req, res) => {
+app.post('/api/contact', contactLimiter, async (req, res) => {
   try {
-    const { name, email, phone, whatsapp, company, inquiryType, details } = req.body || {};
+    const { name, email, phone, whatsapp, company, inquiryType, details, userEmail } = req.body || {};
     if (!name || !email || !details) {
       return res.status(400).json({ success: false, message: 'Name, email, and inquiry details are required' });
     }
     await ensureContactSubmissionsTable();
     await db.query(
-      `INSERT INTO contact_submissions (name, email, phone, whatsapp, company, inquiry_type, details, status) VALUES (?, ?, ?, ?, ?, ?, ?, 'New')`,
-      [name, email, phone || null, whatsapp || null, company || null, inquiryType || 'General / Others', details]
+      `INSERT INTO contact_submissions (name, email, phone, whatsapp, company, inquiry_type, details, status, user_email) VALUES (?, ?, ?, ?, ?, ?, ?, 'New', ?)`,
+      [name, email, phone || null, whatsapp || null, company || null, inquiryType || 'General / Others', details, userEmail ? String(userEmail).toLowerCase().trim() : null]
     );
     return res.status(200).json({
       success: true,
@@ -3364,6 +3847,19 @@ app.post('/api/contact', async (req, res) => {
   } catch (err) {
     console.error('Error handling contact submission:', err);
     return res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+app.get('/api/contact/user', async (req, res) => {
+  try {
+    const email = String(req.query.email || '').toLowerCase().trim();
+    if (!email) return res.status(400).json({ success: false, submissions: [] });
+    await ensureContactSubmissionsTable();
+    const [rows] = await db.query(`SELECT * FROM contact_submissions WHERE LOWER(user_email) = ? ORDER BY created_at DESC`, [email]);
+    return res.status(200).json({ success: true, submissions: rows });
+  } catch (err) {
+    console.error('Error fetching user contact submissions:', err);
+    return res.status(500).json({ success: false, submissions: [] });
   }
 });
 
@@ -3439,7 +3935,7 @@ async function ensureAdvertiseLeadsTable() {
   }
 }
 
-app.post('/api/advertise-leads', async (req, res) => {
+app.post('/api/advertise-leads', advertiseLimiter, async (req, res) => {
   try {
     const { name, company, email, serviceOption, phone, whatsapp, details } = req.body || {};
     if (!name || !company || !email || !details) {
@@ -3504,27 +4000,41 @@ async function ensureSubscriptionRequestsTable() {
         email VARCHAR(255) NOT NULL,
         phone VARCHAR(100) NOT NULL,
         packageName VARCHAR(255) NOT NULL,
-        status VARCHAR(50) DEFAULT 'Pending',
+        price VARCHAR(100) DEFAULT 'Free for 1 Year',
+        status VARCHAR(50) DEFAULT 'Active',
+        start_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+        end_date DATETIME,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     `);
+
+    // Safely add extra columns if table was created previously without them
+    await db.query(`ALTER TABLE subscription_requests ADD COLUMN start_date DATETIME DEFAULT CURRENT_TIMESTAMP`).catch(() => {});
+    await db.query(`ALTER TABLE subscription_requests ADD COLUMN end_date DATETIME`).catch(() => {});
+    await db.query(`ALTER TABLE subscription_requests ADD COLUMN price VARCHAR(100) DEFAULT 'Free for 1 Year'`).catch(() => {});
   } catch (e) {
     console.warn('Subscription table error:', e.message);
   }
 }
 
-async function sendSubscriptionConfirmationEmail({ name, email, phone, packageName, isDuplicate = false }) {
+async function sendSubscriptionConfirmationEmail({ name, email, phone, packageName, price = "Free for 1 Year", startDate, endDate, isDuplicate = false }) {
   try {
     const { transporter, fromEmail } = getEmailTransporter();
 
+    const start = startDate ? new Date(startDate) : new Date();
+    const end = endDate ? new Date(endDate) : new Date(start.getTime() + 365 * 24 * 60 * 60 * 1000);
+    const formatDate = (d) => d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    const formattedStartDate = formatDate(start);
+    const formattedEndDate = formatDate(end);
+
     const noticeMessage = isDuplicate
-      ? "You have been requested a subscription plan already and our team will reach you."
-      : "Within 24 hours our team will reach you and activate your subscribe plan.";
+      ? "Your subscription is already active for 1 year. Below are your active subscription details."
+      : "Your subscription has activated for 1 year.";
 
     const mailOptions = {
       from: fromEmail,
       to: email,
-      subject: `Subscription Request Received - ${packageName} | Times Chicago`,
+      subject: `Your subscription has activated for 1 year | Times Chicago`,
       html: `
         <div style="background-color: #FCFAF2; padding: 40px 16px; font-family: Arial, sans-serif; min-height: 100%;">
           <div style="max-width: 620px; margin: 0 auto; background-color: #FCFAF2; border: 1px solid #EAE6DA; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
@@ -3541,25 +4051,41 @@ async function sendSubscriptionConfirmationEmail({ name, email, phone, packageNa
               </a>
             </div>
             
-            <!-- Main Body Content Matching Image 2 -->
+            <!-- Main Body Content -->
             <div style="padding: 32px 32px; color: #111111; font-family: Arial, sans-serif; line-height: 1.6;">
-              <h2 style="font-size: 18px; color: #111111; margin-top: 0; font-weight: bold;">Dear ${name},</h2>
-              <p style="font-size: 14.5px; color: #374151; margin-bottom: 24px;">Thank you for your interest in Times Chicago digital subscription for <strong>${packageName}</strong>.</p>
+              <h2 style="font-size: 20px; color: #111111; margin-top: 0; font-weight: bold;">Dear ${name},</h2>
+              <p style="font-size: 15px; color: #374151; margin-bottom: 20px;">Thank you for subscribing to Times Chicago digital editions. We are delighted to confirm that your subscription is now live!</p>
               
-              <!-- Highlighted Green Box Matching Image 2 -->
+              <!-- Highlighted Green Box -->
               <div style="background-color: #EFFFEC; border: 1px solid #BFF0B7; border-left: 5px solid #227419; padding: 18px 20px; margin: 24px 0; border-radius: 12px;">
-                <p style="margin: 0; font-weight: bold; color: #227419; font-size: 14.5px; font-family: Arial, sans-serif; line-height: 1.5;">
+                <p style="margin: 0; font-weight: bold; color: #227419; font-size: 16px; font-family: Arial, sans-serif; line-height: 1.5;">
                   ${noticeMessage}
                 </p>
               </div>
               
-              <!-- REQUEST SUMMARY Heading -->
-              <h3 style="font-size: 12px; font-weight: bold; color: #6b7280; letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid #EAE6DA; padding-bottom: 8px; margin-top: 32px; margin-bottom: 16px;">REQUEST SUMMARY</h3>
+              <!-- SUBSCRIPTION DETAILS Heading -->
+              <h3 style="font-size: 12px; font-weight: bold; color: #6b7280; letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid #EAE6DA; padding-bottom: 8px; margin-top: 32px; margin-bottom: 16px;">SUBSCRIPTION DETAILS</h3>
               
               <table style="width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 28px;">
                 <tr>
-                  <td style="padding: 10px 0; color: #6b7280; width: 150px; border-bottom: 1px solid #F3F0E6;">Selected Package:</td>
+                  <td style="padding: 10px 0; color: #6b7280; width: 160px; border-bottom: 1px solid #F3F0E6;">Plan Name:</td>
                   <td style="padding: 10px 0; font-weight: bold; color: #111111; border-bottom: 1px solid #F3F0E6;">${packageName}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 0; color: #6b7280; border-bottom: 1px solid #F3F0E6;">Plan Price:</td>
+                  <td style="padding: 10px 0; font-weight: bold; color: #007cba; border-bottom: 1px solid #F3F0E6;">${price}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 0; color: #6b7280; border-bottom: 1px solid #F3F0E6;">Status:</td>
+                  <td style="padding: 10px 0; font-weight: bold; color: #227419; border-bottom: 1px solid #F3F0E6;">Active (1 Year)</td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 0; color: #6b7280; border-bottom: 1px solid #F3F0E6;">Activation Date:</td>
+                  <td style="padding: 10px 0; font-weight: bold; color: #111111; border-bottom: 1px solid #F3F0E6;">${formattedStartDate}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 0; color: #6b7280; border-bottom: 1px solid #F3F0E6;">Subscription End Date:</td>
+                  <td style="padding: 10px 0; font-weight: bold; color: #b91c1c; border-bottom: 1px solid #F3F0E6;">${formattedEndDate}</td>
                 </tr>
                 <tr>
                   <td style="padding: 10px 0; color: #6b7280; border-bottom: 1px solid #F3F0E6;">Full Name:</td>
@@ -3575,14 +4101,25 @@ async function sendSubscriptionConfirmationEmail({ name, email, phone, packageNa
                 </tr>
               </table>
               
-              <p style="font-size: 13.5px; color: #6b7280; margin-bottom: 0;">If you have any questions, please reply to this email or contact us at <a href="mailto:worldnews@timeschicago.com" style="color: #00558c; text-decoration: underline;">worldnews@timeschicago.com</a>.</p>
+              <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+                <p style="margin: 0 0 8px 0; font-weight: bold; font-size: 13px; color: #1e293b;">Included with your 1-Year Subscription:</p>
+                <ul style="margin: 0; padding-left: 20px; font-size: 13px; color: #475569; line-height: 1.6;">
+                  <li>Unlimited access on Times Chicago website and mobile apps</li>
+                  <li>Daily puzzles and crosswords</li>
+                  <li>Audio versions of Times Chicago articles</li>
+                  <li>Full premium access to all Times Chicago digital editions</li>
+                  <li>Breaking alerts, newsletters, and exclusive editorial reporting</li>
+                </ul>
+              </div>
+
+              <p style="font-size: 13.5px; color: #6b7280; margin-bottom: 0;">If you have any questions or wish to manage your subscription, please reply to this email or contact us at <a href="mailto:worldnews@timeschicago.com" style="color: #00558c; text-decoration: underline;">worldnews@timeschicago.com</a>.</p>
             </div>
             
             <!-- Footer Matching Image 2 Exactly -->
             <div style="padding: 24px; text-align: center; font-family: Arial, sans-serif; font-size: 11.5px; color: #6b7280; border-top: 1px solid #EAE6DA;">
               <p style="margin: 0 0 6px 0;">&copy; ${new Date().getFullYear()} Times Chicago Media Inc. All Rights Reserved.</p>
-              <p style="margin: 0 0 6px 0;">You received this email because you are on the Times Chicago distribution list.</p>
-              <p style="margin: 0;">To manage your notification preferences, <a href="http://localhost:3000/newsletter" style="color: #dc2626; text-decoration: underline;">click here</a>.</p>
+              <p style="margin: 0 0 6px 0;">You received this email because you subscribed to Times Chicago.</p>
+              <p style="margin: 0;">To view your account or manage subscriptions, visit <a href="http://localhost:3000/reader/john/saved" style="color: #00558c; text-decoration: underline;">your Reader Dashboard</a>.</p>
             </div>
             
           </div>
@@ -3600,7 +4137,7 @@ async function sendSubscriptionConfirmationEmail({ name, email, phone, packageNa
   }
 }
 
-app.post('/api/subscriptions', async (req, res) => {
+app.post('/api/subscriptions', subscribeLimiter, async (req, res) => {
   try {
     const { name, email, phone, packageName } = req.body || {};
     if (!name || !email || !phone) {
@@ -3608,13 +4145,15 @@ app.post('/api/subscriptions', async (req, res) => {
     }
 
     const cleanEmail = String(email).toLowerCase().trim();
-    const selectedPackage = packageName || 'Times Chicago Digital';
+    const selectedPackage = packageName || 'Times Chicago Digital Bundle';
+    const now = new Date();
+    const oneYearLater = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
 
     // Check if subscription request already exists for this email
     let existingRequests = [];
     try {
       await ensureSubscriptionRequestsTable();
-      const [rows] = await db.query(`SELECT * FROM subscription_requests WHERE LOWER(email) = ? ORDER BY id ASC`, [cleanEmail]);
+      const [rows] = await db.query(`SELECT * FROM subscription_requests WHERE LOWER(email) = ? ORDER BY id DESC`, [cleanEmail]);
       if (rows && rows.length > 0) {
         existingRequests = rows;
       }
@@ -3625,17 +4164,30 @@ app.post('/api/subscriptions', async (req, res) => {
       existingRequests = jsonSubs.filter(s => s.email && s.email.toLowerCase().trim() === cleanEmail);
     }
 
-    const isDuplicate = existingRequests.length > 0;
+    // Check if user already has an active, non-expired subscription
+    const activeSub = existingRequests.find(s => {
+      const end = s.end_date ? new Date(s.end_date) : null;
+      return s.status === 'Active' && end && end > now;
+    });
 
-    if (isDuplicate) {
-      // DO NOT SAVE to DB or JSON file. Only trigger duplicate notice email.
-      sendSubscriptionConfirmationEmail({ name, email: cleanEmail, phone, packageName: selectedPackage, isDuplicate: true }).catch(console.error);
+    if (activeSub) {
+      // Send active subscription details notice
+      sendSubscriptionConfirmationEmail({
+        name,
+        email: cleanEmail,
+        phone,
+        packageName: activeSub.packageName || selectedPackage,
+        price: activeSub.price || 'Free for 1 Year',
+        startDate: activeSub.start_date || activeSub.created_at || now,
+        endDate: activeSub.end_date || oneYearLater,
+        isDuplicate: true
+      }).catch(console.error);
 
       return res.status(200).json({
         success: true,
         isDuplicate: true,
-        message: 'You have already requested a subscription plan from this email. Within 24 hours our team will reach you and will activate your subscription plan.',
-        subscription: existingRequests[0]
+        message: 'Your subscription is already active for 1 year.',
+        subscription: activeSub
       });
     }
 
@@ -3645,16 +4197,19 @@ app.post('/api/subscriptions', async (req, res) => {
       email: cleanEmail,
       phone,
       packageName: selectedPackage,
-      status: 'Pending',
-      created_at: new Date().toISOString()
+      price: 'Free for 1 Year',
+      status: 'Active',
+      start_date: now.toISOString(),
+      end_date: oneYearLater.toISOString(),
+      created_at: now.toISOString()
     };
 
-    // 1. Save to MySQL Database (only for new emails)
+    // 1. Save to MySQL Database
     try {
       await ensureSubscriptionRequestsTable();
       const [result] = await db.query(
-        `INSERT INTO subscription_requests (name, email, phone, packageName, status) VALUES (?, ?, ?, ?, 'Pending')`,
-        [name, cleanEmail, phone, selectedPackage]
+        `INSERT INTO subscription_requests (name, email, phone, packageName, price, status, start_date, end_date) VALUES (?, ?, ?, ?, ?, 'Active', ?, ?)`,
+        [name, cleanEmail, phone, selectedPackage, 'Free for 1 Year', now, oneYearLater]
       );
       if (result && result.insertId) {
         newRecord.id = String(result.insertId);
@@ -3663,23 +4218,90 @@ app.post('/api/subscriptions', async (req, res) => {
       console.warn('MySQL Subscription Save Notice:', dbErr.message);
     }
 
-    // 2. Save to JSON file fallback (only for new emails)
+    // 2. Save to JSON file fallback
     const allSubs = readJSONFile(SUBSCRIPTIONS_FILE, []);
     allSubs.unshift(newRecord);
     writeJSONFile(SUBSCRIPTIONS_FILE, allSubs);
 
-    // 3. Trigger confirmation email
-    sendSubscriptionConfirmationEmail({ name, email: cleanEmail, phone, packageName: selectedPackage, isDuplicate: false }).catch(console.error);
+    // 3. Trigger confirmation email with end date & details
+    sendSubscriptionConfirmationEmail({
+      name,
+      email: cleanEmail,
+      phone,
+      packageName: selectedPackage,
+      price: 'Free for 1 Year',
+      startDate: now,
+      endDate: oneYearLater,
+      isDuplicate: false
+    }).catch(console.error);
 
     return res.status(200).json({
       success: true,
       isDuplicate: false,
-      message: 'Subscription request submitted successfully!',
+      message: 'Your subscription has activated for 1 year! A confirmation email has been sent.',
       subscription: newRecord
     });
   } catch (err) {
     console.error('Error handling subscription submission:', err);
     return res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// GET /api/subscriptions/user?email=...
+app.get('/api/subscriptions/user', async (req, res) => {
+  try {
+    const { email } = req.query;
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'Email query parameter is required' });
+    }
+    const cleanEmail = String(email).toLowerCase().trim();
+    let userSubs = [];
+
+    try {
+      await ensureSubscriptionRequestsTable();
+      const [rows] = await db.query(`SELECT * FROM subscription_requests WHERE LOWER(email) = ? ORDER BY id DESC`, [cleanEmail]);
+      if (rows && rows.length > 0) {
+        userSubs = rows;
+      }
+    } catch (e) {}
+
+    if (userSubs.length === 0) {
+      const jsonSubs = readJSONFile(SUBSCRIPTIONS_FILE, []);
+      userSubs = jsonSubs.filter(s => s.email && s.email.toLowerCase().trim() === cleanEmail);
+    }
+
+    const validSubs = userSubs.filter(s => (s.status === 'Active' || s.status === 'Cancelled') && s.end_date);
+
+    if (validSubs.length === 0) {
+      return res.status(200).json({ success: true, subscription: null, isSubscribed: false, daysRemaining: 0 });
+    }
+
+    const latest = validSubs[0];
+    const now = new Date();
+    const end = latest.end_date ? new Date(latest.end_date) : new Date(new Date(latest.created_at || latest.start_date).getTime() + 365 * 24 * 60 * 60 * 1000);
+    const isExpired = end <= now;
+
+    if (isExpired && latest.status === 'Active') {
+      latest.status = 'Cancelled';
+      db.query(`UPDATE subscription_requests SET status = 'Cancelled' WHERE id = ?`, [latest.id]).catch(() => {});
+    }
+
+    const remainingMs = end.getTime() - now.getTime();
+    const daysRemaining = Math.max(0, Math.ceil(remainingMs / (1000 * 60 * 60 * 24)));
+
+    return res.status(200).json({
+      success: true,
+      subscription: {
+        ...latest,
+        end_date: end.toISOString(),
+        status: isExpired ? 'Cancelled' : latest.status
+      },
+      isSubscribed: !isExpired && latest.status === 'Active',
+      daysRemaining: isExpired ? 0 : daysRemaining
+    });
+  } catch (err) {
+    console.error('Error fetching user subscription:', err);
+    return res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 

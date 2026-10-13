@@ -164,6 +164,7 @@ export default function ArticleCommentsSection({
             const synced = [data.comment, ...prev.filter((c) => c.id !== tempId && c.id !== data.comment.id)];
             if (typeof window !== "undefined") {
               localStorage.setItem(storageKey, JSON.stringify(synced));
+              window.dispatchEvent(new CustomEvent("wsj_comments_updated", { detail: { articleSlug } }));
             }
             return synced;
           });

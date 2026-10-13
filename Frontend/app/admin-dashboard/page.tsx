@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import ProfileSettingsModal, { UserProfile } from "@/components/ui/ProfileSettingsModal";
 import { getUserDashboardUrl } from "@/data/authors";
 import BillionairesAdminDesk from "@/components/admin/BillionairesAdminDesk";
+import EntrepreneursAdminDesk from "@/components/admin/EntrepreneursAdminDesk";
 
 interface ProjectItem {
   id: string;
@@ -216,6 +217,7 @@ export default function AdminDashboard() {
     | "Database Backups"
     | "Shorts & Reels"
     | "World Billionaires"
+    | "Entrepreneurs"
   >("Overview");
 
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -299,7 +301,7 @@ interface AdSlotConfig {
   id: string;
   slotName: string;
   dimension: string;
-  placementGroup: "Homepage" | "Category" | "Author" | "Article" | "Billionaire";
+  placementGroup: "Homepage" | "Category" | "Author" | "Article" | "Billionaire" | "Entrepreneurs";
   description: string;
   active: boolean;
   actionType: string;
@@ -329,6 +331,11 @@ const SLOT_NAME_MAP: Record<string, string> = {
   billionaire_slot_4: "Billionaire Profile Sticky Ad 02",
   billionaire_slot_5: "Billionaire Profile Sticky Ad 03",
   billionaire_profile_inline_ad: "Billionaire Profile Middle Inline Ad",
+  entrepreneurs_slot_1: "Entrepreneurs Page Ad 01",
+  entrepreneur_profile_inline_ad: "Entrepreneur Profile Inline Ad",
+  entrepreneur_slot_2: "Entrepreneur Profile Sidebar Top Ad",
+  entrepreneur_slot_3: "Entrepreneur Profile Sticky Ad 01",
+  entrepreneur_slot_4: "Entrepreneur Profile Sticky Ad 02",
 };
 
 const normalizeAdSlots = (slots: AdSlotConfig[]): AdSlotConfig[] => {
@@ -361,9 +368,14 @@ const normalizeAdSlots = (slots: AdSlotConfig[]): AdSlotConfig[] => {
     billionaire_slot_4: "300x250",
     billionaire_slot_5: "300x300",
     billionaire_profile_inline_ad: "728x90",
+    entrepreneurs_slot_1: "900x370",
+    entrepreneur_profile_inline_ad: "728x90",
+    entrepreneur_slot_2: "300x250",
+    entrepreneur_slot_3: "300x250",
+    entrepreneur_slot_4: "300x250",
   };
 
-  const GROUP_MAP: Record<string, "Homepage" | "Category" | "Author" | "Article" | "Billionaire"> = {
+  const GROUP_MAP: Record<string, "Homepage" | "Category" | "Author" | "Article" | "Billionaire" | "Entrepreneurs"> = {
     article_slot_1: "Article",
     article_slot_2: "Article",
     article_slot_3: "Article",
@@ -373,13 +385,18 @@ const normalizeAdSlots = (slots: AdSlotConfig[]): AdSlotConfig[] => {
     billionaire_slot_4: "Billionaire",
     billionaire_slot_5: "Billionaire",
     billionaire_profile_inline_ad: "Billionaire",
+    entrepreneurs_slot_1: "Entrepreneurs",
+    entrepreneur_profile_inline_ad: "Entrepreneurs",
+    entrepreneur_slot_2: "Entrepreneurs",
+    entrepreneur_slot_3: "Entrepreneurs",
+    entrepreneur_slot_4: "Entrepreneurs",
   };
 
   return merged.map((s) => ({
     ...s,
     slotName: SLOT_NAME_MAP[s.id] || s.slotName,
     dimension: DIM_MAP[s.id] || s.dimension,
-    placementGroup: GROUP_MAP[s.id] || s.placementGroup || (s.id?.startsWith("billionaire") ? "Billionaire" : s.id?.startsWith("article") ? "Article" : "Homepage"),
+    placementGroup: GROUP_MAP[s.id] || s.placementGroup || (s.id?.startsWith("entrepreneur") ? "Entrepreneurs" : s.id?.startsWith("billionaire") ? "Billionaire" : s.id?.startsWith("article") ? "Article" : "Homepage"),
   }));
 };
 
@@ -612,6 +629,66 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
     selectedArticleSlug: "",
     imageUrl: "https://images.unsplash.com/photo-1557804506-669a67965ba0?fm=webp&fit=crop&w=728&h=90&q=80",
   },
+  {
+    id: "entrepreneurs_slot_1",
+    slotName: "Entrepreneurs Page Ad 01",
+    dimension: "900x370",
+    placementGroup: "Entrepreneurs",
+    description: "Displayed on the Upcoming Top 20 Entrepreneurs listing page (900 × 370).",
+    active: true,
+    actionType: "External Link (URL)",
+    targetUrl: "https://www.top-scholarships.com/",
+    selectedArticleSlug: "",
+    imageUrl: "",
+  },
+  {
+    id: "entrepreneur_profile_inline_ad",
+    slotName: "Entrepreneur Profile Inline Ad",
+    dimension: "728x90",
+    placementGroup: "Entrepreneurs",
+    description: "Displayed horizontally in the middle of More From Times Chicago section on Entrepreneur Profile view pages (728 × 90).",
+    active: true,
+    actionType: "External Link (URL)",
+    targetUrl: "https://www.wsj.com/",
+    selectedArticleSlug: "",
+    imageUrl: "",
+  },
+  {
+    id: "entrepreneur_slot_2",
+    slotName: "Entrepreneur Profile Sidebar Top Ad",
+    dimension: "300x250",
+    placementGroup: "Entrepreneurs",
+    description: "Displayed in the top right sidebar of the Entrepreneur profile page (300 × 250).",
+    active: true,
+    actionType: "External Link (URL)",
+    targetUrl: "https://www.wsj.com/",
+    selectedArticleSlug: "",
+    imageUrl: "",
+  },
+  {
+    id: "entrepreneur_slot_3",
+    slotName: "Entrepreneur Profile Sticky Ad 01",
+    dimension: "300x250",
+    placementGroup: "Entrepreneurs",
+    description: "Displayed sticky in the first right sidebar of the Entrepreneur profile page (300 × 250).",
+    active: true,
+    actionType: "External Link (URL)",
+    targetUrl: "https://www.wsj.com/",
+    selectedArticleSlug: "",
+    imageUrl: "",
+  },
+  {
+    id: "entrepreneur_slot_4",
+    slotName: "Entrepreneur Profile Sticky Ad 02",
+    dimension: "300x250",
+    placementGroup: "Entrepreneurs",
+    description: "Displayed sticky in the second right sidebar of the Entrepreneur profile page (300 × 250).",
+    active: true,
+    actionType: "External Link (URL)",
+    targetUrl: "https://www.wsj.com/",
+    selectedArticleSlug: "",
+    imageUrl: "",
+  },
 ];
 
   // 3. Published Posts Data (Published Posts tab)
@@ -623,7 +700,7 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
   const [pubSearchQuery, setPubSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   // 4. Manage Ads State
-  const [adSubTab, setAdSubTab] = useState<"ALL" | "HOMEPAGE" | "CATEGORY" | "AUTHOR" | "ARTICLE" | "BILLIONAIRE">("ALL");
+  const [adSubTab, setAdSubTab] = useState<"ALL" | "HOMEPAGE" | "CATEGORY" | "AUTHOR" | "ARTICLE" | "BILLIONAIRE" | "ENTREPRENEURS">("ALL");
 
   // 5. Users Desk State
   interface UserDeskItem {
@@ -2382,25 +2459,83 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
           p.status?.toLowerCase() === "approved"
       );
       if (published.length > 0) {
-        const mappedPubs: PublishedPostItem[] = published.map((p: any) => ({
-          id: p.id,
-          title: p.title,
-          subheadline: p.subheadline || p.subtitle || "",
-          cardSummary: p.cardSummary || p.seoDescription || "",
-          bodyContent: p.bodyContent || "",
-          excerpt:
-            p.subheadline ||
-            (p.bodyContent
-              ? p.bodyContent.replace(/<[^>]+>/g, "").slice(0, 150) + "..."
-              : ""),
-          readTime: p.readDuration || "5 min read",
-          category: (p.category || "BUSINESS").toUpperCase(),
-          placement: "Main Grid",
-          author: resolveWriterAuthorName(p),
-          views: p.views || 0,
-          comments: 0,
-          thumbnail: resolveArticleThumbnail(p),
-        }));
+        // Fetch comments count map across articles
+        let commentsBySlug: Record<string, number> = {};
+        try {
+          const commRes = await fetch("http://localhost:5000/api/comments/all").catch(() => null);
+          if (commRes && commRes.ok) {
+            const commData = await commRes.json();
+            const allCommList = Array.isArray(commData.comments) ? commData.comments : [];
+            allCommList.forEach((c: any) => {
+              const slug = String(c.articleSlug || "").toLowerCase().trim();
+              if (slug) commentsBySlug[slug] = (commentsBySlug[slug] || 0) + 1;
+            });
+          }
+        } catch (e) {}
+
+        if (typeof window !== "undefined") {
+          try {
+            for (let i = 0; i < localStorage.length; i++) {
+              const k = localStorage.key(i);
+              if (k && k.startsWith("wsj_comments_")) {
+                const slug = k.replace("wsj_comments_", "").toLowerCase().trim();
+                const arr = JSON.parse(localStorage.getItem(k) || "[]");
+                if (Array.isArray(arr) && arr.length > (commentsBySlug[slug] || 0)) {
+                  commentsBySlug[slug] = arr.length;
+                }
+              }
+            }
+          } catch (e) {}
+        }
+
+        let localViewsMap: Record<string, number> = {};
+        if (typeof window !== "undefined") {
+          try {
+            const rawViews = localStorage.getItem("wsj_article_views");
+            if (rawViews) localViewsMap = JSON.parse(rawViews);
+          } catch (e) {}
+        }
+
+        const mappedPubs: PublishedPostItem[] = published.map((p: any) => {
+          const pSlug = (p.slug || "").toLowerCase().trim();
+          const pId = String(p.id || "").toLowerCase().trim();
+          const pTitleSlug = p.title
+            ? p.title.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")
+            : "";
+
+          const postViews = Math.max(
+            Number(p.views) || 0,
+            localViewsMap[pSlug] || 0,
+            localViewsMap[pTitleSlug] || 0,
+            localViewsMap[pId] || 0
+          );
+
+          const postComments =
+            commentsBySlug[pSlug] ||
+            commentsBySlug[pTitleSlug] ||
+            commentsBySlug[pId] ||
+            0;
+
+          return {
+            id: p.id,
+            title: p.title,
+            subheadline: p.subheadline || p.subtitle || "",
+            cardSummary: p.cardSummary || p.seoDescription || "",
+            bodyContent: p.bodyContent || "",
+            excerpt:
+              p.subheadline ||
+              (p.bodyContent
+                ? p.bodyContent.replace(/<[^>]+>/g, "").slice(0, 150) + "..."
+                : ""),
+            readTime: p.readDuration || "5 min read",
+            category: (p.category || "BUSINESS").toUpperCase(),
+            placement: "Main Grid",
+            author: resolveWriterAuthorName(p),
+            views: postViews,
+            comments: postComments,
+            thumbnail: resolveArticleThumbnail(p),
+          };
+        });
 
         setPublishedPosts(mappedPubs);
       } else {
@@ -2825,6 +2960,8 @@ ${divider70}
     window.addEventListener("wsj_users_updated", fetchUsers);
     window.addEventListener("wsj_newsletter_updated", loadSubscribersData);
     window.addEventListener("wsj_posts_updated", loadPostsData);
+    window.addEventListener("wsj_article_viewed", loadPostsData);
+    window.addEventListener("wsj_comments_updated", loadPostsData);
     return () => {
       window.removeEventListener("wsj_user_updated", loadUserData);
       window.removeEventListener("wsj_users_updated", fetchUsers);
@@ -2833,6 +2970,8 @@ ${divider70}
         loadSubscribersData
       );
       window.removeEventListener("wsj_posts_updated", loadPostsData);
+      window.removeEventListener("wsj_article_viewed", loadPostsData);
+      window.removeEventListener("wsj_comments_updated", loadPostsData);
     };
   }, [router]);
 
@@ -3045,11 +3184,11 @@ ${divider70}
       {/* LEFT SIDEBAR (Option 1 Editorial Light Palette with Light Ash Accent) */}
       {/* ================================================================= */}
       <aside
-        className={`fixed lg:sticky top-0 bottom-0 left-0 z-50 lg:z-20 w-64 lg:w-72 bg-white text-[#0f172a] border-r-2 border-[#cbd5e1] flex flex-col justify-between shrink-0 h-screen shadow-2xs transition-transform duration-200 ease-in-out ${
+        className={`fixed lg:sticky top-0 bottom-0 left-0 z-50 lg:z-20 w-64 lg:w-72 bg-white text-[#0f172a] border-r-2 border-[#cbd5e1] flex flex-col justify-between shrink-0 h-screen overflow-y-auto shadow-2xs transition-transform duration-200 ease-in-out ${
           isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >
-        <div>
+        <div className="pb-6">
           {/* Top WSJ Logo / Masthead Header - Divider removed below logo & logo links to admin account homepage */}
           <div className="h-[120px] sm:h-[132px] lg:h-[136px] pt-3.5 sm:pt-6 lg:pt-7 pb-4 px-6 flex items-start justify-between lg:justify-start shrink-0">
             <Link
@@ -3421,6 +3560,34 @@ ${divider70}
               </svg>
               <span>World Billionaires</span>
             </button>
+
+            {/* 11. Entrepreneurs */}
+            <button
+              onClick={() => {
+                setActiveTab("Entrepreneurs");
+                setIsMobileSidebarOpen(false);
+              }}
+              style={{ fontFamily: "'Century Gothic', 'Publica Sans Light', 'Kumbh Sans', sans-serif" }}
+              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                activeTab === "Entrepreneurs"
+                  ? "bg-[#f1f5f9] text-[#64748b] border border-[#cbd5e1] shadow-2xs font-bold"
+                  : "text-[#111111] hover:bg-[#f8fafc] hover:text-[#64748b]"
+              }`}
+            >
+              <svg
+                width={18}
+                height={18}
+                style={{ width: "18px", height: "18px", minWidth: "18px", minHeight: "18px" }}
+                className="shrink-0"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+              </svg>
+              <span>Entrepreneurs</span>
+            </button>
           </nav>
         </div>
 
@@ -3429,7 +3596,7 @@ ${divider70}
           style={{ fontFamily: "'Century Gothic', 'Publica Sans Light', 'Kumbh Sans', sans-serif" }}
           className="p-4 border-t border-[#f1f5f9] text-[10px] text-[#94a3b8] text-center"
         >
-          © 2026 Dow Jones & Company, Inc.
+          © 2026 Times Chicago Media LLC.
         </div>
       </aside>
 
@@ -4856,6 +5023,18 @@ ${divider70}
               >
                 BILLIONAIRE PAGE SLOTS ({adSlots.filter((s) => s.placementGroup === "Billionaire").length})
               </button>
+
+              <button
+                type="button"
+                onClick={() => setAdSubTab("ENTREPRENEURS")}
+                className={`font-bold tracking-wider uppercase transition-all whitespace-nowrap cursor-pointer pb-2.5 ${
+                  adSubTab === "ENTREPRENEURS"
+                    ? "text-[#64748b] border-b-2 border-[#94a3b8] font-extrabold"
+                    : "text-[#111111] hover:text-[#64748b]"
+                }`}
+              >
+                ENTREPRENEUR PAGE SLOTS ({adSlots.filter((s) => s.placementGroup === "Entrepreneurs").length})
+              </button>
             </div>
 
             {/* List of Filtered Ad Slots */}
@@ -4867,6 +5046,7 @@ ${divider70}
                   if (adSubTab === "AUTHOR") return slot.placementGroup === "Author";
                   if (adSubTab === "ARTICLE") return slot.placementGroup === "Article";
                   if (adSubTab === "BILLIONAIRE") return slot.placementGroup === "Billionaire";
+                  if (adSubTab === "ENTREPRENEURS") return slot.placementGroup === "Entrepreneurs";
                   return true;
                 })
                 .map((slot) => (
@@ -5815,6 +5995,8 @@ ${divider70}
           </div>
         ) : activeTab === "World Billionaires" ? (
           <BillionairesAdminDesk />
+        ) : activeTab === "Entrepreneurs" ? (
+          <EntrepreneursAdminDesk />
         ) : (
           /* Placeholder View for Other Sidebar Tabs */
           <div className="bg-white rounded-3xl p-8 border border-[#e5e7eb] shadow-2xs min-h-[400px] flex flex-col items-center justify-center text-center">

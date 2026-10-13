@@ -1,6 +1,6 @@
 import React from "react";
-import DashboardSkeleton from "@/components/ui/skeletons/DashboardSkeleton";
+import ReaderAccountSkeleton from "@/components/ui/skeletons/ReaderAccountSkeleton";
 
 export default function ReaderDashboardLoading() {
-  return <DashboardSkeleton />;
+  return <ReaderAccountSkeleton />;
 }

@@ -58,7 +58,7 @@ const fallbackMostRead: MostReadItem[] = [
 export default function MostReadSidebar({ authorName, authorEmail }: MostReadSidebarProps) {
   const [authorArticles, setAuthorArticles] = useState<MostReadItem[]>([]);
 
-  useEffect(() => {
+  const loadAuthorPosts = React.useCallback(async () => {
     if (typeof window === "undefined") return;
     try {
       let posts: any[] = [];
@@ -67,22 +67,67 @@ export default function MostReadSidebar({ authorName, authorEmail }: MostReadSid
       const p2 = localStorage.getItem("wsj_published_posts");
       if (p2) posts = [...posts, ...JSON.parse(p2)];
 
-      const targetEmail = (authorEmail || "").toLowerCase().trim();
-      const targetName = (authorName || "").toLowerCase().trim();
+      if (posts.length === 0) {
+        try {
+          const res = await fetch("http://localhost:5000/api/posts").catch(() => null);
+          if (res && res.ok) {
+            const data = await res.json();
+            const remote = Array.isArray(data) ? data : (data && Array.isArray(data.posts) ? data.posts : []);
+            if (remote.length > 0) posts = remote;
+          }
+        } catch (e) {}
+      }
 
-      const filtered = posts.filter((p: any) => {
-        if (!p || p.status !== "Published") return false;
-        const pEmail = (p.authorEmail || "").toLowerCase().trim();
-        const pName = (p.author || "").toLowerCase().trim();
+      // Deduplicate posts
+      const seenIds = new Set<string>();
+      const uniquePosts: any[] = [];
+      posts.forEach((p) => {
+        const pid = String(p?.id || p?.slug || "");
+        if (pid && !seenIds.has(pid)) {
+          seenIds.add(pid);
+          uniquePosts.push(p);
+        }
+      });
 
-        if (targetEmail && pEmail) return pEmail === targetEmail;
-        if (targetName && pName) return pName.includes(targetName) || targetName.includes(pName);
-        return true;
+      let profilesMap: Record<string, any> = {};
+      try {
+        profilesMap = JSON.parse(localStorage.getItem("wsj_users_by_email") || "{}");
+      } catch (e) {}
+
+      const cleanStr = (s: string) => (s || "").toLowerCase().trim();
+      const cleanSlug = (s: string) => (s || "").toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
+      const targetEmail = cleanStr(authorEmail);
+      const targetName = cleanStr(authorName);
+      const targetSlug = cleanSlug(authorName);
+
+      const filtered = uniquePosts.filter((p: any) => {
+        if (!p) return false;
+        const status = cleanStr(p.status);
+        if (!["published", "approved"].includes(status)) return false;
+
+        const pEmail = cleanStr(p.authorEmail);
+        const pName = cleanStr(p.author);
+        const pSlug = cleanSlug(p.author);
+
+        // Resolve dynamic writer name from account profile if available
+        let profileName = "";
+        if (pEmail && profilesMap[pEmail]) {
+          profileName = cleanStr(profilesMap[pEmail].full_name || profilesMap[pEmail].name || "");
+        }
+
+        const isEmailMatch = targetEmail && pEmail && pEmail === targetEmail;
+        const isNameMatch =
+          (targetName && pName && (pName === targetName || pName.includes(targetName) || targetName.includes(pName))) ||
+          (targetSlug && pSlug && (pSlug === targetSlug || pSlug.includes(targetSlug) || targetSlug.includes(pSlug))) ||
+          (targetName && profileName && (profileName === targetName || profileName.includes(targetName) || targetName.includes(profileName)));
+
+        return isEmailMatch || isNameMatch;
       });
 
       if (filtered.length > 0) {
         const formatted: MostReadItem[] = filtered.map((p: any) => {
-          const s = p.slug || String(p.id) || (p.title ? p.title.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-") : "article");
+          const s = p.slug || String(p.id) || (p.title ? cleanSlug(p.title) : "article");
           const views = getArticleViews(s);
           return {
             rank: 1,
@@ -95,9 +140,21 @@ export default function MostReadSidebar({ authorName, authorEmail }: MostReadSid
 
         formatted.sort((a, b) => b.viewsCount - a.viewsCount);
         setAuthorArticles(formatted.slice(0, 5));
+      } else {
+        setAuthorArticles([]);
       }
     } catch (e) {}
   }, [authorName, authorEmail]);
+
+  useEffect(() => {
+    loadAuthorPosts();
+    window.addEventListener("wsj_posts_updated", loadAuthorPosts);
+    window.addEventListener("wsj_article_viewed", loadAuthorPosts);
+    return () => {
+      window.removeEventListener("wsj_posts_updated", loadAuthorPosts);
+      window.removeEventListener("wsj_article_viewed", loadAuthorPosts);
+    };
+  }, [loadAuthorPosts]);
 
   const displayList = useMemo(() => {
     if (authorArticles.length > 0) {
@@ -122,6 +179,9 @@ export default function MostReadSidebar({ authorName, authorEmail }: MostReadSid
     <aside className="w-full bg-white border border-[#e5e7eb] rounded-xs p-5 select-none shadow-2xs">
       {/* Header with Trending Up Icon */}
       <div className="flex items-center gap-2 border-b border-[#e5e7eb] pb-3 mb-4">
+        <h3 className="font-poppins font-sans font-bold text-xs uppercase tracking-wider text-[#111111]">
+          MOST READ
+        </h3>
         <svg
           className="w-4 h-4 text-[#111111]"
           fill="none"
@@ -131,9 +191,6 @@ export default function MostReadSidebar({ authorName, authorEmail }: MostReadSid
         >
           <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
         </svg>
-        <h3 className="font-poppins font-sans font-bold text-xs uppercase tracking-wider text-[#111111]">
-          MOST READ
-        </h3>
       </div>
 
       {/* List */}
@@ -151,7 +208,10 @@ export default function MostReadSidebar({ authorName, authorEmail }: MostReadSid
 
             {/* Content */}
             <div className="flex-1 min-w-0">
-              <h4 className="font-serif font-bold text-xs sm:text-[13px] text-[#111111] leading-snug group-hover:underline line-clamp-2">
+              <h4
+                className="font-bold text-xs sm:text-[13.5px] text-[#111111] leading-snug group-hover:underline line-clamp-2"
+                style={{ fontFamily: "Georgia, serif" }}
+              >
                 {item.title}
               </h4>
               <span className="font-sans text-[10.5px] text-gray-400 font-normal block mt-1">

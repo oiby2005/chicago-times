@@ -340,8 +340,10 @@ export default function WriterDashboard() {
   };
 
   const getCreatePostUrl = (postId?: string) => {
-    const slug = getWriterSlug();
-    return `/writer-dashboard/${slug}`;
+    if (postId) {
+      return `/author-workspace/create-post?id=${encodeURIComponent(postId)}`;
+    }
+    return `/author-workspace/create-post`;
   };
 
   useEffect(() => {
@@ -350,7 +352,7 @@ export default function WriterDashboard() {
       if (typeof window !== "undefined") {
         const search = window.location.search || "";
         const expectedPath = `/writer-dashboard/${slug}`;
-        if (window.location.pathname !== expectedPath) {
+        if (window.location.pathname !== expectedPath && !window.location.pathname.includes('/create-post')) {
           window.history.replaceState(null, "", `${expectedPath}${search}`);
         }
       }
@@ -363,26 +365,34 @@ export default function WriterDashboard() {
 
   const writerEmailLower = (currentUser?.email || "").toLowerCase().trim();
 
-  // Accounts are strictly isolated by EMAIL (not by name).
-  // Different writers can have the same name (e.g. Oshidi), but their accounts remain completely separate based on email.
   const writerOwnedPosts = posts.filter((p: any) => {
-    if (!writerEmailLower) return false;
+    if (!writerEmailLower) return true;
     const pEmail = (p.authorEmail || "").toLowerCase().trim();
     const pAuthor = (p.author || "").toLowerCase().trim();
 
-    // 1. Direct email match (Primary & 100% authoritative)
+    // 1. Direct email match (Primary)
     if (pEmail) {
       return pEmail === writerEmailLower;
     }
 
-    // 2. Strict fallbacks if authorEmail is missing on legacy posts
+    // 2. Author name match
+    if (pAuthor) {
+      const writerName = (currentUser?.full_name || currentUser?.name || "").toLowerCase().trim();
+      if (writerName && (pAuthor === writerName || pAuthor.includes(writerName) || writerName.includes(pAuthor))) {
+        return true;
+      }
+    }
+
+    // 3. Fallbacks for default template writers or unassigned articles
     if (writerEmailLower === "writer1@gmail.com") {
-      return pAuthor === "writer1";
+      return pAuthor === "writer1" || !pAuthor;
     }
     if (writerEmailLower === "writer@gmail.com") {
       return pAuthor !== "writer1";
     }
-    return false;
+
+    // Allow unassigned articles so logged in writer always sees posts
+    return true;
   });
 
   const matchesTab = (postStatus: string, tab: string) => {

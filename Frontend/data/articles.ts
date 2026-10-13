@@ -31,7 +31,7 @@ export const homepageArticles: Record<string, Article> = {
     deck: "Former U.S. President Joe Biden is facing a worsening health situation after his son Hunter Biden said the cancer has spread to his bones and described the disease as \"very painful\" and \"very debilitating.\"",
     summary: "Former U.S. President Joe Biden is facing a worsening health situation after his son Hunter Biden said the cancer has spread to his bones and described the disease as \"very painful\" and \"very debilitating.\"",
     author: "Nivedita Chakrapani",
-    publishedDate: "08/09/26 AT 11:30 AM EDT",
+    publishedDate: "08/09/26 AT 11:30 AM",
     imageUrl: "https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?fm=webp&fit=crop&w=1200&q=80",
     photoCaption: "Former U.S. President Joe Biden",
     commentCount: 42,

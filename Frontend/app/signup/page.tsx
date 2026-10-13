@@ -349,6 +349,7 @@ export default function SignUpPage() {
                 <button
                   type="button"
                   onClick={handleGoogleClick}
+                  suppressHydrationWarning
                   className="w-full bg-white hover:bg-gray-50 text-gray-800 border border-[#e2e2e2] rounded-lg font-sans text-xs sm:text-sm font-medium py-2 sm:py-2.5 px-3 flex items-center justify-center space-x-2 transition-colors shadow-2xs cursor-pointer"
                 >
                   <svg className="w-4 h-4 sm:w-4.5 sm:h-4.5 shrink-0" viewBox="0 0 24 24">
@@ -398,6 +399,7 @@ export default function SignUpPage() {
                     placeholder="e.g. Richard Hendricks"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
+                    suppressHydrationWarning
                     className="w-full bg-white border border-[#cccccc] focus:border-[#00558c] text-xs sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2.5 rounded-lg focus:outline-none transition-all placeholder:text-gray-400"
                   />
                 </div>
@@ -416,6 +418,7 @@ export default function SignUpPage() {
                     placeholder="e.g. richard@piedpiper.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    suppressHydrationWarning
                     className="w-full bg-white border border-[#cccccc] focus:border-[#00558c] text-xs sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2.5 rounded-lg focus:outline-none transition-all placeholder:text-gray-400"
                   />
                 </div>
@@ -435,11 +438,13 @@ export default function SignUpPage() {
                       placeholder="Enter password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
+                      suppressHydrationWarning
                       className="w-full bg-white border border-[#cccccc] focus:border-[#00558c] text-xs sm:text-sm pl-2.5 sm:pl-3 pr-8 sm:pr-9 py-1.5 sm:py-2.5 rounded-lg focus:outline-none transition-all placeholder:text-gray-400"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
+                      suppressHydrationWarning
                       className="absolute inset-y-0 right-0 pr-2 sm:pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
@@ -465,11 +470,13 @@ export default function SignUpPage() {
                       placeholder="Re-enter password"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
+                      suppressHydrationWarning
                       className="w-full bg-white border border-[#cccccc] focus:border-[#00558c] text-xs sm:text-sm pl-2.5 sm:pl-3 pr-8 sm:pr-9 py-1.5 sm:py-2.5 rounded-lg focus:outline-none transition-all placeholder:text-gray-400"
                     />
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      suppressHydrationWarning
                       className="absolute inset-y-0 right-0 pr-2 sm:pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
@@ -484,6 +491,7 @@ export default function SignUpPage() {
                 <button
                   type="submit"
                   disabled={loading}
+                  suppressHydrationWarning
                   className="w-full font-sans text-xs sm:text-sm font-bold uppercase tracking-wider py-2 sm:py-2.5 rounded-lg transition-colors shadow-xs my-1.5 sm:my-2 bg-[#00558c] hover:bg-[#00426d] text-white cursor-pointer"
                 >
                   {loading ? "CREATING ACCOUNT..." : "REGISTER ACCOUNT"}

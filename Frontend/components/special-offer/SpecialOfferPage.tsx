@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import SpecialOfferHeader from "./SpecialOfferHeader";
 import SpecialOfferFooter from "./SpecialOfferFooter";
 import SpecialOfferAccordion from "./SpecialOfferAccordion";
@@ -33,8 +34,11 @@ const COUNTRY_CODES: CountryCodeOption[] = [
 ];
 
 export const SpecialOfferPage: React.FC = () => {
+  const router = useRouter();
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [isSubscribed, setIsSubscribed] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedPackage, setSelectedPackage] = useState<string>("Times Chicago Digital");
+  const [selectedPackage, setSelectedPackage] = useState<string>("Times Chicago Digital Bundle");
   const [selectedCountryIso, setSelectedCountryIso] = useState<string>("US");
   const [formData, setFormData] = useState({
     name: "",
@@ -46,6 +50,124 @@ export const SpecialOfferPage: React.FC = () => {
     success?: boolean;
     message?: string;
   } | null>(null);
+  const [lockoutSeconds, setLockoutSeconds] = useState(0);
+
+  const formatLockoutTime = (totalSec: number) => {
+    const mins = Math.floor(totalSec / 60);
+    const secs = totalSec % 60;
+    return `${mins}m ${secs.toString().padStart(2, "0")}s`;
+  };
+
+  // Check persisted subscription lockout on mount (and refresh)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const storedUntil = localStorage.getItem("wsj_subscribe_lockout_until");
+      if (storedUntil) {
+        const until = parseInt(storedUntil, 10);
+        const now = Date.now();
+        if (until > now) {
+          const sec = Math.ceil((until - now) / 1000);
+          setLockoutSeconds(sec);
+          setSubmitStatus({
+            success: false,
+            message: `Too many subscription attempts from this connection. Please wait: ${formatLockoutTime(sec)} remaining.`,
+          });
+        } else {
+          localStorage.removeItem("wsj_subscribe_lockout_until");
+          setLockoutSeconds(0);
+        }
+      }
+
+      // Check active user & subscription from active tab session
+      const stored = sessionStorage.getItem("wsj_user");
+      if (stored) {
+        const user = JSON.parse(stored);
+        setCurrentUser(user);
+        if (user.email) {
+          const cleanEmail = user.email.toLowerCase().trim();
+          setFormData((prev) => ({
+            ...prev,
+            name: prev.name || user.full_name || user.name || "",
+            email: prev.email || cleanEmail,
+          }));
+
+          const localSub = localStorage.getItem("wsj_subscription_" + cleanEmail);
+          if (localSub) {
+            try {
+              const subObj = JSON.parse(localSub);
+              if (subObj && subObj.status === "Active") {
+                const end = subObj.end_date ? new Date(subObj.end_date) : null;
+                if (!end || end > new Date()) {
+                  setIsSubscribed(true);
+                }
+              }
+            } catch (e) {}
+          }
+
+          fetch(`http://localhost:5000/api/subscriptions/user?email=${encodeURIComponent(cleanEmail)}`)
+            .then((r) => r.json())
+            .then((data) => {
+              if (data && data.success && data.isSubscribed) {
+                setIsSubscribed(true);
+                if (data.subscription) {
+                  localStorage.setItem("wsj_subscription_" + cleanEmail, JSON.stringify(data.subscription));
+                }
+              } else {
+                setIsSubscribed(false);
+                localStorage.removeItem("wsj_subscription_" + cleanEmail);
+              }
+            })
+            .catch(() => {});
+        }
+      } else {
+        setCurrentUser(null);
+        setIsSubscribed(false);
+      }
+    } catch (e) {
+      setCurrentUser(null);
+      setIsSubscribed(false);
+    }
+  }, []);
+
+  // Live countdown timer ticking down every second
+  useEffect(() => {
+    if (lockoutSeconds <= 0) return;
+
+    const timer = setInterval(() => {
+      try {
+        const storedUntil = localStorage.getItem("wsj_subscribe_lockout_until");
+        if (storedUntil) {
+          const until = parseInt(storedUntil, 10);
+          const now = Date.now();
+          if (until > now) {
+            const sec = Math.ceil((until - now) / 1000);
+            setLockoutSeconds(sec);
+            setSubmitStatus({
+              success: false,
+              message: `Too many subscription attempts from this connection. Please wait: ${formatLockoutTime(sec)} remaining.`,
+            });
+          } else {
+            localStorage.removeItem("wsj_subscribe_lockout_until");
+            setLockoutSeconds(0);
+            setSubmitStatus(null);
+          }
+        } else {
+          setLockoutSeconds((prev) => {
+            if (prev <= 1) {
+              setSubmitStatus(null);
+              return 0;
+            }
+            return prev - 1;
+          });
+        }
+      } catch (e) {
+        setLockoutSeconds((prev) => (prev > 0 ? prev - 1 : 0));
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [lockoutSeconds]);
 
   const selectedCountry = COUNTRY_CODES.find((c) => c.iso === selectedCountryIso) || COUNTRY_CODES[0];
   const phoneDigitsOnly = formData.phone.replace(/\D/g, "");
@@ -129,7 +251,20 @@ export const SpecialOfferPage: React.FC = () => {
   const phoneValidationError = getPhoneValidationError();
   const isPhoneValid = formData.phone.trim().length > 0 && !phoneValidationError;
 
-  const openSubscriptionModal = (pkgName: string) => {
+  const handleSubscribeClick = (pkgName: string) => {
+    // 1. If signed out, redirect to signin with error message
+    const stored = typeof window !== "undefined" ? sessionStorage.getItem("wsj_user") : null;
+    if (!currentUser || !stored) {
+      router.push("/signin?redirect=/special-offer&error=subscribe");
+      return;
+    }
+
+    // 2. If already subscribed, do nothing (not clickable)
+    if (isSubscribed) {
+      return;
+    }
+
+    // 3. Open modal
     setSelectedPackage(pkgName);
     setSubmitStatus(null);
     setIsModalOpen(true);
@@ -194,18 +329,45 @@ export const SpecialOfferPage: React.FC = () => {
           email: formData.email.trim(),
           phone: fullPhoneNumber,
           packageName: selectedPackage,
+          price: "Free for 1 Year",
         }),
       });
 
       const data = await res.json();
 
       if (res.ok && data.success) {
+        setIsSubscribed(true);
+        if (formData.email) {
+          const cleanEmail = formData.email.toLowerCase().trim();
+          const subData = data.subscription || {
+            packageName: selectedPackage,
+            price: "Free for 1 Year",
+            status: "Active",
+            start_date: new Date().toISOString(),
+            end_date: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+          };
+          try {
+            localStorage.setItem("wsj_subscription_" + cleanEmail, JSON.stringify(subData));
+          } catch (e) {}
+        }
         setSubmitStatus({
           success: true,
-          message: data.message || "Subscription request submitted successfully! Within 24 hours our team will reach you and activate your subscribe plan.",
+          message: data.message || "Your subscription has activated for 1 year! A confirmation email with details and end date has been sent to your email.",
         });
-        setFormData({ name: "", email: "", phone: "" });
+        setFormData((prev) => ({ ...prev, phone: "" }));
       } else {
+        if (res.status === 429) {
+          const lockoutUntil = Date.now() + 15 * 60 * 1000;
+          if (typeof window !== "undefined") {
+            localStorage.setItem("wsj_subscribe_lockout_until", lockoutUntil.toString());
+          }
+          setLockoutSeconds(15 * 60);
+          setSubmitStatus({
+            success: false,
+            message: `Too many subscription attempts from this connection. Please wait: ${formatLockoutTime(15 * 60)} remaining.`,
+          });
+          return;
+        }
         setSubmitStatus({
           success: false,
           message: data.message || "Failed to submit request. Please try again.",
@@ -214,10 +376,9 @@ export const SpecialOfferPage: React.FC = () => {
     } catch (err) {
       console.error("Subscription submission error:", err);
       setSubmitStatus({
-        success: true,
-        message: "Subscription request received! Within 24 hours our team will reach you and activate your subscribe plan.",
+        success: false,
+        message: "Could not reach the subscription server. Please try again.",
       });
-      setFormData({ name: "", email: "", phone: "" });
     } finally {
       setIsSubmitting(false);
     }
@@ -235,9 +396,9 @@ export const SpecialOfferPage: React.FC = () => {
           <h1 className="font-serif text-2xl sm:text-3xl md:text-[32px] font-normal text-[#111111] tracking-tight mb-2">
             Special Offer:{" "}
             <span className="line-through text-[#777777] font-normal mr-2">
-              $9.99 USD
+              $11.99 USD/Month
             </span>{" "}
-            <span className="font-bold text-black">$3 USD Per Month</span>
+            <span className="font-bold text-black">Free up to 1 Year</span>
           </h1>
           <p className="font-sans text-lg sm:text-xl text-[#333333] font-normal">
             Choose your Times Chicago Subscription
@@ -246,20 +407,22 @@ export const SpecialOfferPage: React.FC = () => {
 
         {/* Subscription Plan Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch mb-8">
-          {/* CARD 1: Times Chicago Digital */}
-          <div className="bg-white border border-[#e2e2e2] rounded-xs shadow-xs p-6 sm:p-8 flex flex-col justify-between text-center select-none">
+          {/* CARD 1: Times Chicago Digital (Disabled - Cannot Access) */}
+          <div className="bg-[#f9f9f9] border border-[#e2e2e2] rounded-xs shadow-xs p-6 sm:p-8 flex flex-col justify-between text-center select-none opacity-80 cursor-not-allowed">
             <div>
               {/* Card Title */}
-              <h2 className="font-sans font-bold text-xl text-black mb-5">
-                Times Chicago Digital
-              </h2>
+              <div className="flex items-center justify-center space-x-2 mb-5">
+                <h2 className="font-sans font-bold text-xl text-gray-500">
+                  Times Chicago Digital
+                </h2>
+              </div>
 
               {/* Logo Graphic */}
-              <div className="h-12 flex items-center justify-center mb-6">
+              <div className="h-12 flex items-center justify-center mb-6 opacity-60">
                 <img
                   src="/images/design-reference/Times Chicago.svg"
                   alt="Times Chicago"
-                  className="h-6 sm:h-7 w-auto object-contain"
+                  className="h-6 sm:h-7 w-auto object-contain grayscale"
                 />
               </div>
 
@@ -269,47 +432,47 @@ export const SpecialOfferPage: React.FC = () => {
               </div>
 
               {/* Main Price Headline */}
-              <div className="font-serif font-bold text-2xl sm:text-[26px] text-black tracking-tight mb-6">
+              <div className="font-serif font-bold text-2xl sm:text-[26px] text-gray-400 tracking-tight mb-6">
                 $3 USD/Month for 1 Year
               </div>
 
-              {/* Subscribe CTA Button */}
+              {/* Subscribe CTA Button (Disabled) */}
               <button
-                onClick={() => openSubscriptionModal("Times Chicago Digital")}
-                className="w-full max-w-[240px] mx-auto block bg-[#007cba] hover:bg-[#006996] text-white font-sans text-xs font-bold py-3 px-6 rounded-xs tracking-tight transition-colors shadow-xs cursor-pointer"
+                disabled
+                className="w-full max-w-[240px] mx-auto block bg-gray-300 text-gray-500 font-sans text-xs font-bold py-3 px-6 rounded-xs tracking-tight cursor-not-allowed pointer-events-none select-none shadow-none"
               >
-                Subscribe Now
+                Unavailable
               </button>
 
               {/* Cancel Anytime Note */}
-              <p className="text-[11.5px] text-[#666666] font-sans mt-2.5 mb-6">
-                You can cancel anytime.
+              <p className="text-[11.5px] text-[#888888] font-sans mt-2.5 mb-6">
+                Plan currently disabled.
               </p>
 
               {/* Divider */}
               <div className="border-t border-[#e2e2e2] mx-4 mb-6" />
 
               {/* Features Heading */}
-              <h3 className="font-sans font-bold text-xs text-black mb-4">
+              <h3 className="font-sans font-bold text-xs text-gray-500 mb-4">
                 What you&apos;ll enjoy:
               </h3>
 
               {/* Feature Bullets List */}
-              <ul className="space-y-3 text-left pl-2 sm:pl-4 text-[12.5px] text-[#333333] font-sans">
+              <ul className="space-y-3 text-left pl-2 sm:pl-4 text-[12.5px] text-gray-400 font-sans">
                 <li className="flex items-start space-x-2">
-                  <span className="text-[#007cba] font-bold text-sm leading-none mt-0.5">
+                  <span className="text-gray-400 font-bold text-sm leading-none mt-0.5">
                     ✓
                   </span>
                   <span>Unlimited access on Times Chicago website and mobile apps</span>
                 </li>
                 <li className="flex items-start space-x-2">
-                  <span className="text-[#007cba] font-bold text-sm leading-none mt-0.5">
+                  <span className="text-gray-400 font-bold text-sm leading-none mt-0.5">
                     ✓
                   </span>
                   <span>Daily puzzles and crosswords</span>
                 </li>
                 <li className="flex items-start space-x-2">
-                  <span className="text-[#007cba] font-bold text-sm leading-none mt-0.5">
+                  <span className="text-gray-400 font-bold text-sm leading-none mt-0.5">
                     ✓
                   </span>
                   <span>Audio versions of Times Chicago articles</span>
@@ -318,11 +481,16 @@ export const SpecialOfferPage: React.FC = () => {
             </div>
           </div>
 
-          {/* CARD 2: Times Chicago Digital Bundle */}
-          <div className="bg-white border border-[#e2e2e2] rounded-xs shadow-xs p-6 sm:p-8 flex flex-col justify-between text-center select-none">
+          {/* CARD 2: Times Chicago Digital Bundle (Free up to 1 Year) */}
+          <div className="bg-white border-2 border-[#007cba] rounded-xs shadow-md p-6 sm:p-8 flex flex-col justify-between text-center select-none relative">
+            {/* Top Tag */}
+            <div className="absolute -top-3.5 left-1/2 transform -translate-x-1/2 bg-[#007cba] text-white font-sans text-[11px] font-bold tracking-wider uppercase px-3 py-0.5 rounded-full shadow-xs">
+              Special 1-Year Free Offer
+            </div>
+
             <div>
               {/* Card Title */}
-              <h2 className="font-sans font-bold text-xl text-black mb-5">
+              <h2 className="font-sans font-bold text-xl text-black mb-5 mt-1">
                 Times Chicago Digital Bundle
               </h2>
 
@@ -352,21 +520,32 @@ export const SpecialOfferPage: React.FC = () => {
               </div>
 
               {/* Main Price Headline */}
-              <div className="font-serif font-bold text-2xl sm:text-[26px] text-black tracking-tight mb-6">
-                $5 USD/Month for 1 Year
+              <div className="font-serif font-bold text-2xl sm:text-[28px] text-black tracking-tight mb-6">
+                Free up to 1 Year
               </div>
 
               {/* Subscribe CTA Button */}
-              <button
-                onClick={() => openSubscriptionModal("Times Chicago Digital Bundle")}
-                className="w-full max-w-[240px] mx-auto block bg-[#007cba] hover:bg-[#006996] text-white font-sans text-xs font-bold py-3 px-6 rounded-xs tracking-tight transition-colors shadow-xs cursor-pointer"
-              >
-                Subscribe Now
-              </button>
+              {isSubscribed ? (
+                <button
+                  type="button"
+                  disabled
+                  className="w-full max-w-[240px] mx-auto block bg-[#007cba] text-white font-sans text-xs font-bold py-3 px-6 rounded-xs tracking-tight shadow-xs cursor-not-allowed pointer-events-none select-none opacity-90"
+                >
+                  Subscribed
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => handleSubscribeClick("Times Chicago Digital Bundle")}
+                  className="w-full max-w-[240px] mx-auto block bg-[#007cba] hover:bg-[#006996] text-white font-sans text-xs font-bold py-3 px-6 rounded-xs tracking-tight transition-colors shadow-xs cursor-pointer"
+                >
+                  Subscribe Now
+                </button>
+              )}
 
               {/* Cancel Anytime Note */}
               <p className="text-[11.5px] text-[#666666] font-sans mt-2.5 mb-6">
-                You can cancel anytime.
+                {isSubscribed ? "You have an active 1-year subscription." : "You can cancel anytime."}
               </p>
 
               {/* Divider */}
@@ -519,7 +698,7 @@ export const SpecialOfferPage: React.FC = () => {
               </div>
             ) : (
               /* If Not Submitted Yet: Show Form Inputs */
-              <form onSubmit={handleSubmit} className="space-y-4 font-sans text-xs">
+              <form onSubmit={handleSubmit} suppressHydrationWarning className="space-y-4 font-sans text-xs">
                 {submitStatus && !submitStatus.success && (
                   <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-sans">
                     {submitStatus.message}
@@ -582,6 +761,7 @@ export const SpecialOfferPage: React.FC = () => {
                     <select
                       value={selectedCountryIso}
                       onChange={(e) => setSelectedCountryIso(e.target.value)}
+                      suppressHydrationWarning
                       className="px-3 py-3 bg-white border border-[#E2DFD2] rounded-xl text-xs font-bold text-gray-800 focus:outline-none focus:border-[#454A58] shadow-2xs cursor-pointer font-sans shrink-0"
                     >
                       {COUNTRY_CODES.map((c) => (
@@ -621,10 +801,19 @@ export const SpecialOfferPage: React.FC = () => {
                 <div className="pt-3">
                   <button
                     type="submit"
-                    disabled={isSubmitting}
-                    className="w-full bg-[#454A58] hover:bg-[#2B303A] text-white font-bold text-xs uppercase tracking-wider py-3.5 rounded-xl transition-colors disabled:opacity-50 shadow-sm cursor-pointer"
+                    disabled={isSubmitting || lockoutSeconds > 0}
+                    suppressHydrationWarning
+                    className={`w-full font-bold text-xs uppercase tracking-wider py-3.5 rounded-xl transition-colors shadow-sm ${
+                      lockoutSeconds > 0
+                        ? "bg-red-600 text-white cursor-not-allowed opacity-90"
+                        : "bg-[#454A58] hover:bg-[#2B303A] text-white cursor-pointer disabled:opacity-50"
+                    }`}
                   >
-                    {isSubmitting ? "SUBMITTING..." : "REQUEST SUBSCRIPTION"}
+                    {lockoutSeconds > 0
+                      ? `🔒 LOCKED (${formatLockoutTime(lockoutSeconds)} REMAINING)`
+                      : isSubmitting
+                      ? "SUBMITTING..."
+                      : "REQUEST SUBSCRIPTION"}
                   </button>
                 </div>
               </form>

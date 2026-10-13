@@ -112,10 +112,11 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
 
     // 2. Persist to Express Backend API & MySQL in background
     try {
+      const prevName = currentUser?.full_name || (currentUser as any)?.name || "";
       const res = await fetch("http://localhost:5000/api/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedUser),
+        body: JSON.stringify({ ...updatedUser, old_full_name: prevName }),
       });
       if (res.ok) {
         const resData = await res.json();
@@ -129,8 +130,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
       }
     } catch (e) {}
 
-    // Update posts created by this specific user
+    // Update posts created by this specific user and push to API
     try {
+      const prevName = (currentUser?.full_name || (currentUser as any)?.name || "").toLowerCase().trim();
       const updatePostsAuthor = (key: string) => {
         const raw = localStorage.getItem(key);
         if (raw) {
@@ -138,18 +140,41 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
           if (Array.isArray(list)) {
             const updatedList = list.map((p: any) => {
               const pEmail = (p.authorEmail || "").toLowerCase().trim();
-              if (pEmail === email.toLowerCase().trim()) {
-                return { ...p, author: fullName };
+              const pAuthor = (p.author || "").toLowerCase().trim();
+              if (
+                (email && pEmail === email.toLowerCase().trim()) ||
+                (prevName && (pAuthor === prevName || pAuthor.includes(prevName))) ||
+                (email === "writer@gmail.com" && pAuthor === "writer user") ||
+                pAuthor === "writer user"
+              ) {
+                return {
+                  ...p,
+                  author: fullName,
+                  authorEmail: email || p.authorEmail,
+                  authorImage: avatarUrl || p.authorImage,
+                  authorAvatar: avatarUrl || p.authorAvatar,
+                };
               }
               return p;
             });
             localStorage.setItem(key, JSON.stringify(updatedList));
+            return updatedList;
           }
         }
+        return null;
       };
-      updatePostsAuthor("wsj_posts");
+
+      const updatedPosts = updatePostsAuthor("wsj_posts");
       updatePostsAuthor("wsj_published_posts");
       window.dispatchEvent(new Event("wsj_posts_updated"));
+
+      if (updatedPosts && updatedPosts.length > 0) {
+        fetch("http://localhost:5000/api/posts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updatedPosts),
+        }).catch(() => {});
+      }
     } catch (e) {}
 
     // Persist to stored accounts list

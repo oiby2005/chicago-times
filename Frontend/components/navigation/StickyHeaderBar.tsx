@@ -205,7 +205,7 @@ export const StickyHeaderBar: React.FC<StickyHeaderBarProps> = ({ visible = true
         isOpen={isSearchOverlayOpen}
         onClose={() => setIsSearchOverlayOpen(false)}
       />
-      <div className="fixed top-0 left-0 right-0 z-50 w-full bg-white border-b border-[#d4d4d4] shadow-md transition-all duration-200 select-none animate-in slide-in-from-top-2 duration-150">
+      <div id="sticky-header-bar" className="fixed top-0 left-0 right-0 z-50 w-full bg-white border-b border-[#d4d4d4] shadow-md transition-all duration-200 select-none animate-in slide-in-from-top-2 duration-150">
         <div className="w-full max-w-[1280px] mx-auto px-4 sm:px-5 md:px-6 relative">
           {/* Top Header Row of Sticky Bar */}
           <div className="flex items-center justify-between h-12 sm:h-14 md:h-16 border-b border-[#f0f0f0] relative">

@@ -118,8 +118,8 @@ export const MostPopularNewsSection: React.FC = () => {
         <div className="space-y-4">
           {articles.map((item, idx) => (
             <React.Fragment key={item.id}>
-              <article className="flex items-start justify-between space-x-3">
-                <div className="flex-1">
+              <article className="flex items-stretch justify-between space-x-3">
+                <div className="flex-1 flex flex-col justify-between">
                   <h4 className="font-poppins font-medium text-[14px] sm:text-[15px] leading-snug text-[#111111] hover:underline cursor-pointer">
                     <Link href={`/article/${item.slug}`}>
                       {item.title}
@@ -132,7 +132,7 @@ export const MostPopularNewsSection: React.FC = () => {
 
                 <Link
                   href={`/article/${item.slug}`}
-                  className="shrink-0 block w-[64px] h-[64px] sm:w-[70px] sm:h-[70px] overflow-hidden bg-gray-100 border border-gray-200"
+                  className="shrink-0 block w-[64px] sm:w-[70px] h-auto self-stretch overflow-hidden bg-gray-100 border border-gray-200"
                 >
                   <img
                     src={item.imageUrl}

@@ -151,8 +151,8 @@ export const LogoHeader: React.FC = () => {
   const editionLinks = [
     { label: "English Edition ▼", href: "#" },
     { label: "Opinions", href: "/opinion" },
-    { label: "Upcoming Top 20", href: "#" },
-    { label: "World Billionaires", href: "/top-20-billionaires" },
+    { label: "Upcoming Top 20", href: "/upcoming-top-20" },
+    { label: "World Billionaires", href: "/world-billionaire" },
   ];
 
   const isLoggedIn = currentUser !== null;
@@ -270,7 +270,7 @@ export const LogoHeader: React.FC = () => {
           </div>
 
           {/* Desktop Left Action Button: Newsletter (visible on md+) */}
-          <div className="hidden md:flex items-center w-[220px] lg:w-[260px] justify-start pt-1">
+          <div className="hidden md:flex items-center flex-1 justify-start pt-1">
             <Link
               href="/newsletters"
               className="bg-black hover:bg-gray-900 text-white font-sans text-[11.5px] font-medium px-5 py-2 h-auto flex items-center justify-center rounded-none tracking-tight transition-colors whitespace-nowrap cursor-pointer inline-flex leading-none shadow-xs"
@@ -305,7 +305,7 @@ export const LogoHeader: React.FC = () => {
           </div>
 
           {/* Desktop Right Action Buttons: Special Offer & Sign In (visible on md+) */}
-          <div className="hidden md:flex items-center space-x-2.5 w-[220px] lg:w-[260px] justify-end pt-1 relative z-[100]">
+          <div className="hidden md:flex items-center space-x-2.5 flex-1 justify-end pt-1 relative z-[100]">
             <SpecialOfferPopover>
               <button
                 className="bg-[#007cb9] hover:bg-[#006996] text-white font-sans text-[11.5px] font-medium px-5 py-2 h-auto flex items-center justify-center rounded-none tracking-tight transition-colors whitespace-nowrap cursor-pointer shadow-xs leading-none"
@@ -354,9 +354,9 @@ export const LogoHeader: React.FC = () => {
         </div>
 
         {/* Sub-Utility Edition Navigation */}
-        <div className="flex items-center justify-start sm:justify-center max-w-full overflow-x-auto sm:overflow-visible no-scrollbar w-full text-[11px] sm:text-[12px] font-['Century_Gothic','Publica_Sans_Light','Kumbh_Sans',sans-serif] font-normal text-[#333333] tracking-tight select-none z-30 whitespace-nowrap my-1 pt-1.5 pb-0.5 px-1">
-          {/* Edition Selection Dropdown Card */}
-          <div className="relative inline-block" ref={editionRef}>
+        <div className="flex items-center justify-between sm:justify-center max-w-full overflow-x-hidden sm:overflow-visible no-scrollbar w-full text-[10px] sm:text-[12px] font-['Century_Gothic','Publica_Sans_Light','Kumbh_Sans',sans-serif] font-normal text-[#333333] tracking-tight select-none z-30 whitespace-nowrap my-1 pt-1.5 pb-0.5 px-0.5 sm:px-1">
+          {/* Edition Selection Dropdown Card - Desktop and Laptop only */}
+          <div className="hidden md:inline-block relative" ref={editionRef}>
             <button
               type="button"
               suppressHydrationWarning
@@ -399,8 +399,8 @@ export const LogoHeader: React.FC = () => {
             )}
           </div>
 
-          {/* Gap between ▼ and | (0.2 cm = 8px) */}
-          <span className="ml-[8px] mr-[8px] text-[#999999] font-light text-[10px] leading-none shrink-0">|</span>
+          {/* Gap between ▼ and | - Desktop and Laptop only */}
+          <span className="hidden md:inline mx-1 sm:ml-[8px] sm:mr-[8px] text-[#999999] font-light text-[9px] sm:text-[10px] leading-none shrink-0">|</span>
 
           {/* Opinions */}
           <a
@@ -410,26 +410,26 @@ export const LogoHeader: React.FC = () => {
             Opinions
           </a>
 
-          {/* Gap between Opinions and | (0.4 cm = 15px) & | and Upcoming Entrepreneurs (0.4 cm = 15px) */}
-          <span className="ml-[15px] mr-[15px] text-[#999999] font-light text-[10px] leading-none shrink-0">|</span>
+          {/* Gap between Opinions and | */}
+          <span className="mx-1 sm:ml-[15px] sm:mr-[15px] text-[#999999] font-light text-[9px] sm:text-[10px] leading-none shrink-0">|</span>
 
-          {/* Upcoming Top 20 */}
-          <a
-            href="/business/entrepreneurship"
-            className="hover:underline cursor-pointer font-normal text-[#333333] hover:text-black leading-none"
-          >
-            Upcoming Top 20
-          </a>
-
-          {/* Gap between Upcoming Top 20 and | (0.4 cm = 15px) & | and World Billionaires (0.4 cm = 15px) */}
-          <span className="ml-[15px] mr-[15px] text-[#999999] font-light text-[10px] leading-none shrink-0">|</span>
-
-          {/* World Billionaires */}
+          {/* Upcoming Top 20 Entrepreneurs */}
           <Link
-            href="/top-20-billionaires"
+            href="/upcoming-top-20"
             className="hover:underline cursor-pointer font-normal text-[#333333] hover:text-black leading-none"
           >
-            World Billionaires
+            Upcoming Top 20 Entrepreneurs
+          </Link>
+
+          {/* Gap between Upcoming Top 20 and | */}
+          <span className="mx-1 sm:ml-[15px] sm:mr-[15px] text-[#999999] font-light text-[9px] sm:text-[10px] leading-none shrink-0">|</span>
+
+          {/* World 20 Billionaires */}
+          <Link
+            href="/world-billionaire"
+            className="hover:underline cursor-pointer font-normal text-[#333333] hover:text-black leading-none"
+          >
+            World 20 Billionaires
           </Link>
         </div>
       </div>

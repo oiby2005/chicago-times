@@ -13,30 +13,26 @@ interface TocItem {
 }
 
 const TOC_ITEMS: TocItem[] = [
-  { id: "our-commitment", label: "Our Commitment" },
-  { id: "accuracy-verification", label: "1. Accuracy & Verification" },
-  { id: "editorial-independence", label: "2. Editorial Independence" },
-  { id: "fairness-balance", label: "3. Fairness and Balance" },
-  { id: "source-standards", label: "4. Source Standards" },
-  { id: "original-journalism", label: "5. Original Journalism" },
-  { id: "attribution-copyright", label: "6. Attribution & Copyright" },
-  { id: "opinion-content", label: "7. Opinion Content" },
-  { id: "corrections-updates", label: "8. Corrections & Updates" },
-  { id: "artificial-intelligence", label: "9. Artificial Intelligence (AI)" },
-  { id: "visuals-multimedia", label: "10. Visuals & Multimedia" },
-  { id: "user-generated-content", label: "11. User-Generated Content" },
-  { id: "sponsored-content", label: "12. Sponsored Content & Ads" },
-  { id: "conflicts-of-interest", label: "13. Conflicts of Interest" },
-  { id: "diversity-inclusion", label: "14. Diversity & Inclusion" },
-  { id: "source-security", label: "15. Security & Confidential Sources" },
-  { id: "community-standards", label: "16. Community Standards" },
-  { id: "transparency-policy", label: "17. Transparency" },
-  { id: "continuous-improvement", label: "18. Continuous Improvement" },
-  { id: "editorial-promise", label: "Our Editorial Promise" },
+  { id: "mission", label: "1. Our Editorial Mission" },
+  { id: "accuracy", label: "2. Accuracy and Verification" },
+  { id: "sources", label: "3. Sources and Attribution" },
+  { id: "fairness", label: "4. Fairness and Right of Reply" },
+  { id: "independence", label: "5. Editorial Independence" },
+  { id: "labels", label: "6. News, Opinion & Sponsored Content" },
+  { id: "multimedia", label: "7. Headlines, Images & Multimedia" },
+  { id: "privacy", label: "8. Privacy & Sensitive Reporting" },
+  { id: "allegations", label: "9. Allegations & Defamation" },
+  { id: "ai-tools", label: "10. Artificial Intelligence & Tools" },
+  { id: "user-content", label: "11. User-Generated Content" },
+  { id: "corrections", label: "12. Errors, Corrections & Updates" },
+  { id: "complaints", label: "13. Complaints & Editorial Review" },
+  { id: "copyright-reuse", label: "14. Copyright and Reuse" },
+  { id: "policy-review", label: "15. Policy Review" },
+  { id: "contact", label: "Contact Information" },
 ];
 
 export default function EditorialClient() {
-  const [activeSection, setActiveSection] = useState<string>("our-commitment");
+  const [activeSection, setActiveSection] = useState<string>("mission");
   const [isTocOpen, setIsTocOpen] = useState<boolean>(false);
 
   const scrollToSection = (id: string) => {
@@ -61,14 +57,20 @@ export default function EditorialClient() {
             {/* Header / Legal Document Title Bar */}
             <div className="text-center max-w-4xl mx-auto mb-8">
               <h1 className="font-serif font-black text-[32px] sm:text-[44px] leading-tight text-[#111111] tracking-tight">
-                Editorial Guidelines &amp; Ethics Policy
+                EDITORIAL POLICY
               </h1>
+              <p className="mt-2 text-xs font-sans text-[#666666]">
+                Website: <a href="https://www.timeschicago.com/" className="text-[#00558c] hover:underline">https://www.timeschicago.com/</a>
+                <span className="mx-2">|</span>
+                Effective Date: October 10, 2026
+                <span className="mx-2">|</span>
+                Last Updated: October 10, 2026
+              </p>
             </div>
 
             {/* Main Content 2-Column Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-              
-              {/* ==================== LEFT SIDEBAR: STICKY TABLE OF CONTENTS (4 of 12 cols ~ 33%) ==================== */}
+              {/* ==================== LEFT SIDEBAR: STICKY TABLE OF CONTENTS ==================== */}
               <div className="lg:col-span-4 sticky top-20 z-10 self-start w-full">
                 <div className="bg-white border border-[#E2DDD0] p-4 sm:p-5 shadow-xs">
                   <button
@@ -103,7 +105,7 @@ export default function EditorialClient() {
                         <button
                           key={item.id}
                           onClick={() => scrollToSection(item.id)}
-                          className={`w-full text-left px-3 py-1 text-[12px] font-sans transition-colors rounded-none flex items-center cursor-pointer ${
+                          className={`w-full text-left px-3 py-1.5 text-[12.5px] font-sans transition-colors rounded-none flex items-center cursor-pointer ${
                             isActive
                               ? "bg-[#FAF5F5] text-[#990000] font-bold border-l-2 border-[#990000]"
                               : "text-[#555555] hover:text-[#990000] hover:bg-[#FAF5F5]"
@@ -117,269 +119,182 @@ export default function EditorialClient() {
                 </div>
               </div>
 
-              {/* ==================== RIGHT MAIN COLUMN: DOCUMENT SECTIONS (8 of 12 cols ~ 67%) ==================== */}
+              {/* ==================== RIGHT MAIN COLUMN: DOCUMENT SECTIONS ==================== */}
               <div className="lg:col-span-8 bg-white border border-[#E2DDD0] p-6 sm:p-10 shadow-xs space-y-8 font-sans text-[14px] leading-relaxed text-[#333333]">
-
-                {/* Our Commitment */}
-                <section id="our-commitment" className="scroll-mt-28">
-                  <h2 className="font-serif font-bold text-[24px] text-[#111111] pb-2 mb-4 border-b border-[#E5E0D3]">
-                    Our Commitment to Journalism
+                {/* 1. Our Editorial Mission */}
+                <section id="mission" className="scroll-mt-28">
+                  <h2 className="font-serif font-bold text-[22px] text-[#111111] pb-2 mb-4 border-b border-[#E5E0D3]">
+                    1. Our Editorial Mission
                   </h2>
-                  <div className="space-y-4">
-                    <p>
-                      At <strong className="font-bold text-[#111111]">Times Chicago</strong>, journalism is a public responsibility. Our mission is to deliver accurate, fair, independent, and responsible reporting that helps readers understand the events shaping their communities, the nation, and the world.
-                    </p>
-                    <p>
-                      We are committed to the highest standards of editorial integrity, transparency, accountability, and ethical journalism. Every article, investigation, opinion piece, and multimedia publication is produced under rigorous editorial oversight to ensure that our readers receive trustworthy information.
-                    </p>
+                  <p>
+                    Times Chicago LLC aims to publish timely, relevant, clear, and informative journalism for readers. Our editorial approach is guided by accuracy, fairness, independence, accountability, and respect for the public interest. We seek to distinguish verified information from allegation, analysis, commentary, and opinion.
+                  </p>
+                </section>
+
+                {/* 2. Accuracy and Verification */}
+                <section id="accuracy" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                  <h2 className="font-serif font-bold text-[20px] text-[#111111] mb-3">
+                    2. Accuracy and Verification
+                  </h2>
+                  <p>
+                    We make reasonable efforts to verify factual claims before publication using reliable sources, relevant documents, direct observation, and on-the-record statements where appropriate. We check names, dates, figures, quotations, and context. When information cannot be independently verified, we aim to explain that limitation clearly rather than present uncertain information as established fact.
+                  </p>
+                </section>
+
+                {/* 3. Sources and Attribution */}
+                <section id="sources" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                  <h2 className="font-serif font-bold text-[20px] text-[#111111] mb-3">
+                    3. Sources and Attribution
+                  </h2>
+                  <p>
+                    We identify sources where appropriate and provide links, citations, or attribution when useful to readers. Anonymous sources may be used only when the information is important, the source has a credible basis for knowing it, and there is a reasonable justification for withholding the source’s identity. Editors should assess possible conflicts, motives, and risks before relying on anonymous information.
+                  </p>
+                </section>
+
+                {/* 4. Fairness and Right of Reply */}
+                <section id="fairness" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                  <h2 className="font-serif font-bold text-[20px] text-[#111111] mb-3">
+                    4. Fairness and Right of Reply
+                  </h2>
+                  <p>
+                    We aim to represent relevant perspectives fairly and in context. When an article contains significant allegations about an identifiable person or organization, we will make reasonable efforts to seek a response before publication, where practicable. If a response is not received by the editorial deadline, the article may state that a request was made and whether a response had been received at publication time.
+                  </p>
+                </section>
+
+                {/* 5. Editorial Independence and Conflicts of Interest */}
+                <section id="independence" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                  <h2 className="font-serif font-bold text-[20px] text-[#111111] mb-3">
+                    5. Editorial Independence and Conflicts of Interest
+                  </h2>
+                  <p>
+                    Editorial decisions should be based on newsworthiness, evidence, relevance, and public interest—not on payment, personal relationships, political pressure, or commercial influence. Staff and contributors should disclose material conflicts of interest to an editor. Advertisers, sponsors, clients, and business partners must not be promised editorial coverage or favorable treatment in exchange for payment unless the material is clearly identified as advertising, sponsored content, or another paid placement.
+                  </p>
+                </section>
+
+                {/* 6. News, Opinion, Sponsored Content, and Corrections */}
+                <section id="labels" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                  <h2 className="font-serif font-bold text-[20px] text-[#111111] mb-3">
+                    6. News, Opinion, Sponsored Content, and Corrections
+                  </h2>
+                  <p>
+                    We aim to label content clearly so readers can distinguish reporting from opinion, analysis, reviews, press releases, sponsored material, and advertising. Sponsored or paid content should be identified in a prominent and understandable way. Press releases and submissions may be edited, checked, rejected, or independently reported before publication; publication does not necessarily mean that Times Chicago LLC endorses every claim made by the source.
+                  </p>
+                </section>
+
+                {/* 7. Headlines, Images, and Multimedia */}
+                <section id="multimedia" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                  <h2 className="font-serif font-bold text-[20px] text-[#111111] mb-3">
+                    7. Headlines, Images, and Multimedia
+                  </h2>
+                  <p>
+                    Headlines, captions, photographs, graphics, and videos should fairly represent the content and must not knowingly mislead readers. Images should not be manipulated in a way that materially distorts the facts. Illustrative, file, archive, or AI-generated images should be labelled where necessary to avoid misleading readers. We seek to respect copyright, licensing terms, privacy, and the dignity of people depicted.
+                  </p>
+                </section>
+
+                {/* 8. Privacy, Children, and Sensitive Reporting */}
+                <section id="privacy" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                  <h2 className="font-serif font-bold text-[20px] text-[#111111] mb-3">
+                    8. Privacy, Children, and Sensitive Reporting
+                  </h2>
+                  <p>
+                    We consider privacy, public interest, potential harm, and the circumstances of each case when reporting on private individuals and sensitive matters. Particular care should be taken when reporting on children, victims of abuse, health matters, grief, or other vulnerable circumstances. We avoid publishing unnecessary identifying details that could expose a person to foreseeable harm, subject to legitimate public-interest considerations and applicable law.
+                  </p>
+                </section>
+
+                {/* 9. Allegations, Defamation, and Presumption of Innocence */}
+                <section id="allegations" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                  <h2 className="font-serif font-bold text-[20px] text-[#111111] mb-3">
+                    9. Allegations, Defamation, and Presumption of Innocence
+                  </h2>
+                  <p>
+                    Allegations should be clearly attributed and not presented as proven facts unless they have been established by reliable evidence or an appropriate legal finding. Reporting about criminal investigations or proceedings should accurately describe the status of the matter and respect applicable legal restrictions. Editors should review serious allegations carefully and seek legal guidance when appropriate.
+                  </p>
+                </section>
+
+                {/* 10. Artificial Intelligence and Editorial Tools */}
+                <section id="ai-tools" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                  <h2 className="font-serif font-bold text-[20px] text-[#111111] mb-3">
+                    10. Artificial Intelligence and Editorial Tools
+                  </h2>
+                  <p>
+                    Digital tools, including AI-assisted tools, may be used to support tasks such as transcription, translation, research organization, or editing, subject to editorial oversight. They must not replace verification or editorial responsibility. Staff should not publish AI-generated factual claims, quotations, images, or references without appropriate checks. Confidential, personal, or sensitive information should not be entered into external tools unless authorized and appropriate safeguards are in place.
+                  </p>
+                </section>
+
+                {/* 11. User-Generated Content and Moderation */}
+                <section id="user-content" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                  <h2 className="font-serif font-bold text-[20px] text-[#111111] mb-3">
+                    11. User-Generated Content and Moderation
+                  </h2>
+                  <p>
+                    Comments, tips, submitted articles, images, and other user material may be reviewed before or after publication. We may edit for clarity, reject, remove, or restrict material that is unlawful, abusive, discriminatory, threatening, deceptive, spam, infringing, or otherwise inconsistent with our standards. User submissions are not automatically endorsed by Times Chicago LLC.
+                  </p>
+                </section>
+
+                {/* 12. Errors, Corrections, and Updates */}
+                <section id="corrections" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                  <h2 className="font-serif font-bold text-[20px] text-[#111111] mb-3">
+                    12. Errors, Corrections, and Updates
+                  </h2>
+                  <p>
+                    We seek to correct material factual errors promptly and transparently. Readers who identify a possible error can contact us with the article URL, the disputed statement, and reliable supporting information. Where a correction is warranted, we may amend the article and add a correction note or update notice when appropriate. Significant changes should not be made in a way that conceals a material error.
+                  </p>
+                </section>
+
+                {/* 13. Complaints and Editorial Review */}
+                <section id="complaints" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                  <h2 className="font-serif font-bold text-[20px] text-[#111111] mb-3">
+                    13. Complaints and Editorial Review
+                  </h2>
+                  <p>
+                    Readers may raise concerns about accuracy, fairness, sourcing, conflicts of interest, or compliance with this policy by emailing{" "}
+                    <a href="mailto:worldnews@timeschicago.com" className="font-bold text-[#00558c] hover:underline">
+                      worldnews@timeschicago.com
+                    </a>
+                    . Please include the article URL, a clear description of the concern, and any supporting documentation. We will review complaints as reasonably practicable, though we cannot guarantee a particular outcome or response time.
+                  </p>
+                </section>
+
+                {/* 14. Copyright and Reuse */}
+                <section id="copyright-reuse" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                  <h2 className="font-serif font-bold text-[20px] text-[#111111] mb-3">
+                    14. Copyright and Reuse
+                  </h2>
+                  <p>
+                    We seek to use text, photographs, graphics, video, and other third-party materials only where we have permission, a suitable licence, or another lawful basis. Attribution alone does not necessarily authorize reuse. We expect contributors to submit material they have the right to provide and to disclose relevant restrictions or third-party rights.
+                  </p>
+                </section>
+
+                {/* 15. Policy Review */}
+                <section id="policy-review" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                  <h2 className="font-serif font-bold text-[20px] text-[#111111] mb-3">
+                    15. Policy Review
+                  </h2>
+                  <p>
+                    This policy may be revised as our editorial practices and applicable requirements evolve. The latest version will be published on our Website with an updated revision date.
+                  </p>
+                </section>
+
+                {/* Contact */}
+                <section id="contact" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
+                  <h2 className="font-serif font-bold text-[20px] text-[#111111] mb-3">
+                    Contact
+                  </h2>
+                  <div className="bg-[#FAF8F5] p-5 border border-[#E5E0D3] space-y-1.5 text-xs sm:text-sm">
+                    <p><strong className="font-bold text-[#111111]">Times Chicago LLC</strong></p>
+                    <p><strong className="font-bold text-[#111111]">Website:</strong> <a href="https://www.timeschicago.com/" className="text-[#00558c] hover:underline">https://www.timeschicago.com/</a></p>
+                    <p><strong className="font-bold text-[#111111]">Editorial email:</strong> <a href="mailto:worldnews@timeschicago.com" className="text-[#00558c] hover:underline">worldnews@timeschicago.com</a></p>
+                    <p><strong className="font-bold text-[#111111]">Address:</strong> 1246 J Clark St, Suite 1100, Chicago, IL 60603, United States</p>
                   </div>
                 </section>
-
-                {/* 1. Accuracy & Verification */}
-                <section id="accuracy-verification" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">1.</span> Accuracy and Verification
-                  </h3>
-                  <p className="mb-3">
-                    Accuracy is the foundation of our journalism. Before publication, our editorial team strives to:
-                  </p>
-                  <ul className="list-disc pl-5 space-y-2 mb-3">
-                    <li>Verify information through reliable and credible sources.</li>
-                    <li>Confirm facts using official records whenever possible.</li>
-                    <li>Review names, dates, statistics, quotations, and references for accuracy.</li>
-                    <li>Seek multiple independent sources before publishing significant claims.</li>
-                    <li>Clearly distinguish verified facts from opinions or analysis.</li>
-                  </ul>
-                  <p>
-                    If new verified information becomes available after publication, articles are updated promptly.
-                  </p>
-                </section>
-
-                {/* 2. Editorial Independence */}
-                <section id="editorial-independence" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">2.</span> Editorial Independence
-                  </h3>
-                  <p>
-                    Times Chicago maintains complete editorial independence. Editorial decisions are never influenced by advertisers, sponsors, political organizations, government agencies, business partners, financial contributors, or individuals seeking favorable coverage. Our journalists and editors are expected to make decisions solely in the public interest.
-                  </p>
-                </section>
-
-                {/* 3. Fairness and Balance */}
-                <section id="fairness-balance" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">3.</span> Fairness and Balance
-                  </h3>
-                  <p>
-                    Our reporting aims to present issues fairly and responsibly. Whenever practical, we seek responses from individuals or organizations that are the subject of our reporting. We strive to present multiple viewpoints, avoid sensationalism, provide context, separate facts from commentary, and avoid misleading headlines or imagery.
-                  </p>
-                </section>
-
-                {/* 4. Source Standards */}
-                <section id="source-standards" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">4.</span> Source Standards
-                  </h3>
-                  <p className="mb-3">
-                    Times Chicago relies on credible and verifiable sources. Preferred sources include government agencies, courts, academic institutions, peer-reviewed research, public records, qualified experts, and official statements.
-                  </p>
-                  <p>
-                    Anonymous sources are used only when disclosure would place the source at genuine risk, the information is of significant public interest, and the identity of the source is approved by and known to the responsible editor. Times Chicago never pays for interviews or confidential information.
-                  </p>
-                </section>
-
-                {/* 5. Original Journalism */}
-                <section id="original-journalism" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">5.</span> Original Journalism
-                  </h3>
-                  <p>
-                    We encourage independent reporting and original journalism. Our reporters identify themselves honestly, respect privacy and legal rights, conduct interviews ethically, preserve quotations accurately, and follow all applicable laws. Original reporting remains one of our highest priorities.
-                  </p>
-                </section>
-
-                {/* 6. Attribution & Copyright */}
-                <section id="attribution-copyright" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">6.</span> Attribution and Copyright
-                  </h3>
-                  <p>
-                    Whenever information originates from another publication or organization, appropriate attribution is provided. Times Chicago respects intellectual property rights and does not tolerate plagiarism, fabricated quotations, copyright infringement, or misrepresentation of sources.
-                  </p>
-                </section>
-
-                {/* 7. Opinion Content */}
-                <section id="opinion-content" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">7.</span> Opinion and Editorial Content
-                  </h3>
-                  <p>
-                    Opinion articles represent the views of their respective authors. Pieces are clearly labeled as opinion, editorials reflect the position of Times Chicago&apos; Editorial Board, and opinion content is kept separate from factual reporting. Contributors are expected to support opinions with credible evidence.
-                  </p>
-                </section>
-
-                {/* 8. Corrections & Updates */}
-                <section id="corrections-updates" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">8.</span> Corrections and Updates
-                  </h3>
-                  <p>
-                    Transparency builds credibility. When errors are identified, we correct factual inaccuracies promptly, add correction notes, update developing stories with verified information, and publish retractions when necessary. Readers may report errors through our editorial channels.
-                  </p>
-                </section>
-
-                {/* 9. Artificial Intelligence (AI) */}
-                <section id="artificial-intelligence" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">9.</span> Artificial Intelligence (AI)
-                  </h3>
-                  <p className="mb-3">
-                    Times Chicago may use artificial intelligence tools to assist with research support, language refinement, content organization, translation, or multimedia production.
-                  </p>
-                  <p>
-                    However, human editors review all AI-assisted material. AI may never invent facts or quotations, and final responsibility always rests with human editors. Accuracy remains our highest priority.
-                  </p>
-                </section>
-
-                {/* 10. Visuals & Multimedia */}
-                <section id="visuals-multimedia" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">10.</span> Images, Video and Multimedia
-                  </h3>
-                  <p>
-                    Visual content must accurately represent events. Times Chicago prohibits misleading image manipulation, fabricated visuals presented as authentic, or deceptive editing. Permitted edits include cropping, brightness, color, and resolution adjustments. Illustrations or AI-generated visual simulations will be clearly identified.
-                  </p>
-                </section>
-
-                {/* 11. User-Generated Content */}
-                <section id="user-generated-content" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">11.</span> User-Generated Content
-                  </h3>
-                  <p>
-                    Readers may contribute comments, guest articles, opinion submissions, press releases, or letters to the editor. Times Chicago reserves the right to edit, reject, or remove submissions containing hate speech, defamation, false information, copyright violations, spam, illegal content, or personal harassment.
-                  </p>
-                </section>
-
-                {/* 12. Sponsored Content & Ads */}
-                <section id="sponsored-content" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">12.</span> Sponsored Content and Advertising
-                  </h3>
-                  <p>
-                    Advertising is clearly separated from editorial content. Sponsored material is identified using labels such as Sponsored, Advertisement, Paid Partnership, or Promotional Content. Sponsors have no influence over newsroom decisions or coverage.
-                  </p>
-                </section>
-
-                {/* 13. Conflicts of Interest */}
-                <section id="conflicts-of-interest" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">13.</span> Conflicts of Interest
-                  </h3>
-                  <p>
-                    Staff must avoid conflicts of interest. Members may not accept gifts/payments for coverage, invest in companies they regularly report on, cover organizations where they have financial interests, or use confidential information for personal gain. Any potential conflict must be disclosed.
-                  </p>
-                </section>
-
-                {/* 14. Diversity & Inclusion */}
-                <section id="diversity-inclusion" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">14.</span> Diversity and Inclusion
-                  </h3>
-                  <p>
-                    Times Chicago believes journalism should represent diverse communities and perspectives. We are committed to inclusive reporting, respectful language, cultural sensitivity, equal opportunity, and avoiding stereotypes and discrimination.
-                  </p>
-                </section>
-
-                {/* 15. Security and Confidential Sources */}
-                <section id="source-security" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">15.</span> Security and Confidential Sources
-                  </h3>
-                  <p>
-                    We recognize the importance of protecting confidential sources. Times Chicago uses reasonable measures to safeguard sensitive communications and respects legally protected journalistic confidentiality.
-                  </p>
-                </section>
-
-                {/* 16. Community Standards */}
-                <section id="community-standards" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">16.</span> Community Standards
-                  </h3>
-                  <p>
-                    We encourage respectful discussion. Users may not post content that promotes violence, encourages illegal activity, contains threats/harassment, spreads deliberate misinformation, or violates intellectual property. Violations may result in restrictions.
-                  </p>
-                </section>
-
-                {/* 17. Transparency */}
-                <section id="transparency-policy" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">17.</span> Transparency
-                  </h3>
-                  <p>
-                    Whenever practical, Times Chicago explains how information was obtained, why anonymous sources were used, whether content was updated, whether AI tools assisted, and whether content is sponsored. Transparency helps readers evaluate reliability.
-                  </p>
-                </section>
-
-                {/* 18. Continuous Improvement */}
-                <section id="continuous-improvement" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
-                    <span className="text-[#990000] font-bold mr-1">18.</span> Continuous Improvement
-                  </h3>
-                  <p className="mb-4">
-                    Editorial standards evolve. Times Chicago regularly reviews its practices to reflect technological developments, industry best practices, legal requirements, and ethical standards. Staff receive ongoing training to maintain excellence.
-                  </p>
-
-                  {/* Contact Our Editorial Team Card */}
-                  <div className="bg-[#F8F5EC] border border-[#E5E0D3] p-5 font-sans text-[13.5px] text-[#333333]">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <span className="text-[#00558C]">✉️</span>
-                      <strong className="font-bold text-[#111111] text-[14px]">
-                        Contact Our Editorial Team
-                      </strong>
-                    </div>
-                    <p className="text-[12.5px] text-[#666666] mb-3">
-                      Questions about our editorial standards, corrections, or news coverage may be directed to:
-                    </p>
-                    <p className="leading-snug text-[#555555]">
-                      <strong className="font-bold text-[#111111]">Editorial Department</strong><br />
-                      Times Chicago<br />
-                      2316 Eastgate St #160<br />
-                      Walla Walla, Washington (WA) 99362<br />
-                      Email: <a href="mailto:info@timeschicago.com" className="font-bold text-[#00558C] hover:underline">info@timeschicago.com</a>
-                    </p>
-                  </div>
-                </section>
-
-                {/* Our Editorial Promise */}
-                <section id="editorial-promise" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <div className="bg-[#F4F8FA] border border-[#D5E5EE] p-6 font-sans">
-                    <div className="flex items-center space-x-2 mb-3">
-                      <span className="text-[#00558C] text-[18px]">🎗️</span>
-                      <h3 className="font-serif font-bold text-[20px] text-[#003366]">
-                        Our Editorial Promise
-                      </h3>
-                    </div>
-                    <div className="space-y-3 text-[13.5px] leading-relaxed text-[#334455]">
-                      <p>
-                        Times Chicago is committed to producing journalism that serves the public interest with honesty, independence, and accountability. We believe that trust is earned through transparency, ethical reporting, rigorous fact-checking, and a commitment to correcting mistakes when they occur.
-                      </p>
-                      <p>
-                        Every story we publish reflects our dedication to informing readers with accuracy, fairness, and integrity while upholding the highest standards of professional journalism.
-                      </p>
-                    </div>
-                  </div>
-                </section>
-
               </div>
-
             </div>
           </Container>
         </main>
       </div>
 
-      <StickySubscribeBar />
       <Footer />
+      <StickySubscribeBar />
     </div>
   );
 }

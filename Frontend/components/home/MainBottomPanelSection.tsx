@@ -89,9 +89,12 @@ export const MainBottomPanelSection: React.FC = () => {
   }, [loadMainBottom]);
 
   return (
-    <div className="w-full h-full grid grid-cols-1 sm:grid-cols-2 gap-[0.4cm] font-sans select-none">
-      {articles.map((article) => (
-        <article key={article.id} className="flex flex-col justify-between">
+    <div className="w-full h-full grid grid-cols-1 sm:grid-cols-2 gap-0 sm:gap-[0.4cm] font-sans select-none">
+      {articles.map((article, idx) => (
+        <article
+          key={article.id}
+          className="flex flex-col justify-start sm:justify-between pb-0 sm:pb-0 mb-0 sm:mb-0"
+        >
           <div>
             <Link href={`/article/${article.slug}`} className="block relative aspect-[4/3] w-full overflow-hidden bg-gray-100 border border-gray-200 mb-2 group">
               <img
@@ -115,6 +118,10 @@ export const MainBottomPanelSection: React.FC = () => {
           <div className="mt-2 flex items-center justify-between font-sans text-[10.5px] text-[#666666]">
             <span>{article.timeAgo || "Recently"}</span>
           </div>
+
+          {idx === 0 && (
+            <div className="pt-[24px] mb-[24px] sm:hidden border-b border-dashed border-[#CCCCCC]" />
+          )}
         </article>
       ))}
     </div>

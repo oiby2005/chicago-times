@@ -99,9 +99,9 @@ export const InDepthPanelSection: React.FC = () => {
   }, [loadInDepth]);
 
   return (
-    <div className="w-full max-h-[9.5cm] h-full flex flex-col justify-between font-sans select-none overflow-hidden divide-y divide-dashed divide-[#D6CEBF]">
+    <div className="w-full max-h-none lg:max-h-[9.5cm] h-full flex flex-col justify-between font-sans select-none overflow-hidden divide-y divide-dashed divide-[#D6CEBF]">
       {articles.map((article) => (
-        <article key={article.id} className="py-2 flex items-start justify-between space-x-2.5 first:pt-0 last:pb-0">
+        <article key={article.id} className="py-[24px] lg:py-2 flex items-start justify-between space-x-2.5 first:pt-0 last:pb-0">
           <div className="flex-1 min-w-0 pr-1">
             {article.category && (
               <div className="mb-0.5">

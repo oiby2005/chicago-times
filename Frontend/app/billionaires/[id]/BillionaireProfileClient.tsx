@@ -8,7 +8,8 @@ import Footer from "@/components/layout/Footer";
 import StickySubscribeBar from "@/components/ui/StickySubscribeBar";
 import Container from "@/components/layout/Container";
 import AdPlaceholder from "@/components/ui/AdPlaceholder";
-import { BillionaireItem, WealthPoint, getBillionairesList } from "@/data/billionaires";
+import { BillionaireItem, WealthPoint, INITIAL_BILLIONAIRES, getBillionairesList } from "@/data/billionaires";
+import { usePathname } from "next/navigation";
 
 // Main Content Interactive Wealth History Line Graph
 function MainContentWealthChart({ history, endYear }: { history?: WealthPoint[]; endYear?: number }) {
@@ -56,8 +57,8 @@ function MainContentWealthChart({ history, endYear }: { history?: WealthPoint[];
     <div className="w-full bg-white border border-[#E5E0D5] p-5 sm:p-8 select-none">
       <div className="text-center mb-5">
         <h3
-          className="font-bold text-[18px] text-[#111111]"
-          style={{ fontFamily: "'Poppins', sans-serif" }}
+          className="font-bold text-[19px] sm:text-[21px] text-[#111111]"
+          style={{ fontFamily: "Georgia, serif" }}
         >
           World Wealth History
         </h3>
@@ -235,7 +236,12 @@ function DidYouKnowSlider({ facts }: { facts?: string[] }) {
 }
 
 export default function BillionaireProfileClient({ id }: { id: string }) {
-  const [billionaires, setBillionaires] = useState<BillionaireItem[]>([]);
+  const pathname = usePathname();
+  const isTop20Page = pathname?.includes("/upcoming-top-20") || pathname?.includes("/top-20-billionaires");
+  const isWorldBillionairePage = pathname?.includes("/world-billionaire");
+  const basePath = isTop20Page ? "/upcoming-top-20" : isWorldBillionairePage ? "/world-billionaire" : "/billionaires";
+
+  const [billionaires, setBillionaires] = useState<BillionaireItem[]>(INITIAL_BILLIONAIRES);
   const [showAllBillionaires, setShowAllBillionaires] = useState(false);
   const [visibleArticleCount, setVisibleArticleCount] = useState(5);
 
@@ -250,14 +256,31 @@ export default function BillionaireProfileClient({ id }: { id: string }) {
     };
   }, []);
 
+  const slugify = (str: string) =>
+    (str || "")
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)+/g, "");
+
+  const cleanParam = decodeURIComponent(id || "").toLowerCase().trim();
+
   // Find target billionaire
   const item = useMemo(() => {
     if (!billionaires || billionaires.length === 0) return null;
     return (
-      billionaires.find((b) => b.id === id || b.rank.toString() === id) ||
-      billionaires[0]
+      billionaires.find((b) => {
+        const bSlug = slugify(b.name);
+        const bName = (b.name || "").toLowerCase().trim();
+        return (
+          b.id === id ||
+          b.rank.toString() === id ||
+          bSlug === cleanParam ||
+          bName === cleanParam
+        );
+      }) || billionaires[0]
     );
-  }, [billionaires, id]);
+  }, [billionaires, id, cleanParam]);
 
   // Find next billionaire in rank order
   const nextBillionaire = useMemo(() => {
@@ -310,10 +333,73 @@ export default function BillionaireProfileClient({ id }: { id: string }) {
     return pool.slice(0, 3);
   }, [item]);
 
+  // Dynamic articles created in Writer/Admin dashboard tagged with billionaire name
+  const [userPosts, setUserPosts] = useState<any[]>([]);
+
+  useEffect(() => {
+    const loadPosts = () => {
+      let local: any[] = [];
+      try {
+        const stored = localStorage.getItem("wsj_posts");
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) local = parsed;
+        }
+      } catch (e) {}
+
+      fetch("http://localhost:5000/api/posts")
+        .then((r) => (r.ok ? r.json() : null))
+        .then((d) => {
+          const postsArr = Array.isArray(d) ? d : d && d.posts && Array.isArray(d.posts) ? d.posts : [];
+          if (postsArr.length > 0) {
+            setUserPosts(postsArr);
+          } else if (local.length > 0) {
+            setUserPosts(local);
+          }
+        })
+        .catch(() => {
+          if (local.length > 0) setUserPosts(local);
+        });
+    };
+
+    loadPosts();
+    window.addEventListener("wsj_posts_updated", loadPosts);
+    return () => window.removeEventListener("wsj_posts_updated", loadPosts);
+  }, []);
+
   // Main content articles for "More from Times Chicago"
   const articlesList = useMemo(() => {
     if (!item) return [];
-    return [
+
+    const nameLower = item.name.toLowerCase().trim();
+
+    // Filter user created articles that have the billionaire's name in their tags AND are Published by Admin
+    const taggedUserArticles = userPosts
+      .filter((post) => {
+        if (!post) return false;
+        // Strictly require Published status (approved by admin). Drafts, Pending review, Rejected, or Trash are excluded.
+        const statusLower = (post.status || "").toLowerCase().trim();
+        if (statusLower !== "published") return false;
+
+        let postTags: string[] = [];
+        if (Array.isArray(post.tags)) {
+          postTags = post.tags;
+        } else if (typeof post.tags === "string") {
+          postTags = post.tags.split(",").map((t: string) => t.replace(/^#/, "").trim());
+        }
+        return postTags.some((t) => t.toLowerCase().trim() === nameLower);
+      })
+      .map((post) => ({
+        id: String(post.id),
+        date: post.date || "Recent",
+        title: post.title,
+        slug: post.slug || post.id,
+        description: post.subheadline || post.excerpt || (post.bodyContent ? post.bodyContent.replace(/<[^>]*>?/gm, "").slice(0, 140) + "..." : ""),
+        author: post.author ? `By ${post.author}` : "By Times Chicago",
+        image: post.thumbnail || item.photoUrl || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=500&q=80",
+      }));
+
+    const sampleFallbackArticles = [
       {
         id: "art_1",
         date: "Sep 8, 2026",
@@ -387,7 +473,9 @@ export default function BillionaireProfileClient({ id }: { id: string }) {
         image: "https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?auto=format&fit=crop&w=500&q=80",
       },
     ];
-  }, [item]);
+
+    return [...taggedUserArticles, ...sampleFallbackArticles];
+  }, [item, userPosts]);
 
   if (!item) {
     return (
@@ -424,10 +512,10 @@ export default function BillionaireProfileClient({ id }: { id: string }) {
           <span className="font-extrabold text-[#111111]">#{item.rank}</span>
           <span className="text-[#CCCCCC]">|</span>
           <Link
-            href="/top-20-billionaires"
+            href={basePath}
             className="font-bold text-[#111111] hover:underline transition-all"
           >
-            Billionaires
+            {isTop20Page ? "Upcoming Top 20" : "Billionaires"}
           </Link>
         </div>
 
@@ -435,7 +523,7 @@ export default function BillionaireProfileClient({ id }: { id: string }) {
         {item.rank > 1 && prevBillionaire ? (
           <div className="flex items-center space-x-3 font-sans text-xs sm:text-sm">
             <Link
-              href={`/billionaires/${prevBillionaire.id}`}
+              href={`${basePath}/${slugify(prevBillionaire.name)}`}
               className="w-8 h-8 rounded-full border border-[#DDD8CC] bg-[#FAF8F5] hover:bg-[#EFECE6] text-[#111111] flex items-center justify-center transition-colors shadow-2xs shrink-0"
               title={`Previous: ${prevBillionaire.name}`}
             >
@@ -450,7 +538,7 @@ export default function BillionaireProfileClient({ id }: { id: string }) {
 
             {nextBillionaire && (
               <Link
-                href={`/billionaires/${nextBillionaire.id}`}
+                href={`${basePath}/${slugify(nextBillionaire.name)}`}
                 className="w-8 h-8 rounded-full border border-[#DDD8CC] bg-[#FAF8F5] hover:bg-[#EFECE6] text-[#111111] flex items-center justify-center transition-colors shadow-2xs shrink-0"
                 title={`Next: ${nextBillionaire.name}`}
               >
@@ -463,7 +551,7 @@ export default function BillionaireProfileClient({ id }: { id: string }) {
         ) : (
           nextBillionaire && (
             <Link
-              href={`/billionaires/${nextBillionaire.id}`}
+              href={`${basePath}/${slugify(nextBillionaire.name)}`}
               className="group font-sans font-extrabold text-[11px] sm:text-[12px] uppercase tracking-wider text-[#111111] hover:text-[#333333] flex items-center space-x-2 cursor-pointer"
             >
               <span>NEXT</span>
@@ -572,7 +660,7 @@ export default function BillionaireProfileClient({ id }: { id: string }) {
                   From the Editor
                 </h3>
                 <span className="font-sans text-[11px] sm:text-[12px] text-[#777777]">
-                  {item.editorLastUpdated || "Last Updated Sep 15, 2026, 6:30am EDT"}
+                  {item.editorLastUpdated?.replace(/\s*EDT\s*/gi, "") || "Last Updated Sep 15, 2026, 6:30am"}
                 </span>
               </div>
 
@@ -651,6 +739,17 @@ export default function BillionaireProfileClient({ id }: { id: string }) {
             {/* 4th Section: "Did you know" Fact Carousel */}
             <DidYouKnowSlider facts={item.didYouKnowFacts} />
 
+            {/* Middle In-Line Advertisement (Billionaire Profile Middle Inline Ad) */}
+            <div className="w-full my-6 flex flex-col items-center justify-center border-y border-dashed border-[#CCCCCC] py-4 bg-[#fafafa]">
+              <span className="text-[10px] uppercase font-sans tracking-widest text-[#94a3b8] font-bold mb-2">Advertisement</span>
+              <AdPlaceholder
+                slotId="billionaire_profile_inline_ad"
+                width="w-full max-w-[728px]"
+                height="h-[90px]"
+                resolution="728 × 90"
+              />
+            </div>
+
             {/* 5th Section: "In Their Own Words" Quote Block */}
             <div className="w-full pt-8 pb-4 border-t border-[#111111]">
               <h3
@@ -714,7 +813,7 @@ export default function BillionaireProfileClient({ id }: { id: string }) {
                     </div>
 
                     <Link
-                      href={`/billionaires/${other.id}`}
+                      href={`${basePath}/${slugify(other.name)}`}
                       className="bg-white hover:bg-[#F0EDE6] border border-[#CCCCCC] text-[#111111] font-bold text-[12px] px-4 py-2 rounded-full transition-colors flex items-center space-x-1.5 shrink-0"
                       style={{ fontFamily: "'Poppins', sans-serif" }}
                     >
@@ -725,14 +824,14 @@ export default function BillionaireProfileClient({ id }: { id: string }) {
                 ))}
               </div>
 
-              {/* See All (20) Action Button */}
+              {/* See All Action Button */}
               <div className="flex justify-end mt-4">
                 <button
                   type="button"
                   onClick={() => setShowAllBillionaires(!showAllBillionaires)}
                   className="bg-[#262626] hover:bg-[#111111] text-white font-sans font-bold text-[12.5px] px-6 py-2.5 rounded-xl cursor-pointer shadow-2xs transition-colors"
                 >
-                  {showAllBillionaires ? "Show Less" : "See All (20)"}
+                  {showAllBillionaires ? "Show Less" : "See All"}
                 </button>
               </div>
             </div>
@@ -747,38 +846,41 @@ export default function BillionaireProfileClient({ id }: { id: string }) {
                 width="w-full"
                 height="h-[250px]"
                 resolution="300 × 250"
+                className="w-full my-0"
               />
             </div>
 
-            {/* 2. ALSO ON TIMES CHICAGO 3-Article Widget */}
-            <div className="w-full bg-white border border-[#E5E0D5] p-5 shadow-2xs">
-              <h3 className="font-sans font-extrabold text-[12px] uppercase tracking-wider text-[#777777] pb-3 border-b border-[#E5E0D5]">
-                ALSO ON TIMES CHICAGO
-              </h3>
-              <div className="divide-y divide-[#E5E0D5]">
-                {sidebarRelatedArticles.map((art) => (
-                  <div key={art.id} className="py-3.5 first:pt-3 last:pb-1">
-                    <h4
-                      className="font-bold text-[15px] sm:text-[16px] leading-snug text-[#111111] hover:underline cursor-pointer"
-                      style={{ fontFamily: "Georgia, serif" }}
-                    >
-                      <Link href={`/article/${art.slug}`}>
-                        {art.title}
-                      </Link>
-                    </h4>
-                  </div>
-                ))}
+            {/* 2 & 3. Sticky Unit: ALSO ON TIMES CHICAGO 3-Article Widget & Ad below it (Image 4) */}
+            <div className="sticky top-24 w-full space-y-6">
+              <div className="w-full bg-white border border-[#E5E0D5] p-5 shadow-2xs">
+                <h3 className="font-sans font-extrabold text-[12px] uppercase tracking-wider text-[#777777] pb-3 border-b border-[#E5E0D5]">
+                  ALSO ON TIMES CHICAGO
+                </h3>
+                <div className="divide-y divide-[#E5E0D5]">
+                  {sidebarRelatedArticles.map((art) => (
+                    <div key={art.id} className="py-3.5 first:pt-3 last:pb-1">
+                      <h4
+                        className="font-bold text-[15px] sm:text-[16px] leading-snug text-[#111111] hover:underline cursor-pointer"
+                        style={{ fontFamily: "Georgia, serif" }}
+                      >
+                        <Link href={`/article/${art.slug}`}>
+                          {art.title}
+                        </Link>
+                      </h4>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
 
-            {/* 3. Sticky Ad 1 */}
-            <div className="sticky top-24 w-full">
-              <AdPlaceholder
-                slotId="billionaire_slot_3"
-                width="w-full"
-                height="h-[250px]"
-                resolution="300 × 250"
-              />
+              <div className="w-full">
+                <AdPlaceholder
+                  slotId="billionaire_slot_3"
+                  width="w-full"
+                  height="h-[250px]"
+                  resolution="300 × 250"
+                  className="w-full my-0"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -861,13 +963,14 @@ export default function BillionaireProfileClient({ id }: { id: string }) {
           </div>
 
           {/* Right Sidebar Column 2: Sticky Ad 2 */}
-          <div className="lg:col-span-4 hidden lg:block">
+          <div className="lg:col-span-4 hidden lg:block pt-8">
             <div className="sticky top-24 w-full">
               <AdPlaceholder
                 slotId="billionaire_slot_4"
                 width="w-full"
                 height="h-[250px]"
                 resolution="300 × 250"
+                className="w-full my-0"
               />
             </div>
           </div>

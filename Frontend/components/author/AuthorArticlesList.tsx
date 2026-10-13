@@ -274,6 +274,21 @@ export default function AuthorArticlesList({
   const totalPages = Math.max(1, Math.ceil(allArticlesList.length / PAGE_SIZE));
   const activeArticles = allArticlesList.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
+  // Dynamic 3-square sliding window for pagination
+  const visiblePageNumbers = React.useMemo(() => {
+    const maxVisible = 3;
+    if (totalPages <= maxVisible) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    const startPage = Math.max(1, Math.min(currentPage - 1, totalPages - maxVisible + 1));
+    const endPage = Math.min(totalPages, startPage + maxVisible - 1);
+    const pages: number[] = [];
+    for (let p = startPage; p <= endPage; p++) {
+      pages.push(p);
+    }
+    return pages;
+  }, [currentPage, totalPages]);
+
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
       setCurrentPage(newPage);
@@ -330,7 +345,10 @@ export default function AuthorArticlesList({
                     <div className="font-sans font-bold text-[10px] uppercase tracking-wider text-[#333333] mb-1">
                       {item.category}
                     </div>
-                    <h4 className="font-serif font-bold text-base sm:text-lg text-[#111111] leading-snug group-hover:underline mb-1.5">
+                    <h4
+                      className="font-serif font-bold text-base sm:text-lg text-[#111111] leading-snug group-hover:underline mb-1.5"
+                      style={{ fontFamily: "Georgia, serif" }}
+                    >
                       {item.title}
                     </h4>
                     <p className="font-sans text-xs sm:text-sm text-[#666666] leading-relaxed line-clamp-2 mb-3">
@@ -360,9 +378,9 @@ export default function AuthorArticlesList({
               PREV
             </button>
 
-            {/* Page Number Buttons */}
+            {/* Page Number Buttons (Maximum 3 squares visible) */}
             <div className="flex items-center space-x-1 mx-1">
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+              {visiblePageNumbers.map((page) => {
                 const isActive = page === currentPage;
                 return (
                   <button

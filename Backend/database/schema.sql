@@ -1,6 +1,6 @@
--- Wall Street Journal MySQL Database Schema
-CREATE DATABASE IF NOT EXISTS `wsj_db`;
-USE `wsj_db`;
+-- Times Chicago MySQL Database Schema
+CREATE DATABASE IF NOT EXISTS `timeschicago_db`;
+USE `timeschicago_db`;
 
 -- --------------------------------------------------------
 -- Table structure for table `newsletter_subscriptions`

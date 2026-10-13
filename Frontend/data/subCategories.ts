@@ -67,7 +67,8 @@ export const ALL_69_SUBCATEGORIES: string[] = [
   "Research",
   "Opinion",
   "Editorials",
-  "Personal Finance"
+  "Personal Finance",
+  "Interviews"
 ];
 
 export const CATEGORY_SUBCATEGORIES_MAP: Record<string, string[]> = {

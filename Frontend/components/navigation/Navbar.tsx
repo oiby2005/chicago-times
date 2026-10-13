@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Container from "@/components/layout/Container";
 import SearchOverlay from "@/components/search/SearchOverlay";
 import { slugifyAuthorName } from "@/data/authors";
+import MegaMenuSkeleton from "@/components/ui/skeletons/MegaMenuSkeleton";
 
 interface MenuSection {
   heading: string;
@@ -507,20 +508,39 @@ function getCategoryMostReadArticles(categoryTitle: string): MegaMenuArticle[] {
     const p2 = localStorage.getItem("wsj_published_posts");
     if (p2) posts = [...posts, ...JSON.parse(p2)];
 
+    // Deduplicate posts by id/slug
+    const seenIds = new Set<string>();
+    const uniquePosts: any[] = [];
+    posts.forEach((p) => {
+      const pid = String(p?.id || p?.slug || "");
+      if (pid && !seenIds.has(pid)) {
+        seenIds.add(pid);
+        uniquePosts.push(p);
+      }
+    });
+
     const normalize = (s: string) => (s || "").toLowerCase().replace(/[^a-z0-9]/g, "");
     const targetNorm = normalize(categoryTitle);
 
-    const catPosts = posts.filter((p: any) => {
-      if (!p || p.status !== "Published") return false;
+    const catPosts = uniquePosts.filter((p: any) => {
+      if (!p) return false;
+      const status = String(p.status || "").toLowerCase();
+      if (!["published", "approved"].includes(status)) return false;
+
       const catNorm = normalize(p.category || "");
       const subsNorm = (p.subCategories || []).map((s: string) => normalize(s));
       const placementNorm = normalize(p.homepagePlacement || "");
+
+      if (targetNorm === "news") {
+        return catNorm.includes("news") || placementNorm.includes("news") || subsNorm.some((s: string) => s.includes("news"));
+      }
 
       return (
         catNorm === targetNorm ||
         catNorm.includes(targetNorm) ||
         (targetNorm.length >= 4 && catNorm.includes(targetNorm)) ||
-        subsNorm.includes(targetNorm) ||
+        (catNorm.length >= 4 && targetNorm.includes(catNorm)) ||
+        subsNorm.some((s: string) => s === targetNorm || s.includes(targetNorm) || targetNorm.includes(s)) ||
         placementNorm.includes(targetNorm)
       );
     });
@@ -537,20 +557,25 @@ function getCategoryMostReadArticles(categoryTitle: string): MegaMenuArticle[] {
           p.subheadline ||
           p.cardSummary ||
           (p.bodyContent ? p.bodyContent.replace(/<[^>]+>/g, " ").trim().slice(0, 80) + "..." : ""),
-        image: p.thumbnail || fallback[0].image,
+        image: p.thumbnail || fallback[0]?.image || "/images/world/jose_rizal.jpg",
         slug: s,
         viewsCount: v,
       };
     });
 
-    fallback.forEach((fb) => {
-      if (!formatted.some((f) => f.slug === fb.slug || f.title === fb.title)) {
-        const v = getArticleViews(fb.slug, fb.viewsCount || 60);
-        formatted.push({ ...fb, viewsCount: v });
-      }
-    });
-
+    // Sort published articles by view count descending
     formatted.sort((a, b) => (b.viewsCount || 0) - (a.viewsCount || 0));
+
+    // Fill remaining up to 4 if fewer than 4 published articles exist
+    if (formatted.length < 4) {
+      fallback.forEach((fb) => {
+        if (!formatted.some((f) => f.slug === fb.slug || f.title === fb.title) && formatted.length < 4) {
+          const v = getArticleViews(fb.slug, fb.viewsCount || 0);
+          formatted.push({ ...fb, viewsCount: v });
+        }
+      });
+    }
+
     return formatted.slice(0, 4);
   } catch (e) {
     return getFallbackArticlesForCategory(categoryTitle);
@@ -564,7 +589,29 @@ export const Navbar: React.FC = () => {
   const [hoveredWidth, setHoveredWidth] = useState<number>(0);
   const [isSearchOverlayOpen, setIsSearchOverlayOpen] = useState(false);
   const [writerPrefix, setWriterPrefix] = useState<string>("");
+  const [isMegaMenuLoading, setIsMegaMenuLoading] = useState<boolean>(false);
+  const loadingTimerRef = useRef<NodeJS.Timeout | null>(null);
   const tabRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const navRef = useRef<HTMLElement | null>(null);
+  const touchTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isHoldingRef = useRef<boolean>(false);
+  const touchMovedRef = useRef<boolean>(false);
+
+  const activateCategory = (title: string) => {
+    if (activeTab !== title) {
+      setIsMegaMenuLoading(true);
+      if (loadingTimerRef.current) clearTimeout(loadingTimerRef.current);
+      loadingTimerRef.current = setTimeout(() => {
+        setIsMegaMenuLoading(false);
+      }, 160);
+    }
+    setActiveTab(title);
+    const currentTabEl = tabRefs.current[title];
+    if (currentTabEl) {
+      setHoveredOffsetLeft(currentTabEl.offsetLeft);
+      setHoveredWidth(currentTabEl.offsetWidth);
+    }
+  };
 
   useEffect(() => {
     try {
@@ -580,6 +627,74 @@ export const Navbar: React.FC = () => {
     } catch (e) {}
   }, []);
 
+  // Close mega menu on outside tap/click
+  useEffect(() => {
+    const handleOutside = (e: MouseEvent | TouchEvent) => {
+      if (navRef.current && !navRef.current.contains(e.target as Node)) {
+        setActiveTab(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleOutside);
+    document.addEventListener("touchstart", handleOutside, { passive: true });
+    return () => {
+      document.removeEventListener("mousedown", handleOutside);
+      document.removeEventListener("touchstart", handleOutside);
+    };
+  }, []);
+
+  // Mobile Press-and-Hold to show Hover Menu
+  const handleTouchStart = (title: string) => {
+    touchMovedRef.current = false;
+    isHoldingRef.current = false;
+    if (touchTimerRef.current) clearTimeout(touchTimerRef.current);
+
+    touchTimerRef.current = setTimeout(() => {
+      if (!touchMovedRef.current) {
+        isHoldingRef.current = true;
+        setActiveTab((prev) => (prev === title ? null : title));
+        const currentTabEl = tabRefs.current[title];
+        if (currentTabEl) {
+          setHoveredOffsetLeft(currentTabEl.offsetLeft);
+          setHoveredWidth(currentTabEl.offsetWidth);
+        }
+        try {
+          if (typeof navigator !== "undefined" && navigator.vibrate) {
+            navigator.vibrate(25);
+          }
+        } catch (e) {}
+      }
+    }, 280);
+  };
+
+  const handleTouchMove = () => {
+    touchMovedRef.current = true;
+    if (touchTimerRef.current) {
+      clearTimeout(touchTimerRef.current);
+      touchTimerRef.current = null;
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (touchTimerRef.current) {
+      clearTimeout(touchTimerRef.current);
+      touchTimerRef.current = null;
+    }
+    if (isHoldingRef.current) {
+      setTimeout(() => {
+        isHoldingRef.current = false;
+      }, 150);
+    }
+  };
+
+  const handleCategoryClick = (e: React.MouseEvent) => {
+    if (isHoldingRef.current) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+  };
+
   const currentMenu = activeTab ? megaMenuData[activeTab] : null;
 
   return (
@@ -590,6 +705,8 @@ export const Navbar: React.FC = () => {
       />
 
       <nav
+        id="main-header-nav"
+        ref={navRef}
         className="w-full bg-white border-b border-[#EAE6DA] relative z-30 font-sans shadow-2xs"
         aria-label="Category Navigation"
         onMouseLeave={() => setActiveTab(null)}
@@ -605,24 +722,21 @@ export const Navbar: React.FC = () => {
                   ref={(el) => { tabRefs.current[title] = el; }}
                   onMouseEnter={() => {
                     if (typeof window !== "undefined" && window.innerWidth < 768) return;
-                    setActiveTab(title);
-                    const currentTabEl = tabRefs.current[title];
-                    if (currentTabEl) {
-                      setHoveredOffsetLeft(currentTabEl.offsetLeft);
-                      setHoveredWidth(currentTabEl.offsetWidth);
-                    }
+                    activateCategory(title);
                   }}
+                  onTouchStart={() => handleTouchStart(title)}
+                  onTouchMove={handleTouchMove}
+                  onTouchEnd={handleTouchEnd}
                   className="relative flex-shrink-0 flex items-end h-full"
                 >
                   <Link
                     href={getCategoryRoute(title, writerPrefix)}
                     prefetch={false}
-                    className={`text-[13px] font-['Century_Gothic','Publica_Sans_Light','Kumbh_Sans',sans-serif] ${
-                      index === 0 ? "pl-0 pr-2.5" : "px-2.5"
-                    } pb-2 pt-1 border transition-all whitespace-nowrap leading-none ${
+                    onClick={handleCategoryClick}
+                    className={`text-[13px] font-['Century_Gothic','Publica_Sans_Light','Kumbh_Sans',sans-serif] px-2.5 pb-2 pt-1 border transition-all whitespace-nowrap leading-none cursor-pointer ${
                       isHovered
                         ? "bg-[#f9f9f8] text-[#111111] font-bold border-[#dcd6cd] border-b-transparent rounded-t-sm z-50 relative -mb-[1px]"
-                        : "text-[#111111] font-normal border-transparent hover:text-[#990000]"
+                        : "text-[#111111] font-normal border-transparent hover:text-[#990000] active:text-[#990000]"
                     }`}
                   >
                     {title}
@@ -632,7 +746,7 @@ export const Navbar: React.FC = () => {
             })}
 
             {/* Integrated Search Icon - Positioned next to Interviews */}
-            <div className="flex items-end flex-shrink-0 relative z-50 pb-2 pl-2 sm:pl-2.5 h-full">
+            <div className="flex items-end flex-shrink-0 relative z-50 pb-2 pl-2 sm:pl-3 pr-0 h-full">
               <button
                 onClick={() => setIsSearchOverlayOpen(true)}
                 aria-label="Search"
@@ -660,15 +774,23 @@ export const Navbar: React.FC = () => {
         {/* Category Sub-Categories & MOST READ 100% Full-Width Hover Dropdown Panel */}
         {activeTab && (
           <div
-            onMouseEnter={() => setActiveTab(activeTab)}
-            onMouseLeave={() => setActiveTab(null)}
-            className="hidden md:block absolute left-0 right-0 w-full top-[36px] bg-[#f9f9f8] border-b border-t border-[#dcd6cd] shadow-xl z-40 py-6 min-h-[190px] transition-all duration-150 animate-fadeIn select-none"
+            onMouseEnter={() => {
+              if (typeof window !== "undefined" && window.innerWidth >= 768) {
+                setActiveTab(activeTab);
+              }
+            }}
+            onMouseLeave={() => {
+              if (typeof window !== "undefined" && window.innerWidth >= 768) {
+                setActiveTab(null);
+              }
+            }}
+            className="block absolute left-0 right-0 w-full top-[36px] bg-[#f9f9f8] border-b border-t border-[#dcd6cd] shadow-2xl z-40 py-4 md:py-6 max-h-[82vh] md:max-h-none overflow-y-auto md:overflow-y-visible md:min-h-[190px] transition-all duration-150 animate-fadeIn select-none"
           >
-            <div className="w-full max-w-[1280px] mx-auto px-4 sm:px-5 md:px-6 relative flex flex-col md:flex-row gap-8 items-stretch">
-              {/* Seamless patch div: erases the top border line ONLY directly underneath the hovered tab */}
+            <div className="w-full max-w-[1280px] mx-auto px-4 sm:px-5 md:px-6 relative flex flex-col md:flex-row gap-6 md:gap-8 items-stretch">
+              {/* Seamless patch div: erases the top border line ONLY directly underneath the hovered tab on desktop */}
               {hoveredWidth > 0 && (
                 <div
-                  className="absolute -top-[25px] bg-[#f9f9f8] h-[3px] z-50 transition-all duration-150"
+                  className="hidden md:block absolute -top-[1px] bg-[#f9f9f8] h-[3px] z-50 transition-all duration-150"
                   style={{
                     left: `${hoveredOffsetLeft}px`,
                     width: `${hoveredWidth}px`,
@@ -676,62 +798,90 @@ export const Navbar: React.FC = () => {
                 />
               )}
 
-              {/* Column 1 (Left): Sub-Categories / SECTIONS */}
-              {currentMenu?.columns?.[0]?.links && currentMenu.columns[0].links.length > 0 && (
-                <div className="w-full md:w-[220px] shrink-0 self-stretch border-b md:border-b-0 md:border-r border-[#dcd6cd] pb-4 md:pb-0 pr-0 md:pr-6">
-                  <h3 className="font-sans font-bold text-[11px] uppercase tracking-wider text-[#666666] mb-3">
-                    SECTIONS
-                  </h3>
-                  <div className="flex flex-col space-y-2">
-                    {currentMenu.columns[0].links.map((link) => (
-                      <Link
-                        key={link.name}
-                        href={writerPrefix ? `${writerPrefix}${link.href}` : link.href}
-                        className="block text-[13.5px] font-sans font-semibold text-[#222222] hover:text-[#990000] hover:underline transition-colors py-0.5"
-                      >
-                        {link.name}
-                      </Link>
-                    ))}
-                  </div>
+              {/* Mobile-only Header Bar with Close Button */}
+              <div className="flex md:hidden items-center justify-between pb-2.5 border-b border-[#dcd6cd]">
+                <div className="flex items-center space-x-2">
+                  <span className="font-sans font-extrabold text-[12px] uppercase tracking-wider text-[#990000]">
+                    {activeTab}
+                  </span>
+                  <span className="text-gray-400 text-[11px] font-medium tracking-tight">/ Sections & Articles</span>
                 </div>
-              )}
-
-              {/* Column 2 & 3 (Right): MOST READ IN [CATEGORY] - 4 Articles in 2 Columns (Col 1: 2 articles, Col 2: 2 articles) matching Image 2 */}
-              <div className="flex-1 w-full pl-0 md:pl-2">
-                <h3 className="font-sans font-bold text-[11px] uppercase tracking-wider text-[#666666] mb-4">
-                  MOST READ IN {activeTab.toUpperCase()}
-                </h3>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
-                  {getCategoryMostReadArticles(activeTab).map((article) => (
-                    <Link
-                      key={article.id || article.slug}
-                      href={writerPrefix ? `${writerPrefix}/article/${article.slug}` : `/article/${article.slug}`}
-                      className="flex items-start gap-3.5 group cursor-pointer"
-                    >
-                      {/* Left Thumbnail Image */}
-                      <div className="w-[50px] h-[50px] sm:w-[54px] sm:h-[54px] shrink-0 overflow-hidden bg-gray-100 border border-[#dcd6cd] rounded-none">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={article.image}
-                          alt={article.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                        />
-                      </div>
-
-                      {/* Right Title & Brief Summary Paragraph */}
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-sans font-bold text-[13.5px] leading-[1.25] text-[#111111] group-hover:text-[#990000] group-hover:underline line-clamp-1">
-                          {article.title}
-                        </h4>
-                        <p className="font-sans text-[11.5px] leading-[1.38] text-[#555555] mt-1 line-clamp-2">
-                          {article.summary}
-                        </p>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab(null)}
+                  className="p-1 rounded-md text-gray-500 hover:text-black bg-gray-200/60 hover:bg-gray-200 transition-colors cursor-pointer"
+                  aria-label="Close menu"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
               </div>
+
+              {isMegaMenuLoading ? (
+                <MegaMenuSkeleton categoryName={activeTab} />
+              ) : (
+                <>
+                  {/* Column 1 (Left): Sub-Categories / SECTIONS */}
+                  {currentMenu?.columns?.[0]?.links && currentMenu.columns[0].links.length > 0 && (
+                    <div className="w-full md:w-[220px] shrink-0 self-stretch border-b md:border-b-0 md:border-r border-[#dcd6cd] pb-4 md:pb-0 pr-0 md:pr-6">
+                      <h3 className="font-sans font-bold text-[11px] uppercase tracking-wider text-[#666666] mb-3">
+                        SECTIONS
+                      </h3>
+                      <div className="flex flex-col space-y-2">
+                        {currentMenu.columns[0].links.map((link) => (
+                          <Link
+                            key={link.name}
+                            href={writerPrefix ? `${writerPrefix}${link.href}` : link.href}
+                            onClick={() => setActiveTab(null)}
+                            className="block text-[13.5px] font-sans font-semibold text-[#222222] hover:text-[#990000] hover:underline transition-colors py-0.5"
+                          >
+                            {link.name}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Column 2 & 3 (Right): MOST READ IN [CATEGORY] - 4 Articles in 2 Columns (Col 1: 2 articles, Col 2: 2 articles) matching Image 2 */}
+                  <div className="flex-1 w-full pl-0 md:pl-2">
+                    <h3 className="font-sans font-bold text-[11px] uppercase tracking-wider text-[#666666] mb-4">
+                      MOST READ IN {activeTab.toUpperCase()}
+                    </h3>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
+                      {getCategoryMostReadArticles(activeTab).map((article) => (
+                        <Link
+                          key={article.id || article.slug}
+                          href={writerPrefix ? `${writerPrefix}/article/${article.slug}` : `/article/${article.slug}`}
+                          onClick={() => setActiveTab(null)}
+                          className="flex items-start gap-3.5 group cursor-pointer"
+                        >
+                          {/* Left Thumbnail Image */}
+                          <div className="w-[50px] h-[50px] sm:w-[54px] sm:h-[54px] shrink-0 overflow-hidden bg-gray-100 border border-[#dcd6cd] rounded-none">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={article.image}
+                              alt={article.title}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                            />
+                          </div>
+
+                          {/* Right Title & Brief Summary Paragraph */}
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-sans font-bold text-[13.5px] leading-[1.25] text-[#111111] group-hover:text-[#990000] group-hover:underline line-clamp-1">
+                              {article.title}
+                            </h4>
+                            <p className="font-sans text-[11.5px] leading-[1.38] text-[#555555] mt-1 line-clamp-2">
+                              {article.summary}
+                            </p>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         )}

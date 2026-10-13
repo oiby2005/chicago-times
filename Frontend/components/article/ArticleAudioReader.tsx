@@ -115,7 +115,7 @@ export default function ArticleAudioReader({ title = "", deck = "", bodyContent 
         </svg>
 
         <span className="text-[#00558C] font-bold">{isPlaying ? "Pause" : "Listen"}</span>
-        <span className="font-normal text-[#00558C] text-[13.5px]">({listenMins} min)</span>
+        <span className="font-normal text-[#00558C] text-[13.5px] whitespace-nowrap">({listenMins} min)</span>
       </button>
     </div>
   );

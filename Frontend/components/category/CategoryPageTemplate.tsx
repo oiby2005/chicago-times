@@ -8,6 +8,7 @@ import Footer from "@/components/layout/Footer";
 import Container from "@/components/layout/Container";
 import StickySubscribeBar from "@/components/ui/StickySubscribeBar";
 import AdPlaceholder from "@/components/ui/AdPlaceholder";
+import ArticleVideosSection from "@/components/article/ArticleVideosSection";
 import { getAuthorForArticle } from "@/data/authors";
 import { getRelativeTime } from "@/lib/relativeTime";
 import { getArticleViews } from "@/lib/viewTracker";
@@ -277,7 +278,11 @@ export default function CategoryPageTemplate({
   React.useEffect(() => {
     loadCustomCategoryPosts();
     window.addEventListener("wsj_posts_updated", loadCustomCategoryPosts);
-    return () => window.removeEventListener("wsj_posts_updated", loadCustomCategoryPosts);
+    window.addEventListener("wsj_article_viewed", loadCustomCategoryPosts);
+    return () => {
+      window.removeEventListener("wsj_posts_updated", loadCustomCategoryPosts);
+      window.removeEventListener("wsj_article_viewed", loadCustomCategoryPosts);
+    };
   }, [loadCustomCategoryPosts]);
 
   // Combine custom published posts (newest first) with baseNewsArticles for full coverage
@@ -312,19 +317,63 @@ export default function CategoryPageTemplate({
     return moreNewsAll.slice(start, start + itemsPerPage);
   }, [moreNewsAll, currentPage]);
 
-  // Trending in Category: Top 5 most opened / most read articles in this category sorted by view count
+  // Trending in Category: The highest 5 view count published articles where category or subcategory matches this category
   const trendingArticles = useMemo(() => {
-    const sorted = [...allCategoryArticles].map((item) => {
-      const v = getArticleViews(item.slug || item.id);
-      return {
-        ...item,
-        viewsCount: v,
-        views: `${v} views since publication`,
-      };
-    }).sort((a, b) => b.viewsCount - a.viewsCount);
+    const parseBaseViews = (vStr?: string) => {
+      if (!vStr) return 0;
+      const parsed = parseInt(String(vStr).replace(/[^0-9]/g, ""), 10);
+      return isNaN(parsed) ? 0 : parsed;
+    };
 
-    return sorted.slice(0, 5);
-  }, [allCategoryArticles]);
+    // 1. Sort custom articles matching this category by view count
+    const sortedCustom = [...customArticles]
+      .map((item) => {
+        const baseV = parseBaseViews(item.views);
+        const v = getArticleViews(item.slug || item.id, baseV);
+        return {
+          ...item,
+          viewsCount: v,
+          views: `${v} views since publication`,
+        };
+      })
+      .sort((a, b) => b.viewsCount - a.viewsCount);
+
+    if (sortedCustom.length >= 5) {
+      return sortedCustom.slice(0, 5);
+    }
+
+    // 2. Supplement with base news articles for this category to ensure exactly 5 articles
+    const existingIds = new Set(sortedCustom.map((a) => a.id));
+    const sortedBase = baseNewsArticles
+      .filter((a) => !existingIds.has(a.id))
+      .map((item) => {
+        const baseV = parseBaseViews(item.views);
+        const v = getArticleViews(item.slug || item.id, baseV);
+        return {
+          ...item,
+          viewsCount: v,
+          views: `${v} views since publication`,
+        };
+      })
+      .sort((a, b) => b.viewsCount - a.viewsCount);
+
+    return [...sortedCustom, ...sortedBase].slice(0, 5);
+  }, [customArticles, baseNewsArticles]);
+
+  // Dynamic 3-square sliding window for pagination
+  const visiblePageNumbers = useMemo(() => {
+    const maxVisible = 3;
+    if (totalPages <= maxVisible) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    const startPage = Math.max(1, Math.min(currentPage - 1, totalPages - maxVisible + 1));
+    const endPage = Math.min(totalPages, startPage + maxVisible - 1);
+    const pages: number[] = [];
+    for (let p = startPage; p <= endPage; p++) {
+      pages.push(p);
+    }
+    return pages;
+  }, [currentPage, totalPages]);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
@@ -371,7 +420,10 @@ export default function CategoryPageTemplate({
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 </Link>
-                <h2 className="font-serif font-bold text-[20px] sm:text-[22px] leading-[1.18] text-[#111111] hover:text-[#333333] hover:underline cursor-pointer">
+                <h2
+                  className="font-serif font-bold text-[20px] sm:text-[22px] leading-[1.18] text-[#111111] hover:text-[#333333] hover:underline cursor-pointer"
+                  style={{ fontFamily: "Georgia, serif" }}
+                >
                   <Link href={`/article/${card1.slug || card1.id}`}>
                     {card1.title}
                   </Link>
@@ -390,7 +442,10 @@ export default function CategoryPageTemplate({
               {/* Card 2 (Top Middle) */}
               <article className="flex flex-row items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
-                  <h2 className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.2] text-[#111111] hover:text-[#333333] hover:underline cursor-pointer">
+                  <h2
+                    className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.2] text-[#111111] hover:text-[#333333] hover:underline cursor-pointer"
+                    style={{ fontFamily: "Georgia, serif" }}
+                  >
                     <Link href={`/article/${card2.slug || card2.id}`}>
                       {card2.title}
                     </Link>
@@ -420,7 +475,10 @@ export default function CategoryPageTemplate({
               {/* Card 3 (Bottom Middle) */}
               <article className="flex flex-row items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
-                  <h2 className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.2] text-[#111111] hover:text-[#333333] hover:underline cursor-pointer">
+                  <h2
+                    className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.2] text-[#111111] hover:text-[#333333] hover:underline cursor-pointer"
+                    style={{ fontFamily: "Georgia, serif" }}
+                  >
                     <Link href={`/article/${card3.slug || card3.id}`}>
                       {card3.title}
                     </Link>
@@ -453,7 +511,10 @@ export default function CategoryPageTemplate({
               {/* Card 4 (Top Right) */}
               <article className="flex flex-row items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
-                  <h2 className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.2] text-[#111111] hover:text-[#333333] hover:underline cursor-pointer">
+                  <h2
+                    className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.2] text-[#111111] hover:text-[#333333] hover:underline cursor-pointer"
+                    style={{ fontFamily: "Georgia, serif" }}
+                  >
                     <Link href={`/article/${card4.slug || card4.id}`}>
                       {card4.title}
                     </Link>
@@ -483,7 +544,10 @@ export default function CategoryPageTemplate({
               {/* Card 5 (Bottom Right) */}
               <article className="flex flex-row items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
-                  <h2 className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.2] text-[#111111] hover:text-[#333333] hover:underline cursor-pointer">
+                  <h2
+                    className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.2] text-[#111111] hover:text-[#333333] hover:underline cursor-pointer"
+                    style={{ fontFamily: "Georgia, serif" }}
+                  >
                     <Link href={`/article/${card5.slug || card5.id}`}>
                       {card5.title}
                     </Link>
@@ -545,7 +609,10 @@ export default function CategoryPageTemplate({
                         </Link>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-serif font-bold text-[17px] sm:text-[18px] leading-[1.22] text-[#111111] hover:text-[#333333] hover:underline cursor-pointer">
+                        <h3
+                          className="font-serif font-bold text-[17px] sm:text-[18px] leading-[1.22] text-[#111111] hover:text-[#333333] hover:underline cursor-pointer"
+                          style={{ fontFamily: "Georgia, serif" }}
+                        >
                           <Link href={`/article/${article.slug || article.id}`}>{article.title}</Link>
                         </h3>
                         <p className="font-sans text-[12.5px] leading-[1.4] text-[#555555] mt-1.5 line-clamp-3">
@@ -559,9 +626,9 @@ export default function CategoryPageTemplate({
                   ))}
                 </div>
 
-                {/* Pagination Controls (Maximum 10 per page) */}
+                {/* Pagination Controls (Maximum 3 squares visible at a time) */}
                 {totalPages > 1 && (
-                  <div className="flex flex-wrap items-center justify-center gap-1.5 py-8 border-t border-gray-300 mt-6">
+                  <div className="flex flex-wrap items-center justify-center gap-1.5 pt-6 pb-2 border-t border-gray-300 mt-6 mb-1">
                     <button
                       onClick={() => handlePageChange(currentPage - 1)}
                       disabled={currentPage === 1}
@@ -574,7 +641,7 @@ export default function CategoryPageTemplate({
                       PREV
                     </button>
 
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                    {visiblePageNumbers.map((page) => {
                       const isActive = page === currentPage;
                       return (
                         <button
@@ -604,52 +671,64 @@ export default function CategoryPageTemplate({
                     </button>
                   </div>
                 )}
+
+                {/* Videos Section below pagination numbers (No top dashed line & tight spacing) */}
+                <ArticleVideosSection hideTopBorder={true} />
               </div>
 
-              {/* Right Sidebar: TRENDING IN [CATEGORY] (Populated with First 5 Articles of More News) */}
-              <aside className="lg:col-span-4 flex flex-col gap-6">
-                <div className="border-[1.5px] border-[#cbd5e1] rounded-none bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
-                  <div className="flex items-center gap-2.5 border-b border-gray-200 pb-3 mb-4">
-                    <svg
-                      className="w-4 h-4 text-[#1d4ed8]"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.2"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 005.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941"
-                      />
-                    </svg>
-                    <h3 className="font-poppins font-sans font-bold text-[16px] tracking-wide text-[#111111]">
-                      Trending in {categoryTitle}
-                    </h3>
+              {/* Right Sidebar: TRENDING IN [CATEGORY] & Sticky Ads */}
+              <aside className="lg:col-span-4 flex flex-col h-full pb-0 mb-0">
+                <div>
+                  <div className="border-[1.5px] border-[#cbd5e1] rounded-none bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.06)] mb-6">
+                    <div className="flex items-center gap-2.5 border-b border-gray-200 pb-3 mb-4">
+                      <h3 className="font-poppins font-sans font-bold text-[16px] tracking-wide text-[#111111]">
+                        Trending in {categoryTitle}
+                      </h3>
+                      <svg
+                        className="w-4 h-4 text-[#1d4ed8]"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.2"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 005.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941"
+                        />
+                      </svg>
+                    </div>
+
+                    <div className="divide-y divide-gray-100">
+                      {trendingArticles.map((item, idx) => (
+                        <div key={item.id} className="py-3.5 flex items-start gap-4">
+                          <span className="font-serif font-bold text-[24px] leading-none text-[#cbd5e1] w-5 shrink-0 pt-0.5">
+                            {idx + 1}
+                          </span>
+                          <div className="flex-1 min-w-0">
+                            <h4
+                              className="font-serif font-bold text-[13.5px] leading-[1.3] text-[#111111] hover:underline cursor-pointer"
+                              style={{ fontFamily: "Georgia, serif" }}
+                            >
+                              <Link href={`/article/${item.slug || item.id}`}>{item.title}</Link>
+                            </h4>
+                            <p className="font-sans text-[11px] text-[#94a3b8] mt-1 font-normal tracking-wide">
+                              {item.views || "66 views since publication"}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
-                  <div className="divide-y divide-gray-100">
-                    {trendingArticles.map((item, idx) => (
-                      <div key={item.id} className="py-3.5 flex items-start gap-4">
-                        <span className="font-serif font-bold text-[24px] leading-none text-[#cbd5e1] w-5 shrink-0 pt-0.5">
-                          {idx + 1}
-                        </span>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-sans font-bold text-[13.5px] leading-[1.3] text-[#111111] hover:underline cursor-pointer">
-                            <Link href={`/article/${item.slug || item.id}`}>{item.title}</Link>
-                          </h4>
-                          <p className="font-sans text-[11px] text-[#94a3b8] mt-1 font-normal tracking-wide">
-                            {item.views || "66 views since publication"}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                  {/* Sidebar Ad 1 */}
+                  <AdPlaceholder slotId="cat_slot_1" width="w-full max-w-full" height="h-[250px]" resolution="300 × 250" className="w-full my-0" />
                 </div>
 
-                {/* Sidebar Ad Placeholders (2 Ads for Category Pages) */}
-                <AdPlaceholder slotId="cat_slot_1" width="w-full" height="h-[250px]" resolution="300 × 250" />
-                <AdPlaceholder slotId="cat_slot_2" width="w-full" height="h-[600px]" resolution="300 × 600" />
+                {/* Sidebar Ad 2: Sticky right below Ad 1 until lower edge aligns with video section lower edge */}
+                <div className="sticky top-[85px] z-10 mt-6 pt-0 pb-0 mb-0 w-full">
+                  <AdPlaceholder slotId="cat_slot_2" width="w-full max-w-full" height="h-[600px]" resolution="300 × 600" className="w-full my-0" />
+                </div>
               </aside>
             </div>
           </div>

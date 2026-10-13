@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Utility helper to track and retrieve article view counts in localStorage.
+ * Utility helper to track and retrieve article view counts in localStorage and backend.
  */
 
 export function recordArticleView(slugOrId: string, initialViewsCount: number = 0): number {
@@ -12,9 +12,8 @@ export function recordArticleView(slugOrId: string, initialViewsCount: number = 
     const key = slugOrId.toLowerCase().trim();
     if (!key) return initialViewsCount;
 
-    // Base initial default views count if first view
-    const defaultSeed = initialViewsCount > 0 ? initialViewsCount : 85;
-    const current = viewsMap[key] !== undefined ? viewsMap[key] : defaultSeed;
+    // View starts at 0 if never opened. First open makes it 1.
+    const current = viewsMap[key] !== undefined ? viewsMap[key] : (initialViewsCount > 0 ? initialViewsCount : 0);
     const updated = current + 1;
     viewsMap[key] = updated;
     localStorage.setItem("wsj_article_views", JSON.stringify(viewsMap));
@@ -42,6 +41,13 @@ export function recordArticleView(slugOrId: string, initialViewsCount: number = 
       }
     }
 
+    // Call backend API to persist views increment across sessions and admin dashboard
+    fetch("http://localhost:5000/api/posts/view", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ slug: key }),
+    }).catch(() => {});
+
     window.dispatchEvent(new CustomEvent("wsj_article_viewed", { detail: { slugOrId: key, views: updated } }));
     return updated;
   } catch (e) {
@@ -49,7 +55,7 @@ export function recordArticleView(slugOrId: string, initialViewsCount: number = 
   }
 }
 
-export function getArticleViews(slugOrId: string, defaultBaseline: number = 65): number {
+export function getArticleViews(slugOrId: string, defaultBaseline: number = 0): number {
   if (typeof window === "undefined" || !slugOrId) return defaultBaseline;
   try {
     const raw = localStorage.getItem("wsj_article_views");
@@ -83,14 +89,7 @@ export function getArticleViews(slugOrId: string, defaultBaseline: number = 65):
       }
     }
     
-    // Fallback deterministic baseline view count based on string hash if not viewed yet
-    let hash = 0;
-    for (let i = 0; i < key.length; i++) {
-      hash = (hash << 5) - hash + key.charCodeAt(i);
-      hash |= 0;
-    }
-    const pseudoRand = (Math.abs(hash) % 150) + 25;
-    return pseudoRand;
+    return defaultBaseline;
   } catch (e) {
     return defaultBaseline;
   }

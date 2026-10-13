@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import ProfileSettingsModal from "@/components/ui/ProfileSettingsModal";
+import ReaderAccountSkeleton from "@/components/ui/skeletons/ReaderAccountSkeleton";
 
 const SAMPLE_SAVED_ARTICLES = [
   {
@@ -249,11 +250,7 @@ export default function ReaderDashboard() {
   const userInitials = getInitials(readerName);
 
   if (!currentUser) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center font-sans text-xs font-bold text-slate-500">
-        Loading Reader Dashboard...
-      </div>
-    );
+    return <ReaderAccountSkeleton />;
   }
 
   return (

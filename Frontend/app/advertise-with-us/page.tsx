@@ -9,6 +9,9 @@ export const metadata = getLinkPreviewMetadata({
   urlPath: "/advertise-with-us",
 });
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default function AdvertiseWithUsPage() {
   return <AdvertiseClient />;
 }

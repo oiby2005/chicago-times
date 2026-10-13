@@ -182,7 +182,7 @@ const LeaderCard: React.FC<{ member: LeaderMember }> = ({ member }) => {
 
   return (
     <div className="group flex flex-col">
-      <div className="relative w-full aspect-[4/5] rounded-none overflow-hidden bg-[#e5e0d5] mb-3 shadow-xs transition-shadow duration-300 group-hover:shadow-md">
+      <div className="relative w-full aspect-[4/5] rounded-none overflow-hidden bg-[#e5e0d5] mb-2.5 sm:mb-3 shadow-xs transition-shadow duration-300 group-hover:shadow-md">
         <img
           src={member.imageUrl}
           alt={member.name}
@@ -197,17 +197,17 @@ const LeaderCard: React.FC<{ member: LeaderMember }> = ({ member }) => {
             href={member.linkedinUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 font-sans font-bold text-[15px] sm:text-[16px] text-[#111111] hover:text-[#0A66C2] transition-colors"
+            className="inline-flex items-center gap-1 sm:gap-1.5 font-sans font-bold text-[13.5px] sm:text-[15px] lg:text-[16px] text-[#111111] hover:text-[#0A66C2] transition-colors"
           >
-            <span>{member.name}</span>
+            <span className="line-clamp-1">{member.name}</span>
             <LinkedInIcon />
           </a>
         ) : (
-          <span className="inline-flex items-center gap-1.5 font-sans font-bold text-[15px] sm:text-[16px] text-[#111111]">
-            <span>{member.name}</span>
+          <span className="inline-flex items-center gap-1 sm:gap-1.5 font-sans font-bold text-[13.5px] sm:text-[15px] lg:text-[16px] text-[#111111]">
+            <span className="line-clamp-1">{member.name}</span>
           </span>
         )}
-        <p className="font-sans text-[12.5px] sm:text-[13px] text-[#666666] font-medium mt-0.5 leading-snug">
+        <p className="font-sans text-[11px] sm:text-[12.5px] lg:text-[13px] text-[#666666] font-medium mt-0.5 leading-snug line-clamp-2">
           {member.role}
         </p>
       </div>
@@ -227,70 +227,70 @@ export default function LeadershipClient() {
         <Header />
         <StickyHeaderBar />
 
-        <main className="bg-white py-8 sm:py-12">
+        <main className="bg-white py-6 sm:py-12">
           <Container>
             {/* HERO SECTION */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start mb-10">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start mb-8 sm:mb-10">
               {/* Left Column: Heading & Intro Text */}
               <div className="lg:col-span-7 flex flex-col justify-start">
                 <div className="inline-block px-3.5 py-1 rounded-full border border-gray-300 bg-[#f4f4f0] text-[#666666] font-sans font-bold text-[11px] uppercase tracking-wider mb-4 w-fit">
                   OUR LEADERSHIP
                 </div>
 
-                <h1 className="font-serif font-extrabold text-[32px] sm:text-[42px] lg:text-[48px] text-[#111111] leading-[1.1] mb-3">
+                <h1 className="font-serif font-extrabold text-[28px] xs:text-[34px] sm:text-[42px] lg:text-[48px] text-[#111111] leading-[1.12] sm:leading-[1.1] mb-3">
                   The Team Behind <br className="hidden sm:inline" />
                   <span className="text-[#666666]">Our Vision</span>
                 </h1>
 
-                <div className="w-12 h-1 bg-[#888888] mb-5 rounded-full" />
+                <div className="w-12 h-1 bg-[#888888] mb-4 sm:mb-5 rounded-full" />
 
-                <p className="font-sans text-[14px] sm:text-[14.5px] leading-relaxed text-[#555555] mb-8">
+                <p className="font-sans text-[13.5px] sm:text-[14.5px] leading-relaxed text-[#555555] mb-6 sm:mb-8">
                   Our leadership team brings together experienced professionals dedicated to advancing global education and student success. With expertise in academic partnerships, operations, and innovation, our leaders guide our company&apos;s strategic vision and ensure the highest standards of service. Their commitment to excellence drives our mission to create accessible opportunities and meaningful impact in the education sector.
                 </p>
 
                 {/* Stats Row with Dot Grid on Left */}
-                <div className="flex items-center space-x-6 pt-2">
+                <div className="flex items-center space-x-3 sm:space-x-6 pt-2">
                   {/* Dot Grid Image Pattern next to 20+ Team Members */}
-                  <div className="w-10 h-10 shrink-0 grid grid-cols-5 gap-1.5 opacity-35">
+                  <div className="hidden xs:grid w-8 h-8 sm:w-10 sm:h-10 shrink-0 grid-cols-5 gap-1 sm:gap-1.5 opacity-35">
                     {[...Array(25)].map((_, i) => (
                       <div key={i} className="w-1 h-1 rounded-full bg-[#888888]" />
                     ))}
                   </div>
 
-                  <div className="grid grid-cols-3 gap-6 flex-1">
-                    <div className="flex items-center space-x-2.5">
-                      <div className="w-10 h-10 rounded-full bg-[#f4f4f0] flex items-center justify-center text-[#666666] shrink-0">
-                        <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                  <div className="grid grid-cols-3 gap-2 sm:gap-6 flex-1">
+                    <div className="flex flex-col sm:flex-row items-center sm:items-center text-center sm:text-left gap-1 sm:space-x-2.5">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#f4f4f0] flex items-center justify-center text-[#666666] shrink-0">
+                        <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current" viewBox="0 0 24 24">
                           <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
                         </svg>
                       </div>
                       <div>
-                        <div className="font-sans font-extrabold text-[20px] text-[#111111] leading-none">20+</div>
-                        <div className="font-sans text-[11.5px] text-[#666666]">Team Members</div>
+                        <div className="font-sans font-extrabold text-[15px] sm:text-[20px] text-[#111111] leading-none">20+</div>
+                        <div className="font-sans text-[10px] sm:text-[11.5px] text-[#666666] mt-0.5 leading-tight">Team Members</div>
                       </div>
                     </div>
 
-                    <div className="flex items-center space-x-2.5">
-                      <div className="w-10 h-10 rounded-full bg-[#f4f4f0] flex items-center justify-center text-[#666666] shrink-0">
-                        <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                    <div className="flex flex-col sm:flex-row items-center sm:items-center text-center sm:text-left gap-1 sm:space-x-2.5">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#f4f4f0] flex items-center justify-center text-[#666666] shrink-0">
+                        <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current" viewBox="0 0 24 24">
                           <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
                         </svg>
                       </div>
                       <div>
-                        <div className="font-sans font-extrabold text-[20px] text-[#111111] leading-none">15+</div>
-                        <div className="font-sans text-[11.5px] text-[#666666]">Countries</div>
+                        <div className="font-sans font-extrabold text-[15px] sm:text-[20px] text-[#111111] leading-none">15+</div>
+                        <div className="font-sans text-[10px] sm:text-[11.5px] text-[#666666] mt-0.5 leading-tight">Countries</div>
                       </div>
                     </div>
 
-                    <div className="flex items-center space-x-2.5">
-                      <div className="w-10 h-10 rounded-full bg-[#f4f4f0] flex items-center justify-center text-[#666666] shrink-0">
-                        <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                    <div className="flex flex-col sm:flex-row items-center sm:items-center text-center sm:text-left gap-1 sm:space-x-2.5">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#f4f4f0] flex items-center justify-center text-[#666666] shrink-0">
+                        <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current" viewBox="0 0 24 24">
                           <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                         </svg>
                       </div>
                       <div>
-                        <div className="font-sans font-extrabold text-[20px] text-[#111111] leading-none">10+</div>
-                        <div className="font-sans text-[11.5px] text-[#666666]">Years Combined</div>
+                        <div className="font-sans font-extrabold text-[15px] sm:text-[20px] text-[#111111] leading-none">10+</div>
+                        <div className="font-sans text-[10px] sm:text-[11.5px] text-[#666666] mt-0.5 leading-tight">Years Combined</div>
                       </div>
                     </div>
                   </div>
@@ -299,29 +299,29 @@ export default function LeadershipClient() {
 
               {/* Right Column: Quotes List */}
               <div className="lg:col-span-5 space-y-3.5 pt-2">
-                <div className="bg-[#fbfbf9] border-l-4 border-[#888888] p-4 rounded-r-xl shadow-xs">
-                  <p className="font-serif italic text-[14px] text-[#333333] leading-snug mb-2">
+                <div className="bg-[#fbfbf9] border-l-4 border-[#888888] p-3.5 sm:p-4 rounded-r-xl shadow-xs">
+                  <p className="font-serif italic text-[13.5px] sm:text-[14px] text-[#333333] leading-snug mb-2">
                     &ldquo;Nothing is impossible; you just need the courage to start and the drive to sustain&rdquo;
                   </p>
-                  <p className="font-sans font-bold text-[12.5px] text-[#666666]">
+                  <p className="font-sans font-bold text-[12px] sm:text-[12.5px] text-[#666666]">
                     &mdash; Geeth Roman
                   </p>
                 </div>
 
-                <div className="bg-[#fbfbf9] border-l-4 border-[#888888] p-4 rounded-r-xl shadow-xs">
-                  <p className="font-serif italic text-[14px] text-[#333333] leading-snug mb-2">
+                <div className="bg-[#fbfbf9] border-l-4 border-[#888888] p-3.5 sm:p-4 rounded-r-xl shadow-xs">
+                  <p className="font-serif italic text-[13.5px] sm:text-[14px] text-[#333333] leading-snug mb-2">
                     &ldquo;Innovating Ideas for Tomorrow&apos;s Success&rdquo;
                   </p>
-                  <p className="font-sans font-bold text-[12.5px] text-[#666666]">
+                  <p className="font-sans font-bold text-[12px] sm:text-[12.5px] text-[#666666]">
                     &mdash; Chamitha Ranneththi
                   </p>
                 </div>
 
-                <div className="bg-[#fbfbf9] border-l-4 border-[#888888] p-4 rounded-r-xl shadow-xs">
-                  <p className="font-serif italic text-[14px] text-[#333333] leading-snug mb-2">
+                <div className="bg-[#fbfbf9] border-l-4 border-[#888888] p-3.5 sm:p-4 rounded-r-xl shadow-xs">
+                  <p className="font-serif italic text-[13.5px] sm:text-[14px] text-[#333333] leading-snug mb-2">
                     &ldquo;We learn from failure, not from success&rdquo;
                   </p>
-                  <p className="font-sans font-bold text-[12.5px] text-[#666666]">
+                  <p className="font-sans font-bold text-[12px] sm:text-[12.5px] text-[#666666]">
                     &mdash; Jatinder Singh
                   </p>
                 </div>
@@ -329,15 +329,15 @@ export default function LeadershipClient() {
             </div>
 
             {/* SECTION 1: EXECUTIVE LEADERSHIP */}
-            <section className="mb-10">
-              <div className="flex items-center mb-6">
-                <span className="w-1.5 h-6 bg-[#888888] rounded-full inline-block mr-2.5" />
-                <h2 className="font-sans font-bold text-[22px] sm:text-[24px] text-[#111111] tracking-tight">
+            <section className="mb-8 sm:mb-10">
+              <div className="flex items-center mb-5 sm:mb-6">
+                <span className="w-1.5 h-5 sm:h-6 bg-[#888888] rounded-full inline-block mr-2 sm:mr-2.5 shrink-0" />
+                <h2 className="font-sans font-bold text-[18px] sm:text-[22px] lg:text-[24px] text-[#111111] tracking-tight">
                   Executive Leadership
                 </h2>
                 <button
                   onClick={() => setExecOpen(!execOpen)}
-                  className="w-5 h-5 rounded-full bg-[#888888] text-white inline-flex items-center justify-center hover:bg-[#666666] transition-colors ml-2.5 cursor-pointer"
+                  className="w-5 h-5 rounded-full bg-[#888888] text-white inline-flex items-center justify-center hover:bg-[#666666] transition-colors ml-2.5 cursor-pointer shrink-0"
                   aria-label="Toggle Executive Leadership"
                 >
                   <svg
@@ -350,7 +350,7 @@ export default function LeadershipClient() {
               </div>
 
               {execOpen && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 items-start">
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-6 items-start">
                   {EXECUTIVE_LEADERSHIP.map((member) => (
                     <LeaderCard key={member.name} member={member} />
                   ))}
@@ -359,15 +359,15 @@ export default function LeadershipClient() {
             </section>
 
             {/* SECTION 2: SENIOR MANAGEMENT */}
-            <section className="mb-10">
-              <div className="flex items-center mb-6">
-                <span className="w-1.5 h-6 bg-[#888888] rounded-full inline-block mr-2.5" />
-                <h2 className="font-sans font-bold text-[22px] sm:text-[24px] text-[#111111] tracking-tight">
+            <section className="mb-8 sm:mb-10">
+              <div className="flex items-center mb-5 sm:mb-6">
+                <span className="w-1.5 h-5 sm:h-6 bg-[#888888] rounded-full inline-block mr-2 sm:mr-2.5 shrink-0" />
+                <h2 className="font-sans font-bold text-[18px] sm:text-[22px] lg:text-[24px] text-[#111111] tracking-tight">
                   Senior Management
                 </h2>
                 <button
                   onClick={() => setSeniorOpen(!seniorOpen)}
-                  className="w-5 h-5 rounded-full bg-[#888888] text-white inline-flex items-center justify-center hover:bg-[#666666] transition-colors ml-2.5 cursor-pointer"
+                  className="w-5 h-5 rounded-full bg-[#888888] text-white inline-flex items-center justify-center hover:bg-[#666666] transition-colors ml-2.5 cursor-pointer shrink-0"
                   aria-label="Toggle Senior Management"
                 >
                   <svg
@@ -380,7 +380,7 @@ export default function LeadershipClient() {
               </div>
 
               {seniorOpen && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 items-start">
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-6 items-start">
                   {SENIOR_MANAGEMENT.map((member) => (
                     <LeaderCard key={member.name} member={member} />
                   ))}
@@ -389,15 +389,15 @@ export default function LeadershipClient() {
             </section>
 
             {/* SECTION 3: OUR COUNTRY COORDINATORS */}
-            <section className="mb-10">
-              <div className="flex items-center mb-6">
-                <span className="w-1.5 h-6 bg-[#888888] rounded-full inline-block mr-2.5" />
-                <h2 className="font-sans font-bold text-[22px] sm:text-[24px] text-[#111111] tracking-tight">
+            <section className="mb-8 sm:mb-10">
+              <div className="flex items-center mb-5 sm:mb-6">
+                <span className="w-1.5 h-5 sm:h-6 bg-[#888888] rounded-full inline-block mr-2 sm:mr-2.5 shrink-0" />
+                <h2 className="font-sans font-bold text-[18px] sm:text-[22px] lg:text-[24px] text-[#111111] tracking-tight">
                   Our Country Coordinators
                 </h2>
                 <button
                   onClick={() => setCoordinatorsOpen(!coordinatorsOpen)}
-                  className="w-5 h-5 rounded-full bg-[#888888] text-white inline-flex items-center justify-center hover:bg-[#666666] transition-colors ml-2.5 cursor-pointer"
+                  className="w-5 h-5 rounded-full bg-[#888888] text-white inline-flex items-center justify-center hover:bg-[#666666] transition-colors ml-2.5 cursor-pointer shrink-0"
                   aria-label="Toggle Our Country Coordinators"
                 >
                   <svg
@@ -410,7 +410,7 @@ export default function LeadershipClient() {
               </div>
 
               {coordinatorsOpen && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 items-start">
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-6 items-start">
                   {COUNTRY_COORDINATORS.map((member) => (
                     <LeaderCard key={member.name} member={member} />
                   ))}
@@ -420,14 +420,14 @@ export default function LeadershipClient() {
 
             {/* SECTION 4: OUR WRITERS */}
             <section className="mb-8">
-              <div className="flex items-center mb-6">
-                <span className="w-1.5 h-6 bg-[#888888] rounded-full inline-block mr-2.5" />
-                <h2 className="font-sans font-bold text-[22px] sm:text-[24px] text-[#111111] tracking-tight">
+              <div className="flex items-center mb-5 sm:mb-6">
+                <span className="w-1.5 h-5 sm:h-6 bg-[#888888] rounded-full inline-block mr-2 sm:mr-2.5 shrink-0" />
+                <h2 className="font-sans font-bold text-[18px] sm:text-[22px] lg:text-[24px] text-[#111111] tracking-tight">
                   Our Writers
                 </h2>
                 <button
                   onClick={() => setWritersOpen(!writersOpen)}
-                  className="w-5 h-5 rounded-full bg-[#888888] text-white inline-flex items-center justify-center hover:bg-[#666666] transition-colors ml-2.5 cursor-pointer"
+                  className="w-5 h-5 rounded-full bg-[#888888] text-white inline-flex items-center justify-center hover:bg-[#666666] transition-colors ml-2.5 cursor-pointer shrink-0"
                   aria-label="Toggle Our Writers"
                 >
                   <svg
@@ -440,7 +440,7 @@ export default function LeadershipClient() {
               </div>
 
               {writersOpen && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 items-start">
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-6 items-start">
                   {OUR_WRITERS.map((member) => (
                     <LeaderCard key={member.name} member={member} />
                   ))}

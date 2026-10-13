@@ -24,7 +24,7 @@ const ALL_MAIN_CATEGORIES = [
   "Sports", "Soccer", "Golf", "Tennis", "Cricket",
   "Lifestyle", "Travel", "Food & Dining", "Cars",
   "Science", "Space", "Climate", "Environment", "Research",
-  "Opinions", "Editorials"
+  "Opinions", "Editorials", "Interviews"
 ];
 
 
@@ -32,6 +32,8 @@ const ALL_MAIN_CATEGORIES = [
 import ArticleCommentsSection from "@/components/article/ArticleCommentsSection";
 import ImageSeoKeywordsInput from "@/components/article/ImageSeoKeywordsInput";
 import { getAuthorForArticle, slugifyAuthorName, slugifyArticleTitle } from "@/data/authors";
+import { getBillionairesList, BillionaireItem } from "@/data/billionaires";
+import { getEntrepreneursList, EntrepreneurItem } from "@/data/entrepreneurs";
 
 const compressImageFile = (file: File, maxWidth = 800, quality = 0.7): Promise<string> => {
   return new Promise((resolve) => {
@@ -227,6 +229,146 @@ export default function CreateNewPostPage() {
   const [tagInput, setTagInput] = useState("");
   const [readDuration, setReadDuration] = useState("5 min read");
   const [isExclusive, setIsExclusive] = useState(true);
+
+  // Billionaire Tagging Link State
+  const [isBillionaireLinked, setIsBillionaireLinked] = useState(false);
+  const [selectedBillionaireName, setSelectedBillionaireName] = useState("");
+  const [billionairesList, setBillionairesList] = useState<BillionaireItem[]>([]);
+
+  React.useEffect(() => {
+    const list = getBillionairesList();
+    setBillionairesList(list);
+
+    const handleUpdate = () => {
+      setBillionairesList(getBillionairesList());
+    };
+    window.addEventListener("wsj_billionaires_updated", handleUpdate);
+    return () => window.removeEventListener("wsj_billionaires_updated", handleUpdate);
+  }, []);
+
+  React.useEffect(() => {
+    if (billionairesList.length > 0 && tags.length > 0) {
+      const matched = billionairesList.find((b) => tags.includes(b.name));
+      if (matched && matched.name !== selectedBillionaireName) {
+        setIsBillionaireLinked(true);
+        setSelectedBillionaireName(matched.name);
+      }
+    }
+  }, [billionairesList, tags]);
+
+  const handleBillionaireCheckboxToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const checked = e.target.checked;
+    setIsBillionaireLinked(checked);
+    if (!checked) {
+      if (selectedBillionaireName) {
+        setTags((prev) => prev.filter((t) => t !== selectedBillionaireName));
+        setSelectedBillionaireName("");
+      }
+    } else {
+      if (billionairesList.length > 0) {
+        const firstName = billionairesList[0].name;
+        setSelectedBillionaireName(firstName);
+        setTags((prev) => {
+          const filtered = prev.filter((t) => t !== selectedBillionaireName);
+          return filtered.includes(firstName) ? filtered : [...filtered, firstName];
+        });
+      }
+    }
+  };
+
+  const handleBillionaireSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newName = e.target.value;
+    const oldName = selectedBillionaireName;
+    setSelectedBillionaireName(newName);
+
+    setTags((prev) => {
+      let updated = prev;
+      if (oldName) {
+        updated = updated.filter((t) => t !== oldName);
+      }
+      if (newName && !updated.includes(newName)) {
+        updated = [...updated, newName];
+      }
+      return updated;
+    });
+  };
+
+  // Entrepreneur Tagging Link State
+  const [isEntrepreneurLinked, setIsEntrepreneurLinked] = useState(false);
+  const [selectedEntrepreneurName, setSelectedEntrepreneurName] = useState("");
+  const [entrepreneursList, setEntrepreneursList] = useState<EntrepreneurItem[]>([]);
+
+  React.useEffect(() => {
+    let localItems: EntrepreneurItem[] = [];
+    try {
+      localItems = getEntrepreneursList();
+    } catch (e) {}
+    setEntrepreneursList(localItems);
+
+    fetch("http://localhost:5000/api/entrepreneurs")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data && data.success && Array.isArray(data.entrepreneurs) && data.entrepreneurs.length > 0) {
+          setEntrepreneursList(data.entrepreneurs);
+        }
+      })
+      .catch(() => {});
+
+    const handleUpdate = () => {
+      try {
+        setEntrepreneursList(getEntrepreneursList());
+      } catch (e) {}
+    };
+    window.addEventListener("wsj_entrepreneurs_updated", handleUpdate);
+    return () => window.removeEventListener("wsj_entrepreneurs_updated", handleUpdate);
+  }, []);
+
+  React.useEffect(() => {
+    if (entrepreneursList.length > 0 && tags.length > 0) {
+      const matched = entrepreneursList.find((ent) => tags.some((t) => t.toLowerCase() === ent.name.toLowerCase()));
+      if (matched && matched.name !== selectedEntrepreneurName) {
+        setIsEntrepreneurLinked(true);
+        setSelectedEntrepreneurName(matched.name);
+      }
+    }
+  }, [entrepreneursList, tags]);
+
+  const handleEntrepreneurCheckboxToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const checked = e.target.checked;
+    setIsEntrepreneurLinked(checked);
+    if (!checked) {
+      if (selectedEntrepreneurName) {
+        setTags((prev) => prev.filter((t) => t.toLowerCase() !== selectedEntrepreneurName.toLowerCase()));
+        setSelectedEntrepreneurName("");
+      }
+    } else {
+      if (entrepreneursList.length > 0) {
+        const firstName = entrepreneursList[0].name;
+        setSelectedEntrepreneurName(firstName);
+        setTags((prev) => {
+          const filtered = prev.filter((t) => t.toLowerCase() !== selectedEntrepreneurName.toLowerCase());
+          return filtered.includes(firstName) ? filtered : [...filtered, firstName];
+        });
+      }
+    }
+  };
+
+  const handleEntrepreneurSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newName = e.target.value;
+    const oldName = selectedEntrepreneurName;
+    setSelectedEntrepreneurName(newName);
+
+    setTags((prev) => {
+      let updated = prev;
+      if (oldName) {
+        updated = updated.filter((t) => t.toLowerCase() !== oldName.toLowerCase());
+      }
+      if (newName && !updated.includes(newName)) {
+        updated = [...updated, newName];
+      }
+      return updated;
+    });
+  };
   
   // Editor Ref & Visual WYSIWYG ContentEditable Formatting
   const editorRef = useRef<HTMLDivElement>(null);
@@ -1427,6 +1569,10 @@ export default function CreateNewPostPage() {
 
   const handleRemoveTag = (tagToRemove: string) => {
     setTags(tags.filter((t) => t !== tagToRemove));
+    if (tagToRemove === selectedBillionaireName) {
+      setIsBillionaireLinked(false);
+      setSelectedBillionaireName("");
+    }
   };
 
   const handleSaveDraft = async (e?: React.FormEvent | React.MouseEvent) => {
@@ -1826,7 +1972,8 @@ export default function CreateNewPostPage() {
                   placeholder="Add Subheading / Deck..."
                   value={subheadline}
                   onChange={(e) => setSubheadline(e.target.value)}
-                  className="w-full bg-transparent border-none outline-none text-lg sm:text-xl font-sans text-[#555555] placeholder-[#cbd5e1] resize-none leading-normal overflow-hidden touch-pan-y"
+                  className="w-full bg-transparent border-none outline-none text-lg sm:text-xl font-georgia-serif text-[#333333] placeholder-[#cbd5e1] resize-none leading-normal overflow-hidden touch-pan-y"
+                  style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
                 />
 
                 {/* Visual WYSIWYG ContentEditable Body Canvas with Interactive Image Selection Overlay */}
@@ -2312,9 +2459,70 @@ export default function CreateNewPostPage() {
                         </div>
 
                         <div className="space-y-1.5">
-                          <label className="block text-[10.5px] font-mono font-bold text-[#94a3b8] uppercase tracking-wider">
-                            TAGS
-                          </label>
+                          <div className="flex items-center justify-between flex-wrap gap-2">
+                            <label className="block text-[10.5px] font-mono font-bold text-[#94a3b8] uppercase tracking-wider">
+                              TAGS
+                            </label>
+                            <div className="flex items-center space-x-3">
+                              <label className="flex items-center space-x-1.5 cursor-pointer text-xs font-sans text-[#1e293b] select-none">
+                                <input
+                                  type="checkbox"
+                                  checked={isBillionaireLinked}
+                                  onChange={handleBillionaireCheckboxToggle}
+                                  className="w-3.5 h-3.5 rounded text-[#ea580c] focus:ring-[#ea580c] cursor-pointer"
+                                />
+                                <span className="font-semibold text-[11px] text-[#475569]">Link to a Billionaire</span>
+                              </label>
+                              <label className="flex items-center space-x-1.5 cursor-pointer text-xs font-sans text-[#1e293b] select-none">
+                                <input
+                                  type="checkbox"
+                                  checked={isEntrepreneurLinked}
+                                  onChange={handleEntrepreneurCheckboxToggle}
+                                  className="w-3.5 h-3.5 rounded text-[#2563eb] focus:ring-[#2563eb] cursor-pointer"
+                                />
+                                <span className="font-semibold text-[11px] text-[#475569]">Link to an Entrepreneur</span>
+                              </label>
+                            </div>
+                          </div>
+
+                          {isBillionaireLinked && (
+                            <div className="bg-[#f8fafc] border border-[#cbd5e1] rounded-xl p-2.5 space-y-1 my-1.5">
+                              <label className="block text-[10px] font-mono font-bold text-[#64748b] uppercase">
+                                Select Billionaire
+                              </label>
+                              <select
+                                value={selectedBillionaireName}
+                                onChange={handleBillionaireSelectChange}
+                                className="w-full bg-white border border-[#cbd5e1] rounded-lg px-2.5 py-1.5 text-xs font-semibold text-[#0f172a] focus:outline-none focus:border-[#ea580c]"
+                              >
+                                {billionairesList.map((b) => (
+                                  <option key={b.id || b.name} value={b.name}>
+                                    {b.name} ({b.netWorth})
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          )}
+
+                          {isEntrepreneurLinked && (
+                            <div className="bg-[#f8fafc] border border-[#cbd5e1] rounded-xl p-2.5 space-y-1 my-1.5">
+                              <label className="block text-[10px] font-mono font-bold text-[#64748b] uppercase">
+                                Select Entrepreneur
+                              </label>
+                              <select
+                                value={selectedEntrepreneurName}
+                                onChange={handleEntrepreneurSelectChange}
+                                className="w-full bg-white border border-[#cbd5e1] rounded-lg px-2.5 py-1.5 text-xs font-semibold text-[#0f172a] focus:outline-none focus:border-[#2563eb]"
+                              >
+                                {entrepreneursList.map((ent) => (
+                                  <option key={ent.id || ent.name} value={ent.name}>
+                                    #{ent.rank} {ent.name} ({ent.source})
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          )}
+
                           <div className="bg-white border-2 border-[#ea580c] rounded-2xl p-3.5 space-y-3 shadow-2xs">
                             {tags.length > 0 && (
                               <div className="flex flex-wrap gap-2">
@@ -2608,9 +2816,9 @@ export default function CreateNewPostPage() {
                   </h1>
                 )}
 
-                {/* Subheadline / Deck (Sans-Serif matching Image 1) */}
+                {/* Subheadline / Deck */}
                 {subheadline.trim() && (
-                  <p className="text-base sm:text-lg md:text-[19px] text-[#555555] font-sans leading-relaxed mb-6">
+                  <p className="text-base sm:text-lg md:text-[19px] text-[#333333] font-georgia-serif leading-relaxed mb-6" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
                     {subheadline}
                   </p>
                 )}

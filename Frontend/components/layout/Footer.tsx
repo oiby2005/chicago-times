@@ -16,7 +16,7 @@ const newsLinksCol1 = [
   { name: "Entertainment", href: "/entertainment" },
 ];
 
-// NEWS Column 2 (8 items max)
+// NEWS Column 2 (9 items)
 const newsLinksCol2 = [
   { name: "Arts", href: "/arts" },
   { name: "Industries", href: "/industries" },
@@ -29,45 +29,34 @@ const newsLinksCol2 = [
   { name: "Interviews", href: "/interviews" },
 ];
 
-// FEATURED Column 1 (8 items max - Small Business under CEO & Executives)
+// FEATURED Column 1 (8 items)
 const featuredLinksCol1 = [
-  { name: "Editorials", href: "/editorials" },
+  { name: "Editorials", href: "/editorial-policy" },
   { name: "Opinions", href: "/opinion" },
-  { name: "U.S. News", href: "/news/us-news" },
-  { name: "International News", href: "/news/international-news" },
-  { name: "World Politics", href: "/politics/world-politics" },
-  { name: "Corporate News", href: "/business/corporate-news" },
-  { name: "CEO & Executives", href: "/business/ceos-and-executives" },
-  { name: "Small Business", href: "/business/small-business" },
+  { name: "U.S. News", href: "/us" },
+  { name: "International News", href: "/world" },
+  { name: "World Politics", href: "/politics" },
+  { name: "Corporate News", href: "/business" },
+  { name: "CEO & Executives", href: "/business" },
+  { name: "Small Business", href: "/business" },
 ];
 
 // FEATURED Column 2 (6 items)
 const featuredLinksCol2 = [
-  { name: "Artificial Intelligence", href: "/tech/artificial-intelligence" },
-  { name: "Innovation", href: "/tech/innovation" },
-  { name: "Stocks", href: "/markets-finance/stocks" },
-  { name: "Real Estate", href: "/investing/real-estate" },
-  { name: "Crypto", href: "/investing/crypto" },
-  { name: "Space", href: "/science/space" },
+  { name: "Artificial Intelligence", href: "/tech" },
+  { name: "Innovation", href: "/tech" },
+  { name: "Stocks", href: "/markets-finance" },
+  { name: "Real Estate", href: "/real-estate" },
+  { name: "Crypto", href: "/markets-finance" },
+  { name: "Space", href: "/science" },
 ];
 
-// ABOUT Column (8 items max)
-// ABOUT Column (5 items max)
+// ABOUT Column
 const aboutLinks = [
   { name: "About us", href: "/about-us" },
   { name: "Terms & Conditions", href: "/terms-and-conditions" },
-  { name: "Editorial Policy", href: "/editorial-policy" },
   { name: "Leadership", href: "/leadership" },
   { name: "RSS Feed", href: "/rss.xml", target: "_blank" },
-];
-
-// LANGUAGE EDITIONS Column
-const editionsLinks = [
-  { name: "English" },
-  { name: "Spanish" },
-  { name: "German" },
-  { name: "Korean" },
-  { name: "Chinese" },
 ];
 
 export const Footer: React.FC = () => {
@@ -90,47 +79,31 @@ export const Footer: React.FC = () => {
   }, []);
 
   return (
-    <footer className="w-full bg-[#FAF7EE] text-[#111111] border-t border-[#EAE6DA] font-sans select-none pt-0 pb-16">
-      {/* TOP OF FOOTER: Back to Top button (no section line or separate bg) */}
-      <div className="w-full py-2">
+    <footer className="w-full text-[#111111] font-sans select-none relative">
+      {/* SECTION 1: Top Bar (Logo, Language Edition Dropdown & Back To Top) — Custom Shade 1 (#E8E8E8) */}
+      <div className="w-full border-t border-b border-[#DCDCDC] py-3.5 bg-[#E8E8E8]">
         <Container>
-          <div className="flex items-center justify-end">
-            <button
-              type="button"
-              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-              className="bg-white hover:bg-gray-50 text-black border border-[#dcd6cd] hover:border-black font-sans text-[11.5px] font-medium px-4 py-1.5 h-auto flex items-center justify-center rounded-none tracking-tight transition-colors whitespace-nowrap cursor-pointer shadow-2xs leading-none"
-            >
-              <span>Back to Top</span>
-              <span className="ml-1 text-[11px] font-bold">^</span>
-            </button>
-          </div>
-        </Container>
-      </div>
-
-      {/* SECTION 1: Top Bar (Logo & Language Edition Dropdown) */}
-      <div className="w-full border-b border-[#EAE6DA] py-4 bg-[#FAF7EE]">
-        <Container>
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center justify-between flex-nowrap gap-2 sm:gap-4">
             {/* Left: Logo & Interactive English Edition Dropdown */}
-            <div className="flex items-center space-x-4 relative">
-              <a href="/" className="inline-block">
+            <div className="flex items-center space-x-2 sm:space-x-4 relative shrink-0 min-w-0">
+              <a href="/" className="inline-block shrink-0">
                 <img
                   src="/images/design-reference/Times Chicago.svg"
                   alt="Times Chicago"
-                  className="h-7 sm:h-8 w-auto object-contain"
+                  className="h-5 sm:h-8 w-auto object-contain shrink-0"
                 />
               </a>
-              <span className="text-[#999999] font-light text-xs">|</span>
-              <div className="relative">
+              <span className="text-[#999999] font-light text-xs shrink-0">|</span>
+              <div className="relative shrink-0">
                 <button
                   type="button"
                   onClick={() => setShowEditionDropdown(!showEditionDropdown)}
-                  className="text-[12px] font-sans font-normal text-[#333333] hover:text-black flex items-center space-x-1 cursor-pointer focus:outline-none"
+                  className="text-[11px] sm:text-[12px] font-sans font-normal text-[#333333] hover:text-black flex items-center space-x-1 cursor-pointer focus:outline-none whitespace-nowrap shrink-0"
                   aria-label="Select edition"
                   suppressHydrationWarning
                 >
-                  <span>{activeEdition} Edition</span>
-                  <span className="text-[8px] text-[#111111] font-bold">▼</span>
+                  <span className="whitespace-nowrap">{activeEdition} Edition</span>
+                  <span className="text-[7.5px] sm:text-[8px] text-[#111111] font-bold ml-0.5">▼</span>
                 </button>
 
                 {showEditionDropdown && (
@@ -163,27 +136,24 @@ export const Footer: React.FC = () => {
               </div>
             </div>
 
-            {/* Right: Subscribe Now, Sign In */}
-            <div className="flex items-center space-x-2.5">
-              <a
-                href="/special-offer"
-                className="bg-[#007cb9] hover:bg-[#006996] text-white font-sans text-[11.5px] font-medium px-4 py-1.5 h-auto flex items-center justify-center rounded-none tracking-tight transition-colors whitespace-nowrap cursor-pointer shadow-2xs leading-none"
+            {/* Right: Back to Top Button aligned inside footer top bar with English Edition */}
+            <div className="shrink-0">
+              <button
+                suppressHydrationWarning
+                type="button"
+                onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+                className="bg-[#64748B] hover:bg-[#475569] text-white font-sans text-[9.5px] sm:text-[10.5px] font-extrabold uppercase px-2.5 sm:px-3.5 py-1.5 flex items-center justify-center tracking-wider transition-colors cursor-pointer shadow-xs leading-none whitespace-nowrap shrink-0"
               >
-                Subscribe Now
-              </a>
-              <a
-                href="/signin"
-                className="bg-white hover:bg-gray-50 text-black border border-black font-sans text-[11.5px] font-medium px-4 py-1.5 h-auto flex items-center justify-center rounded-none tracking-tight transition-colors whitespace-nowrap cursor-pointer shadow-2xs leading-none"
-              >
-                Sign In
-              </a>
+                <span>BACK TO TOP</span>
+                <span className="ml-1 sm:ml-1.5 text-[8px] sm:text-[9px] font-black">▲</span>
+              </button>
             </div>
           </div>
         </Container>
       </div>
 
-      {/* SECTION 2: Multi-Column Directory Grid */}
-      <div className="w-full py-10 bg-[#FAF7EE]">
+      {/* SECTION 2: Multi-Column Directory Grid — Custom Shade 2 (#E3DEDE) */}
+      <div className="w-full py-10 border-b border-[#D7D2D2] bg-[#E3DEDE]">
         <Container>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-6">
             {/* Column 1: NEWS (Part 1) */}
@@ -338,40 +308,45 @@ export const Footer: React.FC = () => {
         </Container>
       </div>
 
-      {/* SECTION 3: Centralized Social Links Row (Facebook, LinkedIn, Instagram, Rumble, Newsletter) */}
-      <div className="w-full border-t border-[#EAE6DA] py-5 bg-[#FAF7EE]">
+      {/* SECTION 3: Centralized Social Links Row — Custom Shade 3 (#D9D4D4) */}
+      <div className="w-full border-b border-[#CEC9C9] py-4 sm:py-5 bg-[#D9D4D4]">
         <Container>
-          <div className="flex flex-wrap items-center justify-center space-x-6 sm:space-x-8 text-xs font-medium text-[#444444] text-center">
+          <div className="flex flex-wrap items-center justify-center gap-y-2.5 gap-x-5 sm:gap-x-8 text-xs font-medium text-[#444444] text-center">
             {/* Facebook */}
             <a
-              href="https://www.facebook.com"
+              href="https://www.facebook.com/times.chicago/"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center space-x-2 hover:text-[#00558c] transition-colors"
             >
-              <svg className="w-4 h-4 text-gray-600 fill-current" viewBox="0 0 24 24">
-                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+              <svg className="w-4 h-4 text-gray-600 fill-none stroke-current stroke-2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                <path d="M15 8h-2a2 2 0 0 0-2 2v7" />
+                <line x1="8.5" y1="12" x2="14.5" y2="12" />
               </svg>
               <span>Facebook</span>
             </a>
 
             {/* LinkedIn */}
             <a
-              href="https://www.linkedin.com"
+              href="https://www.linkedin.com/company/times-chicago"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center space-x-2 hover:text-[#00558c] transition-colors"
             >
-              <svg className="w-4 h-4 text-gray-600 fill-current" viewBox="0 0 24 24">
-                <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2z" />
-                <circle cx="4" cy="4" r="2" />
+              <svg className="w-4 h-4 text-gray-600 fill-none stroke-current stroke-2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                <line x1="8" y1="11" x2="8" y2="16.5" />
+                <line x1="8" y1="8" x2="8.01" y2="8" />
+                <path d="M12 13.5a2.5 2.5 0 0 1 5 0V16.5" />
+                <line x1="12" y1="11" x2="12" y2="16.5" />
               </svg>
               <span>LinkedIn</span>
             </a>
 
             {/* Instagram */}
             <a
-              href="https://www.instagram.com"
+              href="https://www.instagram.com/timeschicago/"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center space-x-2 hover:text-[#00558c] transition-colors"
@@ -386,16 +361,15 @@ export const Footer: React.FC = () => {
 
             {/* Rumble */}
             <a
-              href="https://rumble.com"
+              href="https://rumble.com/user/timeschicago"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center space-x-2 hover:text-[#00558c] transition-colors"
             >
-              <div className="w-4 h-4 rounded-full bg-[#64748b] flex items-center justify-center flex-shrink-0 shadow-2xs">
-                <svg className="w-2.5 h-2.5 text-white fill-current ml-0.5" viewBox="0 0 24 24">
-                  <polygon points="5 3 19 12 5 21 5 3" />
-                </svg>
-              </div>
+              <svg className="w-4 h-4 text-gray-600 fill-none stroke-current stroke-2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                <polygon points="10 8.5 16 12 10 15.5" fill="currentColor" stroke="currentColor" strokeWidth="1" strokeLinejoin="round" />
+              </svg>
               <span>Rumble</span>
             </a>
 
@@ -414,21 +388,27 @@ export const Footer: React.FC = () => {
         </Container>
       </div>
 
-      {/* SECTION 4: Legal Links & Copyright Notice (Centralized) */}
-      <div className="w-full border-t border-[#EAE6DA] pt-6 pb-2 bg-[#FAF7EE]">
+      {/* SECTION 4: Legal Links & Copyright Notice — Custom Shade 4 (#D4CDCD) */}
+      <div className="w-full pt-6 pb-24 sm:pb-28 bg-[#D4CDCD]">
         <Container>
           <div className="flex flex-col items-center justify-center text-center space-y-2">
             {/* Policy Links Row */}
-            <div className="flex flex-wrap items-center justify-center gap-x-2.5 gap-y-1 text-[11.5px] font-sans text-[#444444] text-center">
+            <div className="flex flex-wrap items-center justify-center gap-x-2.5 gap-y-1 text-[11.5px] font-sans text-[#333333] font-medium text-center">
               <a href="/privacy-policy" className="hover:text-black hover:underline transition-colors">Privacy Policy</a>
-              <span className="text-[#999999] font-light">|</span>
+              <span className="text-[#888888] font-light">|</span>
               <a href="/cookie-policy" className="hover:text-black hover:underline transition-colors">Cookie Policy</a>
-              <span className="text-[#999999] font-light">|</span>
+              <span className="text-[#888888] font-light">|</span>
+              <a href="/editorial-policy" className="hover:text-black hover:underline transition-colors">Editorial Policy</a>
+              <span className="text-[#888888] font-light">|</span>
+              <a href="/legal-policies" className="hover:text-black hover:underline transition-colors">Legal Policies</a>
+              <span className="text-[#888888] font-light">|</span>
+              <a href="/copyright-policy" className="hover:text-black hover:underline transition-colors">Copyright Policy</a>
+              <span className="text-[#888888] font-light">|</span>
               <a href="/accessibility" className="hover:text-black hover:underline transition-colors">Accessibility</a>
             </div>
 
             {/* Copyright Line */}
-            <p className="text-[11px] text-[#666666] font-sans">
+            <p className="text-[11px] text-[#555555] font-sans font-medium">
               Copyright ©2026 Times Chicago Media LLC. All Rights Reserved.
             </p>
           </div>

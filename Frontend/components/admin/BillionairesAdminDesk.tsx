@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
+import { createPortal } from "react-dom";
 import { BillionaireItem, WealthPoint, getBillionairesList, saveBillionairesList } from "@/data/billionaires";
 
 export const INDUSTRY_OPTIONS = [
@@ -37,8 +38,14 @@ const autoFormatNetWorth = (val: string): string => {
 };
 
 export default function BillionairesAdminDesk() {
+  const [mounted, setMounted] = useState(false);
   const [billionaires, setBillionaires] = useState<BillionaireItem[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showLimitAlert, setShowLimitAlert] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const [editingItem, setEditingItem] = useState<BillionaireItem | null>(null);
 
   // Form State — Basic Information
@@ -58,9 +65,48 @@ export default function BillionairesAdminDesk() {
   const [titleRole, setTitleRole] = useState("");
   const [realTimeNetWorth, setRealTimeNetWorth] = useState("");
   const [realTimeChange, setRealTimeChange] = useState("");
+  const [realTimeChangeDir, setRealTimeChangeDir] = useState<"DOWN" | "UP" | "UNCHANGED">("DOWN");
+  const [realTimeChangeAmount, setRealTimeChangeAmount] = useState("");
+  const [realTimeChangePercent, setRealTimeChangePercent] = useState("");
   const [realTimeAsOf, setRealTimeAsOf] = useState("");
   const [listNetWorthAsOf, setListNetWorthAsOf] = useState("");
   const [photoCredit, setPhotoCredit] = useState("");
+
+  // Helper to sanitize numeric inputs and remove leading zeros
+  const cleanNumberOnly = (val: string, allowDecimal = true) => {
+    let cleaned = allowDecimal
+      ? val.replace(/[^0-9.]/g, "").replace(/(\..*?)\..*/g, "$1")
+      : val.replace(/\D/g, "");
+    if (cleaned.length > 1 && cleaned.startsWith("0") && cleaned[1] !== ".") {
+      cleaned = cleaned.replace(/^0+/, "") || "0";
+    }
+    return cleaned;
+  };
+
+  // Helper to auto-assemble Real Time Change string
+  const updateRealTimeChangeHelper = (dir: "DOWN" | "UP" | "UNCHANGED", amt: string, pct: string) => {
+    const cleanAmtRaw = cleanNumberOnly(amt);
+    const cleanPctRaw = cleanNumberOnly(pct);
+    setRealTimeChangeDir(dir);
+    setRealTimeChangeAmount(cleanAmtRaw);
+    setRealTimeChangePercent(cleanPctRaw);
+    let symbol = "▼";
+    if (dir === "UP") symbol = "▲";
+    if (dir === "UNCHANGED") symbol = "-";
+
+    const cleanAmt = cleanAmtRaw.trim() ? (cleanAmtRaw.endsWith("B") || cleanAmtRaw.endsWith("M") ? `$${cleanAmtRaw}` : `$${cleanAmtRaw}B`) : "";
+    const cleanPct = cleanPctRaw.trim() ? (cleanPctRaw.endsWith("%") ? cleanPctRaw : `${cleanPctRaw}%`) : "";
+
+    if (cleanAmt && cleanPct) {
+      setRealTimeChange(`${symbol} ${cleanAmt} (${cleanPct})`);
+    } else if (cleanAmt) {
+      setRealTimeChange(`${symbol} ${cleanAmt}`);
+    } else if (cleanPct) {
+      setRealTimeChange(`${symbol} (${cleanPct})`);
+    } else {
+      setRealTimeChange("");
+    }
+  };
 
   // Form State — Image 1 (From the Editor) & In Their Own Words
   const [editorLastUpdated, setEditorLastUpdated] = useState("");
@@ -81,17 +127,17 @@ export default function BillionairesAdminDesk() {
 
   // Form State — Wealth History Graph
   const [endYear, setEndYear] = useState<number>(2026);
-  const [historyValues, setHistoryValues] = useState<{ [year: number]: number }>({
-    2017: 21,
-    2018: 20,
-    2019: 22,
-    2020: 25,
-    2021: 190,
-    2022: 219,
-    2023: 180,
-    2024: 210,
-    2025: 340,
-    2026: 839,
+  const [historyValues, setHistoryValues] = useState<{ [year: number]: number | string }>({
+    2017: "",
+    2018: "",
+    2019: "",
+    2020: "",
+    2021: "",
+    2022: "",
+    2023: "",
+    2024: "",
+    2025: "",
+    2026: "",
   });
 
   const [errorMsg, setErrorMsg] = useState("");
@@ -111,61 +157,56 @@ export default function BillionairesAdminDesk() {
   const yearsWindow = Array.from({ length: 10 }, (_, i) => endYear - 9 + i);
 
   const openAddModal = () => {
+    if (billionaires.length >= 20) {
+      setShowLimitAlert(true);
+      return;
+    }
     setEditingItem(null);
     setName("");
-    setNetWorth("839");
+    setNetWorth("");
     setChangeStatus("UP");
-    setAge(54);
-    setCountry("United States");
-    setSource("Tesla, SpaceX");
-    setIndustry("Technology");
+    setAge("");
+    setCountry("");
+    setSource("");
+    setIndustry("");
     setPhotoUrl("");
     setHighlightText("");
 
-    // Profile Page Header defaults
-    setTitleRole("CEO, Tesla");
-    setRealTimeNetWorth("$1.028T");
-    setRealTimeChange("▼ $23.2B (2.21%)");
-    setRealTimeAsOf("10/7/26");
-    setListNetWorthAsOf("3/10/26");
-    setPhotoCredit("TIMES CHICAGO FOR BILLIONAIRES");
+    // Profile Page Header defaults (Empty for clean new additions)
+    setTitleRole("");
+    setRealTimeNetWorth("");
+    setRealTimeChangeDir("DOWN");
+    setRealTimeChangeAmount("");
+    setRealTimeChangePercent("");
+    setRealTimeChange("");
+    setRealTimeAsOf("");
+    setListNetWorthAsOf("");
+    setPhotoCredit("");
 
     // From Editor & In Their Own Words
-    setEditorLastUpdated("Last Updated Sep 15, 2026, 6:30am EDT");
-    setEditorBulletPointsText(
-      "• Elon Musk became the world's first trillionaire on June 12 when SpaceX went public.\n• SpaceX opened its first day of trading as a public company at a valuation of nearly $2 trillion.\n• He is a cofounder of seven companies, including electric car maker Tesla and rocketmaker SpaceX.\n• Controls major market equity holdings in Tesla.\n• Pioneer in commercial spaceflight and neural tech."
-    );
-    setInTheirOwnWordsQuote(
-      "“I operate on the physics approach to analysis. You boil things down to the first principles or fundamental truths in a particular area and then you reason up from there.”"
-    );
+    setEditorLastUpdated("");
+    setEditorBulletPointsText("");
+    setInTheirOwnWordsQuote("");
 
     // Personal Stats
-    setSelfMadeScore(8);
-    setPhilanthropyScore(1);
-    setResidence("Austin, Texas");
-    setCitizenship("United States");
-    setMaritalStatus("Divorced");
-    setChildren(14);
-    setEducation("Bachelor of Arts/Science, University of Pennsylvania");
+    setSelfMadeScore("");
+    setPhilanthropyScore("");
+    setResidence("");
+    setCitizenship("");
+    setMaritalStatus("");
+    setChildren("");
+    setEducation("");
 
     // Section 4 Hints
-    setDidYouKnowFactsText(
-      "Musk, who says he's worried about population collapse, has fathered at least 14 children with four women.\nMusk slept on the factory floor at Tesla during Model 3 production ramping in 2018."
-    );
+    setDidYouKnowFactsText("");
 
     setEndYear(2026);
-    setHistoryValues({
-      2017: 21,
-      2018: 20,
-      2019: 22,
-      2020: 25,
-      2021: 190,
-      2022: 219,
-      2023: 180,
-      2024: 210,
-      2025: 340,
-      2026: 839,
-    });
+    const emptyHistory: { [yr: number]: number | string } = {};
+    for (let yr = 2017; yr <= 2026; yr++) {
+      emptyHistory[yr] = "";
+    }
+    setHistoryValues(emptyHistory);
+
     setErrorMsg("");
     setIsModalOpen(true);
   };
@@ -185,12 +226,26 @@ export default function BillionairesAdminDesk() {
     setTitleRole(item.titleRole || `CEO, ${item.source}`);
     setRealTimeNetWorth(item.realTimeNetWorth || item.netWorth);
     setRealTimeChange(item.realTimeChange || "▼ $23.2B (2.21%)");
+
+    const match = (item.realTimeChange || "").match(/([▼▲\-])\s*\$?([0-9.]+)[BM]?\s*(?:\(([0-9.]+)%?\))?/);
+    if (match) {
+      if (match[1] === "▲") setRealTimeChangeDir("UP");
+      else if (match[1] === "-") setRealTimeChangeDir("UNCHANGED");
+      else setRealTimeChangeDir("DOWN");
+      setRealTimeChangeAmount(cleanNumberOnly(match[2] || ""));
+      setRealTimeChangePercent(cleanNumberOnly(match[3] || ""));
+    } else {
+      setRealTimeChangeDir("DOWN");
+      setRealTimeChangeAmount("");
+      setRealTimeChangePercent("");
+    }
+
     setRealTimeAsOf(item.realTimeAsOf || "10/7/26");
     setListNetWorthAsOf(item.listNetWorthAsOf || "3/10/26");
     setPhotoCredit(item.photoCredit || "TIMES CHICAGO FOR BILLIONAIRES");
 
     // From Editor & In Their Own Words
-    setEditorLastUpdated(item.editorLastUpdated || "Last Updated Sep 15, 2026, 6:30am EDT");
+    setEditorLastUpdated(item.editorLastUpdated?.replace(/\s*EDT\s*/gi, "") || "Last Updated Sep 15, 2026, 6:30am");
     const bullets = (item.editorBulletPoints || []).map((b) => (b.startsWith("• ") ? b : `• ${b}`));
     setEditorBulletPointsText(bullets.join("\n"));
     setInTheirOwnWordsQuote(
@@ -232,13 +287,33 @@ export default function BillionairesAdminDesk() {
     setIsModalOpen(true);
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
       setErrorMsg("Please select a valid image file.");
       return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch("http://localhost:5000/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.url) {
+          setPhotoUrl(data.url);
+          setErrorMsg("");
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn("Direct upload error, falling back to base64 reader:", err);
     }
 
     const reader = new FileReader();
@@ -559,8 +634,8 @@ export default function BillionairesAdminDesk() {
       </div>
 
       {/* Add / Edit Modal Dialog with Perfect Internal Scrolling */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6 overflow-hidden">
+      {isModalOpen && mounted && createPortal(
+        <div className="fixed inset-0 z-[99999] bg-black/80 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6 overflow-hidden">
           <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden border border-[#e2e8f0]">
             {/* Fixed Modal Header */}
             <div className="shrink-0 p-5 sm:p-6 border-b border-[#f1f5f9] flex items-center justify-between bg-white z-10">
@@ -617,7 +692,7 @@ export default function BillionairesAdminDesk() {
                     <input
                       type="text"
                       value={netWorth}
-                      onChange={(e) => setNetWorth(e.target.value)}
+                      onChange={(e) => setNetWorth(cleanNumberOnly(e.target.value))}
                       placeholder="e.g. 839 (System auto-adds $ & B)"
                       className="w-full bg-[#f8fafc] border border-[#cbd5e1] rounded-xl px-3.5 py-2 text-xs text-[#0f172a] focus:outline-none focus:border-black"
                       required
@@ -784,29 +859,75 @@ export default function BillionairesAdminDesk() {
 
                   <div>
                     <label className="block text-[#64748b] font-bold uppercase tracking-wider mb-1">
-                      Real Time Net Worth
+                      Real Time Net Worth (Numbers Only)
                     </label>
                     <input
                       type="text"
                       value={realTimeNetWorth}
-                      onChange={(e) => setRealTimeNetWorth(e.target.value)}
+                      onChange={(e) => setRealTimeNetWorth(cleanNumberOnly(e.target.value))}
                       placeholder="e.g. 1.028 (Auto-adds $ & T)"
                       className="w-full bg-[#f8fafc] border border-[#cbd5e1] rounded-xl px-3.5 py-2 text-xs text-[#0f172a] focus:outline-none focus:border-black"
                     />
                   </div>
 
+                <div className="bg-[#f8fafc] border border-[#cbd5e1] p-3 rounded-xl space-y-2 mt-1 col-span-1 sm:col-span-3">
+                  <span className="block text-[11px] font-extrabold text-[#0f172a] uppercase tracking-wider">
+                    Real Time Change Helper
+                  </span>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <div>
+                      <label className="block text-[#64748b] font-bold text-[10px] uppercase mb-1">
+                        Direction
+                      </label>
+                      <select
+                        value={realTimeChangeDir}
+                        onChange={(e) => updateRealTimeChangeHelper(e.target.value as any, realTimeChangeAmount, realTimeChangePercent)}
+                        className="w-full bg-white border border-[#cbd5e1] rounded-lg px-2.5 py-1.5 text-xs text-[#0f172a] focus:outline-none focus:border-black cursor-pointer font-bold"
+                      >
+                        <option value="DOWN">▼ DOWN (Red)</option>
+                        <option value="UP">▲ UP (Green)</option>
+                        <option value="UNCHANGED">- UNCHANGED</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-[#64748b] font-bold text-[10px] uppercase mb-1">
+                        Change Amount (Numbers Only)
+                      </label>
+                      <input
+                        type="text"
+                        value={realTimeChangeAmount}
+                        onChange={(e) => updateRealTimeChangeHelper(realTimeChangeDir, e.target.value, realTimeChangePercent)}
+                        placeholder="e.g. 23.2"
+                        className="w-full bg-white border border-[#cbd5e1] rounded-lg px-2.5 py-1.5 text-xs text-[#0f172a] focus:outline-none focus:border-black"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[#64748b] font-bold text-[10px] uppercase mb-1">
+                        Change % (Numbers Only)
+                      </label>
+                      <input
+                        type="text"
+                        value={realTimeChangePercent}
+                        onChange={(e) => updateRealTimeChangeHelper(realTimeChangeDir, realTimeChangeAmount, e.target.value)}
+                        placeholder="e.g. 2.21"
+                        className="w-full bg-white border border-[#cbd5e1] rounded-lg px-2.5 py-1.5 text-xs text-[#0f172a] focus:outline-none focus:border-black"
+                      />
+                    </div>
+                  </div>
+
                   <div>
-                    <label className="block text-[#64748b] font-bold uppercase tracking-wider mb-1">
-                      Real Time Change
+                    <label className="block text-[#64748b] font-bold text-[10px] uppercase mb-1">
+                      Assembled Result (Editable)
                     </label>
                     <input
                       type="text"
                       value={realTimeChange}
                       onChange={(e) => setRealTimeChange(e.target.value)}
                       placeholder="e.g. ▼ $23.2B (2.21%)"
-                      className="w-full bg-[#f8fafc] border border-[#cbd5e1] rounded-xl px-3.5 py-2 text-xs text-[#0f172a] focus:outline-none focus:border-black"
+                      className="w-full bg-white border border-[#cbd5e1] rounded-lg px-2.5 py-1.5 text-xs text-[#0f172a] font-bold focus:outline-none focus:border-black"
                     />
                   </div>
+                </div>
                 </div>
 
                 <div className="grid grid-cols-3 gap-3">
@@ -1035,12 +1156,13 @@ export default function BillionairesAdminDesk() {
                         {yr} ($B)
                       </label>
                       <input
-                        type="number"
+                        type="text"
                         value={historyValues[yr] !== undefined ? historyValues[yr] : ""}
                         onChange={(e) => {
-                          const val = Number(e.target.value);
+                          const val = cleanNumberOnly(e.target.value);
                           setHistoryValues((prev) => ({ ...prev, [yr]: val }));
                         }}
+                        placeholder="0"
                         className="w-full bg-[#f8fafc] border border-[#cbd5e1] rounded-lg px-2 py-1.5 text-center text-xs font-bold text-[#0f172a] focus:outline-none focus:border-black"
                       />
                     </div>
@@ -1067,7 +1189,35 @@ export default function BillionairesAdminDesk() {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
+      )}
+
+      {/* 20 Billionaires Limit Warning Popup Modal */}
+      {showLimitAlert && mounted && createPortal(
+        <div className="fixed inset-0 z-[999999] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150 font-sans">
+          <div className="bg-white rounded-3xl p-6 sm:p-7 max-w-sm w-full shadow-2xl border border-[#e2e8f0] text-center space-y-4 relative">
+            <div className="w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto mb-1 shrink-0">
+              <svg className="w-6 h-6 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-[#0f172a]">Maximum Limit Reached</h3>
+              <p className="text-xs text-[#64748b] mt-1.5 leading-relaxed">
+                Only 20 billionaires can be added to the list. Please edit or delete an existing billionaire before adding a new one.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowLimitAlert(false)}
+              className="w-full bg-[#0f172a] hover:bg-[#1e293b] text-white font-bold py-2.5 px-4 rounded-xl transition-all cursor-pointer text-xs uppercase tracking-wider font-sans shadow-xs mt-2"
+            >
+              Understood
+            </button>
+          </div>
+        </div>,
+        document.body
       )}
     </div>
   );
