@@ -163,11 +163,11 @@ export const BusinessCategorySection: React.FC = () => {
     <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-0 font-sans select-none border-b border-dashed border-[#888070] pb-5 items-stretch">
       {/* COLUMN 1 (LEFT ~ 3 of 12 cols): Positions 1, 2, 3 */}
       <div 
-        className="col-span-12 md:col-span-1 lg:col-span-3 pr-0 md:pr-[0.3cm] pb-0 lg:pb-0 flex flex-col justify-start border-b lg:border-b-0 lg:border-r border-dashed border-[#888070] mb-0 lg:mb-0"
+        className="col-span-12 md:col-span-1 lg:col-span-3 pr-0 md:pr-[0.3cm] pb-0 lg:pb-0 flex flex-col lg:justify-between justify-start border-b lg:border-b-0 lg:border-r border-dashed border-[#888070] mb-0 lg:mb-0 lg:h-full"
       >
         {/* Business Category Section Topic Header */}
-        <div className="flex items-center space-x-2 pb-2 mb-2">
-          <h2 className="font-serif font-bold text-[24px] sm:text-[26px] lg:text-[28px] text-[#1b7538] leading-none tracking-tight">
+        <div className="flex items-center space-x-2 pb-2 mb-2 lg:pb-1 lg:mb-1 shrink-0">
+          <h2 className="font-serif font-bold text-[24px] sm:text-[26px] lg:text-[26px] text-[#1b7538] leading-none tracking-tight">
             <Link href="/business" className="hover:underline">
               Business
             </Link>
@@ -178,25 +178,30 @@ export const BusinessCategorySection: React.FC = () => {
         </div>
 
         {/* Articles List with divide-y spacing between articles */}
-        <div className="divide-y divide-dashed divide-[#888070]">
+        <div className="divide-y divide-dashed divide-[#888070] lg:flex-1 lg:flex lg:flex-col lg:justify-between">
           {leftItems.map((art, idx) => (
-            <article key={art.id} className={`py-4 lg:py-3 ${idx === 0 ? "pt-0" : ""} ${idx === leftItems.length - 1 ? "pb-[24px] lg:pb-3" : ""}`}>
-              <h3
-                className={`font-serif font-bold text-[#111111] hover:text-[#333333] hover:underline cursor-pointer ${idx === 0 ? "text-[22px] sm:text-[24px] lg:text-[26px] leading-[1.12]" : "text-[17px] sm:text-[18px] lg:text-[19px] leading-[1.15]"}`}
-                style={{
-                  whiteSpace: art.customBreakTitle ? "pre-line" : "normal",
-                  ...(idx > 0 ? { fontFamily: "Georgia, serif" } : {}),
-                }}
-              >
-                <Link href={`/article/${art.slug}`}>
-                  {art.customBreakTitle || art.title}
-                </Link>
-              </h3>
-              {art.summary && (
-                <p className="font-sans text-[12.5px] sm:text-[13px] leading-[1.4] text-[#444444] mt-1.5 line-clamp-5">
-                  {art.summary}
-                </p>
-              )}
+            <article
+              key={art.id}
+              className={`py-4 lg:py-2 ${idx === 0 ? "pt-0 lg:pt-0" : ""} ${idx === leftItems.length - 1 ? "pb-[24px] lg:pb-0" : ""} flex flex-col justify-between`}
+            >
+              <div>
+                <h3
+                  className={`font-serif font-bold text-[#111111] hover:text-[#333333] hover:underline cursor-pointer ${idx === 0 ? "text-[22px] sm:text-[24px] lg:text-[21px] leading-[1.12]" : "text-[17px] sm:text-[18px] lg:text-[17.5px] leading-[1.15]"}`}
+                  style={{
+                    whiteSpace: art.customBreakTitle ? "pre-line" : "normal",
+                    ...(idx > 0 ? { fontFamily: "Georgia, serif" } : {}),
+                  }}
+                >
+                  <Link href={`/article/${art.slug}`}>
+                    {art.customBreakTitle || art.title}
+                  </Link>
+                </h3>
+                {art.summary && (
+                  <p className="font-sans text-[12.5px] sm:text-[13px] lg:text-[12px] leading-[1.4] lg:leading-[1.3] text-[#444444] mt-1.5 lg:mt-1 line-clamp-5 lg:line-clamp-2">
+                    {art.summary}
+                  </p>
+                )}
+              </div>
               <span className="font-mono text-[11px] text-[#666666] mt-1 block">
                 {formatTimeAgo(art.publishedAt)}
               </span>
@@ -264,13 +269,13 @@ export const BusinessCategorySection: React.FC = () => {
       </div>
 
       {/* COLUMN 3 (RIGHT ~ 4 of 12 cols): Positions 7 & 8 + Ad 1 Box */}
-      <div className="col-span-12 md:col-span-2 lg:col-span-4 pl-0 md:pl-[0.3cm] pt-6 lg:pt-0 flex flex-col h-full">
+      <div className="col-span-12 md:col-span-2 lg:col-span-4 pl-0 md:pl-[0.3cm] pt-6 lg:pt-0 flex flex-col justify-between h-full">
         {/* Positions 7 & 8: Top 2 Thumbnail Stories */}
-        <div className="divide-y divide-dashed divide-[#888070]">
+        <div className="divide-y divide-dashed divide-[#888070] shrink-0">
           {rightItems.map((art, idx) => (
-            <article key={art.id} className={`py-4 lg:py-2.5 ${idx === 0 ? "pt-0" : ""} flex items-stretch lg:items-start justify-between space-x-3`}>
+            <article key={art.id} className={`py-4 lg:py-2 ${idx === 0 ? "pt-0" : ""} flex items-stretch lg:items-start justify-between space-x-3`}>
               <div className="flex-1 flex flex-col justify-between lg:block">
-                <h3 className="font-serif font-bold text-[17px] sm:text-[18px] lg:text-[18.5px] leading-[1.15] text-[#111111] hover:underline cursor-pointer" style={{ fontFamily: "Georgia, serif" }}>
+                <h3 className="font-serif font-bold text-[17px] sm:text-[18px] lg:text-[18px] leading-[1.15] text-[#111111] hover:underline cursor-pointer" style={{ fontFamily: "Georgia, serif" }}>
                   <Link href={`/article/${art.slug}`}>
                     {art.title}
                   </Link>
@@ -291,8 +296,8 @@ export const BusinessCategorySection: React.FC = () => {
         </div>
 
         {/* Ad 1 (Business Sidebar) - Reduced space on mobile */}
-        <div className="mt-3 pt-3 pb-4 border-t-0 border-b-0 lg:border-t border-dashed border-[#888070] flex-1 flex flex-col h-full items-center justify-center">
-          <AdPlaceholder slotId="hp_slot_1" width="w-full" height="h-full min-h-[240px]" resolution="300 × 300" className="my-0 mb-0 h-full flex-1 flex flex-col" />
+        <div className="mt-3 lg:mt-2 pt-3 lg:pt-2 pb-4 lg:pb-0 border-t-0 border-b-0 lg:border-t border-dashed border-[#888070] flex-1 flex flex-col items-center justify-center min-h-0">
+          <AdPlaceholder slotId="hp_slot_1" width="w-full" height="h-full min-h-[160px]" resolution="300 × 300" className="my-0 mb-0 h-full flex-1 flex flex-col" />
         </div>
       </div>
     </div>
