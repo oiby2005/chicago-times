@@ -733,7 +733,11 @@ export const Navbar: React.FC = () => {
                     href={getCategoryRoute(title, writerPrefix)}
                     prefetch={false}
                     onClick={handleCategoryClick}
-                    className={`text-[13px] font-['Century_Gothic','Publica_Sans_Light','Kumbh_Sans',sans-serif] px-2.5 pb-2 pt-1 border transition-all whitespace-nowrap leading-none cursor-pointer ${
+                    className={`text-[13px] font-['Century_Gothic','Publica_Sans_Light','Kumbh_Sans',sans-serif] ${
+                      index === 0
+                        ? "pl-2.5 md:pl-1 pr-2.5 md:pr-1.5 lg:pr-1.5"
+                        : "px-2.5 md:px-1.5 lg:px-1.5"
+                    } pb-2 pt-1 border transition-all whitespace-nowrap leading-none cursor-pointer ${
                       isHovered
                         ? "bg-[#f9f9f8] text-[#111111] font-bold border-[#dcd6cd] border-b-transparent rounded-t-sm z-50 relative -mb-[1px]"
                         : "text-[#111111] font-normal border-transparent hover:text-[#990000] active:text-[#990000]"
@@ -746,7 +750,7 @@ export const Navbar: React.FC = () => {
             })}
 
             {/* Integrated Search Icon - Positioned next to Interviews */}
-            <div className="flex items-end flex-shrink-0 relative z-50 pb-2 pl-2 sm:pl-3 pr-0 h-full">
+            <div className="flex items-end flex-shrink-0 relative z-50 pb-2 pl-2 sm:pl-3 md:pl-1 pr-0 h-full">
               <button
                 onClick={() => setIsSearchOverlayOpen(true)}
                 aria-label="Search"
