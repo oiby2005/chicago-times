@@ -95,10 +95,31 @@ const defaultArticles: BusinessArticle[] = [
 ];
 
 const extractText = (html: string): string => {
-  if (typeof window === "undefined") return "";
-  const tmp = document.createElement("div");
-  tmp.innerHTML = html || "";
-  return (tmp.textContent || tmp.innerText || "").trim().slice(0, 450);
+  if (!html) return "";
+  if (typeof window !== "undefined") {
+    try {
+      const tmp = document.createElement("div");
+      tmp.innerHTML = html;
+      const figures = tmp.querySelectorAll("figure, img, style, script");
+      figures.forEach((f) => f.remove());
+      const text = (tmp.textContent || tmp.innerText || "").trim();
+      if (text) return text.slice(0, 600);
+    } catch (e) {}
+  }
+  return html
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
+    .replace(/<figure[^>]*>[\s\S]*?<\/figure>/gi, "")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 600);
 };
 
 export const BusinessCategorySection: React.FC = () => {
@@ -121,14 +142,28 @@ export const BusinessCategorySection: React.FC = () => {
         bizPosts.sort((a: any, b: any) => (b.publishedAt || 0) - (a.publishedAt || 0));
 
         if (bizPosts.length > 0) {
-          const formatted: BusinessArticle[] = bizPosts.slice(0, 8).map((p: any) => ({
-            id: p.id,
-            title: p.title,
-            slug: p.slug || p.id,
-            summary: p.subheadline || extractText(p.bodyContent) || "",
-            imageUrl: p.thumbnail || "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?fm=webp&fit=crop&w=800&q=80",
-            publishedAt: p.publishedAt || (p.id && !isNaN(Number(p.id)) ? Number(p.id) : undefined),
-          }));
+          const formatted: BusinessArticle[] = bizPosts.slice(0, 8).map((p: any) => {
+            const bodyTxt = extractText(p.bodyContent);
+            let summaryText = (p.subheadline || "").trim();
+            if (bodyTxt) {
+              if (summaryText) {
+                if (!summaryText.endsWith(".") && !summaryText.endsWith("!") && !summaryText.endsWith("?")) {
+                  summaryText += ".";
+                }
+                summaryText += " " + bodyTxt;
+              } else {
+                summaryText = bodyTxt;
+              }
+            }
+            return {
+              id: p.id,
+              title: p.title,
+              slug: p.slug || p.id,
+              summary: summaryText,
+              imageUrl: p.thumbnail || "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?fm=webp&fit=crop&w=800&q=80",
+              publishedAt: p.publishedAt || (p.id && !isNaN(Number(p.id)) ? Number(p.id) : undefined),
+            };
+          });
 
           const merged = [...formatted];
           for (let i = 0; i < defaultArticles.length && merged.length < 8; i++) {
@@ -177,14 +212,14 @@ export const BusinessCategorySection: React.FC = () => {
           </div>
         </div>
 
-        {/* Articles List with divide-y spacing between articles */}
-        <div className="divide-y divide-dashed divide-[#888070] lg:flex-1 lg:flex lg:flex-col lg:justify-between">
+        {/* Articles List with equal space for all 3 articles on desktop */}
+        <div className="divide-y divide-dashed divide-[#888070] lg:flex-1 lg:flex lg:flex-col lg:min-h-0">
           {leftItems.map((art, idx) => (
             <article
               key={art.id}
-              className={`py-4 lg:py-2 ${idx === 0 ? "pt-0 lg:pt-0" : ""} ${idx === leftItems.length - 1 ? "pb-[24px] lg:pb-0" : ""} flex flex-col justify-between`}
+              className={`py-4 lg:py-2 ${idx === 0 ? "pt-0 lg:pt-0" : ""} ${idx === leftItems.length - 1 ? "pb-[24px] lg:pb-0" : ""} flex flex-col justify-between lg:flex-1 lg:min-h-0 lg:overflow-hidden`}
             >
-              <div>
+              <div className="lg:min-h-0 lg:overflow-hidden">
                 <h3
                   className={`font-serif font-bold text-[#111111] hover:text-[#333333] hover:underline cursor-pointer ${idx === 0 ? "text-[22px] sm:text-[24px] lg:text-[21px] leading-[1.12]" : "text-[17px] sm:text-[18px] lg:text-[17.5px] leading-[1.15]"}`}
                   style={{
@@ -197,12 +232,14 @@ export const BusinessCategorySection: React.FC = () => {
                   </Link>
                 </h3>
                 {art.summary && (
-                  <p className="font-sans text-[12.5px] sm:text-[13px] lg:text-[12px] leading-[1.4] lg:leading-[1.3] text-[#444444] mt-1.5 lg:mt-1 line-clamp-5 lg:line-clamp-2">
+                  <p className={`font-sans text-[12.5px] sm:text-[13px] lg:text-[12px] leading-[1.4] lg:leading-[1.3] text-[#444444] mt-1.5 lg:mt-1 line-clamp-5 ${
+                    (art.title?.length || 0) > 60 ? "lg:line-clamp-3" : "lg:line-clamp-4"
+                  }`}>
                     {art.summary}
                   </p>
                 )}
               </div>
-              <span className="font-mono text-[11px] text-[#666666] mt-1 block">
+              <span className="font-mono text-[11px] text-[#666666] mt-1 lg:mt-auto block shrink-0">
                 {formatTimeAgo(art.publishedAt)}
               </span>
             </article>
@@ -274,8 +311,8 @@ export const BusinessCategorySection: React.FC = () => {
         <div className="divide-y divide-dashed divide-[#888070] shrink-0">
           {rightItems.map((art, idx) => (
             <article key={art.id} className={`py-4 lg:py-2 ${idx === 0 ? "pt-0" : ""} flex items-stretch lg:items-start justify-between space-x-3`}>
-              <div className="flex-1 flex flex-col justify-between lg:block">
-                <h3 className="font-serif font-bold text-[17px] sm:text-[18px] lg:text-[18px] leading-[1.15] text-[#111111] hover:underline cursor-pointer" style={{ fontFamily: "Georgia, serif" }}>
+              <div className="flex-1 min-w-0 flex flex-col justify-between lg:block">
+                <h3 className="font-serif font-bold text-[17px] sm:text-[18px] lg:text-[18px] leading-[1.15] text-[#111111] hover:underline cursor-pointer line-clamp-2" style={{ fontFamily: "Georgia, serif" }}>
                   <Link href={`/article/${art.slug}`}>
                     {art.title}
                   </Link>
@@ -295,8 +332,8 @@ export const BusinessCategorySection: React.FC = () => {
           ))}
         </div>
 
-        {/* Ad 1 (Business Sidebar) - Reduced space on mobile */}
-        <div className="mt-3 lg:mt-2 pt-3 lg:pt-2 pb-4 lg:pb-0 border-t-0 border-b-0 lg:border-t border-dashed border-[#888070] flex-1 flex flex-col items-center justify-center min-h-0">
+        {/* Ad 1 (Business Sidebar) - Equalized top and bottom spacing to dashed lines on desktop/laptop */}
+        <div className="mt-3 lg:mt-2 pt-3 lg:pt-[36px] pb-4 lg:pb-[16px] border-t-0 border-b-0 lg:border-t border-dashed border-[#888070] flex-1 flex flex-col items-center justify-center min-h-0">
           <AdPlaceholder slotId="hp_slot_1" width="w-full" height="h-full min-h-[160px]" resolution="300 × 300" className="my-0 mb-0 h-full flex-1 flex flex-col" />
         </div>
       </div>
