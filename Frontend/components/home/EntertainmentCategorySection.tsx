@@ -277,7 +277,7 @@ export const EntertainmentCategorySection: React.FC = () => {
             <div className="flex items-stretch md:items-start space-x-3 pr-0 md:pr-4 border-b md:border-b-0 md:border-r border-dashed border-[#CCCCCC] pb-[28px] md:pb-0 mb-0 md:mb-0">
               <Link
                 href={`/article/${miniItem1.slug}`}
-                className="shrink-0 block relative w-[140px] sm:w-[165px] h-auto self-stretch md:self-auto md:aspect-[16/10] overflow-hidden bg-gray-100 group"
+                className="shrink-0 block relative w-[140px] sm:w-[160px] h-auto self-stretch md:self-auto md:aspect-[16/10] overflow-hidden bg-gray-100 group"
               >
                 <img
                   src={miniItem1.imageUrl}
@@ -285,7 +285,7 @@ export const EntertainmentCategorySection: React.FC = () => {
                   className="absolute md:static inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
               </Link>
-              <div className="flex flex-col justify-between flex-1 h-full">
+              <div className="flex flex-col justify-between flex-1 min-w-0 h-full">
                 <div>
                   {renderHomeTags(miniItem1)}
                   <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-1 line-clamp-3 overflow-hidden text-ellipsis" style={{ fontFamily: "Georgia, serif" }}>
@@ -311,7 +311,7 @@ export const EntertainmentCategorySection: React.FC = () => {
             <div className="flex items-stretch md:items-start space-x-3 pt-[28px] md:pt-0 pl-0 md:pl-4">
               <Link
                 href={`/article/${miniItem2.slug}`}
-                className="shrink-0 block relative w-[140px] sm:w-[165px] h-auto self-stretch md:self-auto md:aspect-[16/10] overflow-hidden bg-gray-100 group"
+                className="shrink-0 block relative w-[140px] sm:w-[160px] h-auto self-stretch md:self-auto md:aspect-[16/10] overflow-hidden bg-gray-100 group"
               >
                 <img
                   src={miniItem2.imageUrl}
@@ -319,7 +319,7 @@ export const EntertainmentCategorySection: React.FC = () => {
                   className="absolute md:static inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
               </Link>
-              <div className="flex flex-col justify-between flex-1 h-full">
+              <div className="flex flex-col justify-between flex-1 min-w-0 h-full">
                 <div>
                   {renderHomeTags(miniItem2)}
                   <h4 className="font-serif font-bold text-[15px] sm:text-[16px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-1 line-clamp-3 overflow-hidden text-ellipsis" style={{ fontFamily: "Georgia, serif" }}>

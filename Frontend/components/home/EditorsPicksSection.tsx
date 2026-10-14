@@ -258,19 +258,19 @@ export const EditorsPicksSection: React.FC = () => {
           </div>
 
           {/* Row 2 Bottom 2 Side-by-Side Cards */}
-          <div className="pt-[34px] pb-0 md:pt-8 md:pb-0 mt-0 md:mt-4 border-b-0 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="pt-[34px] pb-0 md:pt-8 md:pb-0 mt-0 md:mt-4 border-b-0 grid grid-cols-1 sm:grid-cols-2 gap-0">
             {bottomCards[0] && (
               <article 
-                className="flex items-stretch sm:items-start space-x-3 pr-0 sm:pr-4 border-b sm:border-b-0 sm:border-r border-dashed border-[#CCCCCC] pt-0 pb-[34px] sm:pt-0 sm:pb-0 mb-0 sm:mb-0"
+                className="flex items-stretch sm:items-start space-x-3 pr-0 sm:pr-4 md:pr-4 border-b sm:border-b-0 sm:border-r border-dashed border-[#CCCCCC] pt-0 pb-[34px] sm:pt-0 sm:pb-0 mb-0 sm:mb-0"
               >
-                <Link href={`/article/${bottomCards[0].slug}`} className="shrink-0 block w-[160px] h-auto self-stretch sm:self-auto sm:w-[185px] sm:h-[115px] overflow-hidden bg-gray-100 border border-gray-200">
+                <Link href={`/article/${bottomCards[0].slug}`} className="shrink-0 block w-[160px] h-auto self-stretch sm:self-auto sm:w-[170px] sm:h-[110px] overflow-hidden bg-gray-100 border border-gray-200">
                   <img
                     src={bottomCards[0].imageUrl}
                     alt={bottomCards[0].title}
                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                   />
                 </Link>
-                <div className="flex-1 flex flex-col justify-between h-full min-h-0 sm:min-h-[115px]">
+                <div className="flex-1 min-w-0 flex flex-col justify-between h-full min-h-0 sm:min-h-[110px]">
                   <div>
                     {renderHomeTags(bottomCards[0])}
                     <h4 className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.2] text-[#111111] hover:underline cursor-pointer line-clamp-3 overflow-hidden text-ellipsis" style={{ fontFamily: "Georgia, serif" }}>
@@ -292,15 +292,15 @@ export const EditorsPicksSection: React.FC = () => {
             )}
 
             {bottomCards[1] && (
-              <article className="flex items-stretch sm:items-start space-x-3 pl-0 sm:pl-2 pt-[34px] sm:pt-0">
-                <Link href={`/article/${bottomCards[1].slug}`} className="shrink-0 block w-[160px] h-auto self-stretch sm:self-auto sm:w-[185px] sm:h-[115px] overflow-hidden bg-gray-100 border border-gray-200">
+              <article className="flex items-stretch sm:items-start space-x-3 pl-0 sm:pl-4 md:pl-4 pt-[34px] sm:pt-0">
+                <Link href={`/article/${bottomCards[1].slug}`} className="shrink-0 block w-[160px] h-auto self-stretch sm:self-auto sm:w-[170px] sm:h-[110px] overflow-hidden bg-gray-100 border border-gray-200">
                   <img
                     src={bottomCards[1].imageUrl}
                     alt={bottomCards[1].title}
                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                   />
                 </Link>
-                <div className="flex-1 flex flex-col justify-between h-full min-h-0 sm:min-h-[115px]">
+                <div className="flex-1 min-w-0 flex flex-col justify-between h-full min-h-0 sm:min-h-[110px]">
                   <div>
                     {renderHomeTags(bottomCards[1])}
                     <h4 className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.2] text-[#111111] hover:underline cursor-pointer line-clamp-3 overflow-hidden text-ellipsis" style={{ fontFamily: "Georgia, serif" }}>
