@@ -106,7 +106,7 @@ export const MostPopularNewsSidebar: React.FC = () => {
   }, [loadPosts]);
 
   return (
-    <aside className="w-full select-none my-8">
+    <aside className="w-full  my-8">
       {/* Header matching Image 1 */}
       <div className="pb-2 mb-2">
         <h3 className="font-serif font-bold text-[24px] sm:text-[26px] text-[#111111] tracking-tight">

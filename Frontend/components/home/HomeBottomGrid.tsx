@@ -11,7 +11,7 @@ export const HomeBottomGrid: React.FC = () => {
   const [isPlayingVideo, setIsPlayingVideo] = useState(false);
 
   return (
-    <div className="w-full bg-white text-[#111111] font-sans pb-16 select-none">
+    <div className="w-full bg-white text-[#111111] font-sans pb-16 ">
       <Container>
         {/* ================================================================= */}
         {/* ROW 1: BUSINESS & FINANCE / REAL ESTATE / BUY SIDE (Screenshots 1-2) */}

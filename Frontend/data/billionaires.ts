@@ -47,6 +47,8 @@ export interface BillionaireItem {
 
   // New Profile Section 1: In Their Own Words Quote (Image 1 Specs)
   inTheirOwnWordsQuote?: string;
+  inTheirOwnWordsQuote2?: string;
+  inTheirOwnWordsQuotes?: string[];
 }
 
 export const INITIAL_BILLIONAIRES: BillionaireItem[] = [

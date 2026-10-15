@@ -195,7 +195,7 @@ export const BusinessCategorySection: React.FC = () => {
   const rightItems = articles.slice(6, 8);
 
   return (
-    <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-0 font-sans select-none border-b border-dashed border-[#888070] pb-5 items-stretch">
+    <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-0 font-sans  border-b border-dashed border-[#888070] pb-5 items-stretch">
       {/* COLUMN 1 (LEFT ~ 3 of 12 cols): Positions 1, 2, 3 */}
       <div 
         className="col-span-12 md:col-span-1 lg:col-span-3 pr-0 md:pr-[0.3cm] pb-0 lg:pb-0 flex flex-col lg:justify-between justify-start border-b lg:border-b-0 lg:border-r border-dashed border-[#888070] mb-0 lg:mb-0 lg:h-full"
@@ -224,7 +224,7 @@ export const BusinessCategorySection: React.FC = () => {
                   className={`font-serif font-bold text-[#111111] hover:text-[#333333] hover:underline cursor-pointer ${idx === 0 ? "text-[22px] sm:text-[24px] lg:text-[21px] leading-[1.12]" : "text-[17px] sm:text-[18px] lg:text-[17.5px] leading-[1.15]"}`}
                   style={{
                     whiteSpace: art.customBreakTitle ? "pre-line" : "normal",
-                    ...(idx > 0 ? { fontFamily: "Georgia, serif" } : {}),
+                    fontFamily: "Georgia, serif",
                   }}
                 >
                   <Link href={`/article/${art.slug}`}>
@@ -282,7 +282,7 @@ export const BusinessCategorySection: React.FC = () => {
           {centerBottomItems.map((art) => (
             <article key={art.id} className="flex flex-col justify-start py-[20px] sm:py-0 border-b sm:border-b-0 border-dashed border-[#888070] last:border-b-0">
               <div className="flex flex-col h-full">
-                <Link href={`/article/${art.slug}`} className="shrink-0 block w-full h-[110px] sm:h-[110px] lg:h-[120px] overflow-hidden bg-gray-100 border border-gray-200 group mb-2">
+                <Link href={`/article/${art.slug}`} className="shrink-0 block w-full h-[5.5cm] sm:h-[110px] lg:h-[120px] overflow-hidden bg-gray-100 border border-gray-200 group mb-2">
                   <img
                     src={art.imageUrl || "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?fm=webp&fit=crop&w=400&q=80"}
                     alt={art.title}

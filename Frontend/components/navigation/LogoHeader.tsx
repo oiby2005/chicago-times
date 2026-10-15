@@ -73,13 +73,20 @@ export const LogoHeader: React.FC = () => {
 
   const loadUserFromStorage = () => {
     if (typeof window === "undefined") return;
+    try { localStorage.removeItem("wsj_user"); } catch (e) {}
+
+    if (sessionStorage.getItem("wsj_logged_out") === "true" || localStorage.getItem("wsj_logged_out") === "true") {
+      setCurrentUser(null);
+      return;
+    }
+
     const tabUser = sessionStorage.getItem("wsj_user");
     let parsed: any = null;
     if (tabUser) {
       try { parsed = JSON.parse(tabUser); } catch (e) {}
     }
 
-    if (!parsed && pathname) {
+    if (!parsed && pathname && sessionStorage.getItem("wsj_session_active") === "true") {
       const match = pathname.match(/^\/(writer|admin|reader)\/([^/]+)/i);
       if (match) {
         const role = match[1].toLowerCase();
@@ -96,24 +103,81 @@ export const LogoHeader: React.FC = () => {
       }
     }
 
+    if (parsed && parsed.email) {
+      const cleanEmail = (parsed.email || "").toLowerCase().trim();
+      try {
+        const map = JSON.parse(localStorage.getItem("wsj_users_by_email") || "{}");
+        if (map[cleanEmail]) {
+          const mapped = map[cleanEmail];
+          parsed = {
+            ...parsed,
+            ...mapped,
+            full_name: mapped.full_name || mapped.name || parsed.full_name,
+            name: mapped.full_name || mapped.name || parsed.name,
+          };
+        }
+      } catch (e) {}
+    }
+
     setCurrentUser(parsed);
+
+    // Revalidate with backend to ensure the latest user profile and name in the active tab
+    if (parsed && parsed.email) {
+      const cleanEmail = (parsed.email || "").toLowerCase().trim();
+      fetch(`http://localhost:5000/api/users/${encodeURIComponent(cleanEmail)}`)
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (data && data.success && data.user) {
+            const serverUser = data.user;
+            const updated = {
+              ...parsed,
+              ...serverUser,
+              full_name: serverUser.full_name || serverUser.name || parsed.full_name,
+              name: serverUser.full_name || serverUser.name || parsed.name,
+            };
+            sessionStorage.setItem("wsj_user", JSON.stringify(updated));
+            setCurrentUser(updated);
+          }
+        })
+        .catch(() => {});
+    }
   };
 
   useEffect(() => {
     loadUserFromStorage();
   }, [pathname, isDashboardPage, isAdminDashboard, isWriterDashboard, isReaderDashboard]);
 
-  // Event listener for profile updates & open modal events
+  // Event listener for profile updates & open modal events & cross-tab sync
   useEffect(() => {
     const handleUpdate = () => loadUserFromStorage();
     const handleOpenModal = () => setShowProfileModal(true);
 
+    let channel: BroadcastChannel | null = null;
+    try {
+      channel = new BroadcastChannel("wsj_user_sync");
+      channel.onmessage = () => {
+        // Only re-sync if this specific tab already has an active session
+        if (sessionStorage.getItem("wsj_user")) {
+          loadUserFromStorage();
+        }
+      };
+    } catch (e) {}
+
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "wsj_users_by_email" && sessionStorage.getItem("wsj_user")) {
+        loadUserFromStorage();
+      }
+    };
+
     window.addEventListener("wsj_user_updated", handleUpdate);
     window.addEventListener("wsj_open_profile_modal", handleOpenModal);
+    window.addEventListener("storage", handleStorage);
 
     return () => {
       window.removeEventListener("wsj_user_updated", handleUpdate);
       window.removeEventListener("wsj_open_profile_modal", handleOpenModal);
+      window.removeEventListener("storage", handleStorage);
+      if (channel) channel.close();
     };
   }, []);
 
@@ -139,7 +203,11 @@ export const LogoHeader: React.FC = () => {
       localStorage.removeItem("wsj_user");
       localStorage.removeItem("wsj_token");
       localStorage.removeItem("wsj_admin_user");
+      localStorage.removeItem("wsj_writer_user");
+      localStorage.removeItem("wsj_reader_user");
       localStorage.removeItem("wsj_session_active");
+      sessionStorage.setItem("wsj_logged_out", "true");
+      localStorage.setItem("wsj_logged_out", "true");
       setCurrentUser(null);
       setShowDropdown(false);
       window.dispatchEvent(new Event("wsj_user_updated"));
@@ -158,7 +226,7 @@ export const LogoHeader: React.FC = () => {
   const isLoggedIn = currentUser !== null;
   const userRole = currentUser?.role?.toLowerCase() || "";
 
-  const displayName = currentUser?.full_name || "";
+  const displayName = currentUser?.full_name || currentUser?.name || "";
   const displayEmail = currentUser?.email || "";
   let dashboardLabel = "Dashboard";
   let dashboardHref = "/";
@@ -240,7 +308,7 @@ export const LogoHeader: React.FC = () => {
   );
 
   return (
-    <div className="bg-white h-auto py-2 sm:py-3 relative z-50 select-none">
+    <div className="bg-white h-auto py-2 sm:py-3 relative z-50 ">
       <SearchOverlay
         isOpen={isSearchOverlayOpen}
         onClose={() => setIsSearchOverlayOpen(false)}
@@ -354,7 +422,7 @@ export const LogoHeader: React.FC = () => {
         </div>
 
         {/* Sub-Utility Edition Navigation */}
-        <div className="flex items-center justify-between sm:justify-center max-w-full overflow-x-hidden sm:overflow-visible no-scrollbar w-full text-[10px] sm:text-[12px] font-['Century_Gothic','Publica_Sans_Light','Kumbh_Sans',sans-serif] font-normal text-[#333333] tracking-tight select-none z-30 whitespace-nowrap my-1 pt-1.5 pb-0.5 px-0.5 sm:px-1">
+        <div className="flex items-center justify-center max-w-full overflow-x-hidden sm:overflow-visible no-scrollbar w-full text-[10px] min-[360px]:text-[10.5px] min-[390px]:text-[11px] sm:text-[12px] font-['Century_Gothic','Publica_Sans_Light','Kumbh_Sans',sans-serif] font-normal text-[#333333] tracking-tight z-30 whitespace-nowrap my-1.5 pt-2 pb-2.5 md:pb-0.5 px-1 sm:px-1 border-b md:border-b-0 border-gray-200">
           {/* Edition Selection Dropdown Card - Desktop and Laptop only */}
           <div className="hidden md:inline-block relative" ref={editionRef}>
             <button
@@ -411,7 +479,7 @@ export const LogoHeader: React.FC = () => {
           </a>
 
           {/* Gap between Opinions and | */}
-          <span className="mx-1 sm:ml-[15px] sm:mr-[15px] text-[#999999] font-light text-[9px] sm:text-[10px] leading-none shrink-0">|</span>
+          <span className="mx-0.5 min-[390px]:mx-1 sm:ml-[15px] sm:mr-[15px] text-[#999999] font-light text-[9px] sm:text-[10px] leading-none shrink-0">|</span>
 
           {/* Upcoming Top 20 Entrepreneurs */}
           <Link
@@ -422,7 +490,7 @@ export const LogoHeader: React.FC = () => {
           </Link>
 
           {/* Gap between Upcoming Top 20 and | */}
-          <span className="mx-1 sm:ml-[15px] sm:mr-[15px] text-[#999999] font-light text-[9px] sm:text-[10px] leading-none shrink-0">|</span>
+          <span className="mx-0.5 min-[390px]:mx-1 sm:ml-[15px] sm:mr-[15px] text-[#999999] font-light text-[9px] sm:text-[10px] leading-none shrink-0">|</span>
 
           {/* World 20 Billionaires */}
           <Link

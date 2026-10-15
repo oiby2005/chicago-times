@@ -14,9 +14,10 @@ interface BookmarkButtonProps {
     image?: string;
   };
   variant?: "inline" | "topbar";
+  size?: "sm" | "md";
 }
 
-export default function BookmarkButton({ article, variant = "inline" }: BookmarkButtonProps) {
+export default function BookmarkButton({ article, variant = "inline", size = "md" }: BookmarkButtonProps) {
   const [isBookmarked, setIsBookmarked] = useState(false);
 
   const slugOrId = article.slug || article.id || "";
@@ -26,7 +27,7 @@ export default function BookmarkButton({ article, variant = "inline" }: Bookmark
       const checkBookmarkState = () => {
         try {
           let currentEmail = "";
-          const userStr = sessionStorage.getItem("wsj_user") || localStorage.getItem("wsj_user");
+          const userStr = sessionStorage.getItem("wsj_user");
           if (userStr) {
             try {
               const parsed = JSON.parse(userStr);
@@ -67,7 +68,7 @@ export default function BookmarkButton({ article, variant = "inline" }: Bookmark
 
     try {
       let currentEmail = "reader@gmail.com";
-      const tabUserStr = sessionStorage.getItem("wsj_user") || localStorage.getItem("wsj_user");
+      const tabUserStr = sessionStorage.getItem("wsj_user");
       if (tabUserStr) {
         try {
           const parsed = JSON.parse(tabUserStr);
@@ -157,11 +158,15 @@ export default function BookmarkButton({ article, variant = "inline" }: Bookmark
     );
   }
 
+  const isSm = size === "sm";
+
   return (
     <button
       type="button"
       onClick={handleToggleBookmark}
-      className={`inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-none border transition-all cursor-pointer shadow-2xs ${
+      className={`inline-flex items-center justify-center ${
+        isSm ? "w-5 h-5" : "w-6 h-6"
+      } rounded-none border transition-all cursor-pointer shadow-2xs ${
         isBookmarked
           ? "bg-[#0f172a] text-white border-[#0f172a]"
           : "bg-white hover:bg-slate-100 text-[#334155] border-[#cbd5e1]"
@@ -171,7 +176,7 @@ export default function BookmarkButton({ article, variant = "inline" }: Bookmark
       suppressHydrationWarning
     >
       <svg
-        className="w-3.5 h-3.5"
+        className={isSm ? "w-2.5 h-2.5" : "w-3 h-3"}
         fill={isBookmarked ? "currentColor" : "none"}
         stroke="currentColor"
         strokeWidth="2"

@@ -398,7 +398,7 @@ export default function CategoryPageTemplate({
         {/* Category Page Main Body */}
         <Container className="pt-6 sm:pt-10 pb-10">
           {/* Top Header Banner with Category Title */}
-          <div className="border-t border-b border-[#111111] py-2 sm:py-3 text-center mb-8">
+          <div className="border-b border-[#111111] py-2 sm:py-3 text-center mb-8">
             <h1 className="font-encorpada font-['Encorpada_Classic_Compressed','Escrow_Display_Condensed',serif] text-[38px] sm:text-[46px] font-bold text-[#111111] leading-none">
               {categoryTitle}
             </h1>
@@ -443,14 +443,14 @@ export default function CategoryPageTemplate({
               <article className="flex flex-row items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
                   <h2
-                    className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.2] text-[#111111] hover:text-[#333333] hover:underline cursor-pointer"
+                    className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.2] text-[#111111] hover:text-[#333333] hover:underline cursor-pointer md:line-clamp-3 md:h-[3.6rem] overflow-hidden"
                     style={{ fontFamily: "Georgia, serif" }}
                   >
                     <Link href={`/article/${card2.slug || card2.id}`}>
                       {card2.title}
                     </Link>
                   </h2>
-                  <p className="font-sans text-[12.5px] leading-[1.38] text-[#555555] mt-2 line-clamp-3">
+                  <p className="font-sans text-[12.5px] leading-[1.38] text-[#555555] mt-2 line-clamp-3 md:h-[3.1rem] overflow-hidden">
                     {card2.summary}
                   </p>
                 </div>
@@ -476,14 +476,14 @@ export default function CategoryPageTemplate({
               <article className="flex flex-row items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
                   <h2
-                    className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.2] text-[#111111] hover:text-[#333333] hover:underline cursor-pointer"
+                    className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.2] text-[#111111] hover:text-[#333333] hover:underline cursor-pointer md:line-clamp-3 md:h-[3.6rem] overflow-hidden"
                     style={{ fontFamily: "Georgia, serif" }}
                   >
                     <Link href={`/article/${card3.slug || card3.id}`}>
                       {card3.title}
                     </Link>
                   </h2>
-                  <p className="font-sans text-[12.5px] leading-[1.38] text-[#555555] mt-2 line-clamp-3">
+                  <p className="font-sans text-[12.5px] leading-[1.38] text-[#555555] mt-2 line-clamp-3 md:h-[3.1rem] overflow-hidden">
                     {card3.summary}
                   </p>
                 </div>
@@ -512,14 +512,14 @@ export default function CategoryPageTemplate({
               <article className="flex flex-row items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
                   <h2
-                    className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.2] text-[#111111] hover:text-[#333333] hover:underline cursor-pointer"
+                    className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.2] text-[#111111] hover:text-[#333333] hover:underline cursor-pointer md:line-clamp-3 md:h-[3.6rem] overflow-hidden"
                     style={{ fontFamily: "Georgia, serif" }}
                   >
                     <Link href={`/article/${card4.slug || card4.id}`}>
                       {card4.title}
                     </Link>
                   </h2>
-                  <p className="font-sans text-[12.5px] leading-[1.38] text-[#555555] mt-2 line-clamp-3">
+                  <p className="font-sans text-[12.5px] leading-[1.38] text-[#555555] mt-2 line-clamp-3 md:h-[3.1rem] overflow-hidden">
                     {card4.summary}
                   </p>
                 </div>
@@ -545,14 +545,14 @@ export default function CategoryPageTemplate({
               <article className="flex flex-row items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
                   <h2
-                    className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.2] text-[#111111] hover:text-[#333333] hover:underline cursor-pointer"
+                    className="font-serif font-bold text-[16px] sm:text-[17px] leading-[1.2] text-[#111111] hover:text-[#333333] hover:underline cursor-pointer md:line-clamp-3 md:h-[3.6rem] overflow-hidden"
                     style={{ fontFamily: "Georgia, serif" }}
                   >
                     <Link href={`/article/${card5.slug || card5.id}`}>
                       {card5.title}
                     </Link>
                   </h2>
-                  <p className="font-sans text-[12.5px] leading-[1.38] text-[#555555] mt-2 line-clamp-3">
+                  <p className="font-sans text-[12.5px] leading-[1.38] text-[#555555] mt-2 line-clamp-3 md:h-[3.1rem] overflow-hidden">
                     {card5.summary}
                   </p>
                 </div>

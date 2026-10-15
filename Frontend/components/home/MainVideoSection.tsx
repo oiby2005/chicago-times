@@ -208,7 +208,7 @@ export const MainVideoSection: React.FC = () => {
   const slot1Title = cleanVideoTitle(slot1.title);
 
   return (
-    <div className="w-full font-sans select-none pt-2 pb-4">
+    <div className="w-full font-sans  pt-2 pb-4">
       {/* Section Header: Videos */}
       <div className="flex items-center justify-between pb-2 mb-[24px] md:mb-3 border-b border-dashed border-[#CCCCCC]">
         <h2 className="font-serif font-bold text-[24px] sm:text-[28px] text-[#111111] tracking-tight">

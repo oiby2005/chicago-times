@@ -54,7 +54,7 @@ function MainContentWealthChart({ history, endYear }: { history?: WealthPoint[];
   }, "");
 
   return (
-    <div className="w-full bg-white border border-[#E5E0D5] p-5 sm:p-8 select-none">
+    <div className="w-full bg-white border border-[#E5E0D5] p-5 sm:p-8 ">
       <div className="text-center mb-5">
         <h3
           className="font-bold text-[19px] sm:text-[21px] text-[#111111]"
@@ -498,11 +498,17 @@ export default function BillionaireProfileClient({ id }: { id: string }) {
         `Maintains executive leadership in ${item.industry} and international ventures.`
       ];
 
+  const ownWordsQuotes = [
+    item.inTheirOwnWordsQuote || `“I operate on the physics approach to analysis. You boil things down to the first principles or fundamental truths in a particular area and then you reason up from there.”`,
+    item.inTheirOwnWordsQuote2 || (item.inTheirOwnWordsQuotes && item.inTheirOwnWordsQuotes[1]) || `“When something is important enough, you do it even if the odds are not in your favor.”`
+  ];
+  const [quoteIdx, setQuoteIdx] = useState(0);
+
   const displayedOthers = showAllBillionaires ? otherBillionaires : otherBillionaires.slice(0, 5);
   const currentVisibleArticles = articlesList.slice(0, visibleArticleCount);
 
   return (
-    <main className="min-h-screen flex flex-col bg-white text-[#111111] select-none">
+    <main className="min-h-screen flex flex-col bg-white text-[#111111]">
       <Header />
       <StickyHeaderBar />
 
@@ -633,14 +639,14 @@ export default function BillionaireProfileClient({ id }: { id: string }) {
             </div>
 
             {/* Right Photo Column (Compact height matching Image 2) */}
-            <div className="lg:col-span-5 h-[260px] sm:h-[300px] lg:h-[320px] relative overflow-hidden bg-[#EFECE6] border-t lg:border-t-0 lg:border-l border-[#E5E0D5]">
+            <div className="lg:col-span-5 h-[260px] sm:h-[300px] lg:h-[320px] relative overflow-hidden bg-[#FAF8F5] border-t lg:border-t-0 lg:border-l border-[#E5E0D5]">
               <img
                 src={item.photoUrl || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80"}
                 alt={item.name}
                 onError={(e) => {
                   (e.currentTarget as HTMLImageElement).src = "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80";
                 }}
-                className="w-full h-full object-cover object-center"
+                className="w-full h-full object-contain object-center bg-[#FAF8F5]"
               />
             </div>
           </div>
@@ -676,10 +682,7 @@ export default function BillionaireProfileClient({ id }: { id: string }) {
               </ul>
             </div>
 
-            {/* 2nd Section: "Wealth History" Graph */}
-            <MainContentWealthChart history={item.wealthHistory} endYear={item.endYear} />
-
-            {/* 3rd Section: "Personal Stats" Table */}
+            {/* 2nd Section: "Personal Stats" Table (Swapped before Wealth History) */}
             <div className="w-full pt-6 pb-2 border-t border-[#111111]">
               <h3
                 className="font-bold text-[15px] text-[#333333] mb-4"
@@ -736,6 +739,9 @@ export default function BillionaireProfileClient({ id }: { id: string }) {
               </div>
             </div>
 
+            {/* 3rd Section: "Wealth History" Graph (Swapped after Personal Stats) */}
+            <MainContentWealthChart history={item.wealthHistory} endYear={item.endYear} />
+
             {/* 4th Section: "Did you know" Fact Carousel */}
             <DidYouKnowSlider facts={item.didYouKnowFacts} />
 
@@ -750,21 +756,46 @@ export default function BillionaireProfileClient({ id }: { id: string }) {
               />
             </div>
 
-            {/* 5th Section: "In Their Own Words" Quote Block */}
+            {/* 5th Section: "In Their Own Words" Quote Block (2-Quote Slider) */}
             <div className="w-full pt-8 pb-4 border-t border-[#111111]">
-              <h3
-                className="font-bold text-[20px] text-[#111111] mb-5"
-                style={{ fontFamily: "'Poppins', sans-serif" }}
-              >
-                In Their Own Words
-              </h3>
+              <div className="flex items-center justify-between mb-5">
+                <h3
+                  className="font-bold text-[20px] text-[#111111]"
+                  style={{ fontFamily: "'Poppins', sans-serif" }}
+                >
+                  In Their Own Words
+                </h3>
+                {ownWordsQuotes.length > 1 && (
+                  <div className="flex items-center space-x-2">
+                    <button
+                      type="button"
+                      onClick={() => setQuoteIdx((prev) => (prev > 0 ? prev - 1 : ownWordsQuotes.length - 1))}
+                      className="w-7 h-7 rounded-full border border-[#DDD8CC] bg-[#FAF8F5] hover:bg-[#EFECE6] text-[#111111] flex items-center justify-center transition-colors cursor-pointer text-xs font-bold"
+                      aria-label="Previous quote"
+                    >
+                      ←
+                    </button>
+                    <span className="text-xs font-bold text-[#666666] font-sans">
+                      {quoteIdx + 1} / {ownWordsQuotes.length}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setQuoteIdx((prev) => (prev < ownWordsQuotes.length - 1 ? prev + 1 : 0))}
+                      className="w-7 h-7 rounded-full border border-[#DDD8CC] bg-[#FAF8F5] hover:bg-[#EFECE6] text-[#111111] flex items-center justify-center transition-colors cursor-pointer text-xs font-bold"
+                      aria-label="Next quote"
+                    >
+                      →
+                    </button>
+                  </div>
+                )}
+              </div>
 
-              <div className="bg-white border border-[#E5E0D5] p-8 sm:p-12 text-center shadow-2xs">
+              <div className="bg-white border border-[#E5E0D5] p-8 sm:p-12 text-center shadow-2xs relative">
                 <blockquote
-                  className="text-[18px] sm:text-[22px] leading-relaxed text-[#111111] max-w-2xl mx-auto"
+                  className="text-[18px] sm:text-[22px] leading-relaxed text-[#111111] max-w-2xl mx-auto min-h-[70px] flex items-center justify-center transition-opacity duration-200"
                   style={{ fontFamily: "Georgia, serif" }}
                 >
-                  {item.inTheirOwnWordsQuote || `“I operate on the physics approach to analysis. You boil things down to the first principles or fundamental truths in a particular area and then you reason up from there.”`}
+                  {ownWordsQuotes[quoteIdx]}
                 </blockquote>
 
                 <div className="mt-5 inline-block border-b-2 border-[#41516c] pb-1">
@@ -775,6 +806,22 @@ export default function BillionaireProfileClient({ id }: { id: string }) {
                     {item.name}
                   </p>
                 </div>
+
+                {ownWordsQuotes.length > 1 && (
+                  <div className="flex justify-center space-x-1.5 mt-4">
+                    {ownWordsQuotes.map((_, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => setQuoteIdx(i)}
+                        className={`w-2 h-2 rounded-full transition-all cursor-pointer ${
+                          i === quoteIdx ? "bg-[#111111] w-4" : "bg-[#CCCCCC]"
+                        }`}
+                        aria-label={`Go to quote ${i + 1}`}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 

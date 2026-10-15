@@ -42,7 +42,7 @@ export default function CookieClient() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col justify-between text-[#111111] select-none">
+    <div className="min-h-screen bg-white flex flex-col justify-between text-[#111111]">
       <div>
         <Header />
         <StickyHeaderBar />
@@ -76,7 +76,10 @@ export default function CookieClient() {
                     }`}
                   >
                     <div className="flex items-center min-w-0 pr-1">
-                      <h3 className="font-serif font-bold text-[11px] xs:text-[12px] sm:text-[14px] lg:text-[15px] uppercase tracking-tight sm:tracking-wider text-[#111111] whitespace-nowrap truncate">
+                      <h3
+                        className="font-serif font-bold text-[11px] xs:text-[12px] sm:text-[14px] lg:text-[15px] uppercase tracking-tight sm:tracking-wider text-[#111111] whitespace-nowrap truncate"
+                        style={{ fontFamily: "Georgia, serif" }}
+                      >
                         COOKIE POLICY SECTIONS
                       </h3>
                     </div>
@@ -115,7 +118,7 @@ export default function CookieClient() {
               </div>
 
               {/* ==================== RIGHT MAIN COLUMN: DOCUMENT SECTIONS ==================== */}
-              <div className="lg:col-span-8 bg-white border border-[#E2DDD0] p-6 sm:p-10 shadow-xs space-y-8 font-sans text-[14px] leading-relaxed text-[#333333]">
+              <div className="lg:col-span-8 bg-white border border-[#E2DDD0] p-6 sm:p-10 shadow-xs space-y-8 font-sans text-[14px] leading-relaxed text-[#333333] policy-doc-content [&_h2]:font-['Georgia',serif]">
                 {/* Introduction */}
                 <section id="intro" className="scroll-mt-28">
                   <h2 className="font-serif font-bold text-[22px] text-[#111111] pb-2 mb-4 border-b border-[#E5E0D3]">

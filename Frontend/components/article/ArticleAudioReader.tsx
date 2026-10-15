@@ -92,7 +92,7 @@ export default function ArticleAudioReader({ title = "", deck = "", bodyContent 
   }, []);
 
   return (
-    <div className="inline-flex items-center gap-2 pl-3 border-l border-[#CCCCCC] h-5 my-auto select-none ml-1">
+    <div className="inline-flex items-center gap-2 pl-3 border-l border-[#CCCCCC] h-5 my-auto  ml-1">
       <button
         type="button"
         onClick={handleToggleListen}

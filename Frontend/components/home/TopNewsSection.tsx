@@ -115,7 +115,7 @@ export const TopNewsSection: React.FC = () => {
   }, [loadTopNews]);
 
   return (
-    <div className="w-full h-full flex flex-col justify-between font-sans select-none">
+    <div className="w-full h-full flex flex-col justify-between font-sans ">
       {/* Section Header */}
       <div className="pt-[10px] lg:pt-0 border-b-0 lg:border-b border-dashed border-[#D6CEBF] pb-1 lg:pb-1 mb-2 lg:mb-2">
         <h2 className="font-sans font-bold text-[11.5px] tracking-wider text-[#111111] uppercase">

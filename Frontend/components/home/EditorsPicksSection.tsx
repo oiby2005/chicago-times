@@ -202,7 +202,7 @@ export const EditorsPicksSection: React.FC = () => {
   };
 
   return (
-    <section className="w-full font-sans select-none pb-4 pt-1 my-0 lg:my-4">
+    <section className="w-full font-sans  pb-4 pt-1 my-0 lg:my-4">
       {/* Section Header */}
       <div className="border-b border-dashed border-[#CCCCCC] pb-2 mb-4">
         <h2 className="font-serif font-bold text-[24px] sm:text-[28px] text-[#2D2468] tracking-tight">
@@ -217,7 +217,7 @@ export const EditorsPicksSection: React.FC = () => {
           className="lg:col-span-8 pr-0 lg:pr-[0.4cm] border-b lg:border-b-0 lg:border-r border-dashed border-[#CCCCCC] pb-[34px] lg:pb-0 mb-6 lg:mb-0"
         >
           {/* Row 1 Top Feature Package */}
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 pt-[10px] md:pt-0 pb-[34px] md:pb-4 mb-0 md:mb-0 border-b border-dashed border-[#CCCCCC]">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 pt-[10px] md:pt-0 pb-[34px] md:pb-5 mb-0 md:mb-0 border-b border-dashed border-[#CCCCCC]">
             {/* Left Text Block */}
             <div className="md:col-span-5 flex flex-col justify-start">
               {renderHomeTags(hero)}
@@ -258,7 +258,7 @@ export const EditorsPicksSection: React.FC = () => {
           </div>
 
           {/* Row 2 Bottom 2 Side-by-Side Cards */}
-          <div className="pt-[34px] pb-0 md:pt-8 md:pb-0 mt-0 md:mt-4 border-b-0 grid grid-cols-1 sm:grid-cols-2 gap-0">
+          <div className="pt-[34px] pb-0 md:pt-5 md:pb-0 mt-0 md:mt-0 border-b-0 grid grid-cols-1 sm:grid-cols-2 gap-0">
             {bottomCards[0] && (
               <article 
                 className="flex items-stretch sm:items-start space-x-3 pr-0 sm:pr-4 md:pr-4 border-b sm:border-b-0 sm:border-r border-dashed border-[#CCCCCC] pt-0 pb-[34px] sm:pt-0 sm:pb-0 mb-0 sm:mb-0"

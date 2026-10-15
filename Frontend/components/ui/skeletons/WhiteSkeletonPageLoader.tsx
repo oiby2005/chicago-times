@@ -2,7 +2,7 @@ import React from "react";
 
 export default function WhiteSkeletonPageLoader() {
   return (
-    <div className="fixed inset-0 z-[999999] bg-white text-[#111111] font-sans flex flex-col justify-between select-none pointer-events-none overflow-hidden animate-pulse">
+    <div className="fixed inset-0 z-[999999] bg-white text-[#111111] font-sans flex flex-col justify-between  pointer-events-none overflow-hidden animate-pulse">
       <div>
         {/* Header Skeleton Bar */}
         <header className="w-full bg-white border-b border-[#E5E5E5] py-3.5 px-4 sm:px-8">

@@ -21,40 +21,10 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(express.static(path.join(__dirname, '../Frontend/public')));
 
-// Paths to persistent data files
+// Data directory for backups
 const DATA_DIR = path.join(__dirname, 'data');
-const POSTS_FILE = path.join(DATA_DIR, 'posts.json');
-const SAVED_FILE = path.join(DATA_DIR, 'saved.json');
-const USERS_FILE = path.join(DATA_DIR, 'users.json');
-const ADS_FILE = path.join(DATA_DIR, 'ads.json');
-const SHORTS_FILE = path.join(DATA_DIR, 'shorts.json');
-const COMMENTS_FILE = path.join(DATA_DIR, 'comments.json');
-const SUBSCRIPTIONS_FILE = path.join(DATA_DIR, 'subscription_requests.json');
-
-// Ensure data directory & files exist
 if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
-}
-if (!fs.existsSync(POSTS_FILE)) {
-  fs.writeFileSync(POSTS_FILE, JSON.stringify([], null, 2));
-}
-if (!fs.existsSync(SAVED_FILE)) {
-  fs.writeFileSync(SAVED_FILE, JSON.stringify([], null, 2));
-}
-if (!fs.existsSync(USERS_FILE)) {
-  fs.writeFileSync(USERS_FILE, JSON.stringify({}, null, 2));
-}
-if (!fs.existsSync(ADS_FILE)) {
-  fs.writeFileSync(ADS_FILE, JSON.stringify([], null, 2));
-}
-if (!fs.existsSync(SHORTS_FILE)) {
-  fs.writeFileSync(SHORTS_FILE, JSON.stringify([], null, 2));
-}
-if (!fs.existsSync(COMMENTS_FILE)) {
-  fs.writeFileSync(COMMENTS_FILE, JSON.stringify([], null, 2));
-}
-if (!fs.existsSync(SUBSCRIPTIONS_FILE)) {
-  fs.writeFileSync(SUBSCRIPTIONS_FILE, JSON.stringify([], null, 2));
 }
 
 // Helpers for reading/writing persistent data
@@ -837,55 +807,7 @@ async function initShortsTable() {
       await db.query(`UPDATE shorts SET sub_tab = 'podcast' WHERE id LIKE 'podcast_slot_%' OR id LIKE 'pod%'`);
     } catch (cleanErr) {}
 
-    const [rows] = await db.query('SELECT COUNT(*) AS count FROM shorts');
-    if (rows && rows[0].count === 0) {
-      console.log('Seeding initial shorts/reels into MySQL shorts table...');
-      const fileData = readJSONFile(SHORTS_FILE, {});
-      let listToInsert = [];
-      if (Array.isArray(fileData)) {
-        listToInsert = fileData;
-      } else if (typeof fileData === 'object') {
-        Object.keys(fileData).forEach((tab) => {
-          if (Array.isArray(fileData[tab])) {
-            listToInsert.push(...fileData[tab]);
-          }
-        });
-      }
-
-      for (const slot of listToInsert) {
-        if (!slot || !slot.id) continue;
-        let subTab = 'recommended';
-        if (slot.id.includes('video') || slot.id.includes('main')) subTab = 'videos';
-        else if (slot.id.includes('podcast') || slot.id.includes('pod')) subTab = 'podcast';
-
-        await db.query(
-          `INSERT INTO shorts (id, sub_tab, slot_number, video_url, platform, title, thumbnail_url, duration, status, audio_url)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-           ON DUPLICATE KEY UPDATE
-            sub_tab = VALUES(sub_tab),
-            slot_number = VALUES(slot_number),
-            video_url = VALUES(video_url),
-            platform = VALUES(platform),
-            title = VALUES(title),
-            thumbnail_url = VALUES(thumbnail_url),
-            duration = VALUES(duration),
-            status = VALUES(status),
-            audio_url = VALUES(audio_url);`,
-          [
-            slot.id,
-            subTab,
-            slot.slotNumber || 1,
-            slot.videoUrl || '',
-            slot.platform || 'Youtube Video',
-            slot.title || '',
-            slot.thumbnailUrl || null,
-            slot.duration || '0:45',
-            slot.status || 'Active',
-            slot.audioUrl || null
-          ]
-        );
-      }
-    }
+    // Shorts table ready
   } catch (err) {
     console.warn('MySQL shorts table init notice:', err.message);
   }
@@ -924,19 +846,11 @@ app.get('/api/shorts', async (req, res) => {
       });
       return res.status(200).json({ success: true, slots: Array.from(seenMap.values()) });
     }
+    return res.status(200).json({ success: true, slots: [] });
   } catch (dbErr) {
-    console.warn('MySQL Shorts Fetch Notice:', dbErr.message);
+    console.error('MySQL Shorts Fetch Error:', dbErr.message);
+    return res.status(500).json({ success: false, slots: [], message: dbErr.message });
   }
-
-  const shortsData = readJSONFile(SHORTS_FILE, {});
-  let list = [];
-  if (Array.isArray(shortsData)) list = shortsData;
-  else if (typeof shortsData === 'object') {
-    Object.keys(shortsData).forEach((tab) => {
-      if (Array.isArray(shortsData[tab])) list.push(...shortsData[tab]);
-    });
-  }
-  res.status(200).json({ success: true, slots: list });
 });
 
 app.post('/api/shorts', async (req, res) => {
@@ -1122,16 +1036,7 @@ app.post('/api/shorts', async (req, res) => {
       }
     }
 
-    // 3. Update shorts.json backup
-    const existingData = readJSONFile(SHORTS_FILE, {});
-    if (typeof existingData === 'object' && !Array.isArray(existingData)) {
-      existingData[normSubTab] = incomingSlots;
-      writeJSONFile(SHORTS_FILE, existingData);
-    } else {
-      writeJSONFile(SHORTS_FILE, { [normSubTab]: incomingSlots });
-    }
-
-    // 4. Return fresh list from MySQL database
+    // 3. Return fresh list from MySQL database
     try {
       const [rows] = await db.query('SELECT * FROM shorts ORDER BY updated_at DESC, created_at DESC');
       if (rows && rows.length > 0) {
@@ -1289,10 +1194,6 @@ const sendTargetedArticleEmails = async (post) => {
         const [rows] = await db.query('SELECT * FROM newsletter_subscriptions');
         if (rows && rows.length > 0) subRows = rows;
       } catch (dbErr) {}
-
-      if (subRows.length === 0) {
-        subRows = readJSONFile(NEWSLETTER_FILE, []);
-      }
 
       // Determine article published timestamp & categories
       const postTime = (post.justPublished || post.notifySubscribers || post._triggerEmail)
@@ -1547,7 +1448,7 @@ const sendTargetedArticleEmails = async (post) => {
           <tr>
             <td style="padding: 24px 24px 28px 24px; text-align: center; border-top: 1px solid #eae6da; background-color: #ffffff;">
               <p style="font-family: Arial, sans-serif; font-size: 11px; color: #777777; line-height: 1.5; margin: 0 0 6px 0;">
-                &copy; 2026 Times Chicago Media Inc. All Rights Reserved.
+                &copy; 2026 Times Chicago LLC. All Rights Reserved.
               </p>
               <p style="font-family: Arial, sans-serif; font-size: 11px; color: #777777; line-height: 1.5; margin: 0 0 4px 0;">
                 You received this email because you are on the Times Chicago distribution list.
@@ -1602,20 +1503,12 @@ app.get('/api/posts', async (req, res) => {
       params = [authorEmail];
     }
     const [rows] = await db.query(query, params);
-    if (rows && rows.length > 0) {
-      const formatted = rows.map(formatPostRow);
-      return res.status(200).json({ success: true, posts: formatted });
-    }
+    const formatted = (rows || []).map(formatPostRow);
+    return res.status(200).json({ success: true, posts: formatted });
   } catch (dbErr) {
-    console.warn('MySQL Posts Fetch Notice:', dbErr.message);
+    console.error('MySQL Posts Fetch Error:', dbErr.message);
+    return res.status(500).json({ success: false, posts: [], message: dbErr.message });
   }
-
-  const posts = readJSONFile(POSTS_FILE, []);
-  if (authorEmail) {
-    const filtered = posts.filter((p) => (p.authorEmail || '').toLowerCase().trim() === authorEmail);
-    return res.status(200).json({ success: true, posts: filtered });
-  }
-  res.status(200).json({ success: true, posts });
 });
 
 app.post('/api/posts', async (req, res) => {
@@ -1786,30 +1679,15 @@ app.post('/api/posts', async (req, res) => {
       }
     }
 
-    // Sync to posts.json backup
-    let filePosts = readJSONFile(POSTS_FILE, []);
-    if (Array.isArray(incomingPosts)) {
-      filePosts = incomingPosts;
-    } else if (incomingPosts && typeof incomingPosts === 'object') {
-      const idx = filePosts.findIndex((p) => String(p.id) === String(incomingPosts.id));
-      if (idx >= 0) filePosts[idx] = { ...filePosts[idx], ...incomingPosts };
-      else filePosts.unshift(incomingPosts);
-    }
-    if (Array.isArray(filePosts)) {
-      filePosts.sort((a, b) => (Number(b.publishedAt) || 0) - (Number(a.publishedAt) || 0));
-    }
-    writeJSONFile(POSTS_FILE, filePosts);
-
     // Return fresh list from MySQL
     try {
       const [rows] = await db.query('SELECT * FROM posts ORDER BY publishedAt DESC, created_at DESC');
-      if (rows && rows.length > 0) {
-        const formatted = rows.map(formatPostRow);
-        return res.status(200).json({ success: true, posts: formatted });
-      }
-    } catch (e) {}
-
-    res.status(200).json({ success: true, posts: filePosts });
+      const formatted = (rows || []).map(formatPostRow);
+      return res.status(200).json({ success: true, posts: formatted });
+    } catch (e) {
+      console.error('MySQL Posts Fetch After Save Error:', e.message);
+      return res.status(500).json({ success: false, message: 'Failed to fetch updated posts' });
+    }
   } catch (error) {
     console.error('Error saving posts:', error);
     res.status(500).json({ success: false, message: 'Failed to save posts' });
@@ -1848,34 +1726,16 @@ app.post('/api/posts/view', async (req, res) => {
 
     let updatedViews = 1;
 
-    // 1. Update in posts.json
-    let filePosts = readJSONFile(POSTS_FILE, []);
-    let matchedPost = null;
-    filePosts.forEach((p) => {
-      if (!p) return;
-      const pSlug = String(p.slug || '').toLowerCase().trim();
-      const pId = String(p.id || '').toLowerCase().trim();
-      const pTitleSlug = p.title
-        ? String(p.title).toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
-        : '';
-      if (pSlug === targetKey || pId === targetKey || pTitleSlug === targetKey) {
-        p.views = (Number(p.views) || 0) + 1;
-        updatedViews = p.views;
-        matchedPost = p;
-      }
-    });
-    if (matchedPost) {
-      writeJSONFile(POSTS_FILE, filePosts);
-    }
-
-    // 2. Update in MySQL if table exists
+    // Update directly in MySQL
     try {
-      if (matchedPost) {
-        await db.query('UPDATE posts SET views = views + 1 WHERE id = ?', [matchedPost.id]);
-      } else {
-        await db.query('UPDATE posts SET views = views + 1 WHERE id = ? OR slug = ?', [targetKey, targetKey]);
+      await db.query('UPDATE posts SET views = views + 1 WHERE id = ? OR slug = ?', [targetKey, targetKey]);
+      const [rows] = await db.query('SELECT views FROM posts WHERE id = ? OR slug = ? LIMIT 1', [targetKey, targetKey]);
+      if (rows && rows.length > 0) {
+        updatedViews = Number(rows[0].views) || 1;
       }
-    } catch (e) {}
+    } catch (e) {
+      console.warn('MySQL views increment notice:', e.message);
+    }
 
     return res.status(200).json({ success: true, views: updatedViews });
   } catch (err) {
@@ -1884,20 +1744,19 @@ app.post('/api/posts/view', async (req, res) => {
   }
 });
 
-// Delete post endpoint (Active MySQL DB + Backup)
+// Delete post endpoint (Active MySQL DB)
 app.delete('/api/posts/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
     try {
       await db.query('DELETE FROM posts WHERE id = ?', [String(id)]);
-    } catch (dbErr) {}
+    } catch (dbErr) {
+      console.warn('MySQL Delete Post error:', dbErr.message);
+    }
 
-    let posts = readJSONFile(POSTS_FILE, []);
-    posts = posts.filter((p) => String(p.id) !== String(id));
-    writeJSONFile(POSTS_FILE, posts);
-
-    res.status(200).json({ success: true, posts });
+    const [rows] = await db.query('SELECT * FROM posts ORDER BY publishedAt DESC, created_at DESC');
+    res.status(200).json({ success: true, posts: (rows || []).map(formatPostRow) });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to delete post' });
   }
@@ -1930,16 +1789,11 @@ app.get('/api/saved-articles', async (req, res) => {
       });
       return res.status(200).json({ success: true, saved: savedList });
     }
+    return res.status(200).json({ success: true, saved: [] });
   } catch (dbErr) {
     console.warn('MySQL Saved Articles Fetch Notice:', dbErr.message);
+    return res.status(500).json({ success: false, saved: [], message: dbErr.message });
   }
-
-  const saved = readJSONFile(SAVED_FILE, []);
-  if (userEmail) {
-    const filtered = saved.filter((s) => (s.user_email || s.userEmail || '').toLowerCase().trim() === userEmail);
-    return res.status(200).json({ success: true, saved: filtered });
-  }
-  res.status(200).json({ success: true, saved });
 });
 
 app.post('/api/saved-articles', async (req, res) => {
@@ -1964,32 +1818,16 @@ app.post('/api/saved-articles', async (req, res) => {
       }
     }
 
-    let existingSaved = readJSONFile(SAVED_FILE, []);
-    if (Array.isArray(incomingSaved)) {
-      const postedEmails = new Set(incomingSaved.map((item) => String(item.user_email || item.userEmail || '').toLowerCase().trim()).filter(Boolean));
-      if (postedEmails.size > 0) {
-        existingSaved = existingSaved.filter((s) => {
-          const sEmail = String(s.user_email || s.userEmail || '').toLowerCase().trim();
-          return !postedEmails.has(sEmail);
-        });
-        existingSaved = [...incomingSaved, ...existingSaved];
-      } else {
-        existingSaved = incomingSaved;
+    const [rows] = await db.query('SELECT * FROM saved_articles ORDER BY created_at DESC');
+    const savedList = (rows || []).map((r) => {
+      try {
+        return typeof r.article_data === 'string' ? JSON.parse(r.article_data) : r.article_data;
+      } catch (e) {
+        return { id: r.article_id, user_email: r.user_email };
       }
-    } else if (incomingSaved && typeof incomingSaved === 'object') {
-      const targetEmail = String(incomingSaved.user_email || incomingSaved.userEmail || '').toLowerCase().trim();
-      const targetId = String(incomingSaved.id || incomingSaved.article_id || '');
-      const idx = existingSaved.findIndex((s) => {
-        const sEmail = String(s.user_email || s.userEmail || '').toLowerCase().trim();
-        const sId = String(s.id || s.article_id || '');
-        return sEmail === targetEmail && sId === targetId;
-      });
-      if (idx >= 0) existingSaved[idx] = { ...existingSaved[idx], ...incomingSaved };
-      else existingSaved.unshift(incomingSaved);
-    }
-    writeJSONFile(SAVED_FILE, existingSaved);
+    });
 
-    res.status(200).json({ success: true, saved: existingSaved });
+    res.status(200).json({ success: true, saved: savedList });
   } catch (error) {
     console.error('Error saving articles:', error);
     res.status(500).json({ success: false, message: 'Failed to save article' });
@@ -2006,33 +1844,12 @@ app.delete('/api/saved-articles', async (req, res) => {
 
   try {
     if (articleId) {
-      try {
-        await db.query(
-          'DELETE FROM saved_articles WHERE LOWER(user_email) = ? AND (article_id = ? OR LOWER(article_id) = ?)',
-          [email, articleId, articleId.toLowerCase()]
-        );
-      } catch (dbErr) {
-        console.warn('MySQL Saved Article Delete Notice:', dbErr.message);
-      }
-
-      let saved = readJSONFile(SAVED_FILE, []);
-      saved = saved.filter((s) => {
-        const sEmail = (s.user_email || s.userEmail || '').toLowerCase().trim();
-        const sId = String(s.id || s.article_id || '');
-        if (sEmail === email && (sId === articleId || sId.toLowerCase() === articleId.toLowerCase())) {
-          return false;
-        }
-        return true;
-      });
-      writeJSONFile(SAVED_FILE, saved);
+      await db.query(
+        'DELETE FROM saved_articles WHERE LOWER(user_email) = ? AND (article_id = ? OR LOWER(article_id) = ?)',
+        [email, articleId, articleId.toLowerCase()]
+      );
     } else {
-      try {
-        await db.query('DELETE FROM saved_articles WHERE LOWER(user_email) = ?', [email]);
-      } catch (dbErr) {}
-
-      let saved = readJSONFile(SAVED_FILE, []);
-      saved = saved.filter((s) => (s.user_email || s.userEmail || '').toLowerCase().trim() !== email);
-      writeJSONFile(SAVED_FILE, saved);
+      await db.query('DELETE FROM saved_articles WHERE LOWER(user_email) = ?', [email]);
     }
 
     return res.status(200).json({ success: true, message: 'Saved article(s) removed successfully' });
@@ -2045,7 +1862,6 @@ app.delete('/api/saved-articles', async (req, res) => {
 // ==========================================
 // NEWSLETTER SUBSCRIPTIONS API ENDPOINTS
 // ==========================================
-const NEWSLETTER_FILE = path.join(DATA_DIR, 'newsletter.json');
 
 app.get('/api/newsletter', async (req, res) => {
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
@@ -2071,10 +1887,10 @@ app.get('/api/newsletter', async (req, res) => {
       });
       return res.status(200).json({ success: true, subscribers: formatted });
     }
-  } catch (dbErr) {}
-
-  const subscribers = readJSONFile(NEWSLETTER_FILE, []);
-  res.status(200).json({ success: true, subscribers });
+    return res.status(200).json({ success: true, subscribers: [] });
+  } catch (dbErr) {
+    return res.status(500).json({ success: false, subscribers: [], message: dbErr.message });
+  }
 });
 
 async function sendUserSignupWelcomeEmail({ name, email }) {
@@ -2173,14 +1989,6 @@ app.post('/api/newsletter', subscribeLimiter, async (req, res) => {
       }
     } catch (dbErr) {}
 
-    if (!isAlreadySubscribed) {
-      const existingSubscribers = readJSONFile(NEWSLETTER_FILE, []);
-      const match = existingSubscribers.find((s) => (typeof s === 'string' ? s : s.email || '').toLowerCase().trim() === cleanEmail);
-      if (match) {
-        isAlreadySubscribed = true;
-      }
-    }
-
     if (isAlreadySubscribed) {
       return res.status(400).json({
         success: false,
@@ -2190,7 +1998,6 @@ app.post('/api/newsletter', subscribeLimiter, async (req, res) => {
     }
 
     // 2. Insert new subscriber into MySQL
-    const nowISO = new Date().toISOString();
     try {
       await db.query(
         `INSERT INTO newsletter_subscriptions (email, newsletters, subscribed_at) VALUES (?, ?, NOW());`,
@@ -2199,20 +2006,6 @@ app.post('/api/newsletter', subscribeLimiter, async (req, res) => {
     } catch (dbErr) {
       console.warn('MySQL Newsletter Insert Notice:', dbErr.message);
     }
-
-    // 3. Save to JSON file fallback
-    let subscribers = readJSONFile(NEWSLETTER_FILE, []);
-    const subRecord = {
-      id: 'sub_' + Date.now(),
-      email: cleanEmail,
-      newsletters: topicsArr,
-      subscribed_at: nowISO,
-      subscribedDate: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-    };
-    subscribers.unshift(subRecord);
-    writeJSONFile(NEWSLETTER_FILE, subscribers);
-
-    // NOTE: Per user request ("don't send an email when signed in to newsletter"), email is NOT sent on newsletter signup.
 
     res.status(200).json({
       success: true,
@@ -2239,19 +2032,10 @@ app.delete('/api/newsletter', async (req, res) => {
       } catch (dbErr) {
         console.warn('MySQL Newsletter Delete Notice:', dbErr.message);
       }
-
-      let subscribers = readJSONFile(NEWSLETTER_FILE, []);
-      subscribers = subscribers.filter((s) => !emails.includes((typeof s === 'string' ? s : s.email || '').toLowerCase().trim()));
-      writeJSONFile(NEWSLETTER_FILE, subscribers);
     }
 
-    try {
-      const [rows] = await db.query('SELECT * FROM newsletter_subscriptions ORDER BY subscribed_at DESC');
-      return res.status(200).json({ success: true, subscribers: rows });
-    } catch (e) {}
-
-    const subscribers = readJSONFile(NEWSLETTER_FILE, []);
-    res.status(200).json({ success: true, subscribers });
+    const [rows] = await db.query('SELECT * FROM newsletter_subscriptions ORDER BY subscribed_at DESC');
+    res.status(200).json({ success: true, subscribers: rows || [] });
   } catch (error) {
     console.error('Error deleting newsletter subscription:', error);
     res.status(500).json({ success: false, message: 'Failed to delete subscription' });
@@ -2333,45 +2117,22 @@ async function seedDefaultAdmins() {
   } catch (err) {
     console.warn('Default admin seeding notice:', err.message);
   }
-
-  // Backup to JSON file
-  try {
-    const usersMap = readJSONFile(USERS_FILE, {});
-    // Reset non-default admin flags in JSON map
-    Object.keys(usersMap).forEach((emailKey) => {
-      if (!DEFAULT_ADMIN_EMAILS.includes(emailKey)) {
-        usersMap[emailKey].is_default_admin = false;
-      }
-    });
-
-    for (const admin of defaultAdmins) {
-      const lower = admin.email.toLowerCase();
-      if (!usersMap[lower]) {
-        usersMap[lower] = {
-          full_name: admin.full_name,
-          email: admin.email,
-          role: 'admin',
-          bio: admin.bio,
-          avatar_url: '',
-          is_default_admin: true,
-        };
-      } else {
-        usersMap[lower].full_name = admin.full_name;
-        usersMap[lower].role = 'admin';
-        usersMap[lower].is_default_admin = true;
-      }
-    }
-    writeJSONFile(USERS_FILE, usersMap);
-  } catch (e) {}
 }
-seedDefaultAdmins();
+async function initUserExtraColumns() {
+  try { await db.query('ALTER TABLE users ADD COLUMN phone VARCHAR(64) DEFAULT NULL'); } catch(e) {}
+  try { await db.query('ALTER TABLE users ADD COLUMN country VARCHAR(128) DEFAULT NULL'); } catch(e) {}
+  try { await db.query('ALTER TABLE users ADD COLUMN phone_country_code VARCHAR(32) DEFAULT NULL'); } catch(e) {}
+  try { await db.query('ALTER TABLE users ADD COLUMN is_blocked TINYINT(1) DEFAULT 0'); } catch(e) {}
+}
+initUserExtraColumns();
 
 app.get('/api/users', async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT id, full_name, email, role, bio, avatar_url, linkedin, is_default_admin, created_at FROM users ORDER BY id ASC');
-    const usersList = rows.map((u) => ({
+    const [rows] = await db.query('SELECT id, full_name, email, role, bio, avatar_url, linkedin, is_default_admin, is_blocked, phone, country, phone_country_code, created_at FROM users ORDER BY id ASC');
+    const usersList = (rows || []).map((u) => ({
       ...u,
       is_default_admin: Boolean(u.is_default_admin),
+      is_blocked: Boolean(u.is_blocked),
     }));
     const usersMap = {};
     usersList.forEach((u) => {
@@ -2379,33 +2140,25 @@ app.get('/api/users', async (req, res) => {
     });
     res.status(200).json({ success: true, users: usersMap, list: usersList });
   } catch (dbErr) {
-    const users = readJSONFile(USERS_FILE, {});
-    const usersList = Object.values(users).map((u) => ({
-      ...u,
-      is_default_admin: Boolean(u.is_default_admin),
-    }));
-    res.status(200).json({ success: true, users, list: usersList });
+    console.error('MySQL Users Fetch Error:', dbErr.message);
+    res.status(500).json({ success: false, message: 'Failed to fetch users from database' });
   }
 });
 
 app.get('/api/users/:email', async (req, res) => {
   const email = (req.params.email || '').toLowerCase().trim();
   try {
-    const [rows] = await db.query('SELECT id, full_name, email, role, bio, avatar_url, linkedin, is_default_admin FROM users WHERE LOWER(email) = ?', [email]);
-    if (rows.length > 0) {
+    const [rows] = await db.query('SELECT id, full_name, email, role, bio, avatar_url, linkedin, is_default_admin, is_blocked, phone, country, phone_country_code FROM users WHERE LOWER(email) = ?', [email]);
+    if (rows && rows.length > 0) {
       const user = rows[0];
       user.is_default_admin = Boolean(user.is_default_admin);
+      user.is_blocked = Boolean(user.is_blocked);
       return res.status(200).json({ success: true, user });
     }
-  } catch (dbErr) {}
-
-  const users = readJSONFile(USERS_FILE, {});
-  if (users[email]) {
-    const user = users[email];
-    user.is_default_admin = Boolean(user.is_default_admin);
-    return res.status(200).json({ success: true, user });
+    return res.status(404).json({ success: false, message: 'User not found' });
+  } catch (dbErr) {
+    return res.status(500).json({ success: false, message: dbErr.message });
   }
-  res.status(404).json({ success: false, message: 'User not found' });
 });
 
 // Update Profile endpoint
@@ -2434,6 +2187,10 @@ app.post('/api/users', async (req, res) => {
       userData.image = avatarUrl;
     }
 
+    const phone = userData.phone !== undefined ? userData.phone : null;
+    const country = userData.country !== undefined ? userData.country : null;
+    const phoneCountryCode = userData.phone_country_code || userData.dial_code || null;
+
     try {
       await db.query(
         `UPDATE users SET 
@@ -2441,9 +2198,12 @@ app.post('/api/users', async (req, res) => {
            role = COALESCE(?, role),
            bio = COALESCE(?, bio),
            avatar_url = ?,
-           linkedin = COALESCE(?, linkedin)
+           linkedin = COALESCE(?, linkedin),
+           phone = COALESCE(?, phone),
+           country = COALESCE(?, country),
+           phone_country_code = COALESCE(?, phone_country_code)
          WHERE LOWER(email) = ?`,
-        [fullName, role, bio, avatarUrl, linkedin, email]
+        [fullName, role, bio, avatarUrl, linkedin, phone, country, phoneCountryCode, email]
       );
     } catch (dbErr) {
       console.warn("MySQL Profile Update Notice:", dbErr.message);
@@ -2460,47 +2220,17 @@ app.post('/api/users', async (req, res) => {
       } catch (postDbErr) {
         console.warn("MySQL Posts Author Update Notice:", postDbErr.message);
       }
-
-      try {
-        let postsList = readJSONFile(POSTS_FILE, []);
-        if (Array.isArray(postsList)) {
-          let changed = false;
-          postsList = postsList.map((p) => {
-            const pEmail = String(p.authorEmail || '').toLowerCase().trim();
-            const pAuthor = String(p.author || '').trim();
-            if (
-              pEmail === email ||
-              (oldName && pAuthor === oldName) ||
-              (email === 'writer@gmail.com' && pAuthor.toLowerCase() === 'writer user')
-            ) {
-              changed = true;
-              return { ...p, author: fullName, authorEmail: email };
-            }
-            return p;
-          });
-          if (changed) {
-            writeJSONFile(POSTS_FILE, postsList);
-          }
-        }
-      } catch (fileErr) {}
     }
 
-    const usersMap = readJSONFile(USERS_FILE, {});
-    usersMap[email] = { ...(usersMap[email] || {}), ...userData, avatar_url: avatarUrl, email };
-    writeJSONFile(USERS_FILE, usersMap);
+    const [rows] = await db.query('SELECT id, full_name, email, role, bio, avatar_url, linkedin, is_default_admin, is_blocked, phone, country, phone_country_code FROM users WHERE LOWER(email) = ?', [email]);
+    if (rows && rows.length > 0) {
+      const user = rows[0];
+      user.is_default_admin = Boolean(user.is_default_admin);
+      user.is_blocked = Boolean(user.is_blocked);
+      return res.status(200).json({ success: true, user });
+    }
 
-    try {
-      const [rows] = await db.query('SELECT id, full_name, email, role, bio, avatar_url, linkedin, is_default_admin FROM users WHERE LOWER(email) = ?', [email]);
-      if (rows.length > 0) {
-        const user = rows[0];
-        user.is_default_admin = Boolean(user.is_default_admin);
-        return res.status(200).json({ success: true, user });
-      }
-    } catch (e) {}
-
-    const user = usersMap[email];
-    user.is_default_admin = Boolean(user?.is_default_admin);
-    res.status(200).json({ success: true, user });
+    res.status(200).json({ success: true, user: { ...userData, avatar_url: avatarUrl, email } });
   } catch (error) {
     console.error('Error saving user profile:', error);
     res.status(500).json({ success: false, message: 'Failed to save user profile' });
@@ -2540,18 +2270,6 @@ const registerUserHandler = async (req, res) => {
       console.warn('MySQL Add User Notice:', dbErr.message);
     }
 
-    // 3. Backup to JSON
-    const usersMap = readJSONFile(USERS_FILE, {});
-    usersMap[cleanEmail] = {
-      id: newId,
-      full_name: userName,
-      email: cleanEmail,
-      role: userRole,
-      bio: 'Registered Website Member',
-      is_default_admin: false,
-    };
-    writeJSONFile(USERS_FILE, usersMap);
-
     const newUser = {
       id: newId,
       full_name: userName,
@@ -2560,7 +2278,7 @@ const registerUserHandler = async (req, res) => {
       is_default_admin: false,
     };
 
-    // 4. Send Welcome Email matching Image 1 layout & Times Chicago branding
+    // 3. Send Welcome Email matching Image 1 layout & Times Chicago branding
     sendUserSignupWelcomeEmail({ name: userName, email: cleanEmail }).catch(console.error);
 
     return res.status(201).json({ success: true, message: 'User created successfully', user: newUser });
@@ -2577,7 +2295,7 @@ app.post('/api/users/signup', registerUserHandler);
 app.put('/api/users/edit', async (req, res) => {
   const bcrypt = require('bcryptjs');
   try {
-    const { id, full_name, name, email, role, password, bio, linkedin } = req.body;
+    const { id, full_name, name, email, role, password, bio, linkedin, phone, country, phone_country_code, is_blocked } = req.body;
     if (!email) {
       return res.status(400).json({ success: false, message: 'Email required for edit.' });
     }
@@ -2585,19 +2303,39 @@ app.put('/api/users/edit', async (req, res) => {
     const cleanEmail = email.toLowerCase().trim();
     const userName = full_name || name;
     const userRole = role ? role.toLowerCase().trim() : undefined;
+    const blockedVal = is_blocked !== undefined ? (is_blocked ? 1 : 0) : null;
 
     // MySQL Update
     try {
       if (password && password.trim().length > 0) {
         const hashedPassword = await bcrypt.hash(password.trim(), 10);
         await db.query(
-          'UPDATE users SET full_name = COALESCE(?, full_name), role = COALESCE(?, role), password = ?, bio = COALESCE(?, bio), linkedin = COALESCE(?, linkedin) WHERE LOWER(email) = ?',
-          [userName, userRole, hashedPassword, bio, linkedin, cleanEmail]
+          `UPDATE users SET 
+             full_name = COALESCE(?, full_name), 
+             role = COALESCE(?, role), 
+             password = ?, 
+             bio = COALESCE(?, bio), 
+             linkedin = COALESCE(?, linkedin),
+             phone = COALESCE(?, phone),
+             country = COALESCE(?, country),
+             phone_country_code = COALESCE(?, phone_country_code),
+             is_blocked = COALESCE(?, is_blocked)
+           WHERE LOWER(email) = ?`,
+          [userName, userRole, hashedPassword, bio, linkedin, phone, country, phone_country_code, blockedVal, cleanEmail]
         );
       } else {
         await db.query(
-          'UPDATE users SET full_name = COALESCE(?, full_name), role = COALESCE(?, role), bio = COALESCE(?, bio), linkedin = COALESCE(?, linkedin) WHERE LOWER(email) = ?',
-          [userName, userRole, bio, linkedin, cleanEmail]
+          `UPDATE users SET 
+             full_name = COALESCE(?, full_name), 
+             role = COALESCE(?, role), 
+             bio = COALESCE(?, bio), 
+             linkedin = COALESCE(?, linkedin),
+             phone = COALESCE(?, phone),
+             country = COALESCE(?, country),
+             phone_country_code = COALESCE(?, phone_country_code),
+             is_blocked = COALESCE(?, is_blocked)
+           WHERE LOWER(email) = ?`,
+          [userName, userRole, bio, linkedin, phone, country, phone_country_code, blockedVal, cleanEmail]
         );
       }
 
@@ -2608,33 +2346,8 @@ app.put('/api/users/edit', async (req, res) => {
           [userName.trim(), cleanEmail]
         );
       }
-    } catch (e) {}
-
-    // JSON update
-    const usersMap = readJSONFile(USERS_FILE, {});
-    if (usersMap[cleanEmail]) {
-      if (userName) usersMap[cleanEmail].full_name = userName;
-      if (userRole) usersMap[cleanEmail].role = userRole;
-      if (bio !== undefined) usersMap[cleanEmail].bio = bio;
-      if (linkedin !== undefined) usersMap[cleanEmail].linkedin = linkedin;
-      writeJSONFile(USERS_FILE, usersMap);
-    }
-
-    // JSON posts update
-    if (userName && userName.trim().length > 0) {
-      try {
-        const postsList = readJSONFile(POSTS_FILE, []);
-        let updatedPosts = false;
-        postsList.forEach((p) => {
-          if ((p.authorEmail || '').toLowerCase().trim() === cleanEmail) {
-            p.author = userName.trim();
-            updatedPosts = true;
-          }
-        });
-        if (updatedPosts) {
-          writeJSONFile(POSTS_FILE, postsList);
-        }
-      } catch (e) {}
+    } catch (e) {
+      console.warn('MySQL User Edit Notice:', e.message);
     }
 
     return res.status(200).json({ success: true, message: 'User updated successfully' });
@@ -2644,28 +2357,52 @@ app.put('/api/users/edit', async (req, res) => {
   }
 });
 
-// Delete User
+// Block / Unblock User Status Endpoint
+app.put('/api/users/:email/status', async (req, res) => {
+  try {
+    const email = (req.params.email || '').toLowerCase().trim();
+    const { is_blocked } = req.body;
+    const blockedVal = is_blocked ? 1 : 0;
+    const [result] = await db.query('UPDATE users SET is_blocked = ? WHERE LOWER(email) = ?', [blockedVal, email]);
+    if (result && result.affectedRows === 0) {
+      const fullName = email.split('@')[0];
+      await db.query(
+        'INSERT INTO users (full_name, email, role, is_blocked, is_default_admin, created_at, updated_at) VALUES (?, ?, ?, ?, 0, NOW(), NOW())',
+        [fullName, email, 'reader', blockedVal]
+      ).catch(() => {});
+    }
+    console.log(`[STATUS] User ${email} block status updated to ${blockedVal} in database`);
+    return res.status(200).json({ success: true, is_blocked: Boolean(is_blocked) });
+  } catch (err) {
+    console.error('Error updating block status in database:', err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Delete User (With Cascade Deletion for Writer Articles)
 app.delete('/api/users/:email', async (req, res) => {
   try {
     const email = (req.params.email || '').toLowerCase().trim();
     try {
-      const [rows] = await db.query('SELECT is_default_admin FROM users WHERE LOWER(email) = ?', [email]);
-      if (rows.length > 0 && rows[0].is_default_admin) {
-        return res.status(403).json({ success: false, message: 'Default Admin accounts cannot be deleted.' });
+      const [rows] = await db.query('SELECT is_default_admin, role, full_name FROM users WHERE LOWER(email) = ?', [email]);
+      if (rows.length > 0) {
+        if (rows[0].is_default_admin) {
+          return res.status(403).json({ success: false, message: 'Default Admin accounts cannot be deleted.' });
+        }
+        const userRole = (rows[0].role || '').toLowerCase();
+        const userName = (rows[0].full_name || '').trim();
+        // If writer, delete all articles written by this writer from whole website
+        if (userRole === 'writer') {
+          await db.query('DELETE FROM posts WHERE LOWER(authorEmail) = ? OR LOWER(author) = ?', [email, userName.toLowerCase()]);
+        }
       }
-    } catch (e) {}
-
-    try {
-      await db.query('DELETE FROM users WHERE LOWER(email) = ?', [email]);
-    } catch (e) {}
-
-    const usersMap = readJSONFile(USERS_FILE, {});
-    if (usersMap[email]) {
-      delete usersMap[email];
-      writeJSONFile(USERS_FILE, usersMap);
+    } catch (e) {
+      console.warn('MySQL Delete Writer Articles Notice:', e.message);
     }
 
-    return res.status(200).json({ success: true, message: 'User deleted successfully' });
+    await db.query('DELETE FROM users WHERE LOWER(email) = ?', [email]);
+
+    return res.status(200).json({ success: true, message: 'User and all articles deleted successfully' });
   } catch (err) {
     console.error('Error deleting user:', err);
     res.status(500).json({ success: false, message: 'Failed to delete user.' });
@@ -2731,16 +2468,11 @@ app.get('/api/ads', async (req, res) => {
       }));
       return res.status(200).json({ success: true, slots: formatted });
     }
+    return res.status(200).json({ success: true, slots: [] });
   } catch (dbErr) {
-    console.warn('MySQL Fetch Ads Notice:', dbErr.message);
+    console.error('MySQL Fetch Ads Error:', dbErr.message);
+    return res.status(500).json({ success: false, slots: [], message: dbErr.message });
   }
-
-  const fileSlots = readJSONFile(ADS_FILE, []);
-  const normalizedFileSlots = fileSlots.map((s) => ({
-    ...s,
-    slotName: SLOT_NAME_MAP[s.id] || s.slotName,
-  }));
-  return res.status(200).json({ success: true, slots: normalizedFileSlots });
 });
 
 app.post('/api/ads', async (req, res) => {
@@ -2794,9 +2526,6 @@ app.post('/api/ads', async (req, res) => {
       }
     }
 
-    // Backup to persistent JSON file
-    writeJSONFile(ADS_FILE, targetSlots);
-
     return res.status(200).json({ success: true, slots: targetSlots });
   } catch (error) {
     console.error('Error saving ad configuration:', error);
@@ -2809,7 +2538,6 @@ app.post('/api/ads', async (req, res) => {
 // ==========================================
 // BILLIONAIRES API ENDPOINTS (MySQL DB + Backblaze B2 Storage)
 // ==========================================
-const BILLIONAIRES_FILE = path.join(DATA_DIR, 'billionaires.json');
 
 async function initBillionairesTable() {
   try {
@@ -2900,14 +2628,10 @@ app.get('/api/billionaires', async (req, res) => {
         });
       }
     } catch (dbErr) {
-      console.warn('MySQL GET billionaires warning, falling back to JSON:', dbErr.message);
+      console.warn('MySQL GET billionaires warning:', dbErr.message);
     }
 
-    if (!list || list.length === 0) {
-      list = readJSONFile(BILLIONAIRES_FILE, []);
-    }
-
-    return res.status(200).json({ success: true, billionaires: list });
+    return res.status(200).json({ success: true, billionaires: list || [] });
   } catch (error) {
     console.error('Error fetching billionaires:', error);
     res.status(500).json({ success: false, message: 'Failed to fetch billionaires' });
@@ -3023,9 +2747,6 @@ app.post('/api/billionaires', async (req, res) => {
       console.warn('MySQL Save Billionaires Notice:', dbErr.message);
     }
 
-    // 2. Save to JSON File
-    writeJSONFile(BILLIONAIRES_FILE, processedItems);
-
     return res.status(200).json({ success: true, billionaires: processedItems });
   } catch (error) {
     console.error('Error saving billionaires to database:', error);
@@ -3036,8 +2757,6 @@ app.post('/api/billionaires', async (req, res) => {
 // ==========================================
 // UPCOMING TOP 20 ENTREPRENEURS API ENDPOINTS
 // ==========================================
-const ENTREPRENEURS_FILE = path.join(DATA_DIR, 'entrepreneurs.json');
-
 async function initEntrepreneursTable() {
   try {
     const tableSchema = `
@@ -3065,7 +2784,7 @@ async function initEntrepreneursTable() {
 }
 initEntrepreneursTable();
 
-// GET /api/entrepreneurs - Retrieve entrepreneurs list from MySQL DB / persistent storage
+// GET /api/entrepreneurs - Retrieve entrepreneurs list from MySQL DB
 app.get('/api/entrepreneurs', async (req, res) => {
   try {
     let list = [];
@@ -3094,14 +2813,10 @@ app.get('/api/entrepreneurs', async (req, res) => {
         });
       }
     } catch (dbErr) {
-      console.warn('MySQL GET entrepreneurs warning, falling back to JSON:', dbErr.message);
+      console.warn('MySQL GET entrepreneurs warning:', dbErr.message);
     }
 
-    if (!list || list.length === 0) {
-      list = readJSONFile(ENTREPRENEURS_FILE, []);
-    }
-
-    return res.status(200).json({ success: true, entrepreneurs: list });
+    return res.status(200).json({ success: true, entrepreneurs: list || [] });
   } catch (error) {
     console.error('Error fetching entrepreneurs:', error);
     res.status(500).json({ success: false, message: 'Failed to fetch entrepreneurs' });
@@ -3193,9 +2908,6 @@ app.post('/api/entrepreneurs', async (req, res) => {
       console.warn('MySQL Save Entrepreneurs Notice:', dbErr.message);
     }
 
-    // 2. Save to JSON File fallback
-    writeJSONFile(ENTREPRENEURS_FILE, processedItems);
-
     return res.status(200).json({ success: true, entrepreneurs: processedItems });
   } catch (error) {
     console.error('Error saving entrepreneurs to database:', error);
@@ -3222,20 +2934,14 @@ const seedDefaultBackups = () => {
   defaultFiles.forEach((item) => {
     const fPath = path.join(BACKUPS_DIR, item.name);
     if (!fs.existsSync(fPath)) {
-      const users = readJSONFile(USERS_FILE, []);
-      const posts = readJSONFile(POSTS_FILE, []);
-      const subscribers = readJSONFile(path.join(DATA_DIR, 'subscribers.json'), []);
-      const ads = readJSONFile(ADS_FILE, []);
-      const shorts = readJSONFile(SHORTS_FILE, []);
-
       const dummySnapshot = {
         backupVersion: '1.0',
         created_at: item.time,
-        users,
-        posts,
-        subscribers,
-        ads,
-        shorts,
+        users: [],
+        posts: [],
+        subscribers: [],
+        ads: [],
+        shorts: [],
       };
 
       fs.writeFileSync(fPath, JSON.stringify(dummySnapshot, null, 2));
@@ -3325,17 +3031,15 @@ app.post('/api/backups/create', async (req, res) => {
   try {
     const { payload } = req.body || {};
 
-    // 1. Fetch latest active state from MySQL / JSON files
+    // 1. Fetch latest active state from MySQL
     let posts = [];
     try {
       const [rows] = await db.query('SELECT * FROM posts ORDER BY publishedAt DESC, created_at DESC');
       if (rows && rows.length > 0) {
         posts = rows.map(formatPostRow);
-      } else {
-        posts = readJSONFile(POSTS_FILE, []);
       }
     } catch (e) {
-      posts = readJSONFile(POSTS_FILE, []);
+      console.warn('Backup fetch posts notice:', e.message);
     }
 
     let users = [];
@@ -3343,13 +3047,9 @@ app.post('/api/backups/create', async (req, res) => {
       const [rows] = await db.query('SELECT id, full_name, email, role, bio, avatar_url, linkedin, is_default_admin FROM users ORDER BY id ASC');
       if (rows && rows.length > 0) {
         users = rows.map((u) => ({ ...u, is_default_admin: Boolean(u.is_default_admin) }));
-      } else {
-        const uMap = readJSONFile(USERS_FILE, {});
-        users = Object.values(uMap);
       }
     } catch (e) {
-      const uMap = readJSONFile(USERS_FILE, {});
-      users = Object.values(uMap);
+      console.warn('Backup fetch users notice:', e.message);
     }
 
     let subscribers = [];
@@ -3364,11 +3064,9 @@ app.post('/api/backups/create', async (req, res) => {
           }
           return { id: r.id, email: r.email, newsletters: newslettersArr, subscribed_at: r.subscribed_at };
         });
-      } else {
-        subscribers = readJSONFile(NEWSLETTER_FILE, []);
       }
     } catch (e) {
-      subscribers = readJSONFile(NEWSLETTER_FILE, []);
+      console.warn('Backup fetch subscribers notice:', e.message);
     }
 
     // Filter for published posts only
@@ -3392,6 +3090,80 @@ app.post('/api/backups/create', async (req, res) => {
       advertiseLeads = payload?.advertise_leads || payload?.advertiseLeads || [];
     }
 
+    let billionaires = [];
+    try {
+      const [rows] = await db.query('SELECT * FROM billionaires ORDER BY rank ASC');
+      if (rows && rows.length > 0) {
+        billionaires = rows.map((r) => {
+          const item = typeof r.data === 'string' ? JSON.parse(r.data) : (r.data || {});
+          return {
+            ...item,
+            id: String(r.id || item.id),
+            rank: Number(r.rank || item.rank || 1),
+            name: r.name || item.name || '',
+            netWorth: r.net_worth || item.netWorth || '',
+            changeStatus: r.change_status || item.changeStatus || 'UP',
+            age: r.age || item.age || '',
+            country: r.country || item.country || '',
+            source: r.source || item.source || '',
+            industry: r.industry || item.industry || '',
+            photoUrl: r.photo_url || item.photoUrl || '',
+            highlightText: r.highlight_text || item.highlightText || '',
+            endYear: Number(r.end_year || item.endYear || 2026),
+            titleRole: r.title_role || item.titleRole || '',
+            realTimeNetWorth: r.real_time_net_worth || item.realTimeNetWorth || '',
+            realTimeChange: r.real_time_change || item.realTimeChange || '',
+            realTimeAsOf: r.real_time_as_of || item.realTimeAsOf || '',
+            listNetWorthAsOf: r.list_net_worth_as_of || item.listNetWorthAsOf || '',
+            photoCredit: r.photo_credit || item.photoCredit || '',
+            editorLastUpdated: r.editor_last_updated || item.editorLastUpdated || '',
+            editorBulletPoints: typeof r.editor_bullet_points === 'string' ? JSON.parse(r.editor_bullet_points) : (r.editor_bullet_points || item.editorBulletPoints || []),
+            inTheirOwnWordsQuote: r.in_their_own_words_quote || item.inTheirOwnWordsQuote || '',
+            selfMadeScore: r.self_made_score || item.selfMadeScore || '',
+            philanthropyScore: r.philanthropy_score || item.philanthropyScore || '',
+            residence: r.residence || item.residence || '',
+            citizenship: r.citizenship || item.citizenship || '',
+            maritalStatus: r.marital_status || item.maritalStatus || '',
+            children: r.children || item.children || '',
+            education: r.education || item.education || '',
+            didYouKnowFacts: typeof r.did_you_know_facts === 'string' ? JSON.parse(r.did_you_know_facts) : (r.did_you_know_facts || item.didYouKnowFacts || []),
+            wealthHistory: typeof r.wealth_history === 'string' ? JSON.parse(r.wealth_history) : (r.wealth_history || item.wealthHistory || []),
+          };
+        });
+      }
+    } catch (e) {
+      billionaires = payload?.billionaires || [];
+    }
+
+    let entrepreneurs = [];
+    try {
+      const [rows] = await db.query('SELECT * FROM entrepreneurs ORDER BY rank ASC');
+      if (rows && rows.length > 0) {
+        entrepreneurs = rows.map((r) => {
+          const item = typeof r.data === 'string' ? JSON.parse(r.data) : (r.data || {});
+          return {
+            ...item,
+            id: String(r.id || item.id),
+            rank: Number(r.rank || item.rank || 1),
+            name: r.name || item.name || '',
+            titleRole: r.title_role || item.titleRole || '',
+            bio: r.bio || item.bio || '',
+            website: r.website || item.website || '',
+            photoUrl: r.photo_url || item.photoUrl || '',
+            age: r.age || item.age || '',
+            country: r.country || item.country || '',
+            source: r.source || item.source || '',
+            industry: r.industry || item.industry || '',
+            gender: r.gender || item.gender || '',
+            netWorthMillions: r.net_worth_millions || item.netWorthMillions || '',
+            companies: typeof r.companies === 'string' ? JSON.parse(r.companies) : (r.companies || item.companies || []),
+          };
+        });
+      }
+    } catch (e) {
+      entrepreneurs = payload?.entrepreneurs || [];
+    }
+
     const snapshot = {
       backupVersion: '1.0',
       created_at: new Date().toISOString(),
@@ -3400,6 +3172,8 @@ app.post('/api/backups/create', async (req, res) => {
       users: users,
       contact_submissions: contactSubmissions,
       advertise_leads: advertiseLeads,
+      billionaires: billionaires,
+      entrepreneurs: entrepreneurs,
     };
 
     const now = new Date();
@@ -3474,17 +3248,7 @@ async function restoreDatabaseSnapshot(snapshot) {
   const adsList = Array.isArray(snapshot.ads) ? snapshot.ads : [];
   const shortsList = Array.isArray(snapshot.shorts) ? snapshot.shorts : [];
 
-  // 1. Overwrite persistent JSON files completely
-  if (postsList && postsList.length > 0) writeJSONFile(POSTS_FILE, postsList);
-  if (Object.keys(usersMap).length > 0) writeJSONFile(USERS_FILE, usersMap);
-  if (subsList && subsList.length > 0) {
-    writeJSONFile(path.join(DATA_DIR, 'subscribers.json'), subsList);
-    writeJSONFile(NEWSLETTER_FILE, subsList);
-  }
-  if (adsList && adsList.length > 0) writeJSONFile(ADS_FILE, adsList);
-  if (shortsList && shortsList.length > 0) writeJSONFile(SHORTS_FILE, shortsList);
-
-  // 2. Sync & purge extra records in MySQL database if connected
+  // 1. Sync & purge extra records in MySQL database if connected
   try {
     // Restoring Posts Table
     if (postsList && postsList.length > 0) {
@@ -3661,6 +3425,106 @@ async function restoreDatabaseSnapshot(snapshot) {
             s.status || 'Active',
           ]
         ).catch((err) => console.warn('MySQL Restore Shorts Error:', err.message));
+      }
+    }
+
+    // Restoring Billionaires Table
+    const billionairesList = Array.isArray(snapshot.billionaires) ? snapshot.billionaires : [];
+    if (billionairesList && billionairesList.length > 0) {
+      await db.query('DELETE FROM billionaires').catch((err) => console.warn('MySQL Delete billionaires notice:', err.message));
+      await db.query('DELETE FROM wsj_billionaires').catch((err) => console.warn('MySQL Delete wsj_billionaires notice:', err.message));
+      for (let i = 0; i < billionairesList.length; i++) {
+        const item = billionairesList[i];
+        if (!item || !item.name) continue;
+        const insertSql = `
+          INSERT INTO billionaires (
+            id, rank, name, net_worth, change_status, age, country, source, industry,
+            photo_url, highlight_text, end_year, title_role, real_time_net_worth,
+            real_time_change, real_time_as_of, list_net_worth_as_of, photo_credit,
+            editor_last_updated, editor_bullet_points, in_their_own_words_quote,
+            self_made_score, philanthropy_score, residence, citizenship, marital_status,
+            children, education, did_you_know_facts, wealth_history, data
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+        const insertSqlWsj = `
+          INSERT INTO wsj_billionaires (
+            id, rank, name, net_worth, change_status, age, country, source, industry,
+            photo_url, highlight_text, end_year, title_role, real_time_net_worth,
+            real_time_change, real_time_as_of, list_net_worth_as_of, photo_credit,
+            editor_last_updated, editor_bullet_points, in_their_own_words_quote,
+            self_made_score, philanthropy_score, residence, citizenship, marital_status,
+            children, education, did_you_know_facts, wealth_history, data
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+        const params = [
+          String(item.id || `billionaire_${i + 1}`),
+          Number(item.rank || (i + 1)),
+          String(item.name || ''),
+          String(item.netWorth || ''),
+          String(item.changeStatus || 'UP'),
+          String(item.age || ''),
+          String(item.country || ''),
+          String(item.source || ''),
+          String(item.industry || ''),
+          String(item.photoUrl || ''),
+          String(item.highlightText || ''),
+          Number(item.endYear || 2026),
+          String(item.titleRole || ''),
+          String(item.realTimeNetWorth || ''),
+          String(item.realTimeChange || ''),
+          String(item.realTimeAsOf || ''),
+          String(item.listNetWorthAsOf || ''),
+          String(item.photoCredit || ''),
+          String(item.editorLastUpdated || ''),
+          JSON.stringify(item.editorBulletPoints || []),
+          String(item.inTheirOwnWordsQuote || ''),
+          String(item.selfMadeScore || ''),
+          String(item.philanthropyScore || ''),
+          String(item.residence || ''),
+          String(item.citizenship || ''),
+          String(item.maritalStatus || ''),
+          String(item.children || ''),
+          String(item.education || ''),
+          JSON.stringify(item.didYouKnowFacts || []),
+          JSON.stringify(item.wealthHistory || []),
+          JSON.stringify(item)
+        ];
+        await db.query(insertSql, params).catch((err) => console.warn('MySQL restore billionaires error:', err.message));
+        await db.query(insertSqlWsj, params).catch((err) => console.warn('MySQL restore wsj_billionaires error:', err.message));
+      }
+    }
+
+    // Restoring Entrepreneurs Table
+    const entrepreneursList = Array.isArray(snapshot.entrepreneurs) ? snapshot.entrepreneurs : [];
+    if (entrepreneursList && entrepreneursList.length > 0) {
+      await db.query('DELETE FROM entrepreneurs').catch((err) => console.warn('MySQL Delete entrepreneurs notice:', err.message));
+      for (let i = 0; i < entrepreneursList.length; i++) {
+        const item = entrepreneursList[i];
+        if (!item || !item.name) continue;
+        const insertSql = `
+          INSERT INTO entrepreneurs (
+            id, rank, name, title_role, bio, website, photo_url,
+            age, country, source, industry, gender, net_worth_millions, companies, data
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+        const params = [
+          String(item.id || `ent_${i + 1}`),
+          Number(item.rank || (i + 1)),
+          String(item.name || ''),
+          String(item.titleRole || ''),
+          String(item.bio || ''),
+          String(item.website || ''),
+          String(item.photoUrl || ''),
+          String(item.age || ''),
+          String(item.country || ''),
+          String(item.source || ''),
+          String(item.industry || ''),
+          String(item.gender || ''),
+          String(item.netWorthMillions || ''),
+          JSON.stringify(item.companies || []),
+          JSON.stringify(item)
+        ];
+        await db.query(insertSql, params).catch((err) => console.warn('MySQL restore entrepreneurs error:', err.message));
       }
     }
   } catch (dbErr) {
@@ -4117,7 +3981,7 @@ async function sendSubscriptionConfirmationEmail({ name, email, phone, packageNa
             
             <!-- Footer Matching Image 2 Exactly -->
             <div style="padding: 24px; text-align: center; font-family: Arial, sans-serif; font-size: 11.5px; color: #6b7280; border-top: 1px solid #EAE6DA;">
-              <p style="margin: 0 0 6px 0;">&copy; ${new Date().getFullYear()} Times Chicago Media Inc. All Rights Reserved.</p>
+              <p style="margin: 0 0 6px 0;">&copy; ${new Date().getFullYear()} Times Chicago LLC. All Rights Reserved.</p>
               <p style="margin: 0 0 6px 0;">You received this email because you subscribed to Times Chicago.</p>
               <p style="margin: 0;">To view your account or manage subscriptions, visit <a href="http://localhost:3000/reader/john/saved" style="color: #00558c; text-decoration: underline;">your Reader Dashboard</a>.</p>
             </div>
@@ -4158,11 +4022,6 @@ app.post('/api/subscriptions', subscribeLimiter, async (req, res) => {
         existingRequests = rows;
       }
     } catch (e) {}
-
-    if (existingRequests.length === 0) {
-      const jsonSubs = readJSONFile(SUBSCRIPTIONS_FILE, []);
-      existingRequests = jsonSubs.filter(s => s.email && s.email.toLowerCase().trim() === cleanEmail);
-    }
 
     // Check if user already has an active, non-expired subscription
     const activeSub = existingRequests.find(s => {
@@ -4218,12 +4077,7 @@ app.post('/api/subscriptions', subscribeLimiter, async (req, res) => {
       console.warn('MySQL Subscription Save Notice:', dbErr.message);
     }
 
-    // 2. Save to JSON file fallback
-    const allSubs = readJSONFile(SUBSCRIPTIONS_FILE, []);
-    allSubs.unshift(newRecord);
-    writeJSONFile(SUBSCRIPTIONS_FILE, allSubs);
-
-    // 3. Trigger confirmation email with end date & details
+    // 2. Trigger confirmation email with end date & details
     sendSubscriptionConfirmationEmail({
       name,
       email: cleanEmail,
@@ -4265,11 +4119,6 @@ app.get('/api/subscriptions/user', async (req, res) => {
       }
     } catch (e) {}
 
-    if (userSubs.length === 0) {
-      const jsonSubs = readJSONFile(SUBSCRIPTIONS_FILE, []);
-      userSubs = jsonSubs.filter(s => s.email && s.email.toLowerCase().trim() === cleanEmail);
-    }
-
     const validSubs = userSubs.filter(s => (s.status === 'Active' || s.status === 'Cancelled') && s.end_date);
 
     if (validSubs.length === 0) {
@@ -4287,7 +4136,7 @@ app.get('/api/subscriptions/user', async (req, res) => {
     }
 
     const remainingMs = end.getTime() - now.getTime();
-    const daysRemaining = Math.max(0, Math.ceil(remainingMs / (1000 * 60 * 60 * 24)));
+    const daysRemaining = Math.max(0, Math.floor(remainingMs / (1000 * 60 * 60 * 24)));
 
     return res.status(200).json({
       success: true,
@@ -4307,37 +4156,18 @@ app.get('/api/subscriptions/user', async (req, res) => {
 
 app.get('/api/subscriptions', async (req, res) => {
   try {
-    try {
-      await ensureSubscriptionRequestsTable();
-      const [rows] = await db.query(`SELECT * FROM subscription_requests ORDER BY id ASC`);
-      if (rows && rows.length > 0) {
-        // Deduplicate rows by lowercased email (keeping the first request)
-        const seen = new Set();
-        const uniqueRows = [];
-        for (const row of rows) {
-          const lower = (row.email || '').toLowerCase().trim();
-          if (lower && !seen.has(lower)) {
-            seen.add(lower);
-            uniqueRows.push(row);
-          }
-        }
-        return res.status(200).json({ success: true, subscriptions: uniqueRows });
-      }
-    } catch (e) {}
-
-    const subscriptions = readJSONFile(SUBSCRIPTIONS_FILE, []);
+    await ensureSubscriptionRequestsTable();
+    const [rows] = await db.query(`SELECT * FROM subscription_requests ORDER BY id ASC`);
     const seen = new Set();
-    const uniqueSubs = [];
-    // Sort ascending by id/created_at to keep first request
-    const sorted = [...subscriptions].sort((a, b) => (a.id || 0) - (b.id || 0));
-    for (const sub of sorted) {
-      const lower = (sub.email || '').toLowerCase().trim();
+    const uniqueRows = [];
+    for (const row of (rows || [])) {
+      const lower = (row.email || '').toLowerCase().trim();
       if (lower && !seen.has(lower)) {
         seen.add(lower);
-        uniqueSubs.push(sub);
+        uniqueRows.push(row);
       }
     }
-    return res.status(200).json({ success: true, subscriptions: uniqueSubs });
+    return res.status(200).json({ success: true, subscriptions: uniqueRows });
   } catch (err) {
     console.error('Error fetching subscription requests:', err);
     return res.status(500).json({ success: false, subscriptions: [] });
@@ -4349,19 +4179,8 @@ app.put('/api/subscriptions/:id', async (req, res) => {
     const { status } = req.body || {};
     const { id } = req.params;
 
-    try {
-      await ensureSubscriptionRequestsTable();
-      await db.query(`UPDATE subscription_requests SET status = ? WHERE id = ?`, [status, id]);
-    } catch (e) {}
-
-    const allSubs = readJSONFile(SUBSCRIPTIONS_FILE, []);
-    const updated = allSubs.map((item) => {
-      if (String(item.id) === String(id)) {
-        return { ...item, status };
-      }
-      return item;
-    });
-    writeJSONFile(SUBSCRIPTIONS_FILE, updated);
+    await ensureSubscriptionRequestsTable();
+    await db.query(`UPDATE subscription_requests SET status = ? WHERE id = ?`, [status, id]);
 
     return res.status(200).json({ success: true, message: 'Status updated successfully' });
   } catch (err) {
@@ -4373,14 +4192,8 @@ app.delete('/api/subscriptions/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
-    try {
-      await ensureSubscriptionRequestsTable();
-      await db.query(`DELETE FROM subscription_requests WHERE id = ?`, [id]);
-    } catch (e) {}
-
-    let allSubs = readJSONFile(SUBSCRIPTIONS_FILE, []);
-    allSubs = allSubs.filter((item) => String(item.id) !== String(id));
-    writeJSONFile(SUBSCRIPTIONS_FILE, allSubs);
+    await ensureSubscriptionRequestsTable();
+    await db.query(`DELETE FROM subscription_requests WHERE id = ?`, [id]);
 
     return res.status(200).json({ success: true, message: 'Subscription request deleted' });
   } catch (err) {
@@ -4389,30 +4202,72 @@ app.delete('/api/subscriptions/:id', async (req, res) => {
 });
 
 // =================================================================
-// COMMENTS API ENDPOINTS (Saved persistently in database/comments.json)
+// COMMENTS API ENDPOINTS (MySQL Database)
 // =================================================================
-app.get('/api/comments/:articleSlug', (req, res) => {
+async function ensureCommentsTable() {
   try {
-    const { articleSlug } = req.params;
-    const allComments = readJSONFile(COMMENTS_FILE, []);
-    if (!articleSlug || articleSlug === 'all') {
-      return res.status(200).json({ success: true, comments: allComments });
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS comments (
+        id VARCHAR(100) PRIMARY KEY,
+        articleSlug VARCHAR(255) NOT NULL,
+        authorName VARCHAR(255) NOT NULL,
+        authorEmail VARCHAR(255) DEFAULT '',
+        createdAt VARCHAR(100) DEFAULT '',
+        timestamp BIGINT DEFAULT 0,
+        text TEXT NOT NULL
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `);
+
+    // Ensure all required columns exist even if table was created with an older schema
+    const requiredColumns = [
+      { name: 'articleSlug', type: 'VARCHAR(255) NOT NULL DEFAULT ""' },
+      { name: 'authorName', type: 'VARCHAR(255) NOT NULL DEFAULT "Anonymous"' },
+      { name: 'authorEmail', type: 'VARCHAR(255) DEFAULT ""' },
+      { name: 'createdAt', type: 'VARCHAR(100) DEFAULT ""' },
+      { name: 'timestamp', type: 'BIGINT DEFAULT 0' },
+      { name: 'text', type: 'TEXT' },
+    ];
+
+    for (const col of requiredColumns) {
+      try {
+        await db.query(`ALTER TABLE comments ADD COLUMN ${col.name} ${col.type}`);
+      } catch (colErr) {}
     }
-    const filtered = allComments.filter((c) => c.articleSlug === articleSlug);
-    return res.status(200).json({ success: true, comments: filtered });
+
+    try {
+      await db.query(`UPDATE comments SET articleSlug = article_slug WHERE (articleSlug IS NULL OR articleSlug = '') AND article_slug IS NOT NULL`);
+    } catch (e) {}
+  } catch (err) {
+    console.warn('MySQL comments table initialization notice:', err.message);
+  }
+}
+ensureCommentsTable();
+
+app.get('/api/comments/:articleSlug', async (req, res) => {
+  try {
+    await ensureCommentsTable();
+    const { articleSlug } = req.params;
+    let query = 'SELECT * FROM comments ORDER BY timestamp DESC';
+    let params = [];
+    if (articleSlug && articleSlug !== 'all') {
+      query = 'SELECT * FROM comments WHERE articleSlug = ? OR articleSlug = ? ORDER BY timestamp DESC';
+      params = [articleSlug, articleSlug.toLowerCase()];
+    }
+    const [rows] = await db.query(query, params);
+    return res.status(200).json({ success: true, comments: rows || [] });
   } catch (err) {
     console.error('Error fetching comments:', err);
     return res.status(500).json({ success: false, comments: [], message: err.message });
   }
 });
 
-app.post('/api/comments', (req, res) => {
+app.post('/api/comments', async (req, res) => {
   try {
+    await ensureCommentsTable();
     const { id, articleSlug, text, authorName, authorEmail } = req.body || {};
     if (!articleSlug || !text || !text.trim()) {
       return res.status(400).json({ success: false, message: 'articleSlug and text are required' });
     }
-    const allComments = readJSONFile(COMMENTS_FILE, []);
     const now = new Date();
     const formattedDate = now.toLocaleString("en-US", {
       month: "short",
@@ -4437,8 +4292,10 @@ app.post('/api/comments', (req, res) => {
       text: text.trim(),
     };
 
-    allComments.unshift(newComment);
-    writeJSONFile(COMMENTS_FILE, allComments);
+    await db.query(
+      'INSERT INTO comments (id, articleSlug, authorName, authorEmail, createdAt, timestamp, text) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [newComment.id, newComment.articleSlug, newComment.authorName, newComment.authorEmail, newComment.createdAt, newComment.timestamp, newComment.text]
+    );
 
     return res.status(201).json({ success: true, comment: newComment });
   } catch (err) {
@@ -4447,22 +4304,15 @@ app.post('/api/comments', (req, res) => {
   }
 });
 
-app.delete('/api/comments/:id', (req, res) => {
+app.delete('/api/comments/:id', async (req, res) => {
   try {
     const rawId = req.params.id || '';
     const targetId = decodeURIComponent(rawId).trim();
-    let allComments = readJSONFile(COMMENTS_FILE, []);
-    const initialCount = allComments.length;
-    allComments = allComments.filter((c) => {
-      const cId = String(c.id || '').trim();
-      return cId !== targetId && cId !== String(rawId).trim();
-    });
-    
-    if (allComments.length === initialCount) {
+    const [result] = await db.query('DELETE FROM comments WHERE id = ?', [targetId]);
+    if (result.affectedRows === 0) {
       return res.status(404).json({ success: false, message: 'Comment not found' });
     }
 
-    writeJSONFile(COMMENTS_FILE, allComments);
     return res.status(200).json({ success: true, message: 'Comment deleted successfully' });
   } catch (err) {
     console.error('Error deleting comment:', err);
@@ -4500,7 +4350,7 @@ app.get(['/rss.xml', '/api/rss'], async (req, res) => {
       posts = rows.map(formatPostRow);
     }
   } catch (err) {
-    posts = readJSONFile(POSTS_FILE, []);
+    posts = [];
   }
 
   const cleanCdata = (str) => {

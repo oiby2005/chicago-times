@@ -9,7 +9,7 @@ interface Ad3SectionProps {
 
 export const Ad3Section: React.FC<Ad3SectionProps> = ({ className = "" }) => {
   return (
-    <div className={`w-full font-sans select-none py-1 my-1 flex justify-center ${className}`}>
+    <div className={`w-full font-sans  py-1 my-1 flex justify-center ${className}`}>
       <AdPlaceholder slotId="hp_slot_3" width="w-full" height="h-[120px]" resolution="970 × 120" />
     </div>
   );

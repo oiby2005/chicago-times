@@ -129,7 +129,7 @@ export const TopNetworkBar: React.FC = () => {
   };
 
   return (
-    <div className="w-full bg-white text-[#111111] font-sans border-b border-[#EAE6DA] select-none py-1 relative z-40">
+    <div className="w-full bg-white text-[#111111] font-sans border-b border-[#EAE6DA]  py-1 relative z-40">
       <div className="max-w-[1280px] mx-auto px-4 sm:px-5 md:px-6 flex items-center justify-between text-[11px] font-sans tracking-normal">
         {/* Leftmost Dropdown Caret & Ticker Items List */}
         <div className="flex items-center space-x-2.5 sm:space-x-3.5 overflow-hidden whitespace-nowrap flex-1 justify-start relative">

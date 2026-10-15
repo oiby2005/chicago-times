@@ -294,7 +294,7 @@ export default function MoreFromWsjSection({
     title || `Related in ${categoryName || "This Category"}`;
 
   return (
-    <section className="w-full pt-8 mt-10 border-t border-dashed border-[#CCCCCC] select-none">
+    <section className="w-full pt-8 mt-10 border-t border-dashed border-[#CCCCCC] ">
       {/* Section Header */}
       <div className="mb-6">
         <h3 className="text-[11px] sm:text-[12px] font-bold text-[#505e70] tracking-wider uppercase font-sans">

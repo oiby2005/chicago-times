@@ -212,7 +212,7 @@ export const AdPlaceholder: React.FC<AdPlaceholderProps> = ({
   // If Google AdSense is designated for this slot and no custom image banner override is active:
   if (isGoogleAdSlot && (!slot || !slot.imageUrl)) {
     return (
-      <div className={`flex flex-col items-center justify-center select-none w-full ${className.includes("my-") ? "" : "my-3 mb-4"} ${className}`}>
+      <div className={`flex flex-col items-center justify-center  w-full ${className.includes("my-") ? "" : "my-3 mb-4"} ${className}`}>
         <div className="w-full max-w-[728px] mx-auto flex flex-col items-center justify-center text-center p-2 bg-transparent">
           <span className="text-[10px] font-sans font-bold text-[#94a3b8] uppercase tracking-wider mb-1">
             {slotTitle || "Google AdSense"}
@@ -274,7 +274,7 @@ export const AdPlaceholder: React.FC<AdPlaceholderProps> = ({
   }
 
   return (
-    <div className={`flex flex-col items-center justify-center select-none w-full ${(isSidebarSlot || isFullWidthSlot) ? "my-0" : className.includes("my-") ? "" : "my-3 mb-4"} ${className}`}>
+    <div className={`flex flex-col items-center justify-center  w-full ${(isSidebarSlot || isFullWidthSlot) ? "my-0" : className.includes("my-") ? "" : "my-3 mb-4"} ${className}`}>
       {/* Empty Banner Container with title and resolution size */}
       <div
         style={aspectRatioStyle}

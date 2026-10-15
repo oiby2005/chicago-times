@@ -6,10 +6,17 @@ import Link from "next/link";
 export const StickySubscribeBar: React.FC = () => {
   const [isVisible, setIsVisible] = useState(true);
 
+  const handleClose = () => {
+    setIsVisible(false);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("wsj_sticky_banner_visibility", { detail: { visible: false } }));
+    }
+  };
+
   if (!isVisible) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-[#d4d4d4] shadow-md py-2.5 select-none">
+    <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-[#d4d4d4] shadow-md py-2.5">
       <div className="max-w-[1280px] mx-auto px-4 sm:px-5 md:px-6 flex items-center justify-between">
         {/* Left Offer Text */}
         <div className="flex items-center space-x-2">
@@ -28,7 +35,7 @@ export const StickySubscribeBar: React.FC = () => {
             <span>Subscribe Now</span>
           </Link>
           <button
-            onClick={() => setIsVisible(false)}
+            onClick={handleClose}
             aria-label="Close"
             className="text-gray-500 hover:text-black text-sm font-bold p-1 focus:outline-none cursor-pointer"
             suppressHydrationWarning

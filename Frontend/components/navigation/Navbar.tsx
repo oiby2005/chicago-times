@@ -615,7 +615,7 @@ export const Navbar: React.FC = () => {
 
   useEffect(() => {
     try {
-      const stored = sessionStorage.getItem("wsj_user") || localStorage.getItem("wsj_user");
+      const stored = sessionStorage.getItem("wsj_user");
       if (stored) {
         const u = JSON.parse(stored);
         if (u && (u.role || "").toLowerCase() === "writer") {
@@ -733,14 +733,14 @@ export const Navbar: React.FC = () => {
                     href={getCategoryRoute(title, writerPrefix)}
                     prefetch={false}
                     onClick={handleCategoryClick}
-                    className={`text-[13px] font-['Century_Gothic','Publica_Sans_Light','Kumbh_Sans',sans-serif] ${
+                    className={`text-[15px] md:text-[13px] font-['Century_Gothic','Publica_Sans_Light','Kumbh_Sans',sans-serif] ${
                       index === 0
                         ? "pl-2.5 md:pl-1 pr-2.5 md:pr-1.5 lg:pr-1.5"
                         : "px-2.5 md:px-1.5 lg:px-1.5"
-                    } pb-2 pt-1 border transition-all whitespace-nowrap leading-none cursor-pointer ${
+                    } pb-2 pt-1 whitespace-nowrap leading-none cursor-pointer transition-colors duration-150 ${
                       isHovered
-                        ? "bg-[#f9f9f8] text-[#111111] font-bold border-[#dcd6cd] border-b-transparent rounded-t-sm z-50 relative -mb-[1px]"
-                        : "text-[#111111] font-normal border-transparent hover:text-[#990000] active:text-[#990000]"
+                        ? "bg-[#f9f9f8] text-[#111111] font-bold border border-[#dcd6cd] border-b-transparent rounded-t-sm z-50 relative -mb-[1px]"
+                        : "text-[#111111] font-normal border border-transparent hover:text-[#990000] active:text-[#990000]"
                     }`}
                   >
                     {title}
@@ -788,7 +788,7 @@ export const Navbar: React.FC = () => {
                 setActiveTab(null);
               }
             }}
-            className="block absolute left-0 right-0 w-full top-[36px] bg-[#f9f9f8] border-b border-t border-[#dcd6cd] shadow-2xl z-40 py-4 md:py-6 max-h-[82vh] md:max-h-none overflow-y-auto md:overflow-y-visible md:min-h-[190px] transition-all duration-150 animate-fadeIn select-none"
+            className="block absolute left-0 right-0 w-full top-[36px] bg-[#f9f9f8] border-b border-t border-[#dcd6cd] shadow-2xl z-40 py-4 md:py-6 max-h-[82vh] md:max-h-none overflow-y-auto md:overflow-y-visible md:min-h-[190px] transition-all duration-150 animate-fadeIn "
           >
             <div className="w-full max-w-[1280px] mx-auto px-4 sm:px-5 md:px-6 relative flex flex-col md:flex-row gap-6 md:gap-8 items-stretch">
               {/* Seamless patch div: erases the top border line ONLY directly underneath the hovered tab on desktop */}

@@ -31,20 +31,20 @@ export const StickyHeaderBar: React.FC<StickyHeaderBarProps> = ({ visible = true
 
   const loadUser = () => {
     if (typeof window === "undefined") return;
+    if (sessionStorage.getItem("wsj_logged_out") === "true" || localStorage.getItem("wsj_logged_out") === "true") {
+      setCurrentUser(null);
+      return;
+    }
+
     const tabUser = sessionStorage.getItem("wsj_user");
     const sessionActive = sessionStorage.getItem("wsj_session_active");
 
     let parsed: any = null;
-    if (tabUser && sessionActive === "true") {
+    if (tabUser) {
       try { parsed = JSON.parse(tabUser); } catch (e) {}
-    } else if (isDashboardPage) {
-      const generalUser = localStorage.getItem("wsj_user");
-      if (generalUser) {
-        try { parsed = JSON.parse(generalUser); } catch (e) {}
-      }
     }
 
-    if (!parsed && pathname) {
+    if (!parsed && pathname && sessionActive === "true") {
       const match = pathname.match(/^\/(writer|admin|reader)\/([^/]+)/i);
       if (match) {
         const role = match[1].toLowerCase();
@@ -106,7 +106,11 @@ export const StickyHeaderBar: React.FC<StickyHeaderBarProps> = ({ visible = true
       localStorage.removeItem("wsj_user");
       localStorage.removeItem("wsj_token");
       localStorage.removeItem("wsj_admin_user");
+      localStorage.removeItem("wsj_writer_user");
+      localStorage.removeItem("wsj_reader_user");
       localStorage.removeItem("wsj_session_active");
+      sessionStorage.setItem("wsj_logged_out", "true");
+      localStorage.setItem("wsj_logged_out", "true");
       setCurrentUser(null);
       setShowDropdown(false);
       window.dispatchEvent(new Event("wsj_user_updated"));
@@ -205,7 +209,7 @@ export const StickyHeaderBar: React.FC<StickyHeaderBarProps> = ({ visible = true
         isOpen={isSearchOverlayOpen}
         onClose={() => setIsSearchOverlayOpen(false)}
       />
-      <div id="sticky-header-bar" className="fixed top-0 left-0 right-0 z-50 w-full bg-white border-b border-[#d4d4d4] shadow-md transition-all duration-200 select-none animate-in slide-in-from-top-2 duration-150">
+      <div id="sticky-header-bar" className="fixed top-0 left-0 right-0 z-50 w-full bg-white border-b border-[#d4d4d4] shadow-md transition-all duration-200  animate-in slide-in-from-top-2 duration-150">
         <div className="w-full max-w-[1280px] mx-auto px-4 sm:px-5 md:px-6 relative">
           {/* Top Header Row of Sticky Bar */}
           <div className="flex items-center justify-between h-12 sm:h-14 md:h-16 border-b border-[#f0f0f0] relative">

@@ -144,7 +144,7 @@ export const ArticleUpNextSection: React.FC<ArticleUpNextSectionProps> = ({
   if (articles.length === 0) return null;
 
   return (
-    <section className="w-full select-none my-8 pt-4">
+    <section className="w-full my-8 pt-4">
       {/* Section Header: UP NEXT */}
       <div className="border-b border-dashed border-[#CCCCCC] pb-2 mb-6">
         <h2 className="font-serif font-bold text-[22px] sm:text-[24px] text-[#111111] tracking-tight uppercase">
@@ -165,7 +165,10 @@ export const ArticleUpNextSection: React.FC<ArticleUpNextSectionProps> = ({
             </div>
 
             {/* Main Headline */}
-            <h3 className="font-serif font-bold text-[20px] sm:text-[23px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-1.5">
+            <h3 
+              className="font-serif font-bold text-[20px] sm:text-[23px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-1.5"
+              style={{ fontFamily: "Georgia, serif" }}
+            >
               <Link href={`/article/${item.slug}`}>
                 {item.title}
               </Link>

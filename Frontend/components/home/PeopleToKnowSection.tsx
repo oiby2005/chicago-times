@@ -125,7 +125,7 @@ export const PeopleToKnowSection: React.FC = () => {
   const rightBottom = articles[3] || defaultArticles[3];
 
   return (
-    <section className="w-full font-sans select-none my-2 pt-0 pb-2">
+    <section className="w-full font-sans  my-2 pt-0 pb-2">
       <div className="mb-3">
         <h2 className="font-serif font-bold text-[24px] sm:text-[28px] text-[#111111] tracking-tight">
           People to Know

@@ -8,7 +8,7 @@ import Container from "@/components/layout/Container";
 
 export default function NotFound() {
   return (
-    <main className="min-h-screen bg-white text-[#111111] font-sans flex flex-col justify-between select-none">
+    <main className="min-h-screen bg-white text-[#111111] font-sans flex flex-col justify-between ">
       <div>
         <Header />
         <Container className="py-16 text-center">

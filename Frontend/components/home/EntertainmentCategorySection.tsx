@@ -212,7 +212,7 @@ export const EntertainmentCategorySection: React.FC = () => {
   };
 
   return (
-    <div className="w-full font-sans select-none pt-2 pb-4 my-0">
+    <div className="w-full font-sans pt-2 pb-4 my-0">
       {/* Section Header with dashed line BELOW the Entertainment text */}
       <div className="flex items-center space-x-2 pb-3 mb-4 border-b border-dashed border-[#CCCCCC]">
         <h2 className="font-serif font-bold text-[26px] sm:text-[30px] text-[#b82e2e] tracking-tight">
@@ -232,7 +232,7 @@ export const EntertainmentCategorySection: React.FC = () => {
         <div className="lg:col-span-8 pr-0 lg:pr-4 flex flex-col justify-start h-full border-b lg:border-b-0 lg:border-r border-dashed border-[#CCCCCC] pb-[28px] lg:pb-0 mb-0 lg:mb-0">
           
           {/* Top Half: Position 1 Hero */}
-          <div className="grid grid-cols-1 md:grid-cols-8 gap-4 pb-[28px] md:pb-4 border-b border-dashed border-[#CCCCCC]">
+          <div className="grid grid-cols-1 md:grid-cols-8 gap-4 pb-[28px] md:pb-5 border-b border-dashed border-[#CCCCCC]">
             {/* Left Headline */}
             <div className="md:col-span-4 flex flex-col justify-start">
               {renderHomeTags(heroItem)}
@@ -272,7 +272,7 @@ export const EntertainmentCategorySection: React.FC = () => {
           </div>
 
           {/* Bottom Half: Positions 2 & 3 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-0 pt-[28px] md:pt-8 mt-0 md:mt-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-0 pt-[28px] md:pt-5 mt-0 md:mt-0">
             {/* Position 2 */}
             <div className="flex items-stretch md:items-start space-x-3 pr-0 md:pr-4 border-b md:border-b-0 md:border-r border-dashed border-[#CCCCCC] pb-[28px] md:pb-0 mb-0 md:mb-0">
               <Link

@@ -11,7 +11,7 @@ export const HomeSecondarySections: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false);
 
   return (
-    <div className="w-full bg-white text-[#111111] font-sans pb-12 select-none">
+    <div className="w-full bg-white text-[#111111] font-sans pb-12 ">
       <Container>
         {/* ================================================================= */}
         {/* SECTION 1: PODCASTS & MARKETVIEWS SIDEBAR (Screenshot 1)         */}
@@ -528,7 +528,7 @@ export const HomeSecondarySections: React.FC = () => {
                 </div>
 
                 {/* Coursiv Advertisement Card */}
-                <div className="bg-[#f4f5f7] border border-[#e5e7eb] rounded-xs p-3.5 space-y-2.5 select-none">
+                <div className="bg-[#f4f5f7] border border-[#e5e7eb] rounded-xs p-3.5 space-y-2.5 ">
                   <div className="relative w-full aspect-[4/3] bg-gray-200 rounded-xs overflow-hidden">
                     <img
                       src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?fm=webp&fit=crop&w=600&q=80"

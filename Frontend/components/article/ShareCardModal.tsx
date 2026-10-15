@@ -37,7 +37,7 @@ export const ShareCardModal: React.FC<ShareCardModalProps> = ({
   useEffect(() => {
     if (typeof window !== "undefined") {
       try {
-        const uStr = sessionStorage.getItem("wsj_user") || localStorage.getItem("wsj_user");
+        const uStr = sessionStorage.getItem("wsj_user");
         if (uStr) {
           const parsed = JSON.parse(uStr);
           setUserRole(parsed?.role ? String(parsed.role).toLowerCase() : null);

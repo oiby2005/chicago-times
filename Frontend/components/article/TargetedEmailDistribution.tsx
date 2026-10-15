@@ -207,7 +207,7 @@ export const TargetedEmailDistribution: React.FC<TargetedEmailDistributionProps>
             {/* Newsletter Broadcast Checkbox */}
             <div
               onClick={() => setTempBroadcast(!tempBroadcast)}
-              className="bg-[#f8fafc] border border-[#e2e8f0] rounded-2xl p-3.5 sm:p-4 flex items-start space-x-3 cursor-pointer select-none hover:border-slate-300 transition-colors"
+              className="bg-[#f8fafc] border border-[#e2e8f0] rounded-2xl p-3.5 sm:p-4 flex items-start space-x-3 cursor-pointer  hover:border-slate-300 transition-colors"
             >
               <input
                 type="checkbox"

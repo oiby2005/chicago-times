@@ -53,7 +53,7 @@ export const MarketTickerBar: React.FC = () => {
   };
 
   return (
-    <div className="bg-white border-b border-[#e2e2e2] text-xs font-sans py-1.5 select-none">
+    <div className="bg-white border-b border-[#e2e2e2] text-xs font-sans py-1.5 ">
       <Container className="flex items-center justify-between overflow-x-auto no-scrollbar">
         <div className="flex items-center space-x-6 text-[12px] flex-1">
           {/* Chevron Dropdown trigger */}

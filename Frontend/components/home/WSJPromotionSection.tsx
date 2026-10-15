@@ -5,7 +5,7 @@ import Link from "next/link";
 
 export const WSJPromotionSection: React.FC = () => {
   return (
-    <div className="w-full font-sans select-none my-2 flex flex-col md:flex-row items-stretch border border-[#E5E0D5]">
+    <div className="w-full font-sans  my-2 flex flex-col md:flex-row items-stretch border border-[#E5E0D5]">
       {/* Left Block: Promotion Card (70% width) - Warm Peach/Cream Tint */}
       <div className="flex-1 bg-[#FDF4E7] p-6 sm:p-8 flex flex-col justify-between border-b md:border-b-0 md:border-r border-[#E5E0D5]">
         <div>

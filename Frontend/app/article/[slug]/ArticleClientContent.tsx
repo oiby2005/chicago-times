@@ -95,7 +95,7 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const userStr = sessionStorage.getItem("wsj_user") || localStorage.getItem("wsj_user");
+      const userStr = sessionStorage.getItem("wsj_user");
       const sessionDismissed = sessionStorage.getItem("wsj_notification_dismissed");
       // Show the alert card when reading an article in a signed-out account unless dismissed in this session
       if (!userStr && !sessionDismissed) {
@@ -292,10 +292,10 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
   const bodyHasHeroImg = bodyHtml && imageUrl && bodyHtml.includes(imageUrl);
 
   return (
-    <main className="min-h-screen bg-white text-[#111111] font-sans flex flex-col justify-between select-none">
+    <main className="min-h-screen bg-white text-[#111111] font-sans flex flex-col justify-between ">
       {/* Article Reading Scroll Progress Bar (Extends from 0% to 100% when scrolled to bottom) */}
       <div
-        className="fixed top-0 left-0 right-0 z-[100] h-[3px] sm:h-[3.5px] pointer-events-none select-none bg-transparent"
+        className="fixed top-0 left-0 right-0 z-[100] h-[3px] sm:h-[3.5px] pointer-events-none  bg-transparent"
         aria-hidden="true"
       >
         <div
@@ -379,8 +379,8 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
                 {/* Subheadline / Deck */}
                 {deck && (
                   <p
-                    className="font-georgia-serif text-base sm:text-lg md:text-[19px] text-[#111111] leading-relaxed"
-                    style={{ fontFamily: "Georgia, 'Times New Roman', serif !important", color: "#111111" }}
+                    className="font-georgia-serif font-bold text-base sm:text-lg md:text-[19px] text-[#111111] leading-relaxed"
+                    style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontWeight: 700, color: "#111111" }}
                   >
                     {deck}
                   </p>
@@ -388,15 +388,15 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
 
                 {/* Author Byline & Share + Bookmark Icons */}
                 <div className="pt-2 pb-4 border-b border-dashed border-[#CCCCCC]">
-                  {/* DESKTOP VIEW (sm:flex) - 100% Locked & Untouched */}
-                  <div className="hidden sm:flex font-sans items-start justify-start gap-3 select-none">
+                  {/* DESKTOP VIEW (sm:flex) */}
+                  <div className="hidden sm:flex font-sans items-start justify-start gap-3">
                     {/* Writer's Profile Image */}
-                    <div className="relative w-[60px] h-[60px] rounded-none overflow-hidden shrink-0 border border-gray-300 shadow-2xs bg-gray-100 flex items-center justify-center">
+                    <div className="relative w-[38px] h-[38px] rounded-none overflow-hidden shrink-0 border border-gray-300 shadow-2xs bg-gray-100 flex items-center justify-center">
                       {isMounted && authorObj.image ? (
                         <img
                           src={authorObj.image}
                           alt={authorObj.name}
-                          className="w-full h-full object-cover rounded-none"
+                          className="w-full h-full object-contain rounded-none bg-slate-50"
                         />
                       ) : (
                         <div className="w-full h-full rounded-none bg-[#111111] text-white flex items-center justify-center font-bold text-sm">
@@ -406,7 +406,7 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
                     </div>
 
                     {/* Writer Name + Inline Share & Bookmark Icons + Published Date */}
-                    <div className="flex flex-col justify-between h-[60px]">
+                    <div className="flex flex-col justify-between h-[38px]">
                       <div className="text-[14px] font-bold text-[#111111] leading-none flex items-center gap-2">
                         <span>
                           By{" "}
@@ -423,10 +423,10 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
                             href={authorObj.linkedinUrl}
                             target="_blank"
                             rel="noreferrer"
-                            className="inline-flex items-center justify-center w-8 h-8 rounded-none hover:opacity-90 transition-opacity cursor-pointer shrink-0"
+                            className="inline-flex items-center justify-center w-5 h-5 rounded-none hover:opacity-90 transition-opacity cursor-pointer shrink-0"
                             title={`${authorObj.name}'s LinkedIn Profile`}
                           >
-                            <svg className="w-8 h-8 rounded-none" viewBox="0 0 24 24">
+                            <svg className="w-5 h-5 rounded-none" viewBox="0 0 24 24">
                               <rect width="24" height="24" fill="#0077b5" rx="0" />
                               <path
                                 d="M8 19H5V8h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3V8h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"
@@ -441,12 +441,12 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
                           <button
                             type="button"
                             onClick={() => setIsMainShareOpen(!isMainShareOpen)}
-                            className="inline-flex items-center justify-center w-8 h-8 rounded-none border border-[#cbd5e1] bg-white hover:bg-slate-100 text-[#334155] hover:text-[#0f172a] transition-colors cursor-pointer shadow-2xs"
+                            className="inline-flex items-center justify-center w-5 h-5 rounded-none border border-[#cbd5e1] bg-white hover:bg-slate-100 text-[#334155] hover:text-[#0f172a] transition-colors cursor-pointer shadow-2xs"
                             title="Share Article"
                             aria-label="Share Article"
                             suppressHydrationWarning
                           >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                            <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                               <path d="M4 19c2.5-2.5 6-4.5 11-4.5v4.5l8-8.5L15 2v4.5C8.5 6.5 4.5 11 4 19z" />
                             </svg>
                           </button>
@@ -458,27 +458,27 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
                         </div>
 
                         {/* Bookmark Icon */}
-                        <BookmarkButton article={currentArticleData} variant="inline" />
+                        <BookmarkButton article={currentArticleData} variant="inline" size="sm" />
 
                         {/* Google Auto Reader / Listen Audio Control */}
                         <ArticleAudioReader title={title} deck={deck} bodyContent={bodyHtml || undefined} />
                       </div>
 
-                      <div className="text-[13.5px] font-semibold text-[#555555] leading-none">
+                      <div className="text-[13px] font-semibold text-[#555555] leading-none">
                         {publishedDate}
                       </div>
                     </div>
                   </div>
 
                   {/* MOBILE VIEW (<sm) - Organised cleanly with buttons next to date & time */}
-                  <div className="flex sm:hidden font-sans items-start justify-start gap-3 select-none">
-                    {/* Writer's Profile Image - Aspect square, height aligned to buttons bottom edge */}
+                  <div className="flex sm:hidden font-sans items-start justify-start gap-3">
+                    {/* Writer's Profile Image */}
                     <div className="relative w-[76px] h-[76px] aspect-square rounded-none overflow-hidden shrink-0 border border-gray-300 shadow-2xs bg-gray-100 flex items-center justify-center">
                       {isMounted && authorObj.image ? (
                         <img
                           src={authorObj.image}
                           alt={authorObj.name}
-                          className="w-full h-full object-cover rounded-none"
+                          className="w-full h-full object-contain rounded-none bg-slate-50"
                         />
                       ) : (
                         <div className="w-full h-full rounded-none bg-[#111111] text-white flex items-center justify-center font-bold text-base">
@@ -515,10 +515,10 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
                               href={authorObj.linkedinUrl}
                               target="_blank"
                               rel="noreferrer"
-                              className="inline-flex items-center justify-center w-7 h-7 rounded-none hover:opacity-90 transition-opacity cursor-pointer shrink-0"
+                              className="inline-flex items-center justify-center w-6 h-6 rounded-none hover:opacity-90 transition-opacity cursor-pointer shrink-0"
                               title={`${authorObj.name}'s LinkedIn Profile`}
                             >
-                              <svg className="w-7 h-7 rounded-none" viewBox="0 0 24 24">
+                              <svg className="w-6 h-6 rounded-none" viewBox="0 0 24 24">
                                 <rect width="24" height="24" fill="#0077b5" rx="0" />
                                 <path
                                   d="M8 19H5V8h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3V8h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"
@@ -533,7 +533,7 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
                             <button
                               type="button"
                               onClick={() => setIsMainShareOpen(!isMainShareOpen)}
-                              className="inline-flex items-center justify-center w-7 h-7 rounded-none border border-[#cbd5e1] bg-white hover:bg-slate-100 text-[#334155] hover:text-[#0f172a] transition-colors cursor-pointer shadow-2xs"
+                              className="inline-flex items-center justify-center w-6 h-6 rounded-none border border-[#cbd5e1] bg-white hover:bg-slate-100 text-[#334155] hover:text-[#0f172a] transition-colors cursor-pointer shadow-2xs"
                               title="Share Article"
                               aria-label="Share Article"
                               suppressHydrationWarning
@@ -649,7 +649,7 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
                 <div className="w-full clear-both pt-6 mt-4">
                   <ArticleCommentsSection
                     articleSlug={slug}
-                    commentCount={customPost?.commentsCount || staticArticle.commentCount || 0}
+                    commentCount={0}
                   />
                 </div>
 

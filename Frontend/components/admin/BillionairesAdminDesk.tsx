@@ -112,6 +112,7 @@ export default function BillionairesAdminDesk() {
   const [editorLastUpdated, setEditorLastUpdated] = useState("");
   const [editorBulletPointsText, setEditorBulletPointsText] = useState("");
   const [inTheirOwnWordsQuote, setInTheirOwnWordsQuote] = useState("");
+  const [inTheirOwnWordsQuote2, setInTheirOwnWordsQuote2] = useState("");
 
   // Form State — Image 3 (Personal Stats Table)
   const [selfMadeScore, setSelfMadeScore] = useState<string | number>("");
@@ -186,7 +187,9 @@ export default function BillionairesAdminDesk() {
     // From Editor & In Their Own Words
     setEditorLastUpdated("");
     setEditorBulletPointsText("");
+    // Section 3 Defaults
     setInTheirOwnWordsQuote("");
+    setInTheirOwnWordsQuote2("");
 
     // Personal Stats
     setSelfMadeScore("");
@@ -251,6 +254,11 @@ export default function BillionairesAdminDesk() {
     setInTheirOwnWordsQuote(
       item.inTheirOwnWordsQuote ||
         `“I operate on the physics approach to analysis. You boil things down to the first principles in ${item.industry}.”`
+    );
+    setInTheirOwnWordsQuote2(
+      item.inTheirOwnWordsQuote2 ||
+        (item.inTheirOwnWordsQuotes && item.inTheirOwnWordsQuotes[1]) ||
+        `“When something is important enough, you do it even if the odds are not in your favor.”`
     );
 
     // Personal Stats
@@ -444,6 +452,8 @@ export default function BillionairesAdminDesk() {
               editorLastUpdated: autoLastUpdated,
               editorBulletPoints: parsedBullets,
               inTheirOwnWordsQuote: inTheirOwnWordsQuote.trim(),
+              inTheirOwnWordsQuote2: inTheirOwnWordsQuote2.trim(),
+              inTheirOwnWordsQuotes: [inTheirOwnWordsQuote.trim(), inTheirOwnWordsQuote2.trim()].filter(Boolean),
               selfMadeScore: selfMadeScore || 8,
               philanthropyScore: philanthropyScore || 1,
               residence: residence.trim(),
@@ -479,6 +489,8 @@ export default function BillionairesAdminDesk() {
         editorLastUpdated: autoLastUpdated,
         editorBulletPoints: parsedBullets,
         inTheirOwnWordsQuote: inTheirOwnWordsQuote.trim(),
+        inTheirOwnWordsQuote2: inTheirOwnWordsQuote2.trim(),
+        inTheirOwnWordsQuotes: [inTheirOwnWordsQuote.trim(), inTheirOwnWordsQuote2.trim()].filter(Boolean),
         selfMadeScore: selfMadeScore || 8,
         philanthropyScore: philanthropyScore || 1,
         residence: residence.trim(),
@@ -519,7 +531,7 @@ export default function BillionairesAdminDesk() {
   };
 
   return (
-    <div className="space-y-6 select-none">
+    <div className="space-y-6 ">
       {/* Header Bar */}
       <div className="bg-white border border-[#e5e7eb] rounded-3xl p-6 sm:p-8 shadow-2xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
@@ -1071,24 +1083,39 @@ export default function BillionairesAdminDesk() {
               <div className="border-b border-[#f1f5f9] pb-5 space-y-3">
                 <div className="bg-[#f8fafc] border border-[#e2e8f0] px-3.5 py-2 rounded-xl">
                   <span className="text-[12px] font-extrabold uppercase text-[#0f172a] tracking-wider block">
-                    3. Famous Quotes & Personal Statements
+                    3. Famous Quotes & Personal Statements (2 Quotes for Slider)
                   </span>
                   <p className="text-[11px] text-[#64748b]">
-                    Famous quotes or core statements made by this billionaire rendered in the "In Their Own Words" quote block.
+                    Famous quotes or core statements made by this billionaire rendered in the "In Their Own Words" quote block slider.
                   </p>
                 </div>
 
-                <div>
-                  <label className="block text-[#64748b] font-bold uppercase tracking-wider mb-1">
-                    Famous Quote / Statement
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={inTheirOwnWordsQuote}
-                    onChange={(e) => setInTheirOwnWordsQuote(e.target.value)}
-                    placeholder="e.g. “I operate on the physics approach to analysis. You boil things down to the first principles or fundamental truths in a particular area and then you reason up from there.”"
-                    className="w-full bg-[#f8fafc] border border-[#cbd5e1] rounded-xl px-3.5 py-2.5 text-xs text-[#0f172a] focus:outline-none focus:border-black"
-                  />
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-[#64748b] font-bold uppercase tracking-wider mb-1">
+                      Quote 1 (Slide 1)
+                    </label>
+                    <textarea
+                      rows={3}
+                      value={inTheirOwnWordsQuote}
+                      onChange={(e) => setInTheirOwnWordsQuote(e.target.value)}
+                      placeholder="e.g. “I operate on the physics approach to analysis. You boil things down to the first principles or fundamental truths in a particular area and then you reason up from there.”"
+                      className="w-full bg-[#f8fafc] border border-[#cbd5e1] rounded-xl px-3.5 py-2.5 text-xs text-[#0f172a] focus:outline-none focus:border-black font-serif italic"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[#64748b] font-bold uppercase tracking-wider mb-1">
+                      Quote 2 (Slide 2)
+                    </label>
+                    <textarea
+                      rows={3}
+                      value={inTheirOwnWordsQuote2}
+                      onChange={(e) => setInTheirOwnWordsQuote2(e.target.value)}
+                      placeholder="e.g. “When something is important enough, you do it even if the odds are not in your favor.”"
+                      className="w-full bg-[#f8fafc] border border-[#cbd5e1] rounded-xl px-3.5 py-2.5 text-xs text-[#0f172a] focus:outline-none focus:border-black font-serif italic"
+                    />
+                  </div>
                 </div>
               </div>
 

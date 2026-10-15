@@ -17,7 +17,7 @@ interface ArticleCommentsSectionProps {
   articleSlug?: string;
 }
 
-const API_BASE_URL = "http://localhost:5000";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export default function ArticleCommentsSection({
   commentCount = 0,
@@ -33,7 +33,7 @@ export default function ArticleCommentsSection({
   // Load active user session
   const loadUser = () => {
     if (typeof window === "undefined") return;
-    const tabUser = sessionStorage.getItem("wsj_user") || localStorage.getItem("wsj_user");
+    const tabUser = sessionStorage.getItem("wsj_user");
     let parsed: any = null;
     if (tabUser) {
       try {
@@ -90,8 +90,18 @@ export default function ArticleCommentsSection({
 
     fetchCommentsFromDb();
 
+    const handleCommentsUpdate = () => {
+      fetchCommentsFromDb();
+    };
+    if (typeof window !== "undefined") {
+      window.addEventListener("wsj_comments_updated", handleCommentsUpdate);
+    }
+
     return () => {
       isMounted = false;
+      if (typeof window !== "undefined") {
+        window.removeEventListener("wsj_comments_updated", handleCommentsUpdate);
+      }
     };
   }, [articleSlug, storageKey]);
 
@@ -200,10 +210,10 @@ export default function ArticleCommentsSection({
     }
   };
 
-  const totalCommentCount = comments.length > 0 ? comments.length : commentCount;
+  const totalCommentCount = comments.length;
 
   return (
-    <div className="w-full pb-6 select-none font-sans">
+    <div className="w-full pb-6  font-sans">
       {/* Header without icon, Georgia font, left aligned */}
       <div className="flex items-center justify-start mb-4 text-left">
         <h3

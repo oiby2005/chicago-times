@@ -279,7 +279,7 @@ export default function EntrepreneurProfileClient({ id }: { id: string }) {
         author: (() => {
           if (typeof window !== "undefined") {
             try {
-              const storedUser = JSON.parse(localStorage.getItem("wsj_user") || "null");
+              const storedUser = JSON.parse(sessionStorage.getItem("wsj_user") || "null");
               if (storedUser && (storedUser.full_name || storedUser.name)) {
                 const uEmail = (storedUser.email || "").toLowerCase().trim();
                 const pEmail = (post.authorEmail || "").toLowerCase().trim();
@@ -437,11 +437,17 @@ export default function EntrepreneurProfileClient({ id }: { id: string }) {
         `Recognized across financial sectors for rapid growth and sustainable business innovation.`
       ];
 
+  const ownWordsQuotes = [
+    item.inTheirOwnWordsQuote || `“When tackling unprecedented problems in deep technology, the fastest path forward is questioning conventional industry boundaries and building relentlessly from core physics principles.”`,
+    item.inTheirOwnWordsQuote2 || (item.inTheirOwnWordsQuotes && item.inTheirOwnWordsQuotes[1]) || `“Innovation distinguishes between a leader and a follower. Relentless execution turns vision into reality.”`
+  ];
+  const [quoteIdx, setQuoteIdx] = useState(0);
+
   const displayedOthers = showAllEntrepreneurs ? otherEntrepreneurs : otherEntrepreneurs.slice(0, 5);
   const currentVisibleArticles = articlesList.slice(0, visibleArticleCount);
 
   return (
-    <main className="min-h-screen flex flex-col bg-white text-[#111111] select-none" suppressHydrationWarning>
+    <main className="min-h-screen flex flex-col bg-white text-[#111111]" suppressHydrationWarning>
       <Header />
       <StickyHeaderBar />
 
@@ -572,7 +578,7 @@ export default function EntrepreneurProfileClient({ id }: { id: string }) {
                       <button
                         type="button"
                         onClick={() => setCarouselIndex((prev) => (prev > 0 ? prev - 1 : totalSlides - 1))}
-                        className="w-6 h-6 flex items-center justify-center text-[#111111] hover:text-black rounded-full cursor-pointer shrink-0 transition-colors text-base font-bold select-none"
+                        className="w-6 h-6 flex items-center justify-center text-[#111111] hover:text-black rounded-full cursor-pointer shrink-0 transition-colors text-base font-bold "
                         aria-label="Previous companies"
                       >
                         ←
@@ -661,7 +667,7 @@ export default function EntrepreneurProfileClient({ id }: { id: string }) {
                       <button
                         type="button"
                         onClick={() => setCarouselIndex((prev) => (prev + 1) % totalSlides)}
-                        className="w-6 h-6 flex items-center justify-center text-[#111111] hover:text-black rounded-full cursor-pointer shrink-0 transition-colors text-base font-bold select-none"
+                        className="w-6 h-6 flex items-center justify-center text-[#111111] hover:text-black rounded-full cursor-pointer shrink-0 transition-colors text-base font-bold "
                         aria-label="Next companies"
                       >
                         →
@@ -695,7 +701,7 @@ export default function EntrepreneurProfileClient({ id }: { id: string }) {
                 onError={(e) => {
                   (e.currentTarget as HTMLImageElement).src = "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80";
                 }}
-                className="w-full h-full object-cover object-center absolute inset-0"
+                className="w-full h-full object-contain object-center absolute inset-0 bg-[#EAE6DA]"
                 suppressHydrationWarning
               />
             </div>
@@ -813,21 +819,46 @@ export default function EntrepreneurProfileClient({ id }: { id: string }) {
               />
             </div>
 
-            {/* 5th Section: "In Their Own Words" Quote Block */}
+            {/* 5th Section: "In Their Own Words" Quote Block (2-Quote Slider) */}
             <div className="w-full pt-8 pb-4 border-t border-[#111111]">
-              <h3
-                className="font-bold text-[20px] text-[#111111] mb-5"
-                style={{ fontFamily: "'Poppins', sans-serif" }}
-              >
-                In Their Own Words
-              </h3>
+              <div className="flex items-center justify-between mb-5">
+                <h3
+                  className="font-bold text-[20px] text-[#111111]"
+                  style={{ fontFamily: "'Poppins', sans-serif" }}
+                >
+                  In Their Own Words
+                </h3>
+                {ownWordsQuotes.length > 1 && (
+                  <div className="flex items-center space-x-2">
+                    <button
+                      type="button"
+                      onClick={() => setQuoteIdx((prev) => (prev > 0 ? prev - 1 : ownWordsQuotes.length - 1))}
+                      className="w-7 h-7 rounded-full border border-[#DDD8CC] bg-[#FAF8F5] hover:bg-[#EFECE6] text-[#111111] flex items-center justify-center transition-colors cursor-pointer text-xs font-bold"
+                      aria-label="Previous quote"
+                    >
+                      ←
+                    </button>
+                    <span className="text-xs font-bold text-[#666666] font-sans">
+                      {quoteIdx + 1} / {ownWordsQuotes.length}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setQuoteIdx((prev) => (prev < ownWordsQuotes.length - 1 ? prev + 1 : 0))}
+                      className="w-7 h-7 rounded-full border border-[#DDD8CC] bg-[#FAF8F5] hover:bg-[#EFECE6] text-[#111111] flex items-center justify-center transition-colors cursor-pointer text-xs font-bold"
+                      aria-label="Next quote"
+                    >
+                      →
+                    </button>
+                  </div>
+                )}
+              </div>
 
-              <div className="bg-white border border-[#E5E0D5] p-8 sm:p-12 text-center shadow-2xs">
+              <div className="bg-white border border-[#E5E0D5] p-8 sm:p-12 text-center shadow-2xs relative">
                 <blockquote
-                  className="text-[18px] sm:text-[22px] leading-relaxed text-[#111111] max-w-2xl mx-auto"
+                  className="text-[18px] sm:text-[22px] leading-relaxed text-[#111111] max-w-2xl mx-auto min-h-[70px] flex items-center justify-center transition-opacity duration-200"
                   style={{ fontFamily: "Georgia, serif" }}
                 >
-                  {item.inTheirOwnWordsQuote || `“When tackling unprecedented problems in deep technology, the fastest path forward is questioning conventional industry boundaries and building relentlessly from core physics principles.”`}
+                  {ownWordsQuotes[quoteIdx]}
                 </blockquote>
 
                 <div className="mt-5 inline-block border-b-2 border-[#41516c] pb-1">
@@ -838,6 +869,22 @@ export default function EntrepreneurProfileClient({ id }: { id: string }) {
                     {item.name}
                   </p>
                 </div>
+
+                {ownWordsQuotes.length > 1 && (
+                  <div className="flex justify-center space-x-1.5 mt-4">
+                    {ownWordsQuotes.map((_, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => setQuoteIdx(i)}
+                        className={`w-2 h-2 rounded-full transition-all cursor-pointer ${
+                          i === quoteIdx ? "bg-[#111111] w-4" : "bg-[#CCCCCC]"
+                        }`}
+                        aria-label={`Go to quote ${i + 1}`}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 

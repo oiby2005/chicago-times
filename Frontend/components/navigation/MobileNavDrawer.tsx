@@ -75,7 +75,7 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({
       />
 
       {/* Slide-out Drawer Menu */}
-      <div className="relative w-full max-w-xs sm:max-w-sm bg-white h-full shadow-2xl flex flex-col justify-between overflow-y-auto select-none z-[100000] text-[#111111] animate-in slide-in-from-left duration-200">
+      <div className="relative w-full max-w-xs sm:max-w-sm bg-white h-full shadow-2xl flex flex-col justify-between overflow-y-auto  z-[100000] text-[#111111] animate-in slide-in-from-left duration-200">
         
         {/* Top Header Row of Drawer */}
         <div className="p-4 border-b border-[#e2e2e2] flex items-center justify-between bg-[#fcfcfc]">
@@ -112,7 +112,6 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({
               </svg>
               <span>Search Times Chicago...</span>
             </span>
-            <span className="text-[10px] text-gray-400 font-mono">⌘K</span>
           </button>
         </div>
 
@@ -197,7 +196,7 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({
                         toggleCategory(cat);
                       }
                     }}
-                    className={`flex items-center justify-between py-2 hover:bg-gray-50 px-1.5 transition-colors cursor-pointer select-none w-full ${
+                    className={`flex items-center justify-between py-2 hover:bg-gray-50 px-1.5 transition-colors cursor-pointer  w-full ${
                       isExpanded ? "bg-[#fafafa]" : ""
                     }`}
                   >

@@ -76,7 +76,7 @@ export default function SignUpPage() {
           const user = data.user;
           const token = data.token;
 
-          localStorage.setItem("wsj_user", JSON.stringify(user));
+          localStorage.removeItem("wsj_user");
           if (token) localStorage.setItem("wsj_token", token);
           sessionStorage.setItem("wsj_user", JSON.stringify(user));
           sessionStorage.setItem("wsj_session_active", "true");
@@ -105,7 +105,7 @@ export default function SignUpPage() {
           is_default_admin: isAdmin,
         };
 
-        localStorage.setItem("wsj_user", JSON.stringify(googleUser));
+        localStorage.removeItem("wsj_user");
         sessionStorage.setItem("wsj_user", JSON.stringify(googleUser));
         sessionStorage.setItem("wsj_session_active", "true");
         const profilesMap = JSON.parse(localStorage.getItem("wsj_users_by_email") || "{}");
@@ -250,7 +250,7 @@ export default function SignUpPage() {
         const userStr = JSON.stringify(data.user);
         sessionStorage.setItem("wsj_session_active", "true");
         sessionStorage.setItem("wsj_user", userStr);
-        localStorage.setItem("wsj_user", userStr);
+        localStorage.removeItem("wsj_user");
         try {
           const map = JSON.parse(localStorage.getItem("wsj_users_by_email") || "{}");
           map[cleanEmail] = data.user;
@@ -279,7 +279,7 @@ export default function SignUpPage() {
     const userStr = JSON.stringify(newUser);
     sessionStorage.setItem("wsj_session_active", "true");
     sessionStorage.setItem("wsj_user", userStr);
-    localStorage.setItem("wsj_user", userStr);
+    localStorage.removeItem("wsj_user");
     try {
       const map = JSON.parse(localStorage.getItem("wsj_users_by_email") || "{}");
       map[cleanEmail] = newUser;
@@ -295,7 +295,7 @@ export default function SignUpPage() {
       {/* Minimal Centered WSJ Logo Navbar */}
       <header className="w-full bg-white border-b border-[#e2e2e2] py-2 sm:py-3 text-center shrink-0">
         <Link href="/" className="inline-block focus:outline-none focus:ring-2 focus:ring-[#00558c] rounded-md">
-          <WSJLogo className="w-full max-w-[220px] xs:max-w-[260px] sm:max-w-[360px] h-[26px] xs:h-[30px] sm:h-[40px] mx-auto block select-none" />
+          <WSJLogo className="w-full max-w-[220px] xs:max-w-[260px] sm:max-w-[360px] h-[26px] xs:h-[30px] sm:h-[40px] mx-auto block " />
         </Link>
       </header>
 

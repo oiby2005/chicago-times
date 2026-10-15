@@ -56,7 +56,7 @@ export default function ArticleToolbar({
   articleUrl,
   deck = "",
   bodyContent = "",
-  commentCount = 291,
+  commentCount = 0,
   onFontSizeChange,
   currentFontSize = "md",
   article,
@@ -145,7 +145,7 @@ export default function ArticleToolbar({
   return (
     <>
       {/* Sticky Article Navbar - Increased Height (h-16 sm:h-20 ~ 64px to 80px tall) */}
-      <div id="article-toolbar-nav" className="fixed top-0 left-0 right-0 z-50 w-full bg-white border-b border-[#CCCCCC] shadow-sm transition-all duration-200 select-none">
+      <div id="article-toolbar-nav" className="fixed top-0 left-0 right-0 z-50 w-full bg-white border-b border-[#CCCCCC] shadow-sm transition-all duration-200 ">
         <Container>
           <div className="h-16 sm:h-20 flex items-center justify-between w-full">
             

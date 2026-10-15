@@ -330,8 +330,29 @@ export default function WriterDashboard() {
     };
 
     loadUser();
+
+    let channel: BroadcastChannel | null = null;
+    try {
+      channel = new BroadcastChannel("wsj_user_sync");
+      channel.onmessage = () => {
+        loadUser();
+      };
+    } catch (e) {}
+
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "wsj_user" || e.key === "wsj_users_by_email") {
+        loadUser();
+      }
+    };
+
     window.addEventListener("wsj_user_updated", loadUser);
-    return () => window.removeEventListener("wsj_user_updated", loadUser);
+    window.addEventListener("storage", handleStorage);
+
+    return () => {
+      window.removeEventListener("wsj_user_updated", loadUser);
+      window.removeEventListener("storage", handleStorage);
+      if (channel) channel.close();
+    };
   }, []);
 
   const getWriterSlug = () => {
@@ -391,8 +412,8 @@ export default function WriterDashboard() {
       return pAuthor !== "writer1";
     }
 
-    // Allow unassigned articles so logged in writer always sees posts
-    return true;
+    // Default: new writers only see their own authored posts (0 if brand new)
+    return false;
   });
 
   const matchesTab = (postStatus: string, tab: string) => {
@@ -459,7 +480,7 @@ export default function WriterDashboard() {
               />
             </Link>
 
-            <span className="hidden sm:inline-flex bg-[#eff6ff] text-[#2563eb] text-[9.5px] sm:text-[10.5px] font-mono font-bold px-2 py-0.5 rounded uppercase tracking-wider select-none shrink-0">
+            <span className="hidden sm:inline-flex bg-[#eff6ff] text-[#2563eb] text-[9.5px] sm:text-[10.5px] font-mono font-bold px-2 py-0.5 rounded uppercase tracking-wider  shrink-0">
               WRITER PORTAL
             </span>
           </div>
@@ -560,12 +581,18 @@ export default function WriterDashboard() {
                   </button>
                   <button
                     onClick={() => {
+                      sessionStorage.clear();
                       localStorage.removeItem("wsj_user");
                       localStorage.removeItem("wsj_token");
                       localStorage.removeItem("wsj_admin_user");
-                      sessionStorage.removeItem("wsj_session_active");
+                      localStorage.removeItem("wsj_writer_user");
+                      localStorage.removeItem("wsj_reader_user");
+                      localStorage.removeItem("wsj_session_active");
+                      sessionStorage.setItem("wsj_logged_out", "true");
+                      localStorage.setItem("wsj_logged_out", "true");
                       window.dispatchEvent(new Event("wsj_user_updated"));
-                      router.push("/");
+                      window.dispatchEvent(new Event("wsj_logout"));
+                      window.location.href = "/";
                     }}
                     className="w-full flex items-center space-x-3 px-4 py-2.5 text-xs font-bold text-red-600 hover:bg-red-50 transition-colors text-left"
                   >
@@ -587,7 +614,7 @@ export default function WriterDashboard() {
           {/* Sub-Header Row: Exchanged Search Bar (Left) and Create New Post (Right) */}
           <div className="flex flex-wrap items-center justify-between gap-3 mb-4 sm:mb-5">
             <h1
-              className="text-xl sm:text-2xl font-black text-[#0f172a] tracking-tight leading-none select-none"
+              className="text-xl sm:text-2xl font-black text-[#0f172a] tracking-tight leading-none "
               style={{ fontFamily: '"SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', fontWeight: 900, letterSpacing: '-0.03em' }}
             >
               {activeTab} Posts

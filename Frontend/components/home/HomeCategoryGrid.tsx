@@ -43,7 +43,7 @@ export const HomeCategoryGrid: React.FC = () => {
   const art = homepageArticles;
 
   return (
-    <div className="w-full bg-white text-[#111111] font-sans pb-16 select-none">
+    <div className="w-full bg-white text-[#111111] font-sans pb-16 ">
       <Container>
         {/* ================================================================= */}
         {/* ROW 1: ECONOMY / REAL ESTATE / SPORTS (Screenshot 1)              */}

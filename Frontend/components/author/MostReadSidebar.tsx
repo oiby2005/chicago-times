@@ -176,7 +176,7 @@ export default function MostReadSidebar({ authorName, authorEmail }: MostReadSid
   }, [authorArticles]);
 
   return (
-    <aside className="w-full bg-white border border-[#e5e7eb] rounded-xs p-5 select-none shadow-2xs">
+    <aside className="w-full bg-white border border-[#e5e7eb] rounded-xs p-5  shadow-2xs">
       {/* Header with Trending Up Icon */}
       <div className="flex items-center gap-2 border-b border-[#e5e7eb] pb-3 mb-4">
         <h3 className="font-poppins font-sans font-bold text-xs uppercase tracking-wider text-[#111111]">

@@ -2,7 +2,7 @@ import React from "react";
 
 export default function FormSkeleton() {
   return (
-    <div className="min-h-screen bg-white text-[#111111] font-sans animate-pulse p-4 sm:p-8 space-y-6 select-none max-w-4xl mx-auto">
+    <div className="min-h-screen bg-white text-[#111111] font-sans animate-pulse p-4 sm:p-8 space-y-6  max-w-4xl mx-auto">
       {/* Form Header Skeleton */}
       <div className="border-b border-gray-200 pb-4 space-y-2">
         <div className="h-8 w-64 bg-gray-300 rounded-md" />

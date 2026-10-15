@@ -89,7 +89,7 @@ export const MainBottomPanelSection: React.FC = () => {
   }, [loadMainBottom]);
 
   return (
-    <div className="w-full h-full grid grid-cols-1 sm:grid-cols-2 gap-0 sm:gap-[0.4cm] font-sans select-none">
+    <div className="w-full h-full grid grid-cols-1 sm:grid-cols-2 gap-0 sm:gap-[0.4cm] font-sans ">
       {articles.map((article, idx) => (
         <article
           key={article.id}

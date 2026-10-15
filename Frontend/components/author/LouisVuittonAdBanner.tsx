@@ -5,7 +5,7 @@ import AdPlaceholder from "@/components/ui/AdPlaceholder";
 
 export default function LouisVuittonAdBanner() {
   return (
-    <div className="w-full mt-4 select-none">
+    <div className="w-full mt-4 ">
       <AdPlaceholder slotId="author_slot_1" width="w-full max-w-full" height="h-[250px]" resolution="300 × 250" className="w-full my-0" />
     </div>
   );

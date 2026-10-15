@@ -120,7 +120,7 @@ export const TechCategorySection: React.FC = () => {
   const side3 = articles[3] || defaultArticles[3];
 
   return (
-    <div className="w-full font-sans select-none pt-4 pb-2 my-0">
+    <div className="w-full font-sans  pt-4 pb-2 my-0">
       {/* Section Header */}
       <div className="flex items-center space-x-2 pb-2 mb-3 border-b border-dashed border-[#CCCCCC]">
         <h2 className="font-serif font-bold text-[24px] sm:text-[28px] text-[#b82e2e] tracking-tight">

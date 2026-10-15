@@ -1,6 +1,6 @@
 import React from "react";
-import ReaderAccountSkeleton from "@/components/ui/skeletons/ReaderAccountSkeleton";
+import WhiteSkeletonPageLoader from "@/components/ui/skeletons/WhiteSkeletonPageLoader";
 
 export default function ReaderPageLoading() {
-  return <ReaderAccountSkeleton />;
+  return <WhiteSkeletonPageLoader />;
 }

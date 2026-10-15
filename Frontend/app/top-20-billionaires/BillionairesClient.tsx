@@ -103,7 +103,7 @@ function WealthHistoryChart({ history, endYear }: { history?: WealthPoint[]; end
   }, "");
 
   return (
-    <div className="flex flex-col items-center md:items-end w-full max-w-[360px] select-none">
+    <div className="flex flex-col items-center md:items-end w-full max-w-[360px] ">
       <h4
         className="font-serif font-bold text-[14px] text-[#111111] mb-1 tracking-tight"
         style={{ fontFamily: "Georgia, serif" }}
@@ -309,7 +309,7 @@ export default function BillionairesClient() {
   };
 
   return (
-    <main className="min-h-screen flex flex-col bg-white text-[#111111] select-none">
+    <main className="min-h-screen flex flex-col bg-white text-[#111111] ">
       <Header />
       <StickyHeaderBar />
 
@@ -495,7 +495,7 @@ export default function BillionairesClient() {
 
                         <div className="space-y-3 font-sans text-[14px] text-[#222222]">
                           {/* Male Checkbox */}
-                          <label className="flex items-center space-x-3 cursor-pointer select-none">
+                          <label className="flex items-center space-x-3 cursor-pointer ">
                             <input
                               type="checkbox"
                               suppressHydrationWarning
@@ -510,7 +510,7 @@ export default function BillionairesClient() {
                           </label>
 
                           {/* Female Checkbox */}
-                          <label className="flex items-center space-x-3 cursor-pointer select-none">
+                          <label className="flex items-center space-x-3 cursor-pointer ">
                             <input
                               type="checkbox"
                               suppressHydrationWarning

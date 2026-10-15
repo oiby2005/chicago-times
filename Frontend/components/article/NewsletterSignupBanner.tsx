@@ -99,7 +99,7 @@ export default function NewsletterSignupBanner() {
           />
           <button
             type="submit"
-            className="bg-[#b8860b] hover:bg-[#a07409] text-white font-sans font-bold text-xs tracking-wider uppercase px-7 py-3 rounded-xs transition-colors shrink-0 select-none"
+            className="bg-[#b8860b] hover:bg-[#a07409] text-white font-sans font-bold text-xs tracking-wider uppercase px-7 py-3 rounded-xs transition-colors shrink-0 "
           >
             SIGN UP NOW
           </button>

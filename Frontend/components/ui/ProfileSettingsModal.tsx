@@ -97,12 +97,17 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
 
     // 1. Immediately apply to active session & trigger instant UI updates
     try {
-      localStorage.setItem("wsj_user", JSON.stringify(updatedUser));
+      localStorage.removeItem("wsj_user");
       sessionStorage.setItem("wsj_user", JSON.stringify(updatedUser));
     } catch (e) {}
 
     // Broadcast user update event across all components instantly
     window.dispatchEvent(new Event("wsj_user_updated"));
+    try {
+      const channel = new BroadcastChannel("wsj_user_sync");
+      channel.postMessage({ type: "USER_UPDATED", email });
+      channel.close();
+    } catch (e) {}
 
     if (onSave) {
       onSave(updatedUser);
@@ -123,9 +128,14 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
         if (resData.success && resData.user) {
           const finalAvatar = resData.user.avatar_url !== undefined && resData.user.avatar_url !== null ? resData.user.avatar_url : avatarUrl;
           const finalUser = { ...updatedUser, ...resData.user, avatar_url: finalAvatar };
-          localStorage.setItem("wsj_user", JSON.stringify(finalUser));
           sessionStorage.setItem("wsj_user", JSON.stringify(finalUser));
+          localStorage.removeItem("wsj_user");
           window.dispatchEvent(new Event("wsj_user_updated"));
+          try {
+            const channel = new BroadcastChannel("wsj_user_sync");
+            channel.postMessage({ type: "USER_UPDATED", email });
+            channel.close();
+          } catch (e) {}
         }
       }
     } catch (e) {}
@@ -287,7 +297,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
               <img
                 src={avatarUrl}
                 alt={fullName}
-                className="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl object-cover border border-[#e2e8f0] shadow-sm"
+                className="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl object-contain bg-slate-50 border border-[#e2e8f0] shadow-sm"
               />
             ) : (
               <div className="w-16 h-16 sm:w-18 sm:h-18 bg-[#f05011] rounded-2xl flex items-center justify-center text-white font-bold text-[24px] sm:text-[26px] tracking-tight shadow-sm">

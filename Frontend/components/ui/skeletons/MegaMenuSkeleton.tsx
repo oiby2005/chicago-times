@@ -2,7 +2,7 @@ import React from "react";
 
 export default function MegaMenuSkeleton({ categoryName }: { categoryName?: string }) {
   return (
-    <div className="w-full flex flex-col md:flex-row gap-6 md:gap-8 items-stretch animate-pulse select-none">
+    <div className="w-full flex flex-col md:flex-row gap-6 md:gap-8 items-stretch animate-pulse ">
       {/* Column 1 (Left): Sub-Categories / SECTIONS Skeleton */}
       <div className="w-full md:w-[220px] shrink-0 self-stretch border-b md:border-b-0 md:border-r border-[#dcd6cd] pb-4 md:pb-0 pr-0 md:pr-6 space-y-3">
         <div className="h-3.5 w-20 bg-gray-300 rounded-sm mb-3" />

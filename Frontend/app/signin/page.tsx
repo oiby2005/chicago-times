@@ -112,7 +112,7 @@ export default function SignInPage() {
           const user = data.user;
           const token = data.token;
 
-          localStorage.setItem("wsj_user", JSON.stringify(user));
+          localStorage.removeItem("wsj_user");
           if (token) localStorage.setItem("wsj_token", token);
           sessionStorage.setItem("wsj_user", JSON.stringify(user));
 
@@ -140,7 +140,7 @@ export default function SignInPage() {
           is_default_admin: isAdmin,
         };
 
-        localStorage.setItem("wsj_user", JSON.stringify(googleUser));
+        localStorage.removeItem("wsj_user");
         sessionStorage.setItem("wsj_user", JSON.stringify(googleUser));
         const profilesMap = JSON.parse(localStorage.getItem("wsj_users_by_email") || "{}");
         profilesMap[emailClean] = googleUser;
@@ -423,6 +423,10 @@ export default function SignInPage() {
         return;
       } else {
         setLoading(false);
+        if (res.status === 403 || data.is_blocked) {
+          setError(data.message || "Your account has been blocked. For further information, please contact us at worldnews@timeschicago.com");
+          return;
+        }
         if (res.status === 429) {
           handleLockout(data.message || "Too many sign-in attempts from this connection. Please wait 15 minutes before trying again.");
           return;
@@ -450,7 +454,7 @@ export default function SignInPage() {
       {/* Minimal Centered WSJ Logo Navbar */}
       <header className="w-full bg-white border-b border-[#e2e2e2] py-2 sm:py-3 text-center shrink-0">
         <Link href="/" className="inline-block focus:outline-none focus:ring-2 focus:ring-[#00558c] rounded-md">
-          <WSJLogo className="w-full max-w-[220px] xs:max-w-[260px] sm:max-w-[360px] h-[26px] xs:h-[30px] sm:h-[40px] mx-auto block select-none" />
+          <WSJLogo className="w-full max-w-[220px] xs:max-w-[260px] sm:max-w-[360px] h-[26px] xs:h-[30px] sm:h-[40px] mx-auto block " />
         </Link>
       </header>
 
@@ -498,8 +502,8 @@ export default function SignInPage() {
                   <div
                     suppressHydrationWarning
                     className={`text-xs font-sans text-center font-semibold mb-1 p-2.5 rounded-lg transition-all ${
-                      isLockedOut
-                        ? "bg-red-50 text-red-700 border border-red-200 shadow-2xs"
+                      error.includes("blocked") || isLockedOut
+                        ? "bg-red-50 text-red-600 border border-red-300 shadow-2xs font-bold"
                         : "text-red-600"
                     }`}
                   >

@@ -41,7 +41,7 @@ export default function ArticleTopBar({ onFontSizeChange, article }: ArticleTopB
         {/* Left: Back to Newsfeed */}
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 text-[11px] sm:text-[12px] font-bold text-[#505e70] hover:text-[#0f172a] tracking-wider uppercase transition-colors group select-none"
+          className="inline-flex items-center gap-1.5 text-[11px] sm:text-[12px] font-bold text-[#505e70] hover:text-[#0f172a] tracking-wider uppercase transition-colors group "
         >
           <svg
             className="w-3.5 h-3.5 text-[#505e70] group-hover:text-[#0f172a] transition-transform group-hover:-translate-x-0.5"

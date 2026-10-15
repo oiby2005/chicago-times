@@ -288,7 +288,7 @@ export const EightCategoryGridSection: React.FC = () => {
   }, [loadPosts]);
 
   return (
-    <div className="w-full font-sans select-none pt-8 pb-4">
+    <div className="w-full font-sans pt-8 pb-4">
       {/* ROW 1 (MIDDLE SECTION): ECONOMY, HEALTH, INVESTING, CRYPTO */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[52px] sm:gap-6 items-start mb-[52px] sm:mb-12 pb-0 sm:pb-6">
         {row1.map((item) => (
@@ -316,7 +316,7 @@ export const EightCategoryGridSection: React.FC = () => {
             )}
 
             {item.articles[0] && (
-              <h4 className="font-serif font-bold text-[17px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-3" style={{ fontFamily: "Georgia, serif" }}>
+              <h4 className="font-bold text-[17px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-3" style={{ fontFamily: "Georgia" }}>
                 <Link href={`/article/${item.articles[0].slug}`}>
                   {item.articles[0].title}
                 </Link>
@@ -325,7 +325,7 @@ export const EightCategoryGridSection: React.FC = () => {
 
             {item.articles[1] && (
               <div className="pt-1 pb-2">
-                <h5 className="font-serif font-bold text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer" style={{ fontFamily: "Georgia, serif" }}>
+                <h5 className="font-normal text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer" style={{ fontFamily: "Georgia", fontWeight: 400 }}>
                   <Link href={`/article/${item.articles[1].slug}`}>
                     {item.articles[1].title}
                   </Link>
@@ -335,7 +335,7 @@ export const EightCategoryGridSection: React.FC = () => {
 
             {item.articles[2] && (
               <div className="pt-1">
-                <h5 className="font-serif font-bold text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer" style={{ fontFamily: "Georgia, serif" }}>
+                <h5 className="font-normal text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer" style={{ fontFamily: "Georgia", fontWeight: 400 }}>
                   <Link href={`/article/${item.articles[2].slug}`}>
                     {item.articles[2].title}
                   </Link>
@@ -373,7 +373,7 @@ export const EightCategoryGridSection: React.FC = () => {
             )}
 
             {item.articles[0] && (
-              <h4 className="font-serif font-bold text-[17px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-3" style={{ fontFamily: "Georgia, serif" }}>
+              <h4 className="font-bold text-[17px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-3" style={{ fontFamily: "Georgia" }}>
                 <Link href={`/article/${item.articles[0].slug}`}>
                   {item.articles[0].title}
                 </Link>
@@ -382,7 +382,7 @@ export const EightCategoryGridSection: React.FC = () => {
 
             {item.articles[1] && (
               <div className="pt-1 pb-2">
-                <h5 className="font-serif font-bold text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer" style={{ fontFamily: "Georgia, serif" }}>
+                <h5 className="font-normal text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer" style={{ fontFamily: "Georgia", fontWeight: 400 }}>
                   <Link href={`/article/${item.articles[1].slug}`}>
                     {item.articles[1].title}
                   </Link>
@@ -392,7 +392,7 @@ export const EightCategoryGridSection: React.FC = () => {
 
             {item.articles[2] && (
               <div className="pt-1">
-                <h5 className="font-serif font-bold text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer" style={{ fontFamily: "Georgia, serif" }}>
+                <h5 className="font-normal text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer" style={{ fontFamily: "Georgia", fontWeight: 400 }}>
                   <Link href={`/article/${item.articles[2].slug}`}>
                     {item.articles[2].title}
                   </Link>

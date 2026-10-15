@@ -222,7 +222,7 @@ export default function LeadershipClient() {
   const [writersOpen, setWritersOpen] = useState(true);
 
   return (
-    <div className="min-h-screen bg-white flex flex-col justify-between text-[#111111] select-none font-sans">
+    <div className="min-h-screen bg-white flex flex-col justify-between text-[#111111] font-sans">
       <div>
         <Header />
         <StickyHeaderBar />
@@ -230,9 +230,9 @@ export default function LeadershipClient() {
         <main className="bg-white py-6 sm:py-12">
           <Container>
             {/* HERO SECTION */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start mb-8 sm:mb-10">
-              {/* Left Column: Heading & Intro Text */}
-              <div className="lg:col-span-7 flex flex-col justify-start">
+            <div className="mb-8 sm:mb-10">
+              {/* Intro Text & Stats */}
+              <div className="max-w-4xl flex flex-col justify-start">
                 <div className="inline-block px-3.5 py-1 rounded-full border border-gray-300 bg-[#f4f4f0] text-[#666666] font-sans font-bold text-[11px] uppercase tracking-wider mb-4 w-fit">
                   OUR LEADERSHIP
                 </div>
@@ -294,36 +294,6 @@ export default function LeadershipClient() {
                       </div>
                     </div>
                   </div>
-                </div>
-              </div>
-
-              {/* Right Column: Quotes List */}
-              <div className="lg:col-span-5 space-y-3.5 pt-2">
-                <div className="bg-[#fbfbf9] border-l-4 border-[#888888] p-3.5 sm:p-4 rounded-r-xl shadow-xs">
-                  <p className="font-serif italic text-[13.5px] sm:text-[14px] text-[#333333] leading-snug mb-2">
-                    &ldquo;Nothing is impossible; you just need the courage to start and the drive to sustain&rdquo;
-                  </p>
-                  <p className="font-sans font-bold text-[12px] sm:text-[12.5px] text-[#666666]">
-                    &mdash; Geeth Roman
-                  </p>
-                </div>
-
-                <div className="bg-[#fbfbf9] border-l-4 border-[#888888] p-3.5 sm:p-4 rounded-r-xl shadow-xs">
-                  <p className="font-serif italic text-[13.5px] sm:text-[14px] text-[#333333] leading-snug mb-2">
-                    &ldquo;Innovating Ideas for Tomorrow&apos;s Success&rdquo;
-                  </p>
-                  <p className="font-sans font-bold text-[12px] sm:text-[12.5px] text-[#666666]">
-                    &mdash; Chamitha Ranneththi
-                  </p>
-                </div>
-
-                <div className="bg-[#fbfbf9] border-l-4 border-[#888888] p-3.5 sm:p-4 rounded-r-xl shadow-xs">
-                  <p className="font-serif italic text-[13.5px] sm:text-[14px] text-[#333333] leading-snug mb-2">
-                    &ldquo;We learn from failure, not from success&rdquo;
-                  </p>
-                  <p className="font-sans font-bold text-[12px] sm:text-[12.5px] text-[#666666]">
-                    &mdash; Jatinder Singh
-                  </p>
                 </div>
               </div>
             </div>

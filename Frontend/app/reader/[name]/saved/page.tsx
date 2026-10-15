@@ -6,6 +6,155 @@ import { useParams, useRouter } from "next/navigation";
 import { convertFileToWebP } from "@/lib/webpConverter";
 import { slugifyAuthorName } from "@/data/authors";
 import ReaderAccountSkeleton from "@/components/ui/skeletons/ReaderAccountSkeleton";
+import ReaderHelpCenter from "@/components/dashboard/ReaderHelpCenter";
+
+const COUNTRY_PHONE_INFO: Record<string, { dialCode: string; digits: number; placeholder: string }> = {
+  "United States": { dialCode: "+1", digits: 10, placeholder: "5551234567" },
+  "United Kingdom": { dialCode: "+44", digits: 10, placeholder: "7911123456" },
+  "Canada": { dialCode: "+1", digits: 10, placeholder: "5551234567" },
+  "Australia": { dialCode: "+61", digits: 9, placeholder: "412345678" },
+  "Germany": { dialCode: "+49", digits: 11, placeholder: "15123456789" },
+  "France": { dialCode: "+33", digits: 9, placeholder: "612345678" },
+  "India": { dialCode: "+91", digits: 10, placeholder: "9876543210" },
+  "Japan": { dialCode: "+81", digits: 10, placeholder: "9012345678" },
+  "China": { dialCode: "+86", digits: 11, placeholder: "13812345678" },
+  "Brazil": { dialCode: "+55", digits: 11, placeholder: "11912345678" },
+  "Mexico": { dialCode: "+52", digits: 10, placeholder: "5512345678" },
+  "Italy": { dialCode: "+39", digits: 10, placeholder: "3123456789" },
+  "Spain": { dialCode: "+34", digits: 9, placeholder: "612345678" },
+  "Netherlands": { dialCode: "+31", digits: 9, placeholder: "612345678" },
+  "Switzerland": { dialCode: "+41", digits: 9, placeholder: "791234567" },
+  "Sweden": { dialCode: "+46", digits: 9, placeholder: "701234567" },
+  "Singapore": { dialCode: "+65", digits: 8, placeholder: "81234567" },
+  "South Korea": { dialCode: "+82", digits: 10, placeholder: "1012345678" },
+  "United Arab Emirates": { dialCode: "+971", digits: 9, placeholder: "501234567" },
+  "Saudi Arabia": { dialCode: "+966", digits: 9, placeholder: "501234567" },
+  "South Africa": { dialCode: "+27", digits: 9, placeholder: "821234567" },
+  "New Zealand": { dialCode: "+64", digits: 9, placeholder: "211234567" },
+  "Ireland": { dialCode: "+353", digits: 9, placeholder: "851234567" },
+  "Norway": { dialCode: "+47", digits: 8, placeholder: "41234567" },
+  "Denmark": { dialCode: "+45", digits: 8, placeholder: "20123456" },
+  "Finland": { dialCode: "+358", digits: 9, placeholder: "401234567" },
+  "Belgium": { dialCode: "+32", digits: 9, placeholder: "470123456" },
+  "Austria": { dialCode: "+43", digits: 10, placeholder: "6501234567" },
+  "Poland": { dialCode: "+48", digits: 9, placeholder: "501234567" },
+  "Portugal": { dialCode: "+351", digits: 9, placeholder: "912345678" },
+  "Greece": { dialCode: "+30", digits: 10, placeholder: "6912345678" },
+  "Argentina": { dialCode: "+54", digits: 10, placeholder: "1112345678" },
+  "Chile": { dialCode: "+56", digits: 9, placeholder: "912345678" },
+  "Colombia": { dialCode: "+57", digits: 10, placeholder: "3001234567" },
+  "Egypt": { dialCode: "+20", digits: 10, placeholder: "1001234567" },
+  "Indonesia": { dialCode: "+62", digits: 11, placeholder: "81234567890" },
+  "Israel": { dialCode: "+972", digits: 9, placeholder: "501234567" },
+  "Malaysia": { dialCode: "+60", digits: 10, placeholder: "1234567890" },
+  "Nigeria": { dialCode: "+234", digits: 10, placeholder: "8021234567" },
+  "Pakistan": { dialCode: "+92", digits: 10, placeholder: "3001234567" },
+  "Philippines": { dialCode: "+63", digits: 10, placeholder: "9171234567" },
+  "Qatar": { dialCode: "+974", digits: 8, placeholder: "33123456" },
+  "Sri Lanka": { dialCode: "+94", digits: 9, placeholder: "771234567" },
+  "Thailand": { dialCode: "+66", digits: 9, placeholder: "812345678" },
+  "Turkey": { dialCode: "+90", digits: 10, placeholder: "5321234567" },
+  "Vietnam": { dialCode: "+84", digits: 9, placeholder: "901234567" },
+  "Other": { dialCode: "+", digits: 15, placeholder: "1234567890" }
+};
+
+const COUNTRY_DIAL_CODES = [
+  { code: "+1", label: "+1 (US/Canada)" },
+  { code: "+44", label: "+44 (UK)" },
+  { code: "+61", label: "+61 (Australia)" },
+  { code: "+49", label: "+49 (Germany)" },
+  { code: "+33", label: "+33 (France)" },
+  { code: "+91", label: "+91 (India)" },
+  { code: "+94", label: "+94 (Sri Lanka)" },
+  { code: "+81", label: "+81 (Japan)" },
+  { code: "+86", label: "+86 (China)" },
+  { code: "+55", label: "+55 (Brazil)" },
+  { code: "+52", label: "+52 (Mexico)" },
+  { code: "+39", label: "+39 (Italy)" },
+  { code: "+34", label: "+34 (Spain)" },
+  { code: "+31", label: "+31 (Netherlands)" },
+  { code: "+41", label: "+41 (Switzerland)" },
+  { code: "+46", label: "+46 (Sweden)" },
+  { code: "+65", label: "+65 (Singapore)" },
+  { code: "+82", label: "+82 (South Korea)" },
+  { code: "+971", label: "+971 (UAE)" },
+  { code: "+966", label: "+966 (Saudi Arabia)" },
+  { code: "+27", label: "+27 (South Africa)" },
+  { code: "+64", label: "+64 (New Zealand)" },
+  { code: "+353", label: "+353 (Ireland)" },
+  { code: "+47", label: "+47 (Norway)" },
+  { code: "+45", label: "+45 (Denmark)" },
+  { code: "+358", label: "+358 (Finland)" },
+  { code: "+32", label: "+32 (Belgium)" },
+  { code: "+43", label: "+43 (Austria)" },
+  { code: "+48", label: "+48 (Poland)" },
+  { code: "+351", label: "+351 (Portugal)" },
+  { code: "+30", label: "+30 (Greece)" },
+  { code: "+54", label: "+54 (Argentina)" },
+  { code: "+56", label: "+56 (Chile)" },
+  { code: "+57", label: "+57 (Colombia)" },
+  { code: "+20", label: "+20 (Egypt)" },
+  { code: "+62", label: "+62 (Indonesia)" },
+  { code: "+972", label: "+972 (Israel)" },
+  { code: "+60", label: "+60 (Malaysia)" },
+  { code: "+234", label: "+234 (Nigeria)" },
+  { code: "+92", label: "+92 (Pakistan)" },
+  { code: "+63", label: "+63 (Philippines)" },
+  { code: "+974", label: "+974 (Qatar)" },
+  { code: "+66", label: "+66 (Thailand)" },
+  { code: "+90", label: "+90 (Turkey)" },
+  { code: "+84", label: "+84 (Vietnam)" },
+];
+
+const COUNTRIES = [
+  "United States",
+  "United Kingdom",
+  "Canada",
+  "Australia",
+  "Germany",
+  "France",
+  "India",
+  "Sri Lanka",
+  "Japan",
+  "China",
+  "Brazil",
+  "Mexico",
+  "Italy",
+  "Spain",
+  "Netherlands",
+  "Switzerland",
+  "Sweden",
+  "Singapore",
+  "South Korea",
+  "United Arab Emirates",
+  "Saudi Arabia",
+  "South Africa",
+  "New Zealand",
+  "Ireland",
+  "Norway",
+  "Denmark",
+  "Finland",
+  "Belgium",
+  "Austria",
+  "Poland",
+  "Portugal",
+  "Greece",
+  "Argentina",
+  "Chile",
+  "Colombia",
+  "Egypt",
+  "Indonesia",
+  "Israel",
+  "Malaysia",
+  "Nigeria",
+  "Pakistan",
+  "Philippines",
+  "Qatar",
+  "Thailand",
+  "Turkey",
+  "Vietnam",
+  "Other"
+];
 
 export default function ReaderSavedPage() {
   const params = useParams();
@@ -26,6 +175,9 @@ export default function ReaderSavedPage() {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("READER");
   const [bio, setBio] = useState("");
+  const [phone, setPhone] = useState("");
+  const [phoneCountryCode, setPhoneCountryCode] = useState("+1");
+  const [country, setCountry] = useState("United States");
   const [linkedin, setLinkedin] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [showSavedToast, setShowSavedToast] = useState(false);
@@ -59,7 +211,7 @@ export default function ReaderSavedPage() {
     let activeEmail = userEmail || currentUser?.email || email || "";
 
     if (!activeEmail) {
-      const userStr = sessionStorage.getItem("wsj_user") || localStorage.getItem("wsj_user");
+      const userStr = sessionStorage.getItem("wsj_user");
       if (userStr) {
         try {
           const parsed = JSON.parse(userStr);
@@ -129,7 +281,7 @@ export default function ReaderSavedPage() {
     try {
       let activeEmail = currentUser?.email || email || "";
       if (!activeEmail) {
-        const userStr = sessionStorage.getItem("wsj_user") || localStorage.getItem("wsj_user");
+        const userStr = sessionStorage.getItem("wsj_user");
         if (userStr) {
           try {
             const parsed = JSON.parse(userStr);
@@ -185,7 +337,7 @@ export default function ReaderSavedPage() {
     const now = Date.now();
     const diff = end - now;
     if (diff <= 0) return 0;
-    return Math.ceil(diff / (1000 * 60 * 60 * 24));
+    return Math.floor(diff / (1000 * 60 * 60 * 24));
   };
 
   const formatDateDisplay = (dateStr: string) => {
@@ -213,7 +365,7 @@ export default function ReaderSavedPage() {
         const data = await res.json();
         if (data && data.success && data.subscription) {
           const sub = data.subscription;
-          const days = typeof data.daysRemaining === "number" ? data.daysRemaining : calculateDaysRemaining(sub.end_date);
+          const days = calculateDaysRemaining(sub.end_date);
           const isExpired = days <= 0;
           const status = isExpired ? "Cancelled" : (sub.status || "Active");
           const updatedSub = { ...sub, status };
@@ -243,15 +395,10 @@ export default function ReaderSavedPage() {
 
     let userObj: any = null;
     const sessionStr = sessionStorage.getItem("wsj_user");
-    const localStr = localStorage.getItem("wsj_user");
 
     if (sessionStr) {
       try {
         userObj = JSON.parse(sessionStr);
-      } catch (e) {}
-    } else if (localStr) {
-      try {
-        userObj = JSON.parse(localStr);
       } catch (e) {}
     }
 
@@ -274,10 +421,30 @@ export default function ReaderSavedPage() {
     setEmail(targetEmail);
     setRole((userObj.role || "READER").toUpperCase());
     setBio(userObj.bio || "News Enthusiast");
+    const initialCountry = userObj.country || "United States";
+    setCountry(initialCountry);
+    const initialDialCode = userObj.phone_country_code || userObj.dial_code || "+1";
+    setPhoneCountryCode(initialDialCode);
+    const rawPhone = userObj.phone || userObj.mobile || userObj.mobile_number || "";
+    const cleanDigits = String(rawPhone).replace(/\D/g, "");
+    setPhone(cleanDigits.slice(0, 15));
     setLinkedin(userObj.linkedin || "");
     setAvatarUrl(userObj.avatar_url || "");
 
     loadSubscription(targetEmail);
+  };
+
+  const handleCountryChange = (newCountry: string) => {
+    // Country is selected separately — do not change dial code
+    setCountry(newCountry);
+  };
+
+  const handlePhoneChange = (val: string) => {
+    // Only numbers can be entered
+    const onlyNums = val.replace(/\D/g, "");
+    if (onlyNums.length <= 15) {
+      setPhone(onlyNums);
+    }
   };
 
   useEffect(() => {
@@ -362,12 +529,18 @@ export default function ReaderSavedPage() {
       email: email,
       role: role.toLowerCase(),
       bio: bio,
-      linkedin: linkedin,
+      phone: phone,
+      mobile: phone,
+      mobile_number: phone,
+      phone_country_code: phoneCountryCode,
+      dial_code: phoneCountryCode,
+      country: country,
+      linkedin: "",
       avatar_url: avatarUrl,
     };
 
     try {
-      localStorage.setItem("wsj_user", JSON.stringify(updatedUser));
+      localStorage.removeItem("wsj_user");
       sessionStorage.setItem("wsj_user", JSON.stringify(updatedUser));
     } catch (e) {}
 
@@ -415,7 +588,7 @@ export default function ReaderSavedPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F6F7F9] flex flex-col font-sans select-none text-[#222222]">
+    <div className="min-h-screen bg-[#F6F7F9] flex flex-col font-sans  text-[#222222]">
       {/* Mobile top navigation toggle bar */}
       <div className="lg:hidden bg-white border-b border-[#E5E5E5] px-4 py-3 flex items-center justify-between z-30">
         <button
@@ -438,12 +611,12 @@ export default function ReaderSavedPage() {
         </Link>
       </div>
 
-      <div className="flex-1 flex flex-col lg:flex-row w-full min-h-screen">
+      <div className="flex-1 flex flex-col lg:flex-row-reverse w-full min-h-screen">
         {/* ========================================================================= */}
-        {/* LEFT SIDEBAR (Matching Admin/Reader Dashboard Styling)                    */}
+        {/* RIGHT SIDEBAR (Matching Admin/Reader Dashboard Styling)                   */}
         {/* ========================================================================= */}
         <aside
-          className={`w-full lg:w-72 bg-white border-r border-[#E5E5E5] shrink-0 flex flex-col z-20 ${
+          className={`w-full lg:w-72 bg-white border-b lg:border-b-0 lg:border-l border-[#E5E5E5] shrink-0 flex flex-col z-20 lg:sticky lg:top-0 lg:h-screen lg:self-start lg:overflow-y-auto no-scrollbar ${
             isMobileMenuOpen ? "block" : "hidden lg:flex"
           }`}
         >
@@ -458,7 +631,7 @@ export default function ReaderSavedPage() {
             </Link>
           </div>
 
-          {/* 2. Back to Home link with Arrow Icon (Matching Screenshot) */}
+          {/* 2. Back to Home link with Left Arrow Icon */}
           <div className="px-6 pt-2 pb-1">
             <Link
               href="/"
@@ -518,7 +691,7 @@ export default function ReaderSavedPage() {
           <hr className="mx-6 border-[#E5E5E5] my-6" />
 
           {/* 4. Unified menu items stacked continuously with icons */}
-          <div className="flex flex-col w-full">
+          <div className="flex flex-col w-full pb-8">
             {/* Overview */}
             <button
               type="button"
@@ -535,7 +708,7 @@ export default function ReaderSavedPage() {
               <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
               </svg>
-              <span>Overview</span>
+              <span className="font-poppins">Overview</span>
             </button>
 
             {/* Account Settings */}
@@ -554,7 +727,7 @@ export default function ReaderSavedPage() {
               <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
               </svg>
-              <span>Account Settings</span>
+              <span className="font-poppins">Account Settings</span>
             </button>
 
             {/* Manage Subscriptions */}
@@ -573,7 +746,7 @@ export default function ReaderSavedPage() {
               <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 3h3m-6.75 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5z" />
               </svg>
-              <span>Manage Subscriptions</span>
+              <span className="font-poppins">Manage Subscriptions</span>
             </button>
 
             {/* Saved Articles */}
@@ -592,7 +765,7 @@ export default function ReaderSavedPage() {
               <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
               </svg>
-              <span>Saved Articles</span>
+              <span className="font-poppins">Saved Articles</span>
             </button>
 
             {/* Help Center */}
@@ -611,7 +784,7 @@ export default function ReaderSavedPage() {
               <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
               </svg>
-              <span>Help Center</span>
+              <span className="font-poppins">Help Center</span>
             </button>
 
             {/* Contact Us */}
@@ -630,7 +803,7 @@ export default function ReaderSavedPage() {
               <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
               </svg>
-              <span>Contact Us</span>
+              <span className="font-poppins">Contact Us</span>
             </button>
           </div>
         </aside>
@@ -664,10 +837,10 @@ export default function ReaderSavedPage() {
                   </div>
 
                   <div>
-                    <h1 className="text-2xl sm:text-3xl font-bold text-[#111111] tracking-tight">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-[#111111] tracking-tight font-poppins">
                       {readerDisplayName}
                     </h1>
-                    <p className="text-sm sm:text-base text-[#666666] mt-1 font-normal">
+                    <p className="text-sm sm:text-base text-[#666666] mt-1 font-normal font-poppins">
                       Welcome to your Times Chicago Account
                     </p>
                   </div>
@@ -677,9 +850,7 @@ export default function ReaderSavedPage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
                   {/* Column 1: Profile */}
                   <div>
-                    <h3 className="text-lg font-normal text-[#444444] mb-3">
-                      Profile
-                    </h3>
+                    <h3 className="text-lg font-bold text-[#444444] mb-3 font-poppins">Profile</h3>
                     <div className="space-y-3">
                       {/* Account Settings Card */}
                       <button
@@ -687,7 +858,7 @@ export default function ReaderSavedPage() {
                         onClick={() => setActiveTab("account-settings")}
                         className="w-full bg-white border border-[#E5E5E5] p-5 text-left shadow-2xs hover:shadow-md hover:border-[#CBD5E1] transition-all cursor-pointer flex items-center min-h-[76px] group"
                       >
-                        <span className="text-sm sm:text-[15px] font-medium text-[#222222] group-hover:text-[#0077B6] transition-colors">
+                        <span className="text-sm sm:text-[15px] font-medium text-[#222222] group-hover:text-[#0077B6] transition-colors font-poppins">
                           Account Settings
                         </span>
                       </button>
@@ -698,7 +869,7 @@ export default function ReaderSavedPage() {
                         onClick={() => setActiveTab("manage-subscriptions")}
                         className="w-full bg-white border border-[#E5E5E5] p-5 text-left shadow-2xs hover:shadow-md hover:border-[#CBD5E1] transition-all cursor-pointer flex items-center min-h-[76px] group"
                       >
-                        <span className="text-sm sm:text-[15px] font-medium text-[#222222] group-hover:text-[#0077B6] transition-colors">
+                        <span className="text-sm sm:text-[15px] font-medium text-[#222222] group-hover:text-[#0077B6] transition-colors font-poppins">
                           Manage Subscription
                         </span>
                       </button>
@@ -707,9 +878,7 @@ export default function ReaderSavedPage() {
 
                   {/* Column 2: Help */}
                   <div>
-                    <h3 className="text-lg font-normal text-[#444444] mb-3">
-                      Help
-                    </h3>
+                    <h3 className="text-lg font-bold text-[#444444] mb-3 font-poppins">Help</h3>
                     <div className="space-y-3">
                       {/* Help Center Card */}
                       <button
@@ -717,7 +886,7 @@ export default function ReaderSavedPage() {
                         onClick={() => setActiveTab("help-center")}
                         className="w-full bg-white border border-[#E5E5E5] p-5 text-left shadow-2xs hover:shadow-md hover:border-[#CBD5E1] transition-all cursor-pointer flex items-center min-h-[76px] group"
                       >
-                        <span className="text-sm sm:text-[15px] font-medium text-[#222222] group-hover:text-[#0077B6] transition-colors">
+                        <span className="text-sm sm:text-[15px] font-medium text-[#222222] group-hover:text-[#0077B6] transition-colors font-poppins">
                           Help Center
                         </span>
                       </button>
@@ -728,7 +897,7 @@ export default function ReaderSavedPage() {
                         onClick={() => setActiveTab("contact-us")}
                         className="w-full bg-white border border-[#E5E5E5] p-5 text-left shadow-2xs hover:shadow-md hover:border-[#CBD5E1] transition-all cursor-pointer flex items-center min-h-[76px] group"
                       >
-                        <span className="text-sm sm:text-[15px] font-medium text-[#222222] group-hover:text-[#0077B6] transition-colors">
+                        <span className="text-sm sm:text-[15px] font-medium text-[#222222] group-hover:text-[#0077B6] transition-colors font-poppins">
                           Contact Us
                         </span>
                       </button>
@@ -737,9 +906,7 @@ export default function ReaderSavedPage() {
 
                   {/* Column 3: More (With Saved Articles added and the previous 2 removed) */}
                   <div>
-                    <h3 className="text-lg font-normal text-[#444444] mb-3">
-                      More
-                    </h3>
+                    <h3 className="text-lg font-bold text-[#444444] mb-3 font-poppins">More</h3>
                     <div className="space-y-3">
                       {/* Saved Articles Card */}
                       <button
@@ -747,7 +914,7 @@ export default function ReaderSavedPage() {
                         onClick={() => setActiveTab("saved-articles")}
                         className="w-full bg-white border border-[#E5E5E5] p-5 text-left shadow-2xs hover:shadow-md hover:border-[#CBD5E1] transition-all cursor-pointer flex items-center min-h-[76px] group block"
                       >
-                        <span className="text-sm sm:text-[15px] font-medium text-[#222222] group-hover:text-[#0077B6] transition-colors">
+                        <span className="text-sm sm:text-[15px] font-medium text-[#222222] group-hover:text-[#0077B6] transition-colors font-poppins">
                           Saved Articles
                         </span>
                       </button>
@@ -763,30 +930,32 @@ export default function ReaderSavedPage() {
             {/* ----------------------------------------------------------------- */}
             {activeTab === "account-settings" && (
               <div className="w-full bg-white rounded-2xl p-6 sm:p-8 md:p-10 shadow-xs relative border border-[#e2e8f0]">
-                {/* Toast Notification on Save */}
-                {showSavedToast && (
-                  <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-[#059669] text-white px-4 py-2 rounded-lg text-xs font-mono font-bold shadow-lg flex items-center space-x-2 z-10 animate-bounce">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span>Profile Settings Saved Successfully!</span>
-                  </div>
-                )}
-
                 {/* Modal Header */}
-                <div className="flex items-start justify-between pb-4 mb-5 border-b border-[#f1f5f9]">
-                  <div>
-                    <h2 className="font-serif font-bold text-[24px] sm:text-[26px] text-[#0f172a] leading-tight tracking-tight">
-                      Profile Settings
-                    </h2>
-                    <p className="font-mono text-[11px] font-semibold text-[#94a3b8] tracking-widest uppercase mt-0.5">
-                      MANAGE YOUR ACCOUNT
-                    </p>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-5 border-b border-[#f1f5f9] gap-3">
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <div>
+                      <h2 className="font-poppins font-bold text-[24px] sm:text-[26px] text-[#0f172a] leading-tight tracking-tight">
+                        Profile Settings
+                      </h2>
+                      <p className="font-mono text-[11px] font-semibold text-[#94a3b8] tracking-widest uppercase mt-0.5">
+                        MANAGE YOUR ACCOUNT
+                      </p>
+                    </div>
+
+                    {/* Ash Toast Box in Poppins Font horizontally aligned with Profile Settings */}
+                    {showSavedToast && (
+                      <div className="bg-[#f1f5f9] border border-[#cbd5e1] text-[#334155] px-3.5 py-1.5 rounded-lg text-xs font-poppins font-medium shadow-xs flex items-center space-x-2 transition-all">
+                        <svg className="w-4 h-4 text-[#475569]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span>Profile settings saved successfully!</span>
+                      </div>
+                    )}
                   </div>
                   <button
                     type="button"
                     onClick={() => setActiveTab("overview")}
-                    className="text-[#94a3b8] hover:text-[#475569] p-1 rounded-md transition-colors cursor-pointer"
+                    className="text-[#94a3b8] hover:text-[#475569] p-1 rounded-md transition-colors cursor-pointer self-start sm:self-center"
                     aria-label="Close"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -865,30 +1034,63 @@ export default function ReaderSavedPage() {
                     />
                   </div>
 
-                  {/* LINKEDIN PROFILE Field */}
+                  {/* MOBILE NUMBER Field with Separate Country Code Dropdown */}
                   <div>
-                    <label className="block font-mono text-[11px] font-bold text-[#64748b] tracking-wider uppercase mb-1.5">
-                      LINKEDIN PROFILE
+                    <label className="block font-mono text-[11px] font-bold text-[#64748b] tracking-wider uppercase mb-1.5 font-poppins">
+                      MOBILE NUMBER
                     </label>
-                    <div className="relative flex items-center">
-                      <div className="absolute left-3.5 flex items-center justify-center pointer-events-none">
-                        <div className="w-5 h-5 flex items-center justify-center cursor-default">
-                          <svg className="w-5 h-5 text-[#0077b5] fill-current" viewBox="0 0 24 24">
-                            <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
-                          </svg>
-                        </div>
-                      </div>
+                    <div className="flex rounded-xl overflow-hidden border border-[#e2e8f0] focus-within:border-[#00528a] focus-within:ring-2 focus-within:ring-[#00528a]/15 transition-all">
+                      <select
+                        value={phoneCountryCode}
+                        onChange={(e) => setPhoneCountryCode(e.target.value)}
+                        className="bg-[#f8fafc] border-r border-[#e2e8f0] text-[#334155] font-poppins font-bold text-xs sm:text-sm px-2.5 sm:px-3 py-3 outline-none cursor-pointer max-w-[130px] sm:max-w-[160px]"
+                      >
+                        {COUNTRY_DIAL_CODES.map((d) => (
+                          <option key={`${d.code}-${d.label}`} value={d.code}>
+                            {d.label}
+                          </option>
+                        ))}
+                      </select>
                       <input
                         type="text"
-                        value={linkedin}
-                        onChange={(e) => setLinkedin(e.target.value)}
-                        className="w-full pl-11 pr-4 py-3 bg-white border border-[#e2e8f0] rounded-xl text-[#1e293b] font-sans text-[15px] focus:outline-none focus:border-[#00528a] focus:ring-2 focus:ring-[#00528a]/15 transition-all"
-                        placeholder="https://www.linkedin.com/in/your-profile"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        value={phone}
+                        onChange={(e) => handlePhoneChange(e.target.value)}
+                        className="w-full px-4 py-3 bg-white text-[#1e293b] font-sans text-[15px] focus:outline-none font-poppins"
+                        placeholder="Enter numbers only"
                       />
                     </div>
-                    <p className="font-sans text-[12px] text-[#94a3b8] mt-1.5">
-                      Shown on your article bylines so readers can connect with you.
-                    </p>
+                    <div className="flex justify-between items-center mt-1 text-[11.5px] font-poppins text-[#64748b]">
+                      <span>Country code and country are chosen separately</span>
+                      <span>{phone.length} digits</span>
+                    </div>
+                  </div>
+
+                  {/* COUNTRY Field (Select Dropdown) */}
+                  <div>
+                    <label className="block font-mono text-[11px] font-bold text-[#64748b] tracking-wider uppercase mb-1.5 font-poppins">
+                      COUNTRY
+                    </label>
+                    <div className="relative">
+                      <select
+                        value={country}
+                        onChange={(e) => handleCountryChange(e.target.value)}
+                        className="w-full px-4 py-3 bg-white border border-[#e2e8f0] rounded-xl text-[#1e293b] font-sans text-[15px] focus:outline-none focus:border-[#00528a] focus:ring-2 focus:ring-[#00528a]/15 transition-all appearance-none cursor-pointer font-poppins"
+                      >
+                        <option value="">Select country...</option>
+                        {COUNTRIES.map((c) => (
+                          <option key={c} value={c}>
+                            {c}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-[#64748b]">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -923,7 +1125,7 @@ export default function ReaderSavedPage() {
                   <p className="text-[14px] sm:text-[15px] text-[#444444] font-normal mb-1">
                     Subscription
                   </p>
-                  <h2 className="text-[26px] sm:text-[30px] font-serif font-bold text-[#111111] leading-tight pb-4 mb-5 border-b border-[#E5E5E5]">
+                  <h2 className="text-[26px] sm:text-[30px] font-poppins font-bold text-[#111111] leading-tight pb-4 mb-5 border-b border-[#E5E5E5]">
                     Times Chicago Free Edition
                   </h2>
 
@@ -948,10 +1150,10 @@ export default function ReaderSavedPage() {
                     {/* Header Row */}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 mb-6 border-b border-[#E5E5E5] gap-3">
                       <div>
-                        <p className="text-xs font-mono font-bold text-[#64748b] uppercase tracking-wider mb-1">
+                        <p className="text-xs font-mono font-bold text-[#64748b] uppercase tracking-wider mb-1 font-poppins">
                           YOUR SUBSCRIPTION
                         </p>
-                        <h3 className="text-xl sm:text-2xl font-serif font-bold text-[#111111]">
+                        <h3 className="text-xl sm:text-2xl font-poppins font-bold text-[#111111]">
                           {subscription.package_name || subscription.packageName || "Times Chicago Digital Bundle"}
                         </h3>
                       </div>
@@ -962,7 +1164,7 @@ export default function ReaderSavedPage() {
                             Subscription Cancelled
                           </span>
                         ) : (
-                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 font-poppins">
                             <span className="w-2 h-2 rounded-full bg-emerald-500 mr-2"></span>
                             Active
                           </span>
@@ -977,14 +1179,14 @@ export default function ReaderSavedPage() {
                           <p className="text-xs font-mono font-bold text-[#64748b] uppercase tracking-wider mb-1">
                             TIME REMAINING
                           </p>
-                          <div className="text-2xl sm:text-3xl font-serif font-bold text-[#0f172a]">
+                          <div className="text-2xl sm:text-3xl font-poppins font-bold text-[#0f172a]">
                             {daysRemaining !== null && daysRemaining > 0 ? (
                               <span>{daysRemaining} {daysRemaining === 1 ? "day" : "days"} remaining</span>
                             ) : (
                               <span className="text-rose-600">0 days remaining</span>
                             )}
                           </div>
-                          <p className="text-xs text-[#64748b] mt-1">
+                          <p className="text-xs text-[#64748b] mt-1 font-poppins">
                             {daysRemaining !== null && daysRemaining > 0
                               ? `1-Year Complimentary Period (${daysRemaining} of 365 days remaining)`
                               : "The 1-year subscription term has concluded. Status: Cancelled."}
@@ -993,8 +1195,8 @@ export default function ReaderSavedPage() {
 
                         {daysRemaining !== null && daysRemaining > 0 && (
                           <div className="sm:text-right">
-                            <span className="inline-block bg-[#0077B6]/10 text-[#0077B6] font-mono font-bold text-xs px-3 py-1.5 rounded-md">
-                              {Math.round((daysRemaining / 365) * 100)}% of year left
+                            <span className="inline-block bg-[#0077B6]/10 text-[#0077B6] font-mono font-bold text-xs px-3 py-1.5 rounded-md font-poppins">
+                              {(daysRemaining >= 365 ? 100 : Math.min(99, Math.floor((daysRemaining / 365) * 100)))}% of year left
                             </span>
                           </div>
                         )}
@@ -1014,28 +1216,28 @@ export default function ReaderSavedPage() {
                     {/* Subscription Details Grid */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                       <div className="p-4 bg-gray-50 border border-gray-100 rounded-lg">
-                        <span className="block text-xs font-mono font-bold text-gray-500 uppercase tracking-wider mb-1">
+                        <span className="block text-xs font-mono font-bold text-gray-500 uppercase tracking-wider mb-1 font-poppins">
                           Plan & Pricing
                         </span>
-                        <span className="font-semibold text-gray-900">
+                        <span className="font-semibold text-gray-900 font-poppins">
                           {subscription.price || "Free for 1 Year"}
                         </span>
                       </div>
 
                       <div className="p-4 bg-gray-50 border border-gray-100 rounded-lg">
-                        <span className="block text-xs font-mono font-bold text-gray-500 uppercase tracking-wider mb-1">
+                        <span className="block text-xs font-mono font-bold text-gray-500 uppercase tracking-wider mb-1 font-poppins">
                           Start Date
                         </span>
-                        <span className="font-semibold text-gray-900">
+                        <span className="font-semibold text-gray-900 font-poppins">
                           {formatDateDisplay(subscription.start_date || subscription.created_at)}
                         </span>
                       </div>
 
                       <div className="p-4 bg-gray-50 border border-gray-100 rounded-lg">
-                        <span className="block text-xs font-mono font-bold text-gray-500 uppercase tracking-wider mb-1">
+                        <span className="block text-xs font-mono font-bold text-gray-500 uppercase tracking-wider mb-1 font-poppins">
                           Expiration Date
                         </span>
-                        <span className="font-semibold text-gray-900">
+                        <span className="font-semibold text-gray-900 font-poppins">
                           {formatDateDisplay(subscription.end_date)}
                         </span>
                       </div>
@@ -1053,17 +1255,13 @@ export default function ReaderSavedPage() {
                 {/* Section Header Row */}
                 <div className="flex items-center justify-between mb-5">
                   <div className="flex items-center space-x-2 shrink-0">
-                    {/* Red Book Icon */}
-                    <svg className="w-4 h-4 text-[#b91c1c] shrink-0" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                    </svg>
-                    <h2 className="font-sans font-extrabold text-xs xs:text-sm sm:text-[15px] tracking-wider text-[#0f172a] uppercase whitespace-nowrap">
+                    <h2 className="font-poppins font-extrabold text-xs xs:text-sm sm:text-[15px] tracking-wider text-[#0f172a] uppercase whitespace-nowrap">
                       SAVED ARTICLES
                     </h2>
                   </div>
 
                   {/* Right Pill Badge: N ARTICLES */}
-                  <div className="bg-[#eff4f8] text-[#556980] font-mono text-[9.5px] sm:text-[10px] font-bold px-2 sm:px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                  <div className="bg-[#eff4f8] text-[#556980] font-poppins text-[9.5px] sm:text-[10px] font-bold px-2 sm:px-2.5 py-0.5 rounded-full uppercase tracking-wider">
                     {savedArticles.length} ARTICLES
                   </div>
                 </div>
@@ -1079,7 +1277,7 @@ export default function ReaderSavedPage() {
                     </div>
 
                     {/* No Saved Articles Title */}
-                    <h3 className="font-sans font-bold text-base text-[#0f172a] mb-1.5">
+                    <h3 className="font-poppins font-bold text-base text-[#0f172a] mb-1.5">
                       No Saved Articles
                     </h3>
 
@@ -1123,24 +1321,24 @@ export default function ReaderSavedPage() {
                           <div className="p-3.5 flex flex-col justify-between flex-1 space-y-2">
                             <div>
                               {/* Category & Date */}
-                              <div className="flex items-center space-x-1.5 font-mono text-[10.5px] tracking-tight mb-1">
-                                <span className="font-bold text-[#0284c7] uppercase tracking-wider">{article.category || "WORLD"}</span>
+                              <div className="flex items-center space-x-1.5 font-poppins text-[10.5px] tracking-tight mb-1">
+                                <span className="font-bold text-[#0284c7] uppercase tracking-wider font-poppins">{article.category || "WORLD"}</span>
                                 <span className="text-[#8c9aa8]">•</span>
-                                <span className="text-[#8c9aa8]">
+                                <span className="text-[#8c9aa8] font-poppins">
                                   {formatDateClean(article.date)}
                                 </span>
                               </div>
 
                               {/* Article Title */}
                               <Link href={`/article/${articleSlug}`}>
-                                <h3 className="font-serif font-bold text-[14.5px] text-[#111111] leading-[1.3] line-clamp-2 hover:text-[#0284c7] transition-colors cursor-pointer">
+                                <h3 className="font-bold text-[14.5px] text-[#111111] leading-[1.3] line-clamp-2 hover:text-[#0284c7] transition-colors cursor-pointer font-georgia-serif" style={{ fontFamily: "Georgia, serif" }}>
                                   {article.title}
                                 </h3>
                               </Link>
                             </div>
 
                             {/* Author Byline */}
-                            <div className="font-mono text-[10px] font-medium text-[#8c9aa8] uppercase tracking-wider pt-2 border-t border-[#f1f5f9] truncate">
+                            <div className="font-poppins text-[10px] font-medium text-[#8c9aa8] uppercase tracking-wider pt-2 border-t border-[#f1f5f9] truncate">
                               {article.author || "BY DYLAN CANDICE ODULIO"}
                             </div>
                           </div>
@@ -1153,18 +1351,11 @@ export default function ReaderSavedPage() {
             )}
 
             {/* ----------------------------------------------------------------- */}
-            {/* TAB 5: HELP CENTER (Clean Blank Middle Space)                    */}
+            {/* TAB 5: HELP CENTER                                                */}
             {/* ----------------------------------------------------------------- */}
             {activeTab === "help-center" && (
-              <div className="w-full min-h-[300px] flex flex-col items-center justify-center py-12 text-center">
-                <div className="bg-white border border-[#E5E5E5] p-8 max-w-md w-full shadow-2xs">
-                  <h3 className="text-lg font-medium text-[#222222] mb-2">
-                    Help Center
-                  </h3>
-                  <p className="text-sm text-[#666666] leading-relaxed">
-                    Have questions about your reader account or subscription? Our support documentation and customer care team are here to assist.
-                  </p>
-                </div>
+              <div className="w-full">
+                <ReaderHelpCenter />
               </div>
             )}
 
@@ -1177,7 +1368,7 @@ export default function ReaderSavedPage() {
                   <p className="text-[14px] sm:text-[15px] text-[#444444] font-normal mb-1">
                     Contact Us
                   </p>
-                  <h2 className="text-[26px] sm:text-[30px] font-serif font-bold text-[#111111] leading-tight pb-4 mb-5 border-b border-[#E5E5E5]">
+                  <h2 className="text-[26px] sm:text-[30px] font-poppins font-bold text-[#111111] leading-tight pb-4 mb-5 border-b border-[#E5E5E5]">
                     We&apos;re Here to Help
                   </h2>
 
@@ -1199,7 +1390,7 @@ export default function ReaderSavedPage() {
                 {contactSubmissions.length > 0 && (
                   <div className="bg-white border border-[#E5E5E5] w-full shadow-2xs">
                     <div className="px-6 py-4 border-b border-[#E5E5E5]">
-                      <h4 className="text-base font-medium text-[#222222]">Your Messages</h4>
+                      <h4 className="text-base font-semibold text-[#222222] font-poppins">Your Queries</h4>
                     </div>
                     <ul className="divide-y divide-[#E5E5E5]">
                       {contactSubmissions.map((s: any) => (
@@ -1230,24 +1421,36 @@ export default function ReaderSavedPage() {
 
           {/* BOTTOM FOOTER (Matching Image 3) */}
           <footer className="w-full bg-white border-t border-[#E5E5E5] py-8 text-center mt-auto">
-            <p className="text-[11px] font-bold text-[#555555] tracking-widest uppercase mb-2">
+            <p className="text-[11px] font-bold text-[#555555] tracking-widest uppercase mb-3 font-poppins">
               POWERED BY TIMES CHICAGO
             </p>
-            <div className="text-xs text-[#666666] space-x-2">
-              <Link href="/terms-and-conditions" className="hover:underline">
-                Terms & Conditions
+            <div className="text-xs text-[#666666] flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 font-poppins">
+              <Link href="/privacy-policy" className="hover:underline hover:text-[#111111] transition-colors">
+                Privacy Policy
               </Link>
-              <span>|</span>
-              <Link href="/privacy-policy" className="hover:underline">
-                Privacy Notice
+              <span className="text-[#cbd5e1]">|</span>
+              <Link href="/cookie-policy" className="hover:underline hover:text-[#111111] transition-colors">
+                Cookie Policy
               </Link>
-              <span>|</span>
-              <Link href="/cookie-policy" className="hover:underline">
-                Cookie Notice
+              <span className="text-[#cbd5e1]">|</span>
+              <Link href="/editorial-policy" className="hover:underline hover:text-[#111111] transition-colors">
+                Editorial Policy
+              </Link>
+              <span className="text-[#cbd5e1]">|</span>
+              <Link href="/legal-policies" className="hover:underline hover:text-[#111111] transition-colors">
+                Legal Policies
+              </Link>
+              <span className="text-[#cbd5e1]">|</span>
+              <Link href="/copyright-policy" className="hover:underline hover:text-[#111111] transition-colors">
+                Copyright Policy
+              </Link>
+              <span className="text-[#cbd5e1]">|</span>
+              <Link href="/accessibility" className="hover:underline hover:text-[#111111] transition-colors">
+                Accessibility
               </Link>
             </div>
-            <p className="text-[11px] text-[#888888] mt-2">
-              © 2026 Times Chicago Media LLC, All Rights Reserved
+            <p className="text-[11px] text-[#888888] mt-3 font-poppins">
+              © 2026 Times Chicago LLC, All Rights Reserved
             </p>
           </footer>
         </main>

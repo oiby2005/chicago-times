@@ -109,7 +109,7 @@ export const WorldPoliticsCategorySection: React.FC = () => {
   }, [loadPosts]);
 
   return (
-    <div className="w-full font-sans select-none pb-2 my-0">
+    <div className="w-full font-sans  pb-2 my-0">
       {/* Section Header */}
       <div className="flex items-center space-x-2 pb-2 lg:pb-3 mb-0 lg:mb-4 border-b border-dashed border-[#CCCCCC]">
         <h2 className="font-serif font-bold text-[24px] sm:text-[28px] text-[#b82e2e] tracking-tight">

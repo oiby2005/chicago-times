@@ -37,6 +37,8 @@ export interface EntrepreneurItem {
   education?: string;
   didYouKnowFacts?: string[];
   inTheirOwnWordsQuote?: string;
+  inTheirOwnWordsQuote2?: string;
+  inTheirOwnWordsQuotes?: string[];
 }
 
 export const INITIAL_ENTREPRENEURS: EntrepreneurItem[] = [

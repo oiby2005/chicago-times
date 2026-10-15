@@ -55,7 +55,7 @@ export default function AuthorClientContent() {
   }, [slug, authorData]);
 
   return (
-    <main className="min-h-screen bg-white text-[#111111] font-sans flex flex-col justify-between select-none">
+    <main className="min-h-screen bg-white text-[#111111] font-sans flex flex-col justify-between ">
       <div>
         {/* Main Header & Navigation */}
         <Header />

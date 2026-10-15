@@ -25,14 +25,37 @@
     ry: 0 !important;
   }
 
+  *,
+  *::before,
+  *::after {
+    user-select: text !important;
+    -webkit-user-select: text !important;
+    -moz-user-select: text !important;
+    -ms-user-select: text !important;
+  }
+
   body {
     @apply bg-white text-[#111111] antialiased selection:bg-gray-200;
     font-family: var(--font-sans), 'Inter', sans-serif;
+    user-select: text !important;
+    -webkit-user-select: text !important;
+    -moz-user-select: text !important;
+    -ms-user-select: text !important;
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Encorpada Classic Compressed Bold', 'Encorpada Classic Compressed', 'Escrow Display Condensed Bold', 'Escrow Condensed', var(--font-playfair), 'Playfair Display', Georgia, serif;
+    user-select: text !important;
+    -webkit-user-select: text !important;
   }
+}
+
+.select-none,
+[class*="select-none"] {
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
 }
 
 .font-georgia-serif {
@@ -159,13 +182,9 @@
 .preview-body-text a,
 [contenteditable="true"] a,
 [contenteditable] a {
-  color: #000000 !important;
-  font-weight: 600 !important;
-  text-decoration: underline !important;
-  text-decoration-style: solid !important;
-  text-decoration-line: underline !important;
-  text-decoration-thickness: 1px !important;
-  text-underline-offset: 2px !important;
+  color: #888888 !important;
+  font-weight: 500 !important;
+  text-decoration: none !important;
   border-bottom: none !important;
   box-shadow: none !important;
 }
@@ -181,6 +200,12 @@ u a,
 a u {
   text-decoration: none !important;
   border-bottom: none !important;
+}
+
+/* Policy document section headings (1, 2, 3...) in Georgia */
+.policy-doc-content h2,
+.policy-doc-content section h2 {
+  font-family: Georgia, serif !important;
 }
 
 /* Dedicated Image Caption & Photo Credit Styling matching reference image */
@@ -367,3 +392,5 @@ iframe[class*="VIpgJd"] {
   text-transform: uppercase !important;
   letter-spacing: 0.05em !important;
 }
+
+

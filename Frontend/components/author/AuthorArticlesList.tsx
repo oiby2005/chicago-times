@@ -299,7 +299,7 @@ export default function AuthorArticlesList({
   const showEmptyState = isWriterUser && userArticles.length === 0;
 
   return (
-    <div ref={topRef} className="w-full select-none">
+    <div ref={topRef} className="w-full ">
       {/* Header */}
       <div className="border-b border-[#111111] pb-1.5 mb-6 flex justify-between items-center">
         <h3 className="font-poppins font-sans font-bold text-sm sm:text-[15px] uppercase tracking-wider text-[#111111]">

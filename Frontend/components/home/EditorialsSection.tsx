@@ -121,7 +121,7 @@ export const EditorialsSection: React.FC = () => {
   }, [loadPosts]);
 
   return (
-    <div className="w-full font-sans select-none bg-white border border-[#E5E0D5] overflow-hidden my-2">
+    <div className="w-full font-sans  bg-white border border-[#E5E0D5] overflow-hidden my-2">
       {/* Header Banner */}
       <div className="bg-[#43646B] text-white px-3.5 py-3 flex items-center">
         <h3 className="font-sans font-bold text-[15px] sm:text-[16px] tracking-tight">

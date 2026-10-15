@@ -62,6 +62,7 @@ const aboutLinks = [
 export const Footer: React.FC = () => {
   const [activeEdition, setActiveEdition] = useState<string>("English");
   const [showEditionDropdown, setShowEditionDropdown] = useState<boolean>(false);
+  const [isBannerVisible, setIsBannerVisible] = useState<boolean>(true);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -74,36 +75,46 @@ export const Footer: React.FC = () => {
       }
     };
 
+    const handleBannerVisibility = (e: any) => {
+      if (typeof e.detail?.visible === "boolean") {
+        setIsBannerVisible(e.detail.visible);
+      }
+    };
+
     window.addEventListener("wsj_edition_changed", handleEditionChange);
-    return () => window.removeEventListener("wsj_edition_changed", handleEditionChange);
+    window.addEventListener("wsj_sticky_banner_visibility", handleBannerVisibility);
+    return () => {
+      window.removeEventListener("wsj_edition_changed", handleEditionChange);
+      window.removeEventListener("wsj_sticky_banner_visibility", handleBannerVisibility);
+    };
   }, []);
 
   return (
-    <footer className="w-full text-[#111111] font-sans select-none relative">
+    <footer className="w-full text-[#111111] font-sans relative">
       {/* SECTION 1: Top Bar (Logo, Language Edition Dropdown & Back To Top) — Custom Shade 1 (#E8E8E8) */}
       <div className="w-full border-t border-b border-[#DCDCDC] py-3.5 bg-[#E8E8E8]">
         <Container>
           <div className="flex items-center justify-between flex-nowrap gap-2 sm:gap-4">
             {/* Left: Logo & Interactive English Edition Dropdown */}
-            <div className="flex items-center space-x-2 sm:space-x-4 relative shrink-0 min-w-0">
+            <div className="flex items-end space-x-2 sm:space-x-4 relative shrink-0 min-w-0 pb-0.5">
               <a href="/" className="inline-block shrink-0">
                 <img
                   src="/images/design-reference/Times Chicago.svg"
                   alt="Times Chicago"
-                  className="h-5 sm:h-8 w-auto object-contain shrink-0"
+                  className="h-5 sm:h-8 w-auto object-contain shrink-0 block"
                 />
               </a>
-              <span className="text-[#999999] font-light text-xs shrink-0">|</span>
-              <div className="relative shrink-0">
+              <span className="text-[#999999] font-light text-xs shrink-0 self-end pb-0.5 sm:pb-1">|</span>
+              <div className="relative shrink-0 self-end pb-0.5 sm:pb-1">
                 <button
                   type="button"
                   onClick={() => setShowEditionDropdown(!showEditionDropdown)}
-                  className="text-[11px] sm:text-[12px] font-sans font-normal text-[#333333] hover:text-black flex items-center space-x-1 cursor-pointer focus:outline-none whitespace-nowrap shrink-0"
+                  className="text-[11px] sm:text-[12px] font-sans font-normal text-[#333333] hover:text-black flex items-center space-x-1 cursor-pointer focus:outline-none whitespace-nowrap shrink-0 leading-none"
                   aria-label="Select edition"
                   suppressHydrationWarning
                 >
-                  <span className="whitespace-nowrap">{activeEdition} Edition</span>
-                  <span className="text-[7.5px] sm:text-[8px] text-[#111111] font-bold ml-0.5">▼</span>
+                  <span className="whitespace-nowrap leading-none">{activeEdition} Edition</span>
+                  <span className="text-[7.5px] sm:text-[8px] text-[#111111] font-bold ml-0.5 leading-none">▼</span>
                 </button>
 
                 {showEditionDropdown && (
@@ -389,7 +400,7 @@ export const Footer: React.FC = () => {
       </div>
 
       {/* SECTION 4: Legal Links & Copyright Notice — Custom Shade 4 (#D4CDCD) */}
-      <div className="w-full pt-6 pb-24 sm:pb-28 bg-[#D4CDCD]">
+      <div className={`w-full pt-5 transition-all duration-300 bg-[#D4CDCD] ${isBannerVisible ? "pb-[68px]" : "pb-5"}`}>
         <Container>
           <div className="flex flex-col items-center justify-center text-center space-y-2">
             {/* Policy Links Row */}
@@ -409,7 +420,7 @@ export const Footer: React.FC = () => {
 
             {/* Copyright Line */}
             <p className="text-[11px] text-[#555555] font-sans font-medium">
-              Copyright ©2026 Times Chicago Media LLC. All Rights Reserved.
+              Copyright ©2026 Times Chicago LLC. All Rights Reserved.
             </p>
           </div>
         </Container>

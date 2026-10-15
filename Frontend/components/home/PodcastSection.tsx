@@ -387,7 +387,7 @@ export const PodcastSection: React.FC<PodcastSectionProps> = ({ onActiveCountCha
         return (
           <div
             key={podId}
-            className="w-full font-sans select-none my-0 bg-[#FFFDF7] border border-[#E2DDD0] rounded-none overflow-hidden shadow-xs"
+            className="w-full font-sans my-0 bg-[#FFFDF7] border border-[#E2DDD0] rounded-none overflow-hidden shadow-xs"
           >
             {/* Top Image Banner or Embedded YouTube Player */}
             {isVideoActive ? (
@@ -531,7 +531,7 @@ export const PodcastSection: React.FC<PodcastSectionProps> = ({ onActiveCountCha
                       className="text-[11px] font-bold text-[#b8860b] hover:underline"
                       title="Open original link in new tab"
                     >
-                      Source ↗
+                      Source
                     </a>
                   </div>
                 </div>
@@ -567,10 +567,9 @@ export const PodcastSection: React.FC<PodcastSectionProps> = ({ onActiveCountCha
           href="https://podcasts.apple.com/in/podcast/jadetimes-talks/id1791836245?l=kn"
           target="_blank"
           rel="noopener noreferrer"
-          className="font-sans text-xs font-bold text-[#b8860b] hover:underline uppercase tracking-wider inline-flex items-center space-x-1"
+          className="font-sans text-xs font-bold text-[#b8860b] hover:underline uppercase tracking-wider inline-flex items-center"
         >
           <span>View all our podcasts</span>
-          <span>↗</span>
         </a>
       </div>
     </div>

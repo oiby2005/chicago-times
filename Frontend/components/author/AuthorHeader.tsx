@@ -129,7 +129,7 @@ export default function AuthorHeader({ author = defaultAuthor }: AuthorHeaderPro
   };
 
   return (
-    <div className="w-full bg-white relative select-none">
+    <div className="w-full bg-white relative ">
       <Container className="pt-6 pb-6 border-b border-[#e5e7eb]">
         {/* Back Link */}
         <button

@@ -74,7 +74,7 @@ export default function ReaderDashboard() {
     let activeEmail = userEmail || currentUser?.email || "";
 
     if (!activeEmail) {
-      const userStr = sessionStorage.getItem("wsj_user") || localStorage.getItem("wsj_user");
+      const userStr = sessionStorage.getItem("wsj_user");
       if (userStr) {
         try {
           const parsed = JSON.parse(userStr);
@@ -199,7 +199,7 @@ export default function ReaderDashboard() {
     try {
       let activeEmail = currentUser?.email || "";
       if (!activeEmail) {
-        const userStr = sessionStorage.getItem("wsj_user") || localStorage.getItem("wsj_user");
+        const userStr = sessionStorage.getItem("wsj_user");
         if (userStr) {
           try {
             const parsed = JSON.parse(userStr);
@@ -257,7 +257,7 @@ export default function ReaderDashboard() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f8fafc] text-[#111111] font-sans flex flex-col justify-between select-none">
+    <main className="min-h-screen bg-[#f8fafc] text-[#111111] font-sans flex flex-col justify-between ">
       <div>
         {/* ================================================================= */}
         {/* TOP NAVBAR (Matching Writer Dashboard white palette & layout)    */}
@@ -284,7 +284,7 @@ export default function ReaderDashboard() {
               />
             </Link>
 
-            <span className="hidden sm:inline-flex bg-[#eff6ff] text-[#2563eb] text-[9.5px] sm:text-[10.5px] font-mono font-bold px-2 py-0.5 rounded uppercase tracking-wider select-none shrink-0">
+            <span className="hidden sm:inline-flex bg-[#eff6ff] text-[#2563eb] text-[9.5px] sm:text-[10.5px] font-mono font-bold px-2 py-0.5 rounded uppercase tracking-wider  shrink-0">
               READER PORTAL
             </span>
           </div>

@@ -5,7 +5,7 @@ import AdPlaceholder from "@/components/ui/AdPlaceholder";
 
 export const ArticleSidebarAds: React.FC = () => {
   return (
-    <div className="w-full space-y-6 my-8 select-none flex flex-col items-stretch">
+    <div className="w-full space-y-6 my-8  flex flex-col items-stretch">
       {/* Article Page Ad 01 (300x300) */}
       <AdPlaceholder
         slotId="article_slot_1"

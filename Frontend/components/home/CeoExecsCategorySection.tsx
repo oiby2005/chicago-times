@@ -112,7 +112,7 @@ export const CeoExecsCategorySection: React.FC = () => {
   }, [loadPosts]);
 
   return (
-    <div className="w-full font-sans select-none pt-4 pb-4">
+    <div className="w-full font-sans  pt-4 pb-4">
       {/* Header */}
       <div className="flex items-center space-x-2 pb-3 mb-[28px] sm:mb-4 border-b border-dashed border-[#CCCCCC]">
         <h2 className="font-serif font-bold text-[26px] sm:text-[30px] text-[#3A2371] tracking-tight">

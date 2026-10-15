@@ -223,7 +223,7 @@ export default function ContactUsClient() {
           ...formData,
           userEmail: (() => {
             try {
-              const s = sessionStorage.getItem("wsj_user") || localStorage.getItem("wsj_user");
+              const s = sessionStorage.getItem("wsj_user");
               return s ? JSON.parse(s).email || null : null;
             } catch {
               return null;
@@ -321,7 +321,10 @@ export default function ContactUsClient() {
                 <h4 className="text-[11px] font-bold text-gray-400 tracking-widest uppercase mb-2.5 font-sans">
                   HEADQUARTERS ADDRESS
                 </h4>
-                <p className="font-serif font-bold text-base sm:text-lg text-gray-900 leading-snug">
+                <p
+                  style={{ fontFamily: "'Poppins', sans-serif" }}
+                  className="font-bold text-base sm:text-lg text-gray-900 leading-snug"
+                >
                   1246 J Clark St, Suite 1100<br />
                   Chicago, IL 60603, United States
                 </p>
@@ -336,16 +339,29 @@ export default function ContactUsClient() {
                 </h4>
                 <a
                   href="mailto:worldnews@timeschicago.com"
-                  className="font-serif font-bold text-base sm:text-lg text-[#00558c] hover:underline block"
+                  style={{ fontFamily: "'Poppins', sans-serif" }}
+                  className="font-bold text-base sm:text-lg text-[#00558c] hover:underline block mb-1.5"
                 >
                   worldnews@timeschicago.com
+                </a>
+                <a
+                  href="https://www.timeschicago.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ fontFamily: "'Poppins', sans-serif" }}
+                  className="font-bold text-sm sm:text-base text-gray-700 hover:text-[#00558c] hover:underline block"
+                >
+                  www.timeschicago.com
                 </a>
               </div>
             </div>
 
             {/* Right Column: Submit Your Query Form */}
             <div className="md:col-span-7">
-              <h2 className="font-serif font-bold text-2xl sm:text-3xl text-gray-900 mb-1.5">
+              <h2
+                style={{ fontFamily: "'Poppins', sans-serif" }}
+                className="font-bold text-2xl sm:text-3xl text-gray-900 mb-1.5"
+              >
                 Submit Your Query
               </h2>
               <p className="text-xs text-gray-500 mb-6 font-sans">
@@ -476,6 +492,8 @@ export default function ContactUsClient() {
                       <option value="">-- Select Inquiry Type --</option>
                       <option value="Business / Advertising">Business / Advertising</option>
                       <option value="Editorial">Editorial</option>
+                      <option value="Report a complaint">Report a complaint</option>
+                      <option value="Report a news">Report a news</option>
                       <option value="Technical glitch">Technical glitch</option>
                       <option value="General / Others">General / Others</option>
                     </select>

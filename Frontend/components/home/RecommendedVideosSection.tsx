@@ -151,7 +151,7 @@ export const RecommendedVideosSection: React.FC = () => {
   }, []);
 
   return (
-    <div className="w-full font-sans select-none pt-0 pb-2 my-0">
+    <div className="w-full font-sans pt-0 pb-2 my-0">
       {/* Section Title */}
       <div className="mb-4">
         <h3 className="font-sans font-bold text-[20px] text-[#111111] tracking-tight">
@@ -206,6 +206,12 @@ export const RecommendedVideosSection: React.FC = () => {
                     isShortOrReel ? "object-contain bg-black" : "object-cover object-center"
                   }`}
                 />
+                {/* White triangle play button overlay */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
+                  <svg className="w-5 h-5 text-white fill-current group-hover:scale-110 transition-transform duration-200" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                </div>
               </a>
             </article>
           );

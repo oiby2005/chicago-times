@@ -130,7 +130,7 @@ export const FashionScienceArtsSection: React.FC = () => {
   }, [loadPosts]);
 
   return (
-    <div className="w-full font-sans select-none pt-[20px] md:pt-8 mt-0 md:mt-6 pb-4">
+    <div className="w-full font-sans pt-[20px] md:pt-8 mt-0 md:mt-6 pb-4">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-[40px] md:gap-6 items-start">
         
         {/* ==================== COLUMN 1: FASHION ==================== */}
@@ -160,7 +160,7 @@ export const FashionScienceArtsSection: React.FC = () => {
           )}
 
           {fashionItems[0] && (
-            <h4 className="font-serif font-bold text-[17px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-3" style={{ fontFamily: "Georgia, serif" }}>
+            <h4 className="font-bold text-[17px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-3" style={{ fontFamily: "Georgia" }}>
               <Link href={`/article/${fashionItems[0].slug}`}>
                 {fashionItems[0].title}
               </Link>
@@ -169,7 +169,7 @@ export const FashionScienceArtsSection: React.FC = () => {
 
           {fashionItems[1] && (
             <div className="pt-1 pb-2">
-              <h5 className="font-serif font-bold text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer" style={{ fontFamily: "Georgia, serif" }}>
+              <h5 className="font-normal text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer" style={{ fontFamily: "Georgia", fontWeight: 400 }}>
                 <Link href={`/article/${fashionItems[1].slug}`}>
                   {fashionItems[1].title}
                 </Link>
@@ -179,7 +179,7 @@ export const FashionScienceArtsSection: React.FC = () => {
 
           {fashionItems[2] && (
             <div className="pt-1">
-              <h5 className="font-serif font-bold text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer" style={{ fontFamily: "Georgia, serif" }}>
+              <h5 className="font-normal text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer" style={{ fontFamily: "Georgia", fontWeight: 400 }}>
                 <Link href={`/article/${fashionItems[2].slug}`}>
                   {fashionItems[2].title}
                 </Link>
@@ -215,7 +215,7 @@ export const FashionScienceArtsSection: React.FC = () => {
           )}
 
           {scienceItems[0] && (
-            <h4 className="font-serif font-bold text-[17px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-3" style={{ fontFamily: "Georgia, serif" }}>
+            <h4 className="font-bold text-[17px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-3" style={{ fontFamily: "Georgia" }}>
               <Link href={`/article/${scienceItems[0].slug}`}>
                 {scienceItems[0].title}
               </Link>
@@ -224,7 +224,7 @@ export const FashionScienceArtsSection: React.FC = () => {
 
           {scienceItems[1] && (
             <div className="pt-1 pb-2">
-              <h5 className="font-serif font-bold text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer" style={{ fontFamily: "Georgia, serif" }}>
+              <h5 className="font-normal text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer" style={{ fontFamily: "Georgia", fontWeight: 400 }}>
                 <Link href={`/article/${scienceItems[1].slug}`}>
                   {scienceItems[1].title}
                 </Link>
@@ -234,7 +234,7 @@ export const FashionScienceArtsSection: React.FC = () => {
 
           {scienceItems[2] && (
             <div className="pt-1">
-              <h5 className="font-serif font-bold text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer" style={{ fontFamily: "Georgia, serif" }}>
+              <h5 className="font-normal text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer" style={{ fontFamily: "Georgia", fontWeight: 400 }}>
                 <Link href={`/article/${scienceItems[2].slug}`}>
                   {scienceItems[2].title}
                 </Link>
@@ -270,7 +270,7 @@ export const FashionScienceArtsSection: React.FC = () => {
           )}
 
           {artsItems[0] && (
-            <h4 className="font-serif font-bold text-[17px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-3" style={{ fontFamily: "Georgia, serif" }}>
+            <h4 className="font-bold text-[17px] leading-[1.18] text-[#111111] hover:underline cursor-pointer mb-3" style={{ fontFamily: "Georgia" }}>
               <Link href={`/article/${artsItems[0].slug}`}>
                 {artsItems[0].title}
               </Link>
@@ -279,7 +279,7 @@ export const FashionScienceArtsSection: React.FC = () => {
 
           {artsItems[1] && (
             <div className="pt-1 pb-2">
-              <h5 className="font-serif font-bold text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer" style={{ fontFamily: "Georgia, serif" }}>
+              <h5 className="font-normal text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer" style={{ fontFamily: "Georgia", fontWeight: 400 }}>
                 <Link href={`/article/${artsItems[1].slug}`}>
                   {artsItems[1].title}
                 </Link>
@@ -289,7 +289,7 @@ export const FashionScienceArtsSection: React.FC = () => {
 
           {artsItems[2] && (
             <div className="pt-1">
-              <h5 className="font-serif font-bold text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer" style={{ fontFamily: "Georgia, serif" }}>
+              <h5 className="font-normal text-[14px] leading-[1.2] text-[#111111] hover:underline cursor-pointer" style={{ fontFamily: "Georgia", fontWeight: 400 }}>
                 <Link href={`/article/${artsItems[2].slug}`}>
                   {artsItems[2].title}
                 </Link>

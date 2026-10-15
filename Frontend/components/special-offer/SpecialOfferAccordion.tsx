@@ -38,19 +38,25 @@ export const SpecialOfferAccordion: React.FC = () => {
       content: (
         <div className="space-y-3.5 text-xs text-[#555555] font-sans leading-relaxed">
           <div>
-            <h4 className="font-bold text-[#222222] mb-1">When will my subscription renew?</h4>
+            <h4 className="font-bold text-[#222222] mb-1 font-poppins" style={{ fontFamily: "'Poppins', sans-serif" }}>
+              When will my subscription renew?
+            </h4>
             <p>
               Your subscription automatically renews at the standard monthly rate after your initial 1-year introductory offer period ends unless cancelled.
             </p>
           </div>
           <div>
-            <h4 className="font-bold text-[#222222] mb-1">Can I cancel my subscription anytime?</h4>
+            <h4 className="font-bold text-[#222222] mb-1 font-poppins" style={{ fontFamily: "'Poppins', sans-serif" }}>
+              Can I cancel my subscription anytime?
+            </h4>
             <p>
               Yes, you can cancel your subscription at any time online through your Account Settings or by contacting Customer Service.
             </p>
           </div>
           <div>
-            <h4 className="font-bold text-[#222222] mb-1">What is included in the Times Chicago Digital Bundle?</h4>
+            <h4 className="font-bold text-[#222222] mb-1 font-poppins" style={{ fontFamily: "'Poppins', sans-serif" }}>
+              What is included in the Times Chicago Digital Bundle?
+            </h4>
             <p>
               The Times Chicago Digital Bundle grants full, unlimited access to Times Chicago digital platforms, along with mobile apps and exclusive subscriber events.
             </p>
@@ -75,7 +81,7 @@ export const SpecialOfferAccordion: React.FC = () => {
   ];
 
   return (
-    <div className="w-full bg-white border border-[#e2e2e2] rounded-xs shadow-xs overflow-hidden select-none">
+    <div className="w-full bg-white border border-[#e2e2e2] rounded-xs shadow-xs overflow-hidden">
       {items.map((item) => {
         const isOpen = openId === item.id;
 

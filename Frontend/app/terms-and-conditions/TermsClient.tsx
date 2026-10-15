@@ -57,7 +57,7 @@ export default function TermsClient() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col justify-between text-[#111111] select-none">
+    <div className="min-h-screen bg-white flex flex-col justify-between text-[#111111]">
       <div>
         <Header />
         <StickyHeaderBar />
@@ -88,7 +88,10 @@ export default function TermsClient() {
                     }`}
                   >
                     <div className="flex items-center min-w-0 pr-1">
-                      <h3 className="font-serif font-bold text-[11px] xs:text-[12px] sm:text-[14px] lg:text-[15px] uppercase tracking-tight sm:tracking-wider text-[#111111] whitespace-nowrap truncate">
+                      <h3
+                        className="font-serif font-bold text-[11px] xs:text-[12px] sm:text-[14px] lg:text-[15px] uppercase tracking-tight sm:tracking-wider text-[#111111] whitespace-nowrap truncate"
+                        style={{ fontFamily: "Georgia, serif" }}
+                      >
                         TABLE OF CONTENTS
                       </h3>
                     </div>
@@ -112,7 +115,8 @@ export default function TermsClient() {
                         <button
                           key={item.id}
                           onClick={() => scrollToSection(item.id)}
-                          className={`w-full text-left px-3 py-1.5 text-[12.5px] font-sans transition-colors rounded-none flex items-center cursor-pointer ${
+                          style={{ fontFamily: "Georgia, serif" }}
+                          className={`w-full text-left px-3 py-1.5 text-[12.5px] font-serif transition-colors rounded-none flex items-center cursor-pointer ${
                             isActive
                               ? "bg-[#FAF5F5] text-[#990000] font-bold border-l-2 border-[#990000]"
                               : "text-[#555555] hover:text-[#990000] hover:bg-[#FAF5F5]"
@@ -127,7 +131,7 @@ export default function TermsClient() {
               </div>
 
               {/* ==================== RIGHT MAIN COLUMN: DOCUMENT SECTIONS (8 of 12 cols ~ 67%) ==================== */}
-              <div className="lg:col-span-8 bg-white border border-[#E2DDD0] p-6 sm:p-10 shadow-xs space-y-8 font-sans text-[14px] leading-relaxed text-[#333333]">
+              <div className="lg:col-span-8 bg-white border border-[#E2DDD0] p-6 sm:p-10 shadow-xs space-y-8 font-sans text-[14px] leading-relaxed text-[#333333] policy-doc-content [&_h2]:font-['Georgia',serif] [&_h3]:font-['Georgia',serif]">
 
                 {/* Metadata Summary Table */}
                 <div className="border border-[#E2DDD0] overflow-hidden rounded-none">
@@ -178,7 +182,7 @@ export default function TermsClient() {
 
                 {/* 1. Company Information and Contact */}
                 <section id="sec-1" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
+                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3" style={{ fontFamily: "Georgia, serif" }}>
                     <span className="text-[#990000] font-bold mr-1">1.</span> Company Information and Contact
                   </h3>
                   <div className="space-y-3">
@@ -192,7 +196,7 @@ export default function TermsClient() {
 
                 {/* 2. Eligibility and Lawful Use */}
                 <section id="sec-2" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
+                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3" style={{ fontFamily: "Georgia, serif" }}>
                     <span className="text-[#990000] font-bold mr-1">2.</span> Eligibility and Lawful Use
                   </h3>
                   <p>
@@ -202,7 +206,7 @@ export default function TermsClient() {
 
                 {/* 3. Permitted Use */}
                 <section id="sec-3" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
+                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3" style={{ fontFamily: "Georgia, serif" }}>
                     <span className="text-[#990000] font-bold mr-1">3.</span> Permitted Use
                   </h3>
                   <p>
@@ -212,7 +216,7 @@ export default function TermsClient() {
 
                 {/* 4. News Content and Editorial Standards */}
                 <section id="sec-4" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
+                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3" style={{ fontFamily: "Georgia, serif" }}>
                     <span className="text-[#990000] font-bold mr-1">4.</span> News Content and Editorial Standards
                   </h3>
                   <p>
@@ -222,7 +226,7 @@ export default function TermsClient() {
 
                 {/* 5. Accuracy and Completeness */}
                 <section id="sec-5" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
+                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3" style={{ fontFamily: "Georgia, serif" }}>
                     <span className="text-[#990000] font-bold mr-1">5.</span> Accuracy and Completeness
                   </h3>
                   <p>
@@ -232,7 +236,7 @@ export default function TermsClient() {
 
                 {/* 6. No Professional Advice */}
                 <section id="sec-6" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
+                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3" style={{ fontFamily: "Georgia, serif" }}>
                     <span className="text-[#990000] font-bold mr-1">6.</span> No Professional Advice
                   </h3>
                   <p>
@@ -242,7 +246,7 @@ export default function TermsClient() {
 
                 {/* 7. Intellectual Property */}
                 <section id="sec-7" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
+                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3" style={{ fontFamily: "Georgia, serif" }}>
                     <span className="text-[#990000] font-bold mr-1">7.</span> Intellectual Property
                   </h3>
                   <p>
@@ -252,7 +256,7 @@ export default function TermsClient() {
 
                 {/* 8. User Submissions */}
                 <section id="sec-8" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
+                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3" style={{ fontFamily: "Georgia, serif" }}>
                     <span className="text-[#990000] font-bold mr-1">8.</span> User Submissions
                   </h3>
                   <p>
@@ -262,7 +266,7 @@ export default function TermsClient() {
 
                 {/* 9. News Tips and Confidentiality */}
                 <section id="sec-9" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
+                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3" style={{ fontFamily: "Georgia, serif" }}>
                     <span className="text-[#990000] font-bold mr-1">9.</span> News Tips and Confidentiality
                   </h3>
                   <p>
@@ -272,7 +276,7 @@ export default function TermsClient() {
 
                 {/* 10. Comments and Interactive Features */}
                 <section id="sec-10" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
+                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3" style={{ fontFamily: "Georgia, serif" }}>
                     <span className="text-[#990000] font-bold mr-1">10.</span> Comments and Interactive Features
                   </h3>
                   <p>
@@ -282,7 +286,7 @@ export default function TermsClient() {
 
                 {/* 11. Advertising and Sponsored Content */}
                 <section id="sec-11" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
+                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3" style={{ fontFamily: "Georgia, serif" }}>
                     <span className="text-[#990000] font-bold mr-1">11.</span> Advertising and Sponsored Content
                   </h3>
                   <p>
@@ -292,7 +296,7 @@ export default function TermsClient() {
 
                 {/* 12. Third-Party Websites */}
                 <section id="sec-12" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
+                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3" style={{ fontFamily: "Georgia, serif" }}>
                     <span className="text-[#990000] font-bold mr-1">12.</span> Third-Party Websites
                   </h3>
                   <p>
@@ -302,7 +306,7 @@ export default function TermsClient() {
 
                 {/* 13. Privacy and Cookies */}
                 <section id="sec-13" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
+                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3" style={{ fontFamily: "Georgia, serif" }}>
                     <span className="text-[#990000] font-bold mr-1">13.</span> Privacy and Cookies
                   </h3>
                   <p>
@@ -315,7 +319,7 @@ export default function TermsClient() {
 
                 {/* 14. Accounts and Security */}
                 <section id="sec-14" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
+                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3" style={{ fontFamily: "Georgia, serif" }}>
                     <span className="text-[#990000] font-bold mr-1">14.</span> Accounts and Security
                   </h3>
                   <p>
@@ -325,7 +329,7 @@ export default function TermsClient() {
 
                 {/* 15. Availability and Changes */}
                 <section id="sec-15" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
+                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3" style={{ fontFamily: "Georgia, serif" }}>
                     <span className="text-[#990000] font-bold mr-1">15.</span> Availability and Changes
                   </h3>
                   <p>
@@ -335,7 +339,7 @@ export default function TermsClient() {
 
                 {/* 16. Copyright and Intellectual Property Complaints */}
                 <section id="sec-16" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
+                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3" style={{ fontFamily: "Georgia, serif" }}>
                     <span className="text-[#990000] font-bold mr-1">16.</span> Copyright and Intellectual Property Complaints
                   </h3>
                   <p>
@@ -345,7 +349,7 @@ export default function TermsClient() {
 
                 {/* 17. Disclaimer of Warranties */}
                 <section id="sec-17" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
+                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3" style={{ fontFamily: "Georgia, serif" }}>
                     <span className="text-[#990000] font-bold mr-1">17.</span> Disclaimer of Warranties
                   </h3>
                   <p>
@@ -355,7 +359,7 @@ export default function TermsClient() {
 
                 {/* 18. Limitation of Liability */}
                 <section id="sec-18" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
+                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3" style={{ fontFamily: "Georgia, serif" }}>
                     <span className="text-[#990000] font-bold mr-1">18.</span> Limitation of Liability
                   </h3>
                   <p>
@@ -365,7 +369,7 @@ export default function TermsClient() {
 
                 {/* 19. Indemnification */}
                 <section id="sec-19" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
+                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3" style={{ fontFamily: "Georgia, serif" }}>
                     <span className="text-[#990000] font-bold mr-1">19.</span> Indemnification
                   </h3>
                   <p>
@@ -375,7 +379,7 @@ export default function TermsClient() {
 
                 {/* 20. Suspension and Termination */}
                 <section id="sec-20" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
+                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3" style={{ fontFamily: "Georgia, serif" }}>
                     <span className="text-[#990000] font-bold mr-1">20.</span> Suspension and Termination
                   </h3>
                   <p>
@@ -385,7 +389,7 @@ export default function TermsClient() {
 
                 {/* 21. Governing Law and Jurisdiction */}
                 <section id="sec-21" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
+                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3" style={{ fontFamily: "Georgia, serif" }}>
                     <span className="text-[#990000] font-bold mr-1">21.</span> Governing Law and Jurisdiction
                   </h3>
                   <p>
@@ -395,7 +399,7 @@ export default function TermsClient() {
 
                 {/* 22. Changes to These Terms */}
                 <section id="sec-22" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
+                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3" style={{ fontFamily: "Georgia, serif" }}>
                     <span className="text-[#990000] font-bold mr-1">22.</span> Changes to These Terms
                   </h3>
                   <p>
@@ -405,7 +409,7 @@ export default function TermsClient() {
 
                 {/* 23. Severability and No Waiver */}
                 <section id="sec-23" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
+                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3" style={{ fontFamily: "Georgia, serif" }}>
                     <span className="text-[#990000] font-bold mr-1">23.</span> Severability and No Waiver
                   </h3>
                   <p>
@@ -415,7 +419,7 @@ export default function TermsClient() {
 
                 {/* 24. Entire Agreement */}
                 <section id="sec-24" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
+                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3" style={{ fontFamily: "Georgia, serif" }}>
                     <span className="text-[#990000] font-bold mr-1">24.</span> Entire Agreement
                   </h3>
                   <p>
@@ -425,7 +429,7 @@ export default function TermsClient() {
 
                 {/* 25. Contact Us */}
                 <section id="sec-25" className="scroll-mt-28 pt-4 border-t border-[#F0ECE1]">
-                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3">
+                  <h3 className="font-serif font-bold text-[19px] text-[#111111] mb-3" style={{ fontFamily: "Georgia, serif" }}>
                     <span className="text-[#990000] font-bold mr-1">25.</span> Contact Us
                   </h3>
                   <div className="space-y-3">

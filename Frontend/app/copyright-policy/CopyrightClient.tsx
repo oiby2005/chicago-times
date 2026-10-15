@@ -44,7 +44,7 @@ export default function CopyrightClient() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col justify-between text-[#111111] select-none">
+    <div className="min-h-screen bg-white flex flex-col justify-between text-[#111111]">
       <div>
         <Header />
         <StickyHeaderBar />
@@ -78,7 +78,10 @@ export default function CopyrightClient() {
                     }`}
                   >
                     <div className="flex items-center space-x-2">
-                      <h3 className="font-serif font-bold text-[15px] uppercase tracking-wider text-[#111111]">
+                      <h3
+                        className="font-serif font-bold text-[15px] uppercase tracking-wider text-[#111111]"
+                        style={{ fontFamily: "Georgia, serif" }}
+                      >
                         POLICY SECTIONS
                       </h3>
                     </div>
@@ -117,7 +120,7 @@ export default function CopyrightClient() {
               </div>
 
               {/* ==================== RIGHT MAIN COLUMN: DOCUMENT SECTIONS ==================== */}
-              <div className="lg:col-span-8 bg-white border border-[#E2DDD0] p-6 sm:p-10 shadow-xs space-y-8 font-sans text-[14px] leading-relaxed text-[#333333]">
+              <div className="lg:col-span-8 bg-white border border-[#E2DDD0] p-6 sm:p-10 shadow-xs space-y-8 font-sans text-[14px] leading-relaxed text-[#333333] policy-doc-content [&_h2]:font-['Georgia',serif]">
                 {/* 1. Purpose and Scope */}
                 <section id="purpose-scope" className="scroll-mt-28">
                   <h2 className="font-serif font-bold text-[22px] text-[#111111] pb-2 mb-4 border-b border-[#E5E0D3]">

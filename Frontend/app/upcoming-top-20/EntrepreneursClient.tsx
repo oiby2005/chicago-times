@@ -174,7 +174,7 @@ export default function EntrepreneursClient() {
   }, [entrepreneurs, searchQuery, selectedIndustry, selectedCountry, selectedGender]);
 
   return (
-    <main className="min-h-screen flex flex-col bg-white text-[#111111] select-none">
+    <main className="min-h-screen flex flex-col bg-white text-[#111111] ">
       <Header />
       <StickyHeaderBar />
 
@@ -342,7 +342,7 @@ export default function EntrepreneursClient() {
                         </div>
 
                         <div className="space-y-3 font-sans text-[14px] text-[#222222]">
-                          <label className="flex items-center space-x-3 cursor-pointer select-none">
+                          <label className="flex items-center space-x-3 cursor-pointer ">
                             <input
                               type="checkbox"
                               checked={selectedGender === "Male"}
@@ -355,7 +355,7 @@ export default function EntrepreneursClient() {
                             <span className="font-medium text-[#222222]">Male</span>
                           </label>
 
-                          <label className="flex items-center space-x-3 cursor-pointer select-none">
+                          <label className="flex items-center space-x-3 cursor-pointer ">
                             <input
                               type="checkbox"
                               checked={selectedGender === "Female"}

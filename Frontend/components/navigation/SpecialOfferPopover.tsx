@@ -49,7 +49,7 @@ export const SpecialOfferPopover: React.FC<SpecialOfferPopoverProps> = ({
       {/* Popover Card */}
       {isOpen && (
         <div className="absolute top-full right-0 sm:right-0 pt-2 z-[9999] animate-in fade-in duration-150">
-          <div className="w-[280px] sm:w-[320px] bg-white border border-[#e2e2e2] shadow-2xl rounded-xl p-5 text-center select-none relative font-sans">
+          <div className="w-[280px] sm:w-[320px] bg-white border border-[#e2e2e2] shadow-2xl rounded-xl p-5 text-center  relative font-sans">
             {/* Close button for touch / mobile */}
             <button
               type="button"

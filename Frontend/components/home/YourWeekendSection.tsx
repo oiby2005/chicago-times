@@ -111,7 +111,7 @@ export const YourWeekendSection: React.FC = () => {
   const rightBottom = articles[2] || defaultArticles[2];
 
   return (
-    <section className="w-full font-sans select-none my-0 lg:my-4 pt-0 lg:pt-2">
+    <section className="w-full font-sans  my-0 lg:my-4 pt-0 lg:pt-2">
       {/* Section Title */}
       <div className="mb-4">
         <h2 className="font-serif font-bold text-[24px] sm:text-[28px] text-[#111111] tracking-tight">

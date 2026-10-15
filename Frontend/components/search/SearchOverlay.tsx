@@ -36,7 +36,7 @@ const websiteCategories = [
 ];
 
 const EmptyState: React.FC<{ query: string }> = ({ query }) => (
-  <div className="text-center py-10 px-4 font-sans select-none animate-in fade-in duration-150">
+  <div className="text-center py-10 px-4 font-sans  animate-in fade-in duration-150">
     <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3 text-slate-400">
       <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -118,7 +118,7 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({
 
       // Current Session user if writer
       try {
-        const sessionUser = JSON.parse(sessionStorage.getItem("wsj_user") || localStorage.getItem("wsj_user") || "null");
+        const sessionUser = JSON.parse(sessionStorage.getItem("wsj_user") || "null");
         if (sessionUser && sessionUser.email) {
           const roleUpper = (sessionUser.role || "READER").toUpperCase();
           if (roleUpper === "WRITER" || roleUpper === "AUTHOR") {
@@ -221,7 +221,7 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[9999] bg-slate-900/15 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-150 font-sans select-none">
+    <div className="fixed inset-0 z-[9999] bg-slate-900/15 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-150 font-sans ">
       {/* Modal Dialog Card (Matching Image 3) */}
       <div className="bg-white rounded-3xl max-w-2xl sm:max-w-3xl w-full shadow-2xl overflow-hidden border border-slate-200 animate-in zoom-in-95 duration-150 flex flex-col max-h-[85vh]">
         
@@ -577,9 +577,6 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({
               <kbd className="px-1.5 py-0.5 bg-white border border-slate-200 rounded text-[10px] font-mono shadow-2xs text-slate-600 font-bold">Esc</kbd>
               <span>to close</span>
             </span>
-          </div>
-          <div className="font-serif font-bold text-slate-600 tracking-tight text-xs">
-            Times Chicago
           </div>
         </div>
       </div>

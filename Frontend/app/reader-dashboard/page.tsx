@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 
 import ProfileSettingsModal from "@/components/ui/ProfileSettingsModal";
 import ReaderAccountSkeleton from "@/components/ui/skeletons/ReaderAccountSkeleton";
+import ReaderHelpCenter from "@/components/dashboard/ReaderHelpCenter";
 
 const SAMPLE_SAVED_ARTICLES = [
   {
@@ -43,6 +44,7 @@ export default function ReaderDashboard() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [savedArticles, setSavedArticles] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<"saved" | "help">("help");
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const [deleteConfirmModal, setDeleteConfirmModal] = useState<{
@@ -75,7 +77,7 @@ export default function ReaderDashboard() {
     let activeEmail = userEmail || currentUser?.email || "";
 
     if (!activeEmail) {
-      const userStr = sessionStorage.getItem("wsj_user") || localStorage.getItem("wsj_user");
+      const userStr = sessionStorage.getItem("wsj_user");
       if (userStr) {
         try {
           const parsed = JSON.parse(userStr);
@@ -133,7 +135,7 @@ export default function ReaderDashboard() {
         return;
       }
       try {
-        const parsed = JSON.parse(storedUser);
+        let parsed = JSON.parse(storedUser);
         if (!parsed || !parsed.email) {
           router.push("/signin");
           return;
@@ -149,7 +151,39 @@ export default function ReaderDashboard() {
           return;
         }
 
+        const cleanEmail = parsed.email.toLowerCase().trim();
+        try {
+          const map = JSON.parse(localStorage.getItem("wsj_users_by_email") || "{}");
+          if (map[cleanEmail]) {
+            const mapped = map[cleanEmail];
+            parsed = {
+              ...parsed,
+              ...mapped,
+              full_name: mapped.full_name || mapped.name || parsed.full_name,
+              name: mapped.full_name || mapped.name || parsed.name,
+            };
+          }
+        } catch (e) {}
+
         setCurrentUser(parsed);
+
+        // Fetch latest profile from server
+        fetch(`http://localhost:5000/api/users/${encodeURIComponent(cleanEmail)}`)
+          .then((res) => (res.ok ? res.json() : null))
+          .then((data) => {
+            if (data && data.success && data.user) {
+              const serverUser = data.user;
+              const updated = {
+                ...parsed,
+                ...serverUser,
+                full_name: serverUser.full_name || serverUser.name || parsed.full_name,
+                name: serverUser.full_name || serverUser.name || parsed.name,
+              };
+              sessionStorage.setItem("wsj_user", JSON.stringify(updated));
+              setCurrentUser(updated);
+            }
+          })
+          .catch(() => {});
       } catch (e) {
         router.push("/signin");
         return;
@@ -162,11 +196,29 @@ export default function ReaderDashboard() {
     loadSavedArticles();
 
     if (typeof window !== "undefined") {
+      let channel: BroadcastChannel | null = null;
+      try {
+        channel = new BroadcastChannel("wsj_user_sync");
+        channel.onmessage = () => {
+          loadUser();
+        };
+      } catch (e) {}
+
+      const handleStorage = (e: StorageEvent) => {
+        if (e.key === "wsj_user" || e.key === "wsj_users_by_email") {
+          loadUser();
+        }
+      };
+
       window.addEventListener("wsj_user_updated", loadUser);
       window.addEventListener("wsj_saved_articles_updated", loadSavedArticles);
+      window.addEventListener("storage", handleStorage);
+
       return () => {
         window.removeEventListener("wsj_user_updated", loadUser);
         window.removeEventListener("wsj_saved_articles_updated", loadSavedArticles);
+        window.removeEventListener("storage", handleStorage);
+        if (channel) channel.close();
       };
     }
   }, [router]);
@@ -200,7 +252,7 @@ export default function ReaderDashboard() {
     try {
       let activeEmail = currentUser?.email || "";
       if (!activeEmail) {
-        const userStr = sessionStorage.getItem("wsj_user") || localStorage.getItem("wsj_user");
+        const userStr = sessionStorage.getItem("wsj_user");
         if (userStr) {
           try {
             const parsed = JSON.parse(userStr);
@@ -254,7 +306,7 @@ export default function ReaderDashboard() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f8fafc] text-[#111111] font-sans flex flex-col justify-between select-none">
+    <main className="min-h-screen bg-[#f8fafc] text-[#111111] font-sans flex flex-col justify-between ">
       <div>
         {/* ================================================================= */}
         {/* TOP NAVBAR (Matching Writer Dashboard white palette & layout)    */}
@@ -281,12 +333,54 @@ export default function ReaderDashboard() {
               />
             </Link>
 
-            <span className="hidden sm:inline-flex bg-[#eff6ff] text-[#2563eb] text-[9.5px] sm:text-[10.5px] font-mono font-bold px-2 py-0.5 rounded uppercase tracking-wider select-none shrink-0">
+            <span className="hidden sm:inline-flex bg-[#eff6ff] text-[#2563eb] text-[9.5px] sm:text-[10.5px] font-mono font-bold px-2 py-0.5 rounded uppercase tracking-wider  shrink-0">
               READER PORTAL
             </span>
           </div>
 
+          {/* Middle Navigation Tabs: Saved Articles & Help Center */}
+          <div className="flex items-end space-x-2 sm:space-x-6 overflow-x-auto no-scrollbar mx-2 sm:mx-6">
+            <button
+              type="button"
+              onClick={() => setActiveTab("saved")}
+              style={{ fontFamily: "'Century Gothic', 'Publica Sans Light', 'Kumbh Sans', sans-serif" }}
+              className={`text-[13px] sm:text-[14px] transition-colors relative cursor-pointer flex items-center space-x-1.5 whitespace-nowrap py-3 px-2 ${
+                activeTab === "saved"
+                  ? "font-bold text-[#b91c1c]"
+                  : "font-normal text-[#111111] hover:text-[#b91c1c]"
+              }`}
+            >
+              <span>Saved Articles</span>
+              {savedArticles.length > 0 && (
+                <span
+                  className={`text-[11px] font-bold px-1.5 py-0.5 rounded-full ${
+                    activeTab === "saved" ? "bg-red-50 text-[#b91c1c]" : "bg-gray-100 text-gray-600"
+                  }`}
+                >
+                  {savedArticles.length}
+                </span>
+              )}
+              {activeTab === "saved" && (
+                <div className="absolute -bottom-[1px] left-0 right-0 h-[2.5px] bg-slate-900" />
+              )}
+            </button>
 
+            <button
+              type="button"
+              onClick={() => setActiveTab("help")}
+              style={{ fontFamily: "'Century Gothic', 'Publica Sans Light', 'Kumbh Sans', sans-serif" }}
+              className={`text-[13px] sm:text-[14px] transition-colors relative cursor-pointer flex items-center space-x-1.5 whitespace-nowrap py-3 px-2 ${
+                activeTab === "help"
+                  ? "font-bold text-slate-900"
+                  : "font-normal text-[#111111] hover:text-slate-900"
+              }`}
+            >
+              <span>Help Center</span>
+              {activeTab === "help" && (
+                <div className="absolute -bottom-[1px] left-0 right-0 h-[2.5px] bg-slate-900" />
+              )}
+            </button>
+          </div>
 
           {/* Right User Badge */}
           <div className="relative shrink-0 pb-3" ref={dropdownRef}>
@@ -357,7 +451,11 @@ export default function ReaderDashboard() {
 
         {/* ==================== MAIN READER DASHBOARD BODY ==================== */}
         <section className="w-full px-3 sm:px-6 md:px-8 lg:px-[3.8cm] mt-6 sm:mt-10 pt-4 sm:pt-6 pb-16 font-sans">
-          {/* Section Header Row matching Image 1 styling */}
+          {activeTab === "help" ? (
+            <ReaderHelpCenter />
+          ) : (
+            <>
+              {/* Section Header Row matching Image 1 styling */}
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center space-x-2 shrink-0">
               {/* Red Book Icon */}
@@ -455,6 +553,8 @@ export default function ReaderDashboard() {
                 );
               })}
             </div>
+          )}
+            </>
           )}
         </section>
       </div>

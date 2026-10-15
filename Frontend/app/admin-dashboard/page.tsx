@@ -711,6 +711,11 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
     bio?: string;
     avatar_url?: string;
     linkedin?: string;
+    phone?: string;
+    mobile?: string;
+    country?: string;
+    phone_country_code?: string;
+    is_blocked?: boolean;
     is_default_admin?: boolean;
     created_at?: string;
   }
@@ -743,9 +748,12 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
   const [showEditUserPasswordText, setShowEditUserPasswordText] = useState(false);
   const [editUserBio, setEditUserBio] = useState("");
   const [editUserLinkedin, setEditUserLinkedin] = useState("");
+  const [editUserPhone, setEditUserPhone] = useState("");
+  const [editUserCountry, setEditUserCountry] = useState("United States");
   const [editUserError, setEditUserError] = useState("");
   const [isSubmittingEditUser, setIsSubmittingEditUser] = useState(false);
   const [userToDelete, setUserToDelete] = useState<UserDeskItem | null>(null);
+  const [userToBlock, setUserToBlock] = useState<UserDeskItem | null>(null);
   const [adSavedPopup, setAdSavedPopup] = useState<string | null>(null);
   const [adminNoticePopup, setAdminNoticePopup] = useState<string | null>(null);
   const [adDimensionMismatchPopup, setAdDimensionMismatchPopup] = useState<{
@@ -1117,12 +1125,32 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
       (p: any) => p && p.status && ["published", "approved"].includes(String(p.status).toLowerCase())
     );
 
+    let billionairesList: any[] = [];
+    try {
+      const bRes = await fetch("http://localhost:5000/api/billionaires");
+      if (bRes.ok) {
+        const bData = await bRes.json();
+        billionairesList = bData.billionaires || [];
+      }
+    } catch (e) {}
+
+    let entrepreneursList: any[] = [];
+    try {
+      const eRes = await fetch("http://localhost:5000/api/entrepreneurs");
+      if (eRes.ok) {
+        const eData = await eRes.json();
+        entrepreneursList = eData.entrepreneurs || [];
+      }
+    } catch (e) {}
+
     const payload = {
       published_posts: publishedPostsOnly,
       subscribers: subscribers,
       users: usersList,
       contact_submissions: contactSubmissions,
       advertise_leads: advertiseLeads,
+      billionaires: billionairesList,
+      entrepreneurs: entrepreneursList,
     };
 
     try {
@@ -1189,6 +1217,14 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
               if (pod.length > 0) localStorage.setItem("wsj_podcast_slots", JSON.stringify(pod));
               window.dispatchEvent(new Event("wsj_shorts_updated"));
             }
+            if (snapshot.billionaires && Array.isArray(snapshot.billionaires)) {
+              localStorage.setItem("wsj_billionaires", JSON.stringify(snapshot.billionaires));
+              window.dispatchEvent(new Event("wsj_billionaires_updated"));
+            }
+            if (snapshot.entrepreneurs && Array.isArray(snapshot.entrepreneurs)) {
+              localStorage.setItem("wsj_entrepreneurs", JSON.stringify(snapshot.entrepreneurs));
+              window.dispatchEvent(new Event("wsj_entrepreneurs_updated"));
+            }
             window.dispatchEvent(new Event("wsj_posts_updated"));
             window.dispatchEvent(new Event("wsj_user_updated"));
           }
@@ -1251,6 +1287,14 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
             if (mainV.length > 0) localStorage.setItem("wsj_main_video_slots", JSON.stringify(mainV));
             if (pod.length > 0) localStorage.setItem("wsj_podcast_slots", JSON.stringify(pod));
             window.dispatchEvent(new Event("wsj_shorts_updated"));
+          }
+          if (snap.billionaires && Array.isArray(snap.billionaires)) {
+            localStorage.setItem("wsj_billionaires", JSON.stringify(snap.billionaires));
+            window.dispatchEvent(new Event("wsj_billionaires_updated"));
+          }
+          if (snap.entrepreneurs && Array.isArray(snap.entrepreneurs)) {
+            localStorage.setItem("wsj_entrepreneurs", JSON.stringify(snap.entrepreneurs));
+            window.dispatchEvent(new Event("wsj_entrepreneurs_updated"));
           }
           window.dispatchEvent(new Event("wsj_posts_updated"));
           window.dispatchEvent(new Event("wsj_user_updated"));
@@ -2040,6 +2084,8 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
     setShowEditUserPasswordText(false);
     setEditUserBio(user.bio || "");
     setEditUserLinkedin(user.linkedin || "");
+    setEditUserPhone(user.phone || (user as any).mobile || "");
+    setEditUserCountry(user.country || "United States");
     setEditUserError("");
   };
 
@@ -2060,6 +2106,8 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
           password: editUserPassword.trim() || undefined,
           bio: editUserBio.trim(),
           linkedin: editUserLinkedin.trim(),
+          phone: editUserPhone.trim(),
+          country: editUserCountry.trim(),
         }),
       });
       const data = await res.json();
@@ -2079,6 +2127,8 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
             role: editUserRole,
             bio: editUserBio.trim(),
             linkedin: editUserLinkedin.trim(),
+            phone: editUserPhone.trim(),
+            country: editUserCountry.trim(),
           };
           localStorage.setItem("wsj_users_by_email", JSON.stringify(map));
 
@@ -2089,16 +2139,26 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
               const updatedSessionUser = {
                 ...parsed,
                 full_name: editUserName.trim(),
+                name: editUserName.trim(),
                 role: editUserRole,
                 bio: editUserBio.trim(),
                 linkedin: editUserLinkedin.trim(),
+                phone: editUserPhone.trim(),
+                country: editUserCountry.trim(),
               };
               sessionStorage.setItem("wsj_user", JSON.stringify(updatedSessionUser));
-              localStorage.setItem("wsj_user", JSON.stringify(updatedSessionUser));
             }
           }
+          try { localStorage.removeItem("wsj_user"); } catch (e) {}
+
           window.dispatchEvent(new Event("wsj_user_updated"));
           window.dispatchEvent(new Event("wsj_posts_updated"));
+
+          try {
+            const channel = new BroadcastChannel("wsj_user_sync");
+            channel.postMessage({ type: "USER_UPDATED", email: cleanKey });
+            channel.close();
+          } catch (e) {}
         } catch (e) {}
       }
 
@@ -2109,6 +2169,50 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
     } catch (err) {
       setEditUserError("Network error when updating user.");
       setIsSubmittingEditUser(false);
+    }
+  };
+
+  const handleToggleBlockUser = async (targetUser: UserDeskItem) => {
+    if (!targetUser || !targetUser.email) return;
+    const cleanEmail = targetUser.email.toLowerCase().trim();
+    const newBlockedState = !targetUser.is_blocked;
+
+    try {
+      const res = await fetch(`http://localhost:5000/api/users/${encodeURIComponent(cleanEmail)}/status`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ is_blocked: newBlockedState }),
+      });
+      const data = await res.json().catch(() => null);
+      setUsersList((prev) =>
+        prev.map((u) => (u.email.toLowerCase().trim() === cleanEmail ? { ...u, is_blocked: newBlockedState } : u))
+      );
+      try {
+        const map = JSON.parse(localStorage.getItem("wsj_users_by_email") || "{}");
+        if (map[cleanEmail]) {
+          map[cleanEmail].is_blocked = newBlockedState;
+        } else {
+          map[cleanEmail] = { ...targetUser, is_blocked: newBlockedState };
+        }
+        localStorage.setItem("wsj_users_by_email", JSON.stringify(map));
+      } catch (e) {}
+      await fetchUsers();
+    } catch (err) {
+      console.error("Error updating user block status:", err);
+      setUsersList((prev) =>
+        prev.map((u) => (u.email.toLowerCase().trim() === cleanEmail ? { ...u, is_blocked: newBlockedState } : u))
+      );
+      try {
+        const map = JSON.parse(localStorage.getItem("wsj_users_by_email") || "{}");
+        if (map[cleanEmail]) {
+          map[cleanEmail].is_blocked = newBlockedState;
+        } else {
+          map[cleanEmail] = { ...targetUser, is_blocked: newBlockedState };
+        }
+        localStorage.setItem("wsj_users_by_email", JSON.stringify(map));
+      } catch (e) {}
+    } finally {
+      setUserToBlock(null);
     }
   };
 
@@ -2125,7 +2229,25 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
       });
       const data = await res.json();
       if (data.success) {
+        // Cascade delete all articles written by this writer from state & localStorage
+        if (userToDelete && userToDelete.role?.toLowerCase() === "writer") {
+          try {
+            const stored = localStorage.getItem("wsj_posts");
+            if (stored) {
+              const posts = JSON.parse(stored);
+              const remaining = posts.filter((p: any) => {
+                const emMatch = (p.authorEmail || "").toLowerCase().trim() === cleanEmail;
+                const nameMatch = (p.author || "").toLowerCase().trim() === (userToDelete.full_name || "").toLowerCase().trim();
+                return !emMatch && !nameMatch;
+              });
+              localStorage.setItem("wsj_posts", JSON.stringify(remaining));
+              window.dispatchEvent(new Event("wsj_posts_updated"));
+            }
+          } catch (e) {}
+        }
+
         fetchUsers();
+        loadPostsData();
       } else {
         setAdminNoticePopup(data.message || "Failed to delete user.");
       }
@@ -3181,78 +3303,77 @@ ${divider70}
       )}
 
       {/* ================================================================= */}
-      {/* LEFT SIDEBAR (Option 1 Editorial Light Palette with Light Ash Accent) */}
+      {/* LEFT SIDEBAR (Compact non-scrollable layout)                      */}
       {/* ================================================================= */}
       <aside
-        className={`fixed lg:sticky top-0 bottom-0 left-0 z-50 lg:z-20 w-64 lg:w-72 bg-white text-[#0f172a] border-r-2 border-[#cbd5e1] flex flex-col justify-between shrink-0 h-screen overflow-y-auto shadow-2xs transition-transform duration-200 ease-in-out ${
+        className={`fixed lg:sticky top-0 bottom-0 left-0 z-50 lg:z-20 w-64 lg:w-72 bg-white text-[#0f172a] border-r-2 border-[#cbd5e1] flex flex-col justify-between shrink-0 h-screen overflow-hidden shadow-2xs transition-transform duration-200 ease-in-out ${
           isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >
-        <div className="pb-6">
-          {/* Top WSJ Logo / Masthead Header - Divider removed below logo & logo links to admin account homepage */}
-          <div className="h-[120px] sm:h-[132px] lg:h-[136px] pt-3.5 sm:pt-6 lg:pt-7 pb-4 px-6 flex items-start justify-between lg:justify-start shrink-0">
-            <Link
-              href={(() => {
-                if (currentUser) {
-                  const nameStr = currentUser.username || currentUser.name || currentUser.displayName || "";
-                  if (nameStr) {
-                    return `/admin/${nameStr.toLowerCase().trim().replace(/\s+/g, "-")}`;
-                  }
+        {/* Top WSJ Logo / Masthead Header - Lowered with comfortable breathing room */}
+        <div className="pt-6 sm:pt-7 pb-2 px-5 flex items-center justify-between shrink-0">
+          <Link
+            href={(() => {
+              if (currentUser) {
+                const nameStr = currentUser.username || currentUser.name || currentUser.displayName || "";
+                if (nameStr) {
+                  return `/admin/${nameStr.toLowerCase().trim().replace(/\s+/g, "-")}`;
                 }
-                if (typeof window !== "undefined") {
-                  const userStr = sessionStorage.getItem("wsj_user");
-                  if (userStr) {
-                    try {
-                      const u = JSON.parse(userStr);
-                      if (u && (u.username || u.name)) {
-                        return `/admin/${(u.username || u.name).toLowerCase().trim().replace(/\s+/g, "-")}`;
-                      }
-                    } catch (e) {}
-                  }
+              }
+              if (typeof window !== "undefined") {
+                const userStr = sessionStorage.getItem("wsj_user");
+                if (userStr) {
+                  try {
+                    const u = JSON.parse(userStr);
+                    if (u && (u.username || u.name)) {
+                      return `/admin/${(u.username || u.name).toLowerCase().trim().replace(/\s+/g, "-")}`;
+                    }
+                  } catch (e) {}
                 }
-                return "/admin/admin1";
-              })()}
-              className="inline-block hover:opacity-90 transition-opacity mt-3 sm:mt-4 lg:mt-5"
-            >
-              <img
-                src="/images/design-reference/Times Chicago.svg"
-                alt="Times Chicago"
-                className="h-8 sm:h-9 md:h-10 w-auto object-contain block"
-              />
-            </Link>
-            <button
-              onClick={() => setIsMobileSidebarOpen(false)}
-              className="lg:hidden text-[#64748b] hover:text-[#0f172a] p-1 ml-auto"
-              title="Close Menu"
-            >
-              ✕
-            </button>
-          </div>
+              }
+              return "/admin/admin1";
+            })()}
+            className="inline-block hover:opacity-90 transition-opacity"
+          >
+            <img
+              src="/images/design-reference/Times Chicago.svg"
+              alt="Times Chicago"
+              className="h-7 sm:h-8 w-auto object-contain block"
+            />
+          </Link>
+          <button
+            onClick={() => setIsMobileSidebarOpen(false)}
+            className="lg:hidden text-[#64748b] hover:text-[#0f172a] p-1 ml-auto"
+            title="Close Menu"
+          >
+            ✕
+          </button>
+        </div>
 
-          {/* Back to Home Navigation Item (Preserved original font & styling) */}
-          <div className="px-4 pt-5 pb-3">
-            <Link
-              href="/"
-              className="flex items-center space-x-2.5 px-3.5 py-2 text-xs font-medium text-[#64748b] hover:text-[#0f172a] hover:bg-[#f1f5f9] rounded-xl transition-all cursor-pointer group"
+        {/* Back to Home Navigation Item - Lowered */}
+        <div className="px-3.5 pb-2 pt-1 shrink-0">
+          <Link
+            href="/"
+            className="flex items-center space-x-2 px-3 py-1.5 text-xs font-medium text-[#64748b] hover:text-[#0f172a] hover:bg-[#f1f5f9] rounded-lg transition-all cursor-pointer group"
+          >
+            <svg
+              width={15}
+              height={15}
+              style={{ width: "15px", height: "15px", minWidth: "15px", minHeight: "15px" }}
+              className="shrink-0 text-[#64748b] group-hover:text-[#0f172a] transition-colors"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
             >
-              <svg
-                width={16}
-                height={16}
-                style={{ width: "16px", height: "16px", minWidth: "16px", minHeight: "16px" }}
-                className="shrink-0 text-[#64748b] group-hover:text-[#0f172a] transition-colors"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-              </svg>
-              <span>Back to Home</span>
-            </Link>
-          </div>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+            </svg>
+            <span>Back to Home</span>
+          </Link>
+        </div>
 
-          {/* Sidebar Menu Options (Black when inactive, Light Grey when clicked/active, Homepage Category Font) */}
-          <nav className="px-4 space-y-1.5 mt-1">
+        {/* Sidebar Menu Options - Evenly spaced across remaining height */}
+        <nav className="flex-1 flex flex-col justify-between px-3 py-2 min-h-0 overflow-hidden">
             {/* 1. Overview */}
             <button
               onClick={() => {
@@ -3260,16 +3381,16 @@ ${divider70}
                 setIsMobileSidebarOpen(false);
               }}
               style={{ fontFamily: "'Century Gothic', 'Publica Sans Light', 'Kumbh Sans', sans-serif" }}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 activeTab === "Overview"
                   ? "bg-[#f1f5f9] text-[#64748b] border border-[#cbd5e1] shadow-2xs font-bold"
                   : "text-[#111111] hover:bg-[#f8fafc] hover:text-[#64748b]"
               }`}
             >
               <svg
-                width={18}
-                height={18}
-                style={{ width: "18px", height: "18px", minWidth: "18px", minHeight: "18px" }}
+                width={16}
+                height={16}
+                style={{ width: "16px", height: "16px", minWidth: "16px", minHeight: "16px" }}
                 className="shrink-0"
                 fill="none"
                 stroke="currentColor"
@@ -3288,16 +3409,16 @@ ${divider70}
                 setIsMobileSidebarOpen(false);
               }}
               style={{ fontFamily: "'Century Gothic', 'Publica Sans Light', 'Kumbh Sans', sans-serif" }}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 activeTab === "Newsletter"
                   ? "bg-[#f1f5f9] text-[#64748b] border border-[#cbd5e1] shadow-2xs font-bold"
                   : "text-[#111111] hover:bg-[#f8fafc] hover:text-[#64748b]"
               }`}
             >
               <svg
-                width={18}
-                height={18}
-                style={{ width: "18px", height: "18px", minWidth: "18px", minHeight: "18px" }}
+                width={16}
+                height={16}
+                style={{ width: "16px", height: "16px", minWidth: "16px", minHeight: "16px" }}
                 className="shrink-0"
                 fill="none"
                 stroke="currentColor"
@@ -3316,16 +3437,16 @@ ${divider70}
                 setIsMobileSidebarOpen(false);
               }}
               style={{ fontFamily: "'Century Gothic', 'Publica Sans Light', 'Kumbh Sans', sans-serif" }}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 activeTab === "Published Posts"
                   ? "bg-[#f1f5f9] text-[#64748b] border border-[#cbd5e1] shadow-2xs font-bold"
                   : "text-[#111111] hover:bg-[#f8fafc] hover:text-[#64748b]"
               }`}
             >
               <svg
-                width={18}
-                height={18}
-                style={{ width: "18px", height: "18px", minWidth: "18px", minHeight: "18px" }}
+                width={16}
+                height={16}
+                style={{ width: "16px", height: "16px", minWidth: "16px", minHeight: "16px" }}
                 className="shrink-0"
                 fill="none"
                 stroke="currentColor"
@@ -3344,16 +3465,16 @@ ${divider70}
                 setIsMobileSidebarOpen(false);
               }}
               style={{ fontFamily: "'Century Gothic', 'Publica Sans Light', 'Kumbh Sans', sans-serif" }}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 activeTab === "Users"
                   ? "bg-[#f1f5f9] text-[#64748b] border border-[#cbd5e1] shadow-2xs font-bold"
                   : "text-[#111111] hover:bg-[#f8fafc] hover:text-[#64748b]"
               }`}
             >
               <svg
-                width={18}
-                height={18}
-                style={{ width: "18px", height: "18px", minWidth: "18px", minHeight: "18px" }}
+                width={16}
+                height={16}
+                style={{ width: "16px", height: "16px", minWidth: "16px", minHeight: "16px" }}
                 className="shrink-0"
                 fill="none"
                 stroke="currentColor"
@@ -3372,16 +3493,16 @@ ${divider70}
                 setIsMobileSidebarOpen(false);
               }}
               style={{ fontFamily: "'Century Gothic', 'Publica Sans Light', 'Kumbh Sans', sans-serif" }}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 activeTab === "Manage Ads"
                   ? "bg-[#f1f5f9] text-[#64748b] border border-[#cbd5e1] shadow-2xs font-bold"
                   : "text-[#111111] hover:bg-[#f8fafc] hover:text-[#64748b]"
               }`}
             >
               <svg
-                width={18}
-                height={18}
-                style={{ width: "18px", height: "18px", minWidth: "18px", minHeight: "18px" }}
+                width={16}
+                height={16}
+                style={{ width: "16px", height: "16px", minWidth: "16px", minHeight: "16px" }}
                 className="shrink-0"
                 fill="none"
                 stroke="currentColor"
@@ -3400,16 +3521,16 @@ ${divider70}
                 setIsMobileSidebarOpen(false);
               }}
               style={{ fontFamily: "'Century Gothic', 'Publica Sans Light', 'Kumbh Sans', sans-serif" }}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 activeTab === "Contact Us Submissions"
                   ? "bg-[#f1f5f9] text-[#64748b] border border-[#cbd5e1] shadow-2xs font-bold"
                   : "text-[#111111] hover:bg-[#f8fafc] hover:text-[#64748b]"
               }`}
             >
               <svg
-                width={18}
-                height={18}
-                style={{ width: "18px", height: "18px", minWidth: "18px", minHeight: "18px" }}
+                width={16}
+                height={16}
+                style={{ width: "16px", height: "16px", minWidth: "16px", minHeight: "16px" }}
                 className="shrink-0"
                 fill="none"
                 stroke="currentColor"
@@ -3428,16 +3549,16 @@ ${divider70}
                 setIsMobileSidebarOpen(false);
               }}
               style={{ fontFamily: "'Century Gothic', 'Publica Sans Light', 'Kumbh Sans', sans-serif" }}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 activeTab === "Advertise Leads"
                   ? "bg-[#f1f5f9] text-[#64748b] border border-[#cbd5e1] shadow-2xs font-bold"
                   : "text-[#111111] hover:bg-[#f8fafc] hover:text-[#64748b]"
               }`}
             >
               <svg
-                width={18}
-                height={18}
-                style={{ width: "18px", height: "18px", minWidth: "18px", minHeight: "18px" }}
+                width={16}
+                height={16}
+                style={{ width: "16px", height: "16px", minWidth: "16px", minHeight: "16px" }}
                 className="shrink-0"
                 fill="none"
                 stroke="currentColor"
@@ -3456,16 +3577,16 @@ ${divider70}
                 setIsMobileSidebarOpen(false);
               }}
               style={{ fontFamily: "'Century Gothic', 'Publica Sans Light', 'Kumbh Sans', sans-serif" }}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 activeTab === "Subscription Requests"
                   ? "bg-[#f1f5f9] text-[#64748b] border border-[#cbd5e1] shadow-2xs font-bold"
                   : "text-[#111111] hover:bg-[#f8fafc] hover:text-[#64748b]"
               }`}
             >
               <svg
-                width={18}
-                height={18}
-                style={{ width: "18px", height: "18px", minWidth: "18px", minHeight: "18px" }}
+                width={16}
+                height={16}
+                style={{ width: "16px", height: "16px", minWidth: "16px", minHeight: "16px" }}
                 className="shrink-0"
                 fill="none"
                 stroke="currentColor"
@@ -3484,16 +3605,16 @@ ${divider70}
                 setIsMobileSidebarOpen(false);
               }}
               style={{ fontFamily: "'Century Gothic', 'Publica Sans Light', 'Kumbh Sans', sans-serif" }}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 activeTab === "Database Backups"
                   ? "bg-[#f1f5f9] text-[#64748b] border border-[#cbd5e1] shadow-2xs font-bold"
                   : "text-[#111111] hover:bg-[#f8fafc] hover:text-[#64748b]"
               }`}
             >
               <svg
-                width={18}
-                height={18}
-                style={{ width: "18px", height: "18px", minWidth: "18px", minHeight: "18px" }}
+                width={16}
+                height={16}
+                style={{ width: "16px", height: "16px", minWidth: "16px", minHeight: "16px" }}
                 className="shrink-0"
                 fill="none"
                 stroke="currentColor"
@@ -3512,16 +3633,16 @@ ${divider70}
                 setIsMobileSidebarOpen(false);
               }}
               style={{ fontFamily: "'Century Gothic', 'Publica Sans Light', 'Kumbh Sans', sans-serif" }}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 activeTab === "Shorts & Reels"
                   ? "bg-[#f1f5f9] text-[#64748b] border border-[#cbd5e1] shadow-2xs font-bold"
                   : "text-[#111111] hover:bg-[#f8fafc] hover:text-[#64748b]"
               }`}
             >
               <svg
-                width={18}
-                height={18}
-                style={{ width: "18px", height: "18px", minWidth: "18px", minHeight: "18px" }}
+                width={16}
+                height={16}
+                style={{ width: "16px", height: "16px", minWidth: "16px", minHeight: "16px" }}
                 className="shrink-0"
                 fill="none"
                 stroke="currentColor"
@@ -3540,16 +3661,16 @@ ${divider70}
                 setIsMobileSidebarOpen(false);
               }}
               style={{ fontFamily: "'Century Gothic', 'Publica Sans Light', 'Kumbh Sans', sans-serif" }}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 activeTab === "World Billionaires"
                   ? "bg-[#f1f5f9] text-[#64748b] border border-[#cbd5e1] shadow-2xs font-bold"
                   : "text-[#111111] hover:bg-[#f8fafc] hover:text-[#64748b]"
               }`}
             >
               <svg
-                width={18}
-                height={18}
-                style={{ width: "18px", height: "18px", minWidth: "18px", minHeight: "18px" }}
+                width={16}
+                height={16}
+                style={{ width: "16px", height: "16px", minWidth: "16px", minHeight: "16px" }}
                 className="shrink-0"
                 fill="none"
                 stroke="currentColor"
@@ -3568,16 +3689,16 @@ ${divider70}
                 setIsMobileSidebarOpen(false);
               }}
               style={{ fontFamily: "'Century Gothic', 'Publica Sans Light', 'Kumbh Sans', sans-serif" }}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 activeTab === "Entrepreneurs"
                   ? "bg-[#f1f5f9] text-[#64748b] border border-[#cbd5e1] shadow-2xs font-bold"
                   : "text-[#111111] hover:bg-[#f8fafc] hover:text-[#64748b]"
               }`}
             >
               <svg
-                width={18}
-                height={18}
-                style={{ width: "18px", height: "18px", minWidth: "18px", minHeight: "18px" }}
+                width={16}
+                height={16}
+                style={{ width: "16px", height: "16px", minWidth: "16px", minHeight: "16px" }}
                 className="shrink-0"
                 fill="none"
                 stroke="currentColor"
@@ -3589,14 +3710,13 @@ ${divider70}
               <span>Entrepreneurs</span>
             </button>
           </nav>
-        </div>
 
         {/* Sidebar Footer Copyright */}
         <div
           style={{ fontFamily: "'Century Gothic', 'Publica Sans Light', 'Kumbh Sans', sans-serif" }}
-          className="p-4 border-t border-[#f1f5f9] text-[10px] text-[#94a3b8] text-center"
+          className="shrink-0 py-3 px-2 border-t border-[#f1f5f9] text-[10px] text-[#94a3b8] text-center"
         >
-          © 2026 Times Chicago Media LLC.
+          © 2026 Times Chicago LLC.
         </div>
       </aside>
 
@@ -4420,6 +4540,7 @@ ${divider70}
                     <th className="py-3 px-4 font-bold min-w-[240px]">NAME</th>
                     <th className="py-3 px-4 font-bold min-w-[240px]">EMAIL ADDRESS</th>
                     <th className="py-3 px-4 font-bold whitespace-nowrap">WORKSPACE ROLE</th>
+                    <th className="py-3 px-4 font-bold whitespace-nowrap text-center">STATUS</th>
                     <th className="py-3 pl-4 pr-4 font-bold text-right whitespace-nowrap">ACTIONS</th>
                   </tr>
                 </thead>
@@ -4486,6 +4607,31 @@ ${divider70}
                               <span className="border border-[#e2e8f0] text-[#64748b] bg-[#f8fafc] text-[10px] font-mono font-bold px-3 py-1 rounded-full uppercase tracking-wider inline-block">
                                 READER
                               </span>
+                            )}
+                          </td>
+
+                          {/* STATUS (Block / Blocked button for reader & writer only) */}
+                          <td className="py-4 px-4 whitespace-nowrap text-center">
+                            {userRoleLower === "reader" || userRoleLower === "writer" ? (
+                              user.is_blocked ? (
+                                <button
+                                  type="button"
+                                  onClick={() => setUserToBlock(user)}
+                                  className="border border-red-500 bg-red-500 hover:bg-red-600 text-white text-[10px] font-mono font-bold px-3 py-1 rounded-full uppercase tracking-wider transition-colors cursor-pointer shadow-2xs"
+                                >
+                                  Blocked
+                                </button>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => setUserToBlock(user)}
+                                  className="border border-slate-300 bg-white hover:bg-slate-100 text-[#475569] text-[10px] font-mono font-bold px-3 py-1 rounded-full uppercase tracking-wider transition-colors cursor-pointer shadow-2xs"
+                                >
+                                  Block
+                                </button>
+                              )
+                            ) : (
+                              <span className="text-slate-400 text-xs font-mono">-</span>
                             )}
                           </td>
 
@@ -4575,6 +4721,8 @@ ${divider70}
                   <option value="All Inquiry Types">All Inquiry Types</option>
                   <option value="Business / Advertising">Business / Advertising</option>
                   <option value="Editorial">Editorial</option>
+                  <option value="Report a complaint">Report a complaint</option>
+                  <option value="Report a news">Report a news</option>
                   <option value="Technical glitch">Technical glitch</option>
                   <option value="General / Others">General / Others</option>
                 </select>
@@ -4856,7 +5004,8 @@ ${divider70}
                 <table className="w-full text-left font-sans border-collapse">
                   <thead>
                     <tr className="border-b border-[#f1f5f9] text-[10px] font-mono font-bold text-[#6b7280] uppercase tracking-wider bg-slate-50/50">
-                      <th className="py-3 px-4">DATE</th>
+                      <th className="py-3 px-4">START DATE</th>
+                      <th className="py-3 px-4">EXPIRATION DATE</th>
                       <th className="py-3 px-4">NAME / COMPANY</th>
                       <th className="py-3 px-4">EMAIL</th>
                       <th className="py-3 px-4">PHONE / WHATSAPP</th>
@@ -4868,7 +5017,7 @@ ${divider70}
                   <tbody className="divide-y divide-[#f1f5f9] text-xs">
                     {filteredSubscriptionRequests.length === 0 ? (
                       <tr>
-                        <td colSpan={7} className="py-10 text-center text-slate-400 font-sans text-xs">
+                        <td colSpan={8} className="py-10 text-center text-slate-400 font-sans text-xs">
                           No subscription requests found.
                         </td>
                       </tr>
@@ -4877,6 +5026,13 @@ ${divider70}
                         <tr key={item.id} className="hover:bg-slate-50/70 transition-colors">
                           <td className="py-4 px-4 text-[#6b7280] whitespace-nowrap font-medium text-[11px]">
                             {formatSubmissionDate(item.created_at)}
+                          </td>
+                          <td className="py-4 px-4 text-[#6b7280] whitespace-nowrap font-medium text-[11px]">
+                            {(() => {
+                              const createdTime = item.created_at ? new Date(item.created_at).getTime() : Date.now();
+                              const expDate = new Date(createdTime + 365 * 24 * 60 * 60 * 1000);
+                              return formatSubmissionDate(expDate.toISOString());
+                            })()}
                           </td>
                           <td className="py-4 px-4">
                             <div className="font-bold text-[#111827]">{item.name}</div>
@@ -4893,17 +5049,20 @@ ${divider70}
                             </span>
                           </td>
                           <td className="py-4 px-4 whitespace-nowrap">
-                            <select
-                              value={item.status || "Pending"}
-                              onChange={(e) => handleUpdateSubscriptionStatus(item.id, e.target.value)}
-                              className="bg-[#f1f5f9] border border-[#cbd5e1] text-[#334155] font-bold rounded-lg text-xs px-2.5 py-1 focus:outline-none cursor-pointer"
-                              suppressHydrationWarning
-                            >
-                              <option value="Pending">Pending</option>
-                              <option value="Contacted">Contacted</option>
-                              <option value="Approved">Approved</option>
-                              <option value="Rejected">Rejected</option>
-                            </select>
+                            {(() => {
+                              const createdTime = item.created_at ? new Date(item.created_at).getTime() : Date.now();
+                              const oneYearMs = 365 * 24 * 60 * 60 * 1000;
+                              const isExpired = Date.now() - createdTime > oneYearMs;
+                              return isExpired ? (
+                                <span className="bg-[#fef2f2] text-[#dc2626] border border-[#fecaca] px-3 py-1 rounded-full text-[11px] font-bold inline-block">
+                                  Expired
+                                </span>
+                              ) : (
+                                <span className="bg-[#ecfdf5] text-[#059669] border border-[#a7f3d0] px-3 py-1 rounded-full text-[11px] font-bold inline-block">
+                                  Activated
+                                </span>
+                              );
+                            })()}
                           </td>
                           <td className="py-4 px-4 whitespace-nowrap text-center">
                             <div className="inline-flex items-center space-x-2">
@@ -5274,7 +5433,7 @@ ${divider70}
 
               {/* Sub-description paragraph matching screenshot */}
               <p className="text-xs text-[#64748b] leading-relaxed">
-                Backups are automatically taken every 24 hours. The snapshots include all published articles, media links, admin & writer accounts, subscriber list, ad placements, and contact leads.
+                Backups are automatically taken every 24 hours. The snapshots include all published articles, media links, admin & writer accounts, subscriber list, ad placements, World Billionaires, Upcoming Top 20 Entrepreneurs, and contact leads.
               </p>
 
               {/* Table of Backups */}
@@ -6204,17 +6363,52 @@ ${divider70}
 
             {/* Profile Details List */}
             <div className="space-y-4">
-              <div>
-                <label className="block text-[10px] font-mono font-bold text-[#94a3b8] uppercase tracking-wider mb-1">
-                  EMAIL
-                </label>
-                <div className="flex items-center space-x-2 text-xs font-semibold text-[#334155]">
-                  <svg className="w-4 h-4 text-[#64748b]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-                  </svg>
-                  <span>{showViewUserModal.email}</span>
+              {showViewUserModal.role?.toLowerCase() === "reader" ? (
+                <>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[10px] font-mono font-bold text-[#94a3b8] uppercase tracking-wider mb-1">
+                        EMAIL
+                      </label>
+                      <div className="flex items-center space-x-2 text-xs font-semibold text-[#334155]">
+                        <svg className="w-4 h-4 text-[#64748b] shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                        </svg>
+                        <span className="break-all select-text">{showViewUserModal.email}</span>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-mono font-bold text-[#94a3b8] uppercase tracking-wider mb-1">
+                        COUNTRY
+                      </label>
+                      <div className="text-xs font-semibold text-[#334155] select-text">
+                        {showViewUserModal.country || "United States"}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-mono font-bold text-[#94a3b8] uppercase tracking-wider mb-1">
+                      MOBILE NUMBER
+                    </label>
+                    <div className="text-xs font-semibold text-[#334155] select-text">
+                      {showViewUserModal.phone || "Not provided"}
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div>
+                  <label className="block text-[10px] font-mono font-bold text-[#94a3b8] uppercase tracking-wider mb-1">
+                    EMAIL
+                  </label>
+                  <div className="flex items-center space-x-2 text-xs font-semibold text-[#334155]">
+                    <svg className="w-4 h-4 text-[#64748b] shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                    </svg>
+                    <span className="break-all select-text">{showViewUserModal.email}</span>
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div>
                 <label className="block text-[10px] font-mono font-bold text-[#94a3b8] uppercase tracking-wider mb-1">
@@ -6225,25 +6419,27 @@ ${divider70}
                 </div>
               </div>
 
-              <div>
-                <label className="block text-[10px] font-mono font-bold text-[#94a3b8] uppercase tracking-wider mb-1">
-                  LINKEDIN
-                </label>
-                <div className="text-xs font-semibold text-[#64748b]">
-                  {showViewUserModal.linkedin ? (
-                    <a
-                      href={showViewUserModal.linkedin}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-[#2563eb] hover:underline"
-                    >
-                      {showViewUserModal.linkedin}
-                    </a>
-                  ) : (
-                    "Not linked."
-                  )}
+              {showViewUserModal.role?.toLowerCase() !== "reader" && (
+                <div>
+                  <label className="block text-[10px] font-mono font-bold text-[#94a3b8] uppercase tracking-wider mb-1">
+                    LINKEDIN
+                  </label>
+                  <div className="text-xs font-semibold text-[#64748b]">
+                    {showViewUserModal.linkedin ? (
+                      <a
+                        href={showViewUserModal.linkedin}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-[#2563eb] hover:underline"
+                      >
+                        {showViewUserModal.linkedin}
+                      </a>
+                    ) : (
+                      "Not linked."
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
             {/* Modal Footer Close Button */}
@@ -6368,6 +6564,58 @@ ${divider70}
                 </select>
               </div>
 
+              {/* For reader: Mobile Number & Country; For others: LinkedIn */}
+              {editUserRole === "reader" ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[10px] font-mono font-bold text-[#6b7280] uppercase tracking-wider mb-1.5">
+                      MOBILE NUMBER
+                    </label>
+                    <input
+                      type="tel"
+                      placeholder="e.g. 5551234567"
+                      value={editUserPhone}
+                      onChange={(e) => setEditUserPhone(e.target.value.replace(/\D/g, ""))}
+                      className="w-full bg-white border border-[#d1d5db] rounded-2xl px-4 py-3 text-xs text-[#111827] outline-none focus:border-[#64748b] transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-mono font-bold text-[#6b7280] uppercase tracking-wider mb-1.5">
+                      COUNTRY
+                    </label>
+                    <select
+                      value={editUserCountry}
+                      onChange={(e) => setEditUserCountry(e.target.value)}
+                      className="w-full bg-white border border-[#d1d5db] rounded-2xl px-4 py-3 text-xs font-semibold text-[#111827] outline-none focus:border-[#64748b] transition-colors cursor-pointer"
+                    >
+                      {[
+                        "United States", "United Kingdom", "Canada", "Australia", "Germany", "France", "India",
+                        "Japan", "China", "Brazil", "Mexico", "Italy", "Spain", "Netherlands", "Switzerland",
+                        "Sweden", "Singapore", "South Korea", "United Arab Emirates", "Saudi Arabia", "South Africa",
+                        "New Zealand", "Ireland", "Norway", "Denmark", "Finland", "Belgium", "Austria", "Poland",
+                        "Portugal", "Greece", "Argentina", "Chile", "Colombia", "Egypt", "Indonesia", "Israel",
+                        "Malaysia", "Nigeria", "Pakistan", "Philippines", "Qatar", "Sri Lanka", "Thailand", "Turkey", "Vietnam", "Other"
+                      ].map((c) => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <label className="block text-[10px] font-mono font-bold text-[#6b7280] uppercase tracking-wider mb-1.5">
+                    LINKEDIN URL
+                  </label>
+                  <input
+                    type="url"
+                    placeholder="https://linkedin.com/in/..."
+                    value={editUserLinkedin}
+                    onChange={(e) => setEditUserLinkedin(e.target.value)}
+                    className="w-full bg-white border border-[#d1d5db] rounded-2xl px-4 py-3 text-xs text-[#111827] outline-none focus:border-[#64748b] transition-colors"
+                  />
+                </div>
+              )}
+
               {/* Action Buttons */}
               <div className="grid grid-cols-2 gap-3 pt-4">
                 <button
@@ -6428,6 +6676,64 @@ ${divider70}
                 className="px-5 py-2 text-xs font-bold bg-red-600 hover:bg-red-700 text-white rounded-full transition-colors cursor-pointer shadow-sm"
               >
                 Yes, Delete Account
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* CONFIRM BLOCK / UNBLOCK USER POPUP MODAL */}
+      {userToBlock && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 text-left font-sans animate-in fade-in zoom-in duration-150 border border-slate-100">
+            <div className={`flex items-center space-x-3 ${userToBlock.is_blocked ? "text-slate-800" : "text-red-600"} border-b border-gray-100 pb-3`}>
+              <div className={`w-10 h-10 rounded-full ${userToBlock.is_blocked ? "bg-slate-100" : "bg-red-100"} flex items-center justify-center shrink-0`}>
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 leading-tight">
+                  {userToBlock.is_blocked ? "Confirm Unblock Account" : "Confirm Block Account"}
+                </h3>
+                <p className="text-xs text-gray-500 font-normal">
+                  {userToBlock.is_blocked
+                    ? "Restore access for this user."
+                    : "Prevent this user from logging in."}
+                </p>
+              </div>
+            </div>
+
+            <div className="py-2 text-sm text-slate-700 leading-relaxed">
+              {userToBlock.is_blocked ? (
+                <>
+                  Are you sure you want to unblock <strong className="font-extrabold text-slate-900">{userToBlock.full_name}</strong> (<span className="font-mono text-xs text-slate-600">{userToBlock.email}</span>)? The user will be able to sign in again.
+                </>
+              ) : (
+                <>
+                  Are you sure you want to block <strong className="font-extrabold text-slate-900">{userToBlock.full_name}</strong> (<span className="font-mono text-xs text-slate-600">{userToBlock.email}</span>)? The user will not be able to sign into their account.
+                </>
+              )}
+            </div>
+
+            <div className="flex items-center justify-end space-x-3 pt-2 border-t border-gray-100">
+              <button
+                type="button"
+                onClick={() => setUserToBlock(null)}
+                className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-full cursor-pointer transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => handleToggleBlockUser(userToBlock)}
+                className={`px-5 py-2 text-xs font-bold text-white rounded-full transition-colors cursor-pointer shadow-sm ${
+                  userToBlock.is_blocked
+                    ? "bg-[#334155] hover:bg-[#1e293b]"
+                    : "bg-red-600 hover:bg-red-700"
+                }`}
+              >
+                {userToBlock.is_blocked ? "Yes, Unblock Account" : "Yes, Block Account"}
               </button>
             </div>
           </div>
@@ -6859,6 +7165,25 @@ ${divider70}
             <div className="space-y-4 text-xs">
               <div className="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
                 <div>
+                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">START DATE</div>
+                  <div className="font-bold text-slate-900 mt-0.5">
+                    {formatModalSubmittedDate(selectedSubscriptionModal.created_at)}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">EXPIRATION DATE</div>
+                  <div className="font-bold text-slate-900 mt-0.5">
+                    {(() => {
+                      const createdTime = selectedSubscriptionModal.created_at ? new Date(selectedSubscriptionModal.created_at).getTime() : Date.now();
+                      const expDate = new Date(createdTime + 365 * 24 * 60 * 60 * 1000);
+                      return formatModalSubmittedDate(expDate.toISOString());
+                    })()}
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                <div>
                   <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">FULL NAME</div>
                   <div className="font-bold text-slate-900 mt-0.5">{selectedSubscriptionModal.name}</div>
                 </div>
@@ -6924,7 +7249,7 @@ ${divider70}
           if (typeof window !== "undefined") {
             sessionStorage.setItem("wsj_user", JSON.stringify(updated));
             sessionStorage.setItem("wsj_admin_user", JSON.stringify(updated));
-            localStorage.setItem("wsj_user", JSON.stringify(updated));
+            localStorage.removeItem("wsj_user");
             window.dispatchEvent(new Event("wsj_user_updated"));
           }
           fetchUsers();

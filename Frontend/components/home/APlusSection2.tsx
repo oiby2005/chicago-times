@@ -9,6 +9,7 @@ interface APlus2Article {
   slug: string;
   summary: string;
   imageUrl: string;
+  category?: string;
 }
 
 const defaultHero: APlus2Article = {
@@ -17,6 +18,7 @@ const defaultHero: APlus2Article = {
   slug: "the-gorgeous-tourist-free-adriatic-islands",
   summary: "Croatia’s Zadar archipelago is a heavenly place — Edward VIII and Wallis Simpson were fans, and this luxe hotel on Dugi Otok is the perfect base",
   imageUrl: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?fm=webp&fit=crop&w=1000&q=80",
+  category: "TRAVEL",
 };
 
 const extractText = (html: string): string => {
@@ -52,6 +54,7 @@ export const APlusSection2: React.FC = () => {
             slug: match.slug || match.id,
             summary: match.subheadline || extractText(match.bodyContent) || "",
             imageUrl: match.thumbnail || "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?fm=webp&fit=crop&w=1000&q=80",
+            category: match.category || match.mainCategory || "TRAVEL",
           });
           return;
         }
@@ -67,7 +70,12 @@ export const APlusSection2: React.FC = () => {
   }, [loadPosts]);
 
   return (
-    <div className="w-full font-sans select-none my-4">
+    <div className="w-full font-sans my-4 relative">
+      {/* Category Tag in Top Right of Section */}
+      <div className="absolute top-2 right-2 md:top-6 md:right-6 bg-black text-white text-[10px] sm:text-[11px] font-sans font-bold uppercase tracking-wider px-2.5 py-1 z-10 shadow-xs">
+        {hero.category || "TRAVEL"}
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-12 gap-0 items-stretch border-t-0 md:border-t border-dashed border-[#CCCCCC] pt-0 md:pt-4">
         {/* Left Text Card (6 of 12 cols) */}
         <div className="col-span-12 md:col-span-6 bg-[#F7F4EB] p-6 sm:p-10 flex flex-col justify-center">

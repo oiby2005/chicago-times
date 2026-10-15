@@ -42,7 +42,7 @@ const POLICY_ITEMS: PolicyItem[] = [
 
 export default function LegalPoliciesClient() {
   return (
-    <div className="min-h-screen bg-[#FCFBF7] flex flex-col justify-between text-[#111111] select-none">
+    <div className="min-h-screen bg-[#FCFBF7] flex flex-col justify-between text-[#111111]">
       <div>
         <Header />
         <StickyHeaderBar />
@@ -66,7 +66,10 @@ export default function LegalPoliciesClient() {
                       href={item.href}
                       className="group block py-3.5 sm:py-4 transition-colors text-left"
                     >
-                      <span className="font-serif text-[17px] sm:text-[18px] text-[#00558c] group-hover:underline group-hover:text-[#003d66] font-medium inline-block text-left">
+                      <span 
+                        className="text-[17px] sm:text-[18px] text-[#00558c] group-hover:underline group-hover:text-[#003d66] font-medium inline-block text-left"
+                        style={{ fontFamily: "'Poppins', sans-serif" }}
+                      >
                         {item.title}
                       </span>
                     </Link>

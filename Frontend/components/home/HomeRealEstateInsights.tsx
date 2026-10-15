@@ -7,7 +7,7 @@ import AdPlaceholder from "@/components/ui/AdPlaceholder";
 
 export const HomeRealEstateInsights: React.FC = () => {
   return (
-    <div className="w-full bg-white text-[#111111] font-sans pb-16 select-none">
+    <div className="w-full bg-white text-[#111111] font-sans pb-16 ">
       <Container>
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
           {/* =============================================================== */}

@@ -5,7 +5,7 @@ import Footer from "@/components/layout/Footer";
 
 export default function NewslettersLoading() {
   return (
-    <main className="min-h-screen bg-white text-[#111111] font-sans flex flex-col justify-between select-none animate-pulse">
+    <main className="min-h-screen bg-white text-[#111111] font-sans flex flex-col justify-between  animate-pulse">
       <div>
         <Header />
 

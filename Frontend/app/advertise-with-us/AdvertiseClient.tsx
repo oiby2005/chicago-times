@@ -303,14 +303,20 @@ export default function AdvertiseClient() {
                 The Times Chicago reaches an influential global audience of corporate executives, investors, policy makers, and thought leaders. Position your brand alongside premium financial journalism and global reporting.
               </p>
 
-              <h4 className="text-[11px] font-bold text-gray-400 tracking-widest uppercase mb-4 font-sans">
+              <h4
+                style={{ fontFamily: "'Poppins', sans-serif" }}
+                className="text-[11px] font-bold text-gray-400 tracking-widest uppercase mb-4"
+              >
                 OUR SERVICES
               </h4>
 
               <div className="space-y-6 text-xs font-sans">
                 {/* Service 1 */}
                 <div>
-                  <h5 className="font-bold text-gray-900 text-sm mb-1">
+                  <h5
+                    style={{ fontFamily: "'Poppins', sans-serif" }}
+                    className="font-bold text-gray-900 text-sm mb-1"
+                  >
                     Publish Company Article
                   </h5>
                   <p className="text-gray-500 leading-relaxed">
@@ -320,7 +326,10 @@ export default function AdvertiseClient() {
 
                 {/* Service 2 */}
                 <div>
-                  <h5 className="font-bold text-gray-900 text-sm mb-1">
+                  <h5
+                    style={{ fontFamily: "'Poppins', sans-serif" }}
+                    className="font-bold text-gray-900 text-sm mb-1"
+                  >
                     Publish CEO Profile
                   </h5>
                   <p className="text-gray-500 leading-relaxed">
@@ -330,7 +339,10 @@ export default function AdvertiseClient() {
 
                 {/* Service 3 */}
                 <div>
-                  <h5 className="font-bold text-gray-900 text-sm mb-1">
+                  <h5
+                    style={{ fontFamily: "'Poppins', sans-serif" }}
+                    className="font-bold text-gray-900 text-sm mb-1"
+                  >
                     Report News
                   </h5>
                   <p className="text-gray-500 leading-relaxed">
@@ -340,7 +352,10 @@ export default function AdvertiseClient() {
 
                 {/* Service 4 */}
                 <div>
-                  <h5 className="font-bold text-gray-900 text-sm mb-1">
+                  <h5
+                    style={{ fontFamily: "'Poppins', sans-serif" }}
+                    className="font-bold text-gray-900 text-sm mb-1"
+                  >
                     Times Chicago Magazine
                   </h5>
                   <p className="text-gray-500 leading-relaxed">

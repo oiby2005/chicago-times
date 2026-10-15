@@ -39,7 +39,7 @@ export default function NewHomeSection1() {
   const isPodcastSticky = activePodcastCount < 3;
 
   return (
-    <section className="w-full bg-white text-[#111111] pt-0 pb-6 select-none">
+    <section className="w-full bg-white text-[#111111] pt-0 pb-6">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 mb-0 lg:mb-6 items-stretch border-b-0 lg:border-b border-dashed border-[#888070] pb-0 lg:pb-4">
         
         {/* Column 2 (Center 6 of 12 cols ~ 50%): A+ MAIN NEWS -> MAIN BOTTOM PANEL (ORDER-1 ON MOBILE, SHOWS FIRST) */}

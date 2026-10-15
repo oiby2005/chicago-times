@@ -89,7 +89,7 @@ export const APlusMainNewsSection: React.FC<APlusMainNewsSectionProps> = ({
   const displayReadTime = activeArticle.readTime;
 
   return (
-    <article className="w-full h-full flex flex-col justify-between font-sans select-none">
+    <article className="w-full h-full flex flex-col justify-between font-sans ">
       {/* Featured Main Hero Image (Stays on Top on Mobile & Desktop) */}
       <Link href={`/article/${displaySlug}`} className="block w-full h-[8.4cm] overflow-hidden bg-gray-100 mb-3 group">
         <img

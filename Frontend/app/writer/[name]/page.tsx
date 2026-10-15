@@ -18,7 +18,7 @@ export default function WriterRolePage() {
     const syncUrlWithName = () => {
       if (typeof window === "undefined") return;
       try {
-        const storedUser = sessionStorage.getItem("wsj_user") || localStorage.getItem("wsj_user");
+        const storedUser = sessionStorage.getItem("wsj_user");
         if (storedUser) {
           const parsed = JSON.parse(storedUser);
           if (parsed && (parsed.role || "").toLowerCase() === "writer") {

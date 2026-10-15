@@ -105,7 +105,7 @@ export const MostPopularNewsSection: React.FC = () => {
   }, [loadPosts]);
 
   return (
-    <section className="w-full font-sans select-none my-0 pt-0">
+    <section className="w-full font-sans  my-0 pt-0">
       <div className="w-full">
         {/* Header Title */}
         <div className="mb-3">

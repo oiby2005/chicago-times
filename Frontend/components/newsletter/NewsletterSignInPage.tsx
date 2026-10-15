@@ -299,7 +299,7 @@ export const NewsletterSignInPage: React.FC = () => {
       <div className="min-h-screen bg-white flex flex-col justify-between selection:bg-gray-200">
         <Header />
         <StickyHeaderBar />
-        <main className="flex-1 w-full bg-white select-none">
+        <main className="flex-1 w-full bg-white ">
           {/* Black & White Gold Banner */}
           <section className="w-full bg-[#f4f4f4] py-6 sm:py-8 text-center border-b border-[#e5e5e5]">
             <div className="max-w-[1200px] mx-auto px-4">
@@ -350,7 +350,7 @@ export const NewsletterSignInPage: React.FC = () => {
 
       <main className="flex-1 w-full bg-white">
         {/* Top Monochrome Banner matching Image 1 */}
-        <section className="w-full bg-[#f4f4f4] py-6 sm:py-8 text-center border-b border-[#e5e5e5] select-none">
+        <section className="w-full bg-[#f4f4f4] py-6 sm:py-8 text-center border-b border-[#e5e5e5] ">
           <div className="max-w-[1200px] mx-auto px-4">
             <h1 className="font-serif font-bold text-2xl sm:text-3xl text-[#111111] uppercase tracking-[0.25em] mb-1.5">
               NEWSLETTERS
@@ -363,7 +363,7 @@ export const NewsletterSignInPage: React.FC = () => {
         </section>
 
         {/* Hero Headline & Intro Text matching Image 1 */}
-        <section className="w-full py-8 px-4 select-none bg-white">
+        <section className="w-full py-8 px-4  bg-white">
           <div className="max-w-[800px] mx-auto text-center">
             <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#111111] leading-tight mb-2">
               Let the best of Times Chicago news come to you.
@@ -406,7 +406,7 @@ export const NewsletterSignInPage: React.FC = () => {
         <div className="border-b border-[#e2e2e2] max-w-[1140px] mx-auto mb-8 px-4" />
 
         {/* Exactly 18 Main Categories Cards Grid (Black / White / Grey theme) */}
-        <section className="max-w-[1140px] mx-auto px-4 mb-12 select-none">
+        <section className="max-w-[1140px] mx-auto px-4 mb-12 ">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredGroups.map((group) => {
               const selectedCount = group.subcategories.filter((sub) =>
@@ -560,7 +560,7 @@ export const NewsletterSignInPage: React.FC = () => {
             </div>
 
             {/* Bottom Disclaimer matching Image 2 */}
-            <p className="font-sans text-[11.5px] text-[#777777] text-center max-w-[560px] mx-auto select-none">
+            <p className="font-sans text-[11.5px] text-[#777777] text-center max-w-[560px] mx-auto ">
               You can unsubscribe at any time. By signing up you are agreeing to our{" "}
               <Link href="/terms-and-conditions" className="text-[#111111] font-semibold underline hover:text-[#555555]">
                 Terms of Service

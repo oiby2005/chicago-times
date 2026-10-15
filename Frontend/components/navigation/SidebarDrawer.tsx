@@ -82,7 +82,7 @@ export default function SidebarDrawer({
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex select-none text-[#111111] font-sans">
+    <div className="fixed inset-0 z-[100] flex  text-[#111111] font-sans">
       {/* Dark Backdrop */}
       <div
         className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"

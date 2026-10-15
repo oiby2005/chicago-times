@@ -392,7 +392,7 @@ export const SpecialOfferPage: React.FC = () => {
       {/* Main Special Offer Content Container */}
       <main className="flex-1 w-full max-w-[960px] mx-auto px-4 py-8 sm:py-10">
         {/* Page Title & Subtitle */}
-        <div className="text-center mb-8 sm:mb-10 select-none">
+        <div className="text-center mb-8 sm:mb-10 ">
           <h1 className="font-serif text-2xl sm:text-3xl md:text-[32px] font-normal text-[#111111] tracking-tight mb-2">
             Special Offer:{" "}
             <span className="line-through text-[#777777] font-normal mr-2">
@@ -408,7 +408,7 @@ export const SpecialOfferPage: React.FC = () => {
         {/* Subscription Plan Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch mb-8">
           {/* CARD 1: Times Chicago Digital (Disabled - Cannot Access) */}
-          <div className="bg-[#f9f9f9] border border-[#e2e2e2] rounded-xs shadow-xs p-6 sm:p-8 flex flex-col justify-between text-center select-none opacity-80 cursor-not-allowed">
+          <div className="bg-[#f9f9f9] border border-[#e2e2e2] rounded-xs shadow-xs p-6 sm:p-8 flex flex-col justify-between text-center  opacity-80 cursor-not-allowed">
             <div>
               {/* Card Title */}
               <div className="flex items-center justify-center space-x-2 mb-5">
@@ -439,7 +439,7 @@ export const SpecialOfferPage: React.FC = () => {
               {/* Subscribe CTA Button (Disabled) */}
               <button
                 disabled
-                className="w-full max-w-[240px] mx-auto block bg-gray-300 text-gray-500 font-sans text-xs font-bold py-3 px-6 rounded-xs tracking-tight cursor-not-allowed pointer-events-none select-none shadow-none"
+                className="w-full max-w-[240px] mx-auto block bg-gray-300 text-gray-500 font-sans text-xs font-bold py-3 px-6 rounded-xs tracking-tight cursor-not-allowed pointer-events-none  shadow-none"
               >
                 Unavailable
               </button>
@@ -482,7 +482,7 @@ export const SpecialOfferPage: React.FC = () => {
           </div>
 
           {/* CARD 2: Times Chicago Digital Bundle (Free up to 1 Year) */}
-          <div className="bg-white border-2 border-[#007cba] rounded-xs shadow-md p-6 sm:p-8 flex flex-col justify-between text-center select-none relative">
+          <div className="bg-white border-2 border-[#007cba] rounded-xs shadow-md p-6 sm:p-8 flex flex-col justify-between text-center  relative">
             {/* Top Tag */}
             <div className="absolute -top-3.5 left-1/2 transform -translate-x-1/2 bg-[#007cba] text-white font-sans text-[11px] font-bold tracking-wider uppercase px-3 py-0.5 rounded-full shadow-xs">
               Special 1-Year Free Offer
@@ -529,7 +529,7 @@ export const SpecialOfferPage: React.FC = () => {
                 <button
                   type="button"
                   disabled
-                  className="w-full max-w-[240px] mx-auto block bg-[#007cba] text-white font-sans text-xs font-bold py-3 px-6 rounded-xs tracking-tight shadow-xs cursor-not-allowed pointer-events-none select-none opacity-90"
+                  className="w-full max-w-[240px] mx-auto block bg-[#007cba] text-white font-sans text-xs font-bold py-3 px-6 rounded-xs tracking-tight shadow-xs cursor-not-allowed pointer-events-none  opacity-90"
                 >
                   Subscribed
                 </button>
@@ -634,7 +634,7 @@ export const SpecialOfferPage: React.FC = () => {
         </div>
 
         {/* Disclaimer Text */}
-        <div className="text-center text-[12px] text-[#555555] font-sans py-2 select-none">
+        <div className="text-center text-[12px] text-[#555555] font-sans py-2 ">
           We&apos;ll let you know in advance of any price changes. Learn more
           about our{" "}
           <a
@@ -666,7 +666,7 @@ export const SpecialOfferPage: React.FC = () => {
             </button>
 
             {/* Header */}
-            <div className="mb-6 select-none">
+            <div className="mb-6 ">
               <span className="text-[10px] font-bold text-[#E85D25] tracking-widest uppercase bg-[#FFF0E6] px-3.5 py-1 rounded-full inline-block mb-2">
                 {selectedPackage.toUpperCase()}
               </span>
@@ -682,7 +682,7 @@ export const SpecialOfferPage: React.FC = () => {
 
             {/* If Subscribed (Success / Duplicate): Show Image 1 Layout (Green Box + Close Button Only) */}
             {submitStatus?.success ? (
-              <div className="space-y-6 pt-1 select-none">
+              <div className="space-y-6 pt-1 ">
                 <div className="p-5 rounded-2xl bg-[#EFFFEC] border border-[#BFF0B7] text-[#227419] font-sans font-medium text-xs sm:text-sm leading-relaxed">
                   {submitStatus.message}
                 </div>

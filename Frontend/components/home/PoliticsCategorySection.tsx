@@ -116,7 +116,7 @@ export const PoliticsCategorySection: React.FC = () => {
   const col3Bottom = articles[3] || defaultArticles[3];
 
   return (
-    <div className="w-full font-sans select-none pt-0 pb-2 my-0">
+    <div className="w-full font-sans pt-0 pb-2 my-0">
       {/* Section Title */}
       <div className="flex items-center space-x-2 pb-2 mb-3 border-b border-dashed border-[#CCCCCC]">
         <h2 className="font-serif font-bold text-[24px] sm:text-[28px] text-[#8b6f37] tracking-tight leading-none">
@@ -138,7 +138,7 @@ export const PoliticsCategorySection: React.FC = () => {
           {col1.imageUrl && (
             <Link
               href={`/article/${col1.slug}`}
-              className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 mb-2.5 group"
+              className="block relative w-full h-[190px] sm:h-[190px] md:h-[180px] lg:h-[190px] overflow-hidden bg-gray-100 mb-2.5 group"
             >
               <img
                 src={col1.imageUrl}
@@ -147,7 +147,7 @@ export const PoliticsCategorySection: React.FC = () => {
               />
             </Link>
           )}
-          <h3 className="font-serif font-bold text-[17px] sm:text-[18px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-1.5">
+          <h3 className="font-serif font-bold text-[17px] sm:text-[18px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-1.5" style={{ fontFamily: "Georgia, serif" }}>
             <Link href={`/article/${col1.slug}`}>
               {col1.title}
             </Link>
@@ -169,7 +169,7 @@ export const PoliticsCategorySection: React.FC = () => {
           {col2.imageUrl && (
             <Link
               href={`/article/${col2.slug}`}
-              className="block relative aspect-[16/10] w-full overflow-hidden bg-gray-100 mb-2.5 group"
+              className="block relative w-full h-[190px] sm:h-[190px] md:h-[180px] lg:h-[190px] overflow-hidden bg-gray-100 mb-2.5 group"
             >
               <img
                 src={col2.imageUrl}

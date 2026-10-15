@@ -176,7 +176,7 @@ export function ArticleVideosSection({ hideTopBorder = false, className = "" }: 
   const embedInfo = getEmbedInfo(activeVideo.videoUrl, activeVideo.platform);
 
   return (
-    <div className={`w-full select-none ${hideTopBorder ? "pt-2 mt-2" : "pt-8 mt-8 border-t border-dashed border-[#CCCCCC]"} ${className}`}>
+    <div className={`w-full  ${hideTopBorder ? "pt-2 mt-2" : "pt-8 mt-8 border-t border-dashed border-[#CCCCCC]"} ${className}`}>
       {/* Title */}
       <h3 className="font-serif font-bold text-xl sm:text-[22px] text-[#111111] leading-tight mb-4">
         Videos

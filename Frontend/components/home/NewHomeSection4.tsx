@@ -33,7 +33,7 @@ export default function NewHomeSection4() {
             </h2>
 
             {/* Sub-heading with flanking lines */}
-            <div className="flex items-center justify-center gap-3 my-3 text-[11px] font-sans font-extrabold tracking-widest text-[#111111] uppercase select-none">
+            <div className="flex items-center justify-center gap-3 my-3 text-[11px] font-sans font-extrabold tracking-widest text-[#111111] uppercase ">
               <span className="w-8 sm:w-12 h-px bg-black/70"></span>
               <span>WSJ PROMOTION</span>
               <span className="w-8 sm:w-12 h-px bg-black/70"></span>
@@ -48,14 +48,14 @@ export default function NewHomeSection4() {
             <div className="my-3">
               <Link
                 href="/special-offer"
-                className="bg-[#007cb9] hover:bg-[#005599] text-white font-sans font-bold text-[13.5px] px-8 py-2.5 inline-block transition-colors cursor-pointer text-center shadow-2xs select-none"
+                className="bg-[#007cb9] hover:bg-[#005599] text-white font-sans font-bold text-[13.5px] px-8 py-2.5 inline-block transition-colors cursor-pointer text-center shadow-2xs "
               >
                 Subscribe Now
               </Link>
             </div>
 
             {/* Brand Logo & Tagline */}
-            <div className="pt-2 select-none">
+            <div className="pt-2 ">
               <span className="font-serif font-black text-[17px] sm:text-[19px] tracking-[0.14em] text-[#111111] block">
                 TIMES CHICAGO
               </span>
@@ -210,7 +210,7 @@ export default function NewHomeSection4() {
               </div>
 
               {/* Sub-Column 2: Sponsored AI Course Card */}
-              <div className="bg-[#f4f5f6] p-3 border border-gray-200 flex flex-col justify-between select-none">
+              <div className="bg-[#f4f5f6] p-3 border border-gray-200 flex flex-col justify-between ">
                 <div>
                   <div className="relative aspect-[16/11] w-full overflow-hidden bg-white border border-gray-200 mb-2">
                     {/* Top Left Ad Badge */}
@@ -609,7 +609,7 @@ export default function NewHomeSection4() {
             </div>
 
             {/* Video Player Container */}
-            <div className="relative aspect-[16/9] w-full overflow-hidden bg-black border border-gray-300 shadow-md group/mainvid select-none">
+            <div className="relative aspect-[16/9] w-full overflow-hidden bg-black border border-gray-300 shadow-md group/mainvid ">
               {/* Video Thumbnail Background */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -1057,7 +1057,7 @@ export default function NewHomeSection4() {
               </div>
 
               {/* Middle Column: Sponsored Ad Card (Matching Screenshot) */}
-              <div className="bg-[#f4f5f6] p-3 border border-gray-200 flex flex-col justify-between select-none h-full">
+              <div className="bg-[#f4f5f6] p-3 border border-gray-200 flex flex-col justify-between  h-full">
                 <div>
                   <div className="relative aspect-[16/11] w-full overflow-hidden bg-white border border-gray-200 mb-2">
                     {/* Top Left Ad Badge */}
@@ -1291,7 +1291,7 @@ export default function NewHomeSection4() {
               <h3 className="font-serif font-bold text-[20px] text-[#111111]">
                 Real Estate Insights
               </h3>
-              <div className="font-sans text-[12px] text-[#666666] flex items-center gap-1.5 select-none">
+              <div className="font-sans text-[12px] text-[#666666] flex items-center gap-1.5 ">
                 <span>Content provided by</span>
                 <span className="font-bold text-[#d9222a] flex items-center gap-0.5 text-[13px]">
                   <span className="text-[14px]">🏠</span> realtor.com
@@ -1525,7 +1525,7 @@ export default function NewHomeSection4() {
               <div className="pt-2">
                 <Link
                   href="/editorials"
-                  className="w-full bg-[#426a79] hover:bg-[#345763] text-white font-sans font-bold text-[13.5px] py-2.5 rounded-none text-center block transition-colors shadow-2xs select-none"
+                  className="w-full bg-[#426a79] hover:bg-[#345763] text-white font-sans font-bold text-[13.5px] py-2.5 rounded-none text-center block transition-colors shadow-2xs "
                 >
                   Go to Free Expression
                 </Link>
@@ -2117,7 +2117,7 @@ export default function NewHomeSection4() {
                   {/* Top-Left Sound Pill Button */}
                   <button
                     onClick={() => setIsMutedVideo(!isMutedVideo)}
-                    className="absolute top-2.5 left-2.5 bg-white/95 hover:bg-white text-black font-sans font-bold text-[11.5px] px-3 py-1.5 rounded-full shadow-md flex items-center gap-1.5 cursor-pointer transition-colors z-10 select-none"
+                    className="absolute top-2.5 left-2.5 bg-white/95 hover:bg-white text-black font-sans font-bold text-[11.5px] px-3 py-1.5 rounded-full shadow-md flex items-center gap-1.5 cursor-pointer transition-colors z-10 "
                     suppressHydrationWarning
                   >
                     <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">

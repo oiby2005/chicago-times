@@ -2,7 +2,7 @@ import React from "react";
 
 export default function DashboardSkeleton() {
   return (
-    <div className="min-h-screen bg-white text-[#111111] font-sans animate-pulse p-4 sm:p-8 space-y-6 select-none">
+    <div className="min-h-screen bg-white text-[#111111] font-sans animate-pulse p-4 sm:p-8 space-y-6 ">
       {/* Top Bar / Header Skeleton */}
       <div className="flex items-center justify-between border-b border-gray-200 pb-4">
         <div className="space-y-2">

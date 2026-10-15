@@ -1,26 +1,6 @@
 const db = require('../config/db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const fs = require('fs');
-const path = require('path');
-
-const USERS_FILE = path.join(__dirname, '../data/users.json');
-
-const readUsersFile = () => {
-  try {
-    if (!fs.existsSync(USERS_FILE)) return {};
-    const content = fs.readFileSync(USERS_FILE, 'utf-8');
-    return JSON.parse(content);
-  } catch (err) {
-    return {};
-  }
-};
-
-const writeUsersFile = (usersMap) => {
-  try {
-    fs.writeFileSync(USERS_FILE, JSON.stringify(usersMap, null, 2), 'utf-8');
-  } catch (err) {}
-};
 
 // Default Accounts definition matching the 3 strict default admins
 const DEFAULT_ACCOUNTS = {
@@ -54,6 +34,30 @@ const DEFAULT_ACCOUNTS = {
     email: "admin@gmail.com",
     passwords: ["admin123", "123456", "admin"],
     role: "admin",
+    is_default_admin: false,
+  },
+  "reader@gmail.com": {
+    id: 7,
+    full_name: "Reader User",
+    email: "reader@gmail.com",
+    passwords: ["reader123"],
+    role: "reader",
+    is_default_admin: false,
+  },
+  "writer@gmail.com": {
+    id: 5,
+    full_name: "Writer User",
+    email: "writer@gmail.com",
+    passwords: ["writer123", "writer456"],
+    role: "writer",
+    is_default_admin: false,
+  },
+  "writer1@gmail.com": {
+    id: 6,
+    full_name: "writer1",
+    email: "writer1@gmail.com",
+    passwords: ["writer456"],
+    role: "writer",
     is_default_admin: false,
   },
 };
@@ -101,17 +105,28 @@ const login = async (req, res) => {
     if (defaultAcc) {
       const allowedPasswords = (defaultAcc.passwords || []).map((p) => p.trim());
       if (allowedPasswords.includes(cleanPassword)) {
-        const usersMap = readUsersFile();
-        const savedProfile = usersMap[cleanEmail];
+        let profile = defaultAcc;
+        try {
+          const [pRows] = await db.query('SELECT * FROM users WHERE LOWER(email) = ?', [cleanEmail]);
+          if (pRows && pRows.length > 0) profile = pRows[0];
+        } catch (e) {}
+        if (Boolean(profile.is_blocked)) {
+          return res.status(403).json({
+            success: false,
+            is_blocked: true,
+            message: "Your account has been blocked. For further information, please contact us at worldnews@timeschicago.com",
+          });
+        }
         authUser = {
-          id: savedProfile?.id || defaultAcc.id,
-          full_name: savedProfile?.full_name || defaultAcc.full_name,
+          id: profile.id || defaultAcc.id,
+          full_name: profile.full_name || defaultAcc.full_name,
           email: defaultAcc.email,
-          role: savedProfile?.role || defaultAcc.role,
-          bio: savedProfile?.bio || defaultAcc.bio || '',
-          linkedin: savedProfile?.linkedin || defaultAcc.linkedin || '',
-          avatar_url: savedProfile?.avatar_url || defaultAcc.avatar_url || '',
+          role: profile.role || defaultAcc.role,
+          bio: profile.bio || defaultAcc.bio || '',
+          linkedin: profile.linkedin || defaultAcc.linkedin || '',
+          avatar_url: profile.avatar_url || defaultAcc.avatar_url || '',
           is_default_admin: Boolean(defaultAcc.is_default_admin),
+          is_blocked: Boolean(profile.is_blocked),
         };
         isAuthenticated = true;
       }
@@ -138,6 +153,13 @@ const login = async (req, res) => {
         }
 
         if (isMatch) {
+          if (Boolean(user.is_blocked)) {
+            return res.status(403).json({
+              success: false,
+              is_blocked: true,
+              message: "Your account has been blocked. For further information, please contact us at worldnews@timeschicago.com",
+            });
+          }
           try {
             await db.query('UPDATE users SET updated_at = NOW() WHERE id = ?', [user.id]);
           } catch (e) {}
@@ -151,33 +173,23 @@ const login = async (req, res) => {
             linkedin: user.linkedin || '',
             avatar_url: user.avatar_url || '',
             is_default_admin: Boolean(user.is_default_admin),
+            is_blocked: Boolean(user.is_blocked),
           };
           isAuthenticated = true;
         }
       }
     }
 
-    // 3. File fallback if DB/default account failed
-    if (!isAuthenticated) {
-      const usersMap = readUsersFile();
-      const savedUser = usersMap[cleanEmail];
-      if (savedUser && savedUser.password && savedUser.password === cleanPassword) {
-        authUser = {
-          id: savedUser.id,
-          full_name: savedUser.full_name,
-          email: savedUser.email,
-          role: savedUser.role,
-          bio: savedUser.bio || '',
-          linkedin: savedUser.linkedin || '',
-          avatar_url: savedUser.avatar_url || '',
-          is_default_admin: Boolean(savedUser.is_default_admin),
-        };
-        isAuthenticated = true;
-      }
-    }
-
     // Handle authentication result
     if (isAuthenticated && authUser) {
+      if (authUser.is_blocked) {
+        return res.status(403).json({
+          success: false,
+          is_blocked: true,
+          message: "Your account has been blocked. For further information, please contact us at worldnews@timeschicago.com",
+        });
+      }
+
       // Clear failed attempts on successful login
       failedAttemptsMap.delete(cleanEmail);
 
@@ -223,21 +235,15 @@ const login = async (req, res) => {
 
 // @desc    Get current user profile
 // @route   GET /api/auth/me
+// @desc    Get current user profile
+// @route   GET /api/auth/me
 // @access  Private
 const getMe = async (req, res) => {
   try {
     const { id: userId, email: userEmail } = req.user;
     const cleanEmail = (userEmail || '').toLowerCase().trim();
 
-    // First check persistent file store users
-    const usersMap = readUsersFile();
-    let savedProfile = usersMap[cleanEmail];
-    
-    if (!savedProfile && userId) {
-      savedProfile = Object.values(usersMap).find((u) => Number(u.id) === Number(userId));
-    }
-
-    // Next try DB query
+    // Query active MySQL Database
     try {
       const [rows] = await db.query(
         'SELECT id, full_name, email, role, bio, linkedin, avatar_url, is_default_admin, created_at FROM users WHERE id = ? OR LOWER(email) = ?',
@@ -252,9 +258,9 @@ const getMe = async (req, res) => {
             full_name: user.full_name,
             email: user.email,
             role: user.role,
-            bio: user.bio !== null && user.bio !== undefined ? user.bio : (savedProfile?.bio || ""),
-            linkedin: user.linkedin !== null && user.linkedin !== undefined ? user.linkedin : (savedProfile?.linkedin || ""),
-            avatar_url: user.avatar_url !== null && user.avatar_url !== undefined ? user.avatar_url : (savedProfile?.avatar_url || ""),
+            bio: user.bio || "",
+            linkedin: user.linkedin || "",
+            avatar_url: user.avatar_url || "",
             is_default_admin: Boolean(user.is_default_admin),
           },
         });
@@ -264,15 +270,16 @@ const getMe = async (req, res) => {
     // Fallback to DEFAULT_ACCOUNTS
     const def = DEFAULT_ACCOUNTS[cleanEmail] || Object.values(DEFAULT_ACCOUNTS).find((u) => u.id === Number(userId));
 
-    if (def || savedProfile) {
+    if (def) {
       const finalUser = {
-        id: savedProfile?.id || def?.id || userId,
-        full_name: savedProfile?.full_name || def?.full_name || "User",
-        email: savedProfile?.email || def?.email || cleanEmail,
-        role: savedProfile?.role || def?.role || "reader",
-        bio: savedProfile?.bio || def?.bio || "",
-        linkedin: savedProfile?.linkedin || def?.linkedin || "",
-        avatar_url: savedProfile?.avatar_url || "",
+        id: def.id || userId,
+        full_name: def.full_name || "User",
+        email: def.email || cleanEmail,
+        role: def.role || "reader",
+        bio: def.bio || "",
+        linkedin: def.linkedin || "",
+        avatar_url: def.avatar_url || "",
+        is_default_admin: Boolean(def.is_default_admin),
       };
       return res.status(200).json({
         success: true,
@@ -383,20 +390,15 @@ const googleLogin = async (req, res) => {
       }
     }
 
-    // 2. Also record in local file fallback
-    const usersMap = readUsersFile();
-    usersMap[userEmail] = {
-      id: user.id,
-      full_name: user.full_name,
-      email: user.email,
-      role: user.role,
-      bio: user.bio || '',
-      avatar_url: user.avatar_url || userPicture || '',
-      is_default_admin: Boolean(user.is_default_admin),
-    };
-    writeUsersFile(usersMap);
+    if (user.is_blocked) {
+      return res.status(403).json({
+        success: false,
+        is_blocked: true,
+        message: "Your account has been blocked. For further information, please contact us at worldnews@timeschicago.com",
+      });
+    }
 
-    // 3. Generate JWT Token
+    // 2. Generate JWT Token
     const jwtSecret = process.env.JWT_SECRET || 'wsj_super_secret_jwt_key_2026_key';
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role },

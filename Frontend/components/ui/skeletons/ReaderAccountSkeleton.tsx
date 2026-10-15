@@ -2,7 +2,7 @@ import React from "react";
 
 export default function ReaderAccountSkeleton() {
   return (
-    <div className="min-h-screen bg-[#F6F7F9] flex flex-col font-sans select-none animate-pulse">
+    <div className="min-h-screen bg-[#F6F7F9] flex flex-col font-sans  animate-pulse">
       {/* Top Mobile Bar Skeleton */}
       <div className="lg:hidden bg-white border-b border-[#E5E5E5] px-4 py-3 flex items-center justify-between">
         <div className="h-6 w-28 bg-gray-200 rounded" />

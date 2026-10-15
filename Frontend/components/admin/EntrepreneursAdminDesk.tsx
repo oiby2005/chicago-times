@@ -112,6 +112,7 @@ export default function EntrepreneursAdminDesk() {
   const [editorLastUpdated, setEditorLastUpdated] = useState("");
   const [editorBulletPointsText, setEditorBulletPointsText] = useState("");
   const [inTheirOwnWordsQuote, setInTheirOwnWordsQuote] = useState("");
+  const [inTheirOwnWordsQuote2, setInTheirOwnWordsQuote2] = useState("");
   const [selfMadeScore, setSelfMadeScore] = useState<string | number>("");
   const [philanthropyScore, setPhilanthropyScore] = useState<string | number>("");
   const [maritalStatus, setMaritalStatus] = useState("Single");
@@ -183,6 +184,7 @@ export default function EntrepreneursAdminDesk() {
     setEditorLastUpdated("Last Updated Oct 10, 2026, 9:00am");
     setEditorBulletPointsText("");
     setInTheirOwnWordsQuote("");
+    setInTheirOwnWordsQuote2("");
     setSelfMadeScore(8);
     setPhilanthropyScore(2);
     setMaritalStatus("Single");
@@ -224,6 +226,11 @@ export default function EntrepreneursAdminDesk() {
     const bullets = (item.editorBulletPoints || []).map((b) => (b.startsWith("• ") ? b : `• ${b}`));
     setEditorBulletPointsText(bullets.join("\n"));
     setInTheirOwnWordsQuote(item.inTheirOwnWordsQuote || "");
+    setInTheirOwnWordsQuote2(
+      item.inTheirOwnWordsQuote2 ||
+      (item.inTheirOwnWordsQuotes && item.inTheirOwnWordsQuotes[1]) ||
+      ""
+    );
     setSelfMadeScore(item.selfMadeScore !== undefined ? item.selfMadeScore : 8);
     setPhilanthropyScore(item.philanthropyScore !== undefined ? item.philanthropyScore : 2);
     setMaritalStatus(item.maritalStatus || "Single");
@@ -393,6 +400,8 @@ export default function EntrepreneursAdminDesk() {
             editorLastUpdated: editorLastUpdated.trim(),
             editorBulletPoints: cleanedBullets,
             inTheirOwnWordsQuote: inTheirOwnWordsQuote.trim(),
+            inTheirOwnWordsQuote2: inTheirOwnWordsQuote2.trim(),
+            inTheirOwnWordsQuotes: [inTheirOwnWordsQuote.trim(), inTheirOwnWordsQuote2.trim()].filter(Boolean),
             selfMadeScore: selfMadeScore !== "" ? Number(selfMadeScore) : item.selfMadeScore,
             philanthropyScore: philanthropyScore !== "" ? Number(philanthropyScore) : item.philanthropyScore,
             maritalStatus: maritalStatus.trim() || item.maritalStatus,
@@ -431,6 +440,8 @@ export default function EntrepreneursAdminDesk() {
           `${name.trim()} leads transformative ventures shaping international markets.`
         ],
         inTheirOwnWordsQuote: inTheirOwnWordsQuote.trim(),
+        inTheirOwnWordsQuote2: inTheirOwnWordsQuote2.trim(),
+        inTheirOwnWordsQuotes: [inTheirOwnWordsQuote.trim(), inTheirOwnWordsQuote2.trim()].filter(Boolean),
         selfMadeScore: selfMadeScore !== "" ? Number(selfMadeScore) : 8,
         philanthropyScore: philanthropyScore !== "" ? Number(philanthropyScore) : 2,
         maritalStatus: maritalStatus.trim() || "Single",
@@ -488,7 +499,7 @@ export default function EntrepreneursAdminDesk() {
   };
 
   return (
-    <div className="space-y-6 select-none">
+    <div className="space-y-6 ">
       {/* Header Bar matching Billionaires Desk */}
       <div className="bg-white border border-[#e5e7eb] rounded-3xl p-6 sm:p-8 shadow-2xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
@@ -1188,13 +1199,26 @@ export default function EntrepreneursAdminDesk() {
 
                     <div className="md:col-span-2">
                       <label className="block text-[#64748b] font-bold uppercase tracking-wider mb-1">
-                        In Their Own Words Quote
+                        In Their Own Words Quote 1 (Slide 1)
                       </label>
                       <textarea
                         rows={2}
                         value={inTheirOwnWordsQuote}
                         onChange={(e) => setInTheirOwnWordsQuote(e.target.value)}
                         placeholder="“When tackling unprecedented problems in deep technology...”"
+                        className="w-full bg-[#f8fafc] border border-[#cbd5e1] rounded-xl px-3.5 py-2.5 text-xs text-[#0f172a] focus:outline-none focus:border-black font-serif italic"
+                      />
+                    </div>
+
+                    <div className="md:col-span-2">
+                      <label className="block text-[#64748b] font-bold uppercase tracking-wider mb-1">
+                        In Their Own Words Quote 2 (Slide 2)
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={inTheirOwnWordsQuote2}
+                        onChange={(e) => setInTheirOwnWordsQuote2(e.target.value)}
+                        placeholder="“Innovation distinguishes between a leader and a follower...”"
                         className="w-full bg-[#f8fafc] border border-[#cbd5e1] rounded-xl px-3.5 py-2.5 text-xs text-[#0f172a] focus:outline-none focus:border-black font-serif italic"
                       />
                     </div>

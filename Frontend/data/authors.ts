@@ -290,7 +290,7 @@ export function getAuthorBySlug(slug: string): Author {
   if (cleanSlug === "writer") {
     if (typeof window !== "undefined") {
       try {
-        const storedUser = JSON.parse(localStorage.getItem("wsj_user") || "null");
+        const storedUser = JSON.parse(sessionStorage.getItem("wsj_user") || "null");
         if (storedUser && (storedUser.full_name || storedUser.name)) {
           const uName = extractSingleAuthorName(storedUser.full_name || storedUser.name);
           return {
@@ -326,7 +326,7 @@ export function getAuthorBySlug(slug: string): Author {
 export function getAuthorForArticle(articleSlugOrId: string, authorName?: string, authorEmail?: string): Author {
   if (typeof window !== "undefined") {
     try {
-      const storedUser = JSON.parse(localStorage.getItem("wsj_user") || "null");
+      const storedUser = JSON.parse(sessionStorage.getItem("wsj_user") || "null");
       if (storedUser && (storedUser.full_name || storedUser.name)) {
         const uName = extractSingleAuthorName(storedUser.full_name || storedUser.name);
         const uEmail = (storedUser.email || "").toLowerCase().trim();

@@ -121,7 +121,7 @@ export const OpinionSection: React.FC = () => {
   }, [loadOpinionPosts]);
 
   return (
-    <div className="w-full h-full flex flex-col justify-between font-sans select-none">
+    <div className="w-full h-full flex flex-col justify-between font-sans ">
       {/* Section Header */}
       <div className="pb-1 mb-1">
         <h2 className="font-serif font-bold text-[21px] sm:text-[22px] text-[#8b6f37] leading-none">
@@ -134,36 +134,72 @@ export const OpinionSection: React.FC = () => {
       {/* Opinion Articles List */}
       <div className="flex flex-col divide-y divide-dashed divide-[#D6CEBF]">
         {articles.map((article) => (
-          <article key={article.id} className="py-2.5 flex items-start space-x-3">
-            {/* Image */}
-            <div className="shrink-0 pt-0.5">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={article.imageUrl}
-                alt={article.author}
-                className="w-[46px] h-[46px] object-cover bg-gray-100 border border-gray-200 rounded-none"
-              />
+          <article key={article.id} className="py-2.5">
+            {/* Mobile View (< sm) */}
+            <div className="block sm:hidden w-full">
+              <div className="flex items-stretch space-x-3">
+                <div className="shrink-0 self-stretch flex items-stretch">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={article.imageUrl}
+                    alt={article.author}
+                    className="w-[48px] h-full object-cover bg-gray-100 border border-gray-200 rounded-none self-stretch"
+                  />
+                </div>
+                <div className="flex-1 min-w-0 flex flex-col justify-between py-0">
+                  <div className="font-sans font-bold text-[10.5px] text-[#8b6f37] uppercase tracking-wider leading-none mb-1">
+                    {article.author}
+                  </div>
+                  <h3
+                    className="font-bold text-[16px] leading-[1.25] text-[#111111] hover:text-[#333333] hover:underline cursor-pointer line-clamp-3"
+                    style={{
+                      fontFamily: "Georgia, serif",
+                      display: "-webkit-box",
+                      WebkitLineClamp: 3,
+                      WebkitBoxOrient: "vertical",
+                      overflow: "hidden",
+                    }}
+                  >
+                    <Link href={`/article/${article.slug}`}>
+                      {article.title}
+                    </Link>
+                  </h3>
+                </div>
+              </div>
             </div>
 
-            {/* Content */}
-            <div className="flex-1 min-w-0">
-              <div className="font-sans font-bold text-[9.5px] text-[#8b6f37] uppercase tracking-wider mb-0.5">
-                {article.author}
+            {/* Desktop / Laptop View (>= sm) */}
+            <div className="hidden sm:flex items-start space-x-3 w-full">
+              {/* Image */}
+              <div className="shrink-0 pt-0.5">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={article.imageUrl}
+                  alt={article.author}
+                  className="w-[46px] h-[46px] object-cover bg-gray-100 border border-gray-200 rounded-none"
+                />
               </div>
-              <h3
-                className="font-bold text-[13.5px] sm:text-[14px] leading-[1.2] text-[#111111] hover:text-[#333333] hover:underline cursor-pointer line-clamp-2"
-                style={{
-                  fontFamily: "Georgia, serif",
-                  display: "-webkit-box",
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: "vertical",
-                  overflow: "hidden",
-                }}
-              >
-                <Link href={`/article/${article.slug}`}>
-                  {article.title}
-                </Link>
-              </h3>
+
+              {/* Content */}
+              <div className="flex-1 min-w-0">
+                <div className="font-sans font-bold text-[9.5px] text-[#8b6f37] uppercase tracking-wider mb-0.5">
+                  {article.author}
+                </div>
+                <h3
+                  className="font-bold text-[14px] leading-[1.2] text-[#111111] hover:text-[#333333] hover:underline cursor-pointer line-clamp-2"
+                  style={{
+                    fontFamily: "Georgia, serif",
+                    display: "-webkit-box",
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: "vertical",
+                    overflow: "hidden",
+                  }}
+                >
+                  <Link href={`/article/${article.slug}`}>
+                    {article.title}
+                  </Link>
+                </h3>
+              </div>
             </div>
           </article>
         ))}

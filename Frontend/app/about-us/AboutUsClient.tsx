@@ -59,7 +59,7 @@ const EDITORIAL_VALUES = [
 
 export default function AboutUsClient() {
   return (
-    <div className="min-h-screen bg-white flex flex-col justify-between text-[#111111] select-none">
+    <div className="min-h-screen bg-white flex flex-col justify-between text-[#111111]">
       <div>
         <Header />
         <StickyHeaderBar />
@@ -83,7 +83,10 @@ export default function AboutUsClient() {
                 
                 {/* 1. Who We Are Section */}
                 <section className="bg-white border border-[#e2e8f0] p-6 sm:p-8 shadow-xs">
-                  <h2 className="font-serif font-bold text-[22px] sm:text-[26px] text-[#111111] pb-3 mb-4 border-b border-[#edf2f7]">
+                  <h2 
+                    className="font-serif font-bold text-[22px] sm:text-[26px] text-[#111111] pb-3 mb-4 border-b border-[#edf2f7]"
+                    style={{ fontFamily: "Georgia, serif" }}
+                  >
                     Who We Are
                   </h2>
 
@@ -99,7 +102,10 @@ export default function AboutUsClient() {
 
                 {/* 2. What We Cover Section */}
                 <section className="bg-white border border-[#e2e8f0] p-6 sm:p-8 shadow-xs">
-                  <h2 className="font-serif font-bold text-[22px] sm:text-[26px] text-[#111111] pb-3 mb-2 border-b border-[#edf2f7]">
+                  <h2 
+                    className="font-serif font-bold text-[22px] sm:text-[26px] text-[#111111] pb-3 mb-2 border-b border-[#edf2f7]"
+                    style={{ fontFamily: "Georgia, serif" }}
+                  >
                     What We Cover
                   </h2>
 
@@ -122,21 +128,27 @@ export default function AboutUsClient() {
 
                 {/* 3. Our Editorial Values Section */}
                 <section className="bg-white border border-[#e2e8f0] p-6 sm:p-8 shadow-xs">
-                  <h2 className="font-serif font-bold text-[22px] sm:text-[26px] text-[#111111] pb-3 mb-2 border-b border-[#edf2f7]">
+                  <h2 
+                    className="font-serif font-bold text-[22px] sm:text-[26px] text-[#111111] pb-3 mb-2 border-b border-[#edf2f7]"
+                    style={{ fontFamily: "Georgia, serif" }}
+                  >
                     Our Editorial Values
                   </h2>
 
-                  <p className="font-sans text-[13.5px] text-[#718096] mb-6">
+                  <p className="font-sans text-[13.5px] text-[#718096] mb-5">
                     Every story published by Times Chicago is guided by our core journalistic values:
                   </p>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-2">
                     {EDITORIAL_VALUES.map((val) => (
                       <div
                         key={val.title}
                         className="bg-[#f8fafc] border border-[#edf2f7] p-5 sm:p-6 flex flex-col justify-start"
                       >
-                        <h3 className="font-sans font-bold text-[14.5px] text-[#1a202c] mb-1.5">
+                        <h3 
+                          className="font-bold text-[14.5px] text-[#1a202c] mb-1.5"
+                          style={{ fontFamily: "Georgia, serif" }}
+                        >
                           {val.title}
                         </h3>
                         <p className="font-sans text-[13px] text-[#4a5568] leading-relaxed">
@@ -145,10 +157,6 @@ export default function AboutUsClient() {
                       </div>
                     ))}
                   </div>
-
-                  <span className="font-serif italic text-[12.5px] text-[#718096] pt-4 border-t border-[#edf2f7] block">
-                    Our editorial team follows strict review processes to ensure our reporting meets professional standards and serves the public interest.
-                  </span>
                 </section>
 
               </div>
@@ -158,7 +166,10 @@ export default function AboutUsClient() {
                 
                 {/* 1. Our Mission Card */}
                 <div className="bg-white border border-[#e2e8f0] p-6 shadow-xs">
-                  <h3 className="font-serif font-bold text-[20px] text-[#111111] pb-2 mb-3 border-b border-[#edf2f7]">
+                  <h3 
+                    className="font-serif font-bold text-[20px] text-[#111111] pb-2 mb-3 border-b border-[#edf2f7]"
+                    style={{ fontFamily: "Georgia, serif" }}
+                  >
                     Our Mission
                   </h3>
                   <p className="font-sans text-[13.5px] text-[#4a5568] leading-relaxed">
@@ -168,7 +179,10 @@ export default function AboutUsClient() {
 
                 {/* 2. Our Vision Card */}
                 <div className="bg-white border border-[#e2e8f0] p-6 shadow-xs">
-                  <h3 className="font-serif font-bold text-[20px] text-[#111111] pb-2 mb-3 border-b border-[#edf2f7]">
+                  <h3 
+                    className="font-serif font-bold text-[20px] text-[#111111] pb-2 mb-3 border-b border-[#edf2f7]"
+                    style={{ fontFamily: "Georgia, serif" }}
+                  >
                     Our Vision
                   </h3>
                   <p className="font-sans text-[13.5px] text-[#4a5568] leading-relaxed">
@@ -178,7 +192,10 @@ export default function AboutUsClient() {
 
                 {/* 3. Contact Us Card */}
                 <div className="bg-white border border-[#e2e8f0] p-6 shadow-xs">
-                  <h3 className="font-serif font-bold text-[20px] text-[#111111] pb-2 mb-4 border-b border-[#edf2f7]">
+                  <h3 
+                    className="font-serif font-bold text-[20px] text-[#111111] pb-2 mb-4 border-b border-[#edf2f7]"
+                    style={{ fontFamily: "Georgia, serif" }}
+                  >
                     Contact Us
                   </h3>
 
@@ -226,14 +243,17 @@ export default function AboutUsClient() {
 
                 {/* 4. Stay Connected Card */}
                 <div className="bg-[#111111] text-white p-6 shadow-xs">
-                  <h3 className="font-serif font-bold text-[20px] text-white mb-2 text-center">
+                  <h3 
+                    className="font-serif font-bold text-[20px] text-white mb-2 text-center"
+                    style={{ fontFamily: "Georgia, serif" }}
+                  >
                     Stay Connected
                   </h3>
                   <p className="font-sans text-[12.5px] text-[#cbd5e1] text-center mb-5 leading-relaxed">
                     Join our Times Chicago community to receive weekly summaries, breaking alerts, and professional editor highlights.
                   </p>
                   <Link
-                    href="/newsletter"
+                    href="/special-offer"
                     className="w-full bg-[#990000] hover:bg-[#770000] text-white font-sans font-bold text-[12.5px] uppercase tracking-wider py-3 px-4 block text-center transition-colors cursor-pointer"
                   >
                     SUBSCRIBE NOW

@@ -874,10 +874,10 @@ export default function AdminEditPostPage() {
       a.href = url;
       a.target = "_blank";
       a.rel = "noopener noreferrer";
-      a.className = "text-black font-semibold underline";
-      a.style.color = "#000000";
-      a.style.fontWeight = "600";
-      a.style.textDecoration = "underline solid 1px";
+      a.className = "text-[#888888] font-medium no-underline hover:text-[#555555]";
+      a.style.color = "#888888";
+      a.style.fontWeight = "500";
+      a.style.textDecoration = "none";
       a.style.borderBottom = "none";
       a.style.boxShadow = "none";
       a.textContent = targetText;
@@ -902,10 +902,10 @@ export default function AdminEditPostPage() {
       a.href = url;
       a.target = "_blank";
       a.rel = "noopener noreferrer";
-      a.className = "text-black font-semibold underline";
-      a.style.color = "#000000";
-      a.style.fontWeight = "600";
-      a.style.textDecoration = "underline solid 1px";
+      a.className = "text-[#888888] font-medium no-underline hover:text-[#555555]";
+      a.style.color = "#888888";
+      a.style.fontWeight = "500";
+      a.style.textDecoration = "none";
       a.style.borderBottom = "none";
       a.style.boxShadow = "none";
       a.textContent = linkText.trim();
@@ -921,10 +921,10 @@ export default function AdminEditPostPage() {
     anchors.forEach((anc) => {
       anc.setAttribute("target", "_blank");
       anc.setAttribute("rel", "noopener noreferrer");
-      anc.className = "text-black font-semibold underline";
-      anc.style.color = "#000000";
-      anc.style.fontWeight = "600";
-      anc.style.textDecoration = "underline solid 1px";
+      anc.className = "text-[#888888] font-medium no-underline hover:text-[#555555]";
+      anc.style.color = "#888888";
+      anc.style.fontWeight = "500";
+      anc.style.textDecoration = "none";
       anc.style.borderBottom = "none";
       anc.style.boxShadow = "none";
 
@@ -1908,7 +1908,7 @@ export default function AdminEditPostPage() {
                       </h3>
                     </div>
 
-                    <div className="bg-[#f1f5f9]/70 border border-[#e2e8f0] rounded-xl p-1 grid grid-cols-2 gap-1 text-center text-xs tracking-tight select-none">
+                    <div className="bg-[#f1f5f9]/70 border border-[#e2e8f0] rounded-xl p-1 grid grid-cols-2 gap-1 text-center text-xs tracking-tight ">
                       <button
                         type="button"
                         onClick={() => setSidebarTab("DETAILS")}
@@ -1936,7 +1936,7 @@ export default function AdminEditPostPage() {
                     {sidebarTab === "DETAILS" && (
                       <div className="space-y-5">
                         <div className="bg-[#f8fafc] border border-[#e2e8f0] rounded-xl p-3">
-                          <label className="flex items-center space-x-2.5 text-xs font-bold text-[#1e293b] cursor-pointer select-none">
+                          <label className="flex items-center space-x-2.5 text-xs font-bold text-[#1e293b] cursor-pointer ">
                             <input
                               type="checkbox"
                               checked={isExclusive}
@@ -2143,7 +2143,7 @@ export default function AdminEditPostPage() {
                               TAGS
                             </label>
                             <div className="flex items-center space-x-3">
-                              <label className="flex items-center space-x-1.5 cursor-pointer text-xs font-sans text-[#1e293b] select-none">
+                              <label className="flex items-center space-x-1.5 cursor-pointer text-xs font-sans text-[#1e293b] ">
                                 <input
                                   type="checkbox"
                                   checked={isBillionaireLinked}
@@ -2152,7 +2152,7 @@ export default function AdminEditPostPage() {
                                 />
                                 <span className="font-semibold text-[11px] text-[#475569]">Link to a Billionaire</span>
                               </label>
-                              <label className="flex items-center space-x-1.5 cursor-pointer text-xs font-sans text-[#1e293b] select-none">
+                              <label className="flex items-center space-x-1.5 cursor-pointer text-xs font-sans text-[#1e293b] ">
                                 <input
                                   type="checkbox"
                                   checked={isEntrepreneurLinked}
@@ -2566,7 +2566,7 @@ export default function AdminEditPostPage() {
       {/* ARTICLE PREVIEW MODAL */}
       {showPreviewModal && (
         <div className="fixed inset-0 bg-white text-[#0f172a] z-50 overflow-y-auto font-sans animate-in fade-in duration-200">
-          <header className="bg-[#0b132b] text-white h-auto min-h-[56px] px-3.5 sm:px-6 lg:px-10 py-2 flex items-center justify-between sticky top-0 z-50 border-b border-slate-800 shadow-md select-none flex-wrap sm:flex-nowrap gap-2">
+          <header className="bg-[#0b132b] text-white h-auto min-h-[56px] px-3.5 sm:px-6 lg:px-10 py-2 flex items-center justify-between sticky top-0 z-50 border-b border-slate-800 shadow-md  flex-wrap sm:flex-nowrap gap-2">
             <div className="flex items-center space-x-3">
               <span className="bg-[#b45309] text-amber-100 font-mono text-[10px] font-extrabold uppercase tracking-widest px-2 py-0.5 rounded">
                 PREVIEW MODE
@@ -2593,7 +2593,7 @@ export default function AdminEditPostPage() {
               <div className="w-full lg:flex-1 max-w-[780px] text-left font-sans">
                 <div className="flex items-center space-x-3 mb-3 font-sans">
                   {isExclusive && (
-                    <span className="inline-block border border-[#333333] rounded-[3px] px-2 py-[2px] text-[11.5px] font-sans font-bold text-[#111111] tracking-wider leading-none select-none">
+                    <span className="inline-block border border-[#333333] rounded-[3px] px-2 py-[2px] text-[11.5px] font-sans font-bold text-[#111111] tracking-wider leading-none ">
                       EXCLUSIVE
                     </span>
                   )}

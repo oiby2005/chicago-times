@@ -99,36 +99,74 @@ export const InDepthPanelSection: React.FC = () => {
   }, [loadInDepth]);
 
   return (
-    <div className="w-full max-h-none lg:max-h-[9.5cm] h-full flex flex-col justify-between font-sans select-none overflow-hidden divide-y divide-dashed divide-[#D6CEBF]">
+    <div className="w-full max-h-none lg:max-h-[9.5cm] h-full flex flex-col justify-between font-sans  overflow-hidden divide-y divide-dashed divide-[#D6CEBF]">
       {articles.map((article) => (
-        <article key={article.id} className="py-[24px] lg:py-2 flex items-start justify-between space-x-2.5 first:pt-0 last:pb-0">
-          <div className="flex-1 min-w-0 pr-1">
+        <article key={article.id} className="py-[16px] lg:py-2 first:pt-0 last:pb-0">
+          {/* Mobile View (< lg) */}
+          <div className="block lg:hidden w-full">
             {article.category && (
-              <div className="mb-0.5">
-                <span className="font-sans font-bold text-[10px] tracking-wider text-[#00558c] uppercase">
+              <div className="mb-1">
+                <span className="font-sans font-bold text-[10.5px] tracking-wider text-[#00558c] uppercase">
                   {article.category}
                 </span>
               </div>
             )}
-            <h3 className="font-whitney font-['Whitney','Whitney_Book',sans-serif] font-semibold text-[13.5px] leading-[1.25] text-[#111111] hover:text-[#333333] hover:underline cursor-pointer">
-              <Link href={`/article/${article.slug}`}>
-                {article.title}
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex-1 min-w-0">
+                <h3 className="font-whitney font-['Whitney','Whitney_Book',sans-serif] font-semibold text-[16.5px] leading-[1.25] text-[#111111] hover:text-[#333333] hover:underline cursor-pointer">
+                  <Link href={`/article/${article.slug}`}>
+                    {article.title}
+                  </Link>
+                </h3>
+                {article.timeAgo && (
+                  <span className="font-sans text-[10.5px] text-[#666666] mt-1 block">
+                    {article.timeAgo}
+                  </span>
+                )}
+              </div>
+              <Link
+                href={`/article/${article.slug}`}
+                className="shrink-0 block w-[90px] h-[60px] overflow-hidden bg-gray-100 border border-gray-200"
+              >
+                <img
+                  src={article.imageUrl}
+                  alt={article.title}
+                  className="w-full h-full object-cover"
+                />
               </Link>
-            </h3>
-            {article.timeAgo && (
-              <span className="font-sans text-[10px] text-[#666666] mt-0.5 block">
-                {article.timeAgo}
-              </span>
-            )}
+            </div>
           </div>
 
-          <Link href={`/article/${article.slug}`} className="shrink-0 block w-[95px] h-[64px] overflow-hidden bg-gray-100 border border-gray-200">
-            <img
-              src={article.imageUrl}
-              alt={article.title}
-              className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-            />
-          </Link>
+          {/* Desktop / Laptop View (>= lg) */}
+          <div className="hidden lg:flex items-start justify-between space-x-2.5 w-full">
+            <div className="flex-1 min-w-0 pr-1">
+              {article.category && (
+                <div className="mb-0.5">
+                  <span className="font-sans font-bold text-[10px] tracking-wider text-[#00558c] uppercase">
+                    {article.category}
+                  </span>
+                </div>
+              )}
+              <h3 className="font-whitney font-['Whitney','Whitney_Book',sans-serif] font-semibold text-[13.5px] leading-[1.25] text-[#111111] hover:text-[#333333] hover:underline cursor-pointer">
+                <Link href={`/article/${article.slug}`}>
+                  {article.title}
+                </Link>
+              </h3>
+              {article.timeAgo && (
+                <span className="font-sans text-[10px] text-[#666666] mt-0.5 block">
+                  {article.timeAgo}
+                </span>
+              )}
+            </div>
+
+            <Link href={`/article/${article.slug}`} className="shrink-0 block w-[95px] h-[64px] overflow-hidden bg-gray-100 border border-gray-200">
+              <img
+                src={article.imageUrl}
+                alt={article.title}
+                className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+              />
+            </Link>
+          </div>
         </article>
       ))}
     </div>
