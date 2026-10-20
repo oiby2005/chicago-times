@@ -1,3 +1,5 @@
+import { getAuthHeaders } from "@/lib/authHeader";
+
 export interface CompanyShareholding {
   id: string;
   name: string;        // e.g. "Tesla"
@@ -769,7 +771,7 @@ export function saveEntrepreneursList(items: EntrepreneurItem[]): void {
   // Save to MySQL database & upload images to Backblaze B2
   fetch("http://localhost:5000/api/entrepreneurs", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: getAuthHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify({ entrepreneurs: trimmed }),
   })
     .then((res) => (res.ok ? res.json() : null))

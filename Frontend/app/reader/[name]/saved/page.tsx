@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { convertFileToWebP } from "@/lib/webpConverter";
 import { slugifyAuthorName } from "@/data/authors";
+import { getAuthHeaders } from "@/lib/authHeader";
 import ReaderAccountSkeleton from "@/components/ui/skeletons/ReaderAccountSkeleton";
 import ReaderHelpCenter from "@/components/dashboard/ReaderHelpCenter";
 
@@ -551,7 +552,7 @@ export default function ReaderSavedPage() {
       const prevName = currentUser?.full_name || currentUser?.name || "";
       await fetch("http://localhost:5000/api/users", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify({ ...updatedUser, old_full_name: prevName }),
       });
     } catch (e) {}

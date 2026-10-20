@@ -1,24 +1,72 @@
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
+const cookieParser = require('cookie-parser');
 const fs = require('fs');
 const path = require('path');
 const nodemailer = require('nodemailer');
 require('dotenv').config();
 
 const authRoutes = require('./routes/authRoutes');
-const { contactLimiter, advertiseLimiter, subscribeLimiter } = require('./middlewares/rateLimiter');
+const { contactLimiter, advertiseLimiter, subscribeLimiter, commentsLimiter } = require('./middlewares/rateLimiter');
+const { protect, requireAdmin, requireWriterOrAdmin, optionalAuth } = require('./middlewares/authMiddleware');
+const { validateUrlForSsrf } = require('./lib/ssrfValidator');
+const { sanitizeArticleHtml, stripHtml } = require('./lib/htmlSanitizer');
+const { getQuotaStatus, checkAllContributorsQuota } = require('./controllers/contributorController');
 
 const app = express();
 app.set('trust proxy', 1);
+app.disable('x-powered-by');
 const PORT = process.env.PORT || 5000;
+
+// HTTP Security Headers via Helmet
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }, // Allows Frontend (port 3000) to fetch static images and audio from Backend
+  crossOriginEmbedderPolicy: false, // Allows cross-origin media embedding (Backblaze B2, Unsplash, YouTube)
+  crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" }, // Allows Google OAuth login popup without COOP conflicts
+  referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+  contentSecurityPolicy: false, // Prevents interfering with JSON API payloads
+  xFrameOptions: { action: "sameorigin" }, // Clickjacking protection
+  xContentTypeOptions: true, // MIME-sniffing protection
+  hidePoweredBy: true, // Removes X-Powered-By
+}));
 
 // Middleware
 app.use(cors({
   origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
   credentials: true
 }));
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+app.use(cookieParser());
+
+// Request Body Parsing with Strict DoS / Payload Size Protection
+// Standard routes (auth, comments, contact, subscriptions) are capped at 1MB to prevent RAM exhaustion / DoS
+// Only routes handling rich media, full articles, and database snapshots are allocated 50MB
+const LARGE_PAYLOAD_PATHS = [
+  '/api/posts',
+  '/api/upload',
+  '/api/backups',
+  '/api/billionaires',
+  '/api/entrepreneurs',
+  '/api/users',
+];
+
+app.use((req, res, next) => {
+  const isLargePermitted = LARGE_PAYLOAD_PATHS.some((p) => req.path.startsWith(p));
+  const limit = isLargePermitted ? '50mb' : '1mb';
+  express.json({ limit })(req, res, (err) => {
+    if (err) {
+      if (err.type === 'entity.too.large') {
+        return res.status(413).json({
+          success: false,
+          message: `Request payload too large. Maximum permitted body size is ${limit}.`,
+        });
+      }
+      return next(err);
+    }
+    express.urlencoded({ extended: true, limit })(req, res, next);
+  });
+});
+
 app.use(express.static(path.join(__dirname, '../Frontend/public')));
 
 // Data directory for backups
@@ -51,6 +99,13 @@ const writeJSONFile = (filePath, data) => {
 
 // Routes
 app.use('/api/auth', authRoutes);
+
+// Contributor Quota Status Endpoint & Periodic Monitor
+app.get('/api/contributors/quota-status', optionalAuth, getQuotaStatus);
+setTimeout(() => {
+  checkAllContributorsQuota();
+  setInterval(checkAllContributorsQuota, 10 * 60 * 1000);
+}, 5000);
 
 const { uploadBase64ToB2, uploadToBackblazeB2, uploadAllBase64InHtml, uploadRemoteUrlToB2, uploadAllExternalImagesInHtml } = require('./lib/backblazeB2');
 
@@ -128,9 +183,81 @@ function parseIsoDuration(durationStr) {
 const parseDurationString = parseIsoDuration;
 
 // ==========================================
+// HUMAN-LIKE JOURNALIST AI VOICE (TTS) ENDPOINTS
+// ==========================================
+const { AUDIO_CACHE_DIR, generateArticleSpeech } = require('./lib/ttsService');
+
+app.post('/api/tts/generate', async (req, res) => {
+  try {
+    const { slug, title, deck, bodyContent, voice } = req.body || {};
+    if (!title && !bodyContent) {
+      return res.status(400).json({ success: false, message: 'Article title or content required' });
+    }
+
+    const result = await generateArticleSpeech({
+      slug,
+      title,
+      deck,
+      bodyContent,
+      voice: voice || 'en-US-ChristopherNeural',
+    });
+
+    return res.status(200).json(result);
+  } catch (err) {
+    console.error('TTS Generation error:', err);
+    return res.status(500).json({ success: false, message: err.message || 'Failed to synthesize audio' });
+  }
+});
+
+app.get('/api/tts/audio/:fileName', (req, res) => {
+  try {
+    const { fileName } = req.params;
+    const safeName = path.basename(fileName);
+    const filePath = path.join(AUDIO_CACHE_DIR, safeName);
+
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ success: false, message: 'Audio file not found' });
+    }
+
+    const stat = fs.statSync(filePath);
+    const fileSize = stat.size;
+    const range = req.headers.range;
+
+    if (range) {
+      const parts = range.replace(/bytes=/, '').split('-');
+      const start = parseInt(parts[0], 10);
+      const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+      const chunksize = end - start + 1;
+      const fileStream = fs.createReadStream(filePath, { start, end });
+
+      const head = {
+        'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+        'Accept-Ranges': 'bytes',
+        'Content-Length': chunksize,
+        'Content-Type': 'audio/mpeg',
+      };
+
+      res.writeHead(206, head);
+      fileStream.pipe(res);
+    } else {
+      const head = {
+        'Content-Length': fileSize,
+        'Content-Type': 'audio/mpeg',
+        'Accept-Ranges': 'bytes',
+      };
+      res.writeHead(200, head);
+      fs.createReadStream(filePath).pipe(res);
+    }
+  } catch (err) {
+    console.error('Audio stream error:', err);
+    res.status(500).end();
+  }
+});
+
+// ==========================================
 // BACKBLAZE B2 IMAGE UPLOAD ENDPOINT
 // ==========================================
-app.post('/api/upload', async (req, res) => {
+app.post('/api/upload', requireWriterOrAdmin, async (req, res) => {
   try {
     const { imageBase64, fileName, type, folder } = req.body;
     if (!imageBase64) {
@@ -152,7 +279,7 @@ app.post('/api/upload', async (req, res) => {
 });
 
 // Upload remote URL or base64 to Backblaze B2
-app.post('/api/upload-url', async (req, res) => {
+app.post('/api/upload-url', requireWriterOrAdmin, async (req, res) => {
   try {
     const { url, imageBase64, folder } = req.body || {};
     const targetFolder = folder || 'articles';
@@ -250,24 +377,43 @@ app.post('/api/video-metadata', async (req, res) => {
     }
 
     const trimmedUrl = url.trim();
-    const lowerUrl = trimmedUrl.toLowerCase();
+
+    // SSRF Protection: Validate target URL against private/internal IPs, localhost, cloud metadata, and forbidden ports
+    const ssrfCheck = await validateUrlForSsrf(trimmedUrl);
+    if (!ssrfCheck.valid || !ssrfCheck.parsedUrl) {
+      return res.status(403).json({ success: false, message: ssrfCheck.reason || 'Forbidden URL destination' });
+    }
+
+    const parsedHost = ssrfCheck.parsedUrl.hostname.toLowerCase();
+    const isAllowedPlatform =
+      parsedHost === 'apple.com' || parsedHost.endsWith('.apple.com') ||
+      parsedHost === 'spotify.com' || parsedHost.endsWith('.spotify.com') ||
+      parsedHost === 'youtube.com' || parsedHost.endsWith('.youtube.com') || parsedHost === 'youtu.be' ||
+      parsedHost === 'amazon.com' || parsedHost.endsWith('.amazon.com') ||
+      parsedHost === 'rumble.com' || parsedHost.endsWith('.rumble.com') ||
+      parsedHost === 'facebook.com' || parsedHost.endsWith('.facebook.com') || parsedHost === 'fb.watch' ||
+      parsedHost === 'instagram.com' || parsedHost.endsWith('.instagram.com');
+
+    if (!isAllowedPlatform) {
+      return res.status(400).json({ success: false, message: 'URL is not from a supported video or audio platform' });
+    }
 
     let platform = 'Youtube Video';
-    if (lowerUrl.includes('apple.com') || lowerUrl.includes('podcasts.apple.com')) {
+    if (parsedHost === 'apple.com' || parsedHost.endsWith('.apple.com')) {
       platform = 'Apple Podcasts';
-    } else if (lowerUrl.includes('spotify.com')) {
+    } else if (parsedHost === 'spotify.com' || parsedHost.endsWith('.spotify.com')) {
       platform = 'Spotify';
-    } else if (lowerUrl.includes('music.youtube.com')) {
+    } else if (parsedHost === 'music.youtube.com') {
       platform = 'YouTube Music';
-    } else if (lowerUrl.includes('amazon.com') || lowerUrl.includes('music.amazon.com')) {
+    } else if (parsedHost === 'amazon.com' || parsedHost.endsWith('.amazon.com')) {
       platform = 'Amazon Music';
-    } else if (lowerUrl.includes('youtube.com') || lowerUrl.includes('youtu.be')) {
-      platform = lowerUrl.includes('/shorts/') ? 'YouTube Shorts' : 'Youtube Video';
-    } else if (lowerUrl.includes('rumble.com')) {
+    } else if (parsedHost === 'youtube.com' || parsedHost.endsWith('.youtube.com') || parsedHost === 'youtu.be') {
+      platform = trimmedUrl.toLowerCase().includes('/shorts/') ? 'YouTube Shorts' : 'Youtube Video';
+    } else if (parsedHost === 'rumble.com' || parsedHost.endsWith('.rumble.com')) {
       platform = 'Rumble Video';
-    } else if (lowerUrl.includes('facebook.com') || lowerUrl.includes('fb.watch')) {
+    } else if (parsedHost === 'facebook.com' || parsedHost.endsWith('.facebook.com') || parsedHost === 'fb.watch') {
       platform = 'Facebook Short';
-    } else if (lowerUrl.includes('instagram.com')) {
+    } else if (parsedHost === 'instagram.com' || parsedHost.endsWith('.instagram.com')) {
       platform = 'Instagram shorts';
     }
 
@@ -277,7 +423,7 @@ app.post('/api/video-metadata', async (req, res) => {
     let formattedDuration = '0:45';
 
     // 0A. Apple Podcasts
-    if (lowerUrl.includes('apple.com') || lowerUrl.includes('podcasts.apple.com')) {
+    if (parsedHost === 'apple.com' || parsedHost.endsWith('.apple.com')) {
       try {
         const podRes = await fetchWithTimeout(trimmedUrl, {
           headers: {
@@ -363,7 +509,7 @@ app.post('/api/video-metadata', async (req, res) => {
     }
 
     // 0B. Spotify
-    if (lowerUrl.includes('spotify.com')) {
+    if (parsedHost === 'spotify.com' || parsedHost.endsWith('.spotify.com')) {
       try {
         const spotRes = await fetchWithTimeout(trimmedUrl, {
           headers: {
@@ -424,7 +570,7 @@ app.post('/api/video-metadata', async (req, res) => {
     }
 
     // 0C. Amazon Music
-    if (lowerUrl.includes('amazon.com') || lowerUrl.includes('music.amazon.com')) {
+    if (parsedHost === 'amazon.com' || parsedHost.endsWith('.amazon.com')) {
       try {
         const amzRes = await fetchWithTimeout(trimmedUrl, {
           headers: {
@@ -524,7 +670,7 @@ app.post('/api/video-metadata', async (req, res) => {
     }
 
     // 2. Rumble
-    if (lowerUrl.includes('rumble.com')) {
+    if (parsedHost === 'rumble.com' || parsedHost.endsWith('.rumble.com')) {
       const cleanRumbleUrl = trimmedUrl.split('?')[0];
       try {
         const oembedUrl = `https://rumble.com/api/Media/oembed.json?url=${encodeURIComponent(cleanRumbleUrl)}`;
@@ -581,7 +727,7 @@ app.post('/api/video-metadata', async (req, res) => {
     }
 
     // 3. Instagram
-    if (lowerUrl.includes('instagram.com')) {
+    if (parsedHost === 'instagram.com' || parsedHost.endsWith('.instagram.com')) {
       platform = 'Instagram shorts';
       const instaMatch = trimmedUrl.match(/\/(?:reel|reels|p|tv)\/([a-zA-Z0-9_-]+)/);
       if (instaMatch && instaMatch[1]) {
@@ -654,7 +800,7 @@ app.post('/api/video-metadata', async (req, res) => {
     }
 
     // 4. Facebook
-    if (lowerUrl.includes('facebook.com') || lowerUrl.includes('fb.watch')) {
+    if (parsedHost === 'facebook.com' || parsedHost.endsWith('.facebook.com') || parsedHost === 'fb.watch') {
       try {
         const fbRes = await fetchWithTimeout(trimmedUrl, {
           headers: {
@@ -853,7 +999,7 @@ app.get('/api/shorts', async (req, res) => {
   }
 });
 
-app.post('/api/shorts', async (req, res) => {
+app.post('/api/shorts', requireAdmin, async (req, res) => {
   try {
     const { subTab, slots } = req.body;
     const incomingSlots = Array.isArray(slots) ? slots : (req.body && Array.isArray(req.body.slots) ? req.body.slots : []);
@@ -886,8 +1032,10 @@ app.post('/api/shorts', async (req, res) => {
       if ((normSubTab === 'podcast' || slot.id?.includes('podcast')) && slot.videoUrl) {
         slot.audioUrl = ''; // Reset audioUrl before extracting for new videoUrl
         try {
-          const lowerUrl = slot.videoUrl.toLowerCase();
-            if (lowerUrl.includes('apple.com') || lowerUrl.includes('podcasts.apple.com')) {
+          const videoSsrf = await validateUrlForSsrf(slot.videoUrl.trim());
+          if (videoSsrf.valid && videoSsrf.parsedUrl) {
+            const pHost = videoSsrf.parsedUrl.hostname.toLowerCase();
+            if (pHost === 'apple.com' || pHost.endsWith('.apple.com')) {
               const podRes = await fetchWithTimeout(slot.videoUrl.trim(), {
                 headers: {
                   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
@@ -924,7 +1072,7 @@ app.post('/api/shorts', async (req, res) => {
                   slot.audioUrl = decodeURIComponent(streamUrlMatch.replace(/\\/g, ''));
                 }
               }
-            } else if (lowerUrl.includes('spotify.com')) {
+            } else if (pHost === 'spotify.com' || pHost.endsWith('.spotify.com')) {
               let embedUrl = slot.videoUrl.trim();
               if (embedUrl.includes('open.spotify.com/') && !embedUrl.includes('/embed/')) {
                 embedUrl = embedUrl.replace('open.spotify.com/', 'open.spotify.com/embed/');
@@ -937,7 +1085,7 @@ app.post('/api/shorts', async (req, res) => {
                 const match = html.match(/https:\/\/p\.scdn\.co\/mp3-preview\/[a-zA-Z0-9]+/);
                 if (match && match[0]) slot.audioUrl = match[0];
               }
-            } else if (lowerUrl.includes('music.youtube.com') || lowerUrl.includes('youtube.com') || lowerUrl.includes('youtu.be')) {
+            } else if (pHost === 'youtube.com' || pHost.endsWith('.youtube.com') || pHost === 'youtu.be') {
               const ytMatch = slot.videoUrl.trim().match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/)|music\.youtube\.com\/watch\?v=)([\w-]{11})/i);
               if (ytMatch && ytMatch[1]) {
                 const ytId = ytMatch[1];
@@ -979,11 +1127,12 @@ app.post('/api/shorts', async (req, res) => {
                   }
                 }
               }
-            } else if (lowerUrl.endsWith('.mp3') || lowerUrl.endsWith('.m4a') || lowerUrl.endsWith('.wav')) {
+            } else if (slot.videoUrl.toLowerCase().endsWith('.mp3') || slot.videoUrl.toLowerCase().endsWith('.m4a') || slot.videoUrl.toLowerCase().endsWith('.wav')) {
               slot.audioUrl = slot.videoUrl.trim();
             }
-          } catch (audioExtractErr) {}
-        }
+          }
+        } catch (audioExtractErr) {}
+      }
 
       // 2. Save / Update into MySQL `shorts` database table
       try {
@@ -1097,6 +1246,11 @@ const formatPostRow = (row) => {
     targetedEmailsArr = typeof row.targetedEmails === 'string' ? JSON.parse(row.targetedEmails) : (row.targetedEmails || []);
   } catch (e) {}
 
+  let subWritersArr = [];
+  try {
+    subWritersArr = typeof row.sub_writers === 'string' ? JSON.parse(row.sub_writers) : (row.sub_writers || []);
+  } catch (e) {}
+
   const cleanThumb = unwrapWebpProxyUrl(row.thumbnail || '');
 
   return {
@@ -1106,6 +1260,7 @@ const formatPostRow = (row) => {
     tags: Array.isArray(tagsArr) ? tagsArr : [],
     imageSeoKeywords: Array.isArray(imageSeoKeywordsArr) ? imageSeoKeywordsArr : [],
     targetedEmails: Array.isArray(targetedEmailsArr) ? targetedEmailsArr : [],
+    sub_writers: Array.isArray(subWritersArr) ? subWritersArr : [],
     focusKeyword: row.focusKeyword || '',
     seoTitle: row.seoTitle || '',
     seoDescription: row.seoDescription || '',
@@ -1181,11 +1336,11 @@ const sendTargetedArticleEmails = async (post) => {
     }
   });
 
-  // 2. Collect newsletter subscribers if broadcastToSubscribers is enabled (default true)
-  const shouldBroadcast = post.broadcastToSubscribers !== false &&
-    post.broadcastToSubscribers !== 0 &&
-    post.broadcastToSubscribers !== '0' &&
-    post.broadcastToSubscribers !== 'false';
+  // 2. Collect newsletter subscribers ONLY if broadcastToSubscribers is explicitly checked
+  const shouldBroadcast = post.broadcastToSubscribers === true ||
+    post.broadcastToSubscribers === 1 ||
+    post.broadcastToSubscribers === '1' ||
+    post.broadcastToSubscribers === 'true';
 
   if (shouldBroadcast) {
     try {
@@ -1207,6 +1362,8 @@ const sendTargetedArticleEmails = async (post) => {
 
       const normalizeCatStr = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
       const normPostCategories = allPostCategories.map(normalizeCatStr).filter(Boolean);
+
+      const genericWords = new Set(['news', 'all', 'general', 'world', 'daily', 'editorial', 'opinion', 'business', 'tech', 'arts', 'sports']);
 
       subRows.forEach((sub) => {
         const subEmail = (typeof sub === 'string' ? sub : sub.email || '').toLowerCase().trim();
@@ -1246,10 +1403,23 @@ const sendTargetedArticleEmails = async (post) => {
             const normT = normalizeCatStr(origTopic);
             if (!normT) continue;
 
-            const isMatch = normPostCategories.some((c) => {
+            const isMatch = allPostCategories.some((rawC) => {
+              const c = normalizeCatStr(rawC);
               if (!c || !normT) return false;
               if (c === normT) return true;
-              if (c.length >= 3 && normT.length >= 3) {
+
+              // Check if both contain "international"
+              if (normT.includes('international') && c.includes('international')) return true;
+
+              // Check if both match "us" / "usnews"
+              if ((normT === 'usnews' || normT === 'us') && (c === 'usnews' || c === 'us')) return true;
+
+              // Don't let generic words (e.g. "news") falsely match specific topics (e.g. "internationalnews")
+              if (genericWords.has(c) || genericWords.has(normT)) {
+                return c === normT;
+              }
+
+              if (c.length >= 4 && normT.length >= 4) {
                 return c.includes(normT) || normT.includes(c);
               }
               return false;
@@ -1499,8 +1669,8 @@ app.get('/api/posts', async (req, res) => {
     let query = 'SELECT * FROM posts ORDER BY publishedAt DESC, created_at DESC';
     let params = [];
     if (authorEmail) {
-      query = 'SELECT * FROM posts WHERE LOWER(authorEmail) = ? ORDER BY publishedAt DESC, created_at DESC';
-      params = [authorEmail];
+      query = 'SELECT * FROM posts WHERE LOWER(authorEmail) = ? OR (sub_writers IS NOT NULL AND LOWER(CAST(sub_writers AS CHAR)) LIKE ?) ORDER BY publishedAt DESC, created_at DESC';
+      params = [authorEmail, `%${authorEmail}%`];
     }
     const [rows] = await db.query(query, params);
     const formatted = (rows || []).map(formatPostRow);
@@ -1511,7 +1681,7 @@ app.get('/api/posts', async (req, res) => {
   }
 });
 
-app.post('/api/posts', async (req, res) => {
+app.post('/api/posts', requireWriterOrAdmin, async (req, res) => {
   try {
     const incomingPosts = req.body;
     let listToProcess = Array.isArray(incomingPosts) ? incomingPosts : [incomingPosts];
@@ -1578,28 +1748,41 @@ app.post('/api/posts', async (req, res) => {
         p.thumbnail = rawThumb;
       }
 
+      // Sanitize metadata fields to neutralize any injected scripts/HTML tags
+      if (p.title) p.title = stripHtml(p.title);
+      if (p.subheadline) p.subheadline = stripHtml(p.subheadline);
+      if (p.cardSummary) p.cardSummary = stripHtml(p.cardSummary);
+      if (p.author) p.author = stripHtml(p.author);
+      if (p.photoCaption) p.photoCaption = stripHtml(p.photoCaption);
+      if (p.focusKeyword) p.focusKeyword = stripHtml(p.focusKeyword);
+      if (p.seoTitle) p.seoTitle = stripHtml(p.seoTitle);
+      if (p.seoDescription) p.seoDescription = stripHtml(p.seoDescription);
+
       // 2. Upload all inline body images (base64 & external URLs) in article HTML to Backblaze B2 under articles/
+      // and sanitize HTML bodyContent to completely eliminate Stored XSS vectors before database persistence
       if (p.bodyContent) {
         p.bodyContent = await uploadAllExternalImagesInHtml(p.bodyContent, `article_${p.id}`, 'articles');
+        p.bodyContent = sanitizeArticleHtml(p.bodyContent);
       }
 
       // 3. Save / Update in MySQL posts table
       try {
-        // Ensure imageSeoKeywords, targetedEmails, broadcastToSubscribers, focusKeyword, seoTitle, seoDescription columns exist in MySQL posts table
+        // Ensure imageSeoKeywords, targetedEmails, broadcastToSubscribers, focusKeyword, seoTitle, seoDescription, sub_writers columns exist in MySQL posts table
         try { await db.query('ALTER TABLE posts ADD COLUMN imageSeoKeywords JSON DEFAULT NULL'); } catch (colErr) {}
         try { await db.query('ALTER TABLE posts ADD COLUMN targetedEmails JSON DEFAULT NULL'); } catch (colErr) {}
         try { await db.query('ALTER TABLE posts ADD COLUMN broadcastToSubscribers TINYINT(1) DEFAULT 1'); } catch (colErr) {}
         try { await db.query('ALTER TABLE posts ADD COLUMN focusKeyword VARCHAR(255) DEFAULT NULL'); } catch (colErr) {}
         try { await db.query('ALTER TABLE posts ADD COLUMN seoTitle VARCHAR(255) DEFAULT NULL'); } catch (colErr) {}
         try { await db.query('ALTER TABLE posts ADD COLUMN seoDescription TEXT DEFAULT NULL'); } catch (colErr) {}
+        try { await db.query('ALTER TABLE posts ADD COLUMN sub_writers JSON DEFAULT NULL'); } catch (colErr) {}
 
         const insertQuery = `
           INSERT INTO posts (
             id, title, slug, subheadline, cardSummary, bodyContent, category,
             subCategories, homepagePlacement, author, authorEmail, status,
             thumbnail, photoCaption, tags, imageSeoKeywords, targetedEmails, broadcastToSubscribers, readDuration, views, publishedAt, date,
-            focusKeyword, seoTitle, seoDescription
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            focusKeyword, seoTitle, seoDescription, sub_writers
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
           ON DUPLICATE KEY UPDATE
             title = VALUES(title),
             slug = VALUES(slug),
@@ -1624,7 +1807,8 @@ app.post('/api/posts', async (req, res) => {
             date = VALUES(date),
             focusKeyword = VALUES(focusKeyword),
             seoTitle = VALUES(seoTitle),
-            seoDescription = VALUES(seoDescription);
+            seoDescription = VALUES(seoDescription),
+            sub_writers = VALUES(sub_writers);
         `;
 
         // Check if article was previously published in database to avoid duplicate email broadcasts
@@ -1667,7 +1851,8 @@ app.post('/api/posts', async (req, res) => {
           p.date || null,
           p.focusKeyword || null,
           p.seoTitle || null,
-          p.seoDescription || null
+          p.seoDescription || null,
+          JSON.stringify(p.sub_writers || [])
         ]);
 
         // Dispatch targeted email notifications ONLY if status is Published AND it was not previously published (or explicit notify requested)
@@ -1745,9 +1930,22 @@ app.post('/api/posts/view', async (req, res) => {
 });
 
 // Delete post endpoint (Active MySQL DB)
-app.delete('/api/posts/:id', async (req, res) => {
+app.delete('/api/posts/:id', requireWriterOrAdmin, async (req, res) => {
   try {
     const { id } = req.params;
+    const requesterRole = (req.user?.role || '').toLowerCase().trim();
+    const requesterEmail = (req.user?.email || '').toLowerCase().trim();
+
+    // If writer, verify they are deleting their own article
+    if (requesterRole !== 'admin') {
+      const [postRows] = await db.query('SELECT authorEmail FROM posts WHERE id = ?', [String(id)]);
+      if (postRows && postRows.length > 0) {
+        const postAuthor = (postRows[0].authorEmail || '').toLowerCase().trim();
+        if (postAuthor && postAuthor !== requesterEmail) {
+          return res.status(403).json({ success: false, message: 'Access denied: You can only delete your own articles.' });
+        }
+      }
+    }
 
     try {
       await db.query('DELETE FROM posts WHERE id = ?', [String(id)]);
@@ -1863,7 +2061,7 @@ app.delete('/api/saved-articles', async (req, res) => {
 // NEWSLETTER SUBSCRIPTIONS API ENDPOINTS
 // ==========================================
 
-app.get('/api/newsletter', async (req, res) => {
+app.get('/api/newsletter', requireAdmin, async (req, res) => {
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
   try {
     const [rows] = await db.query('SELECT * FROM newsletter_subscriptions ORDER BY subscribed_at DESC');
@@ -2019,7 +2217,7 @@ app.post('/api/newsletter', subscribeLimiter, async (req, res) => {
   }
 });
 
-app.delete('/api/newsletter', async (req, res) => {
+app.delete('/api/newsletter', optionalAuth, async (req, res) => {
   try {
     const email = (req.body?.email || req.query?.email || '').toLowerCase().trim();
     const emails = Array.isArray(req.body?.emails) ? req.body.emails.map((e) => String(e).toLowerCase().trim()) : [];
@@ -2034,8 +2232,13 @@ app.delete('/api/newsletter', async (req, res) => {
       }
     }
 
-    const [rows] = await db.query('SELECT * FROM newsletter_subscriptions ORDER BY subscribed_at DESC');
-    res.status(200).json({ success: true, subscribers: rows || [] });
+    const isAdmin = req.user && String(req.user.role || '').toLowerCase() === 'admin';
+    if (isAdmin) {
+      const [rows] = await db.query('SELECT * FROM newsletter_subscriptions ORDER BY subscribed_at DESC');
+      return res.status(200).json({ success: true, message: 'Unsubscribed successfully', subscribers: rows || [] });
+    }
+
+    return res.status(200).json({ success: true, message: 'Unsubscribed successfully' });
   } catch (error) {
     console.error('Error deleting newsletter subscription:', error);
     res.status(500).json({ success: false, message: 'Failed to delete subscription' });
@@ -2057,7 +2260,6 @@ async function seedDefaultAdmins() {
     {
       full_name: 'Akram Yanoos',
       email: 'akramyoonos006@gmail.com',
-      plainPassword: 'Admin123',
       role: 'admin',
       bio: 'Default System Administrator',
       avatar_url: '',
@@ -2065,7 +2267,6 @@ async function seedDefaultAdmins() {
     {
       full_name: 'Geeth Liyanage',
       email: 'geethliyanage979@gmail.com',
-      plainPassword: 'Admin123',
       role: 'admin',
       bio: 'Default System Administrator',
       avatar_url: '',
@@ -2073,7 +2274,6 @@ async function seedDefaultAdmins() {
     {
       full_name: 'Times Chicago',
       email: 'timeschicago17@gmail.com',
-      plainPassword: 'times+chicago1724##',
       role: 'admin',
       bio: 'Default System Administrator',
       avatar_url: '',
@@ -2098,10 +2298,11 @@ async function seedDefaultAdmins() {
 
     for (const admin of defaultAdmins) {
       const lowerEmail = admin.email.toLowerCase();
-      const defaultPass = await bcrypt.hash(admin.plainPassword, 10);
       try {
         const [rows] = await db.query('SELECT id FROM users WHERE LOWER(email) = ?', [lowerEmail]);
         if (rows.length === 0) {
+          const initialPassword = process.env.INITIAL_ADMIN_PASSWORD || 'ChangeMe979!';
+          const defaultPass = await bcrypt.hash(initialPassword, 12);
           await db.query(
             'INSERT INTO users (full_name, email, password, role, bio, avatar_url, is_default_admin) VALUES (?, ?, ?, ?, ?, ?, 1)',
             [admin.full_name, admin.email, defaultPass, 'admin', admin.bio, admin.avatar_url]
@@ -2123,16 +2324,39 @@ async function initUserExtraColumns() {
   try { await db.query('ALTER TABLE users ADD COLUMN country VARCHAR(128) DEFAULT NULL'); } catch(e) {}
   try { await db.query('ALTER TABLE users ADD COLUMN phone_country_code VARCHAR(32) DEFAULT NULL'); } catch(e) {}
   try { await db.query('ALTER TABLE users ADD COLUMN is_blocked TINYINT(1) DEFAULT 0'); } catch(e) {}
+  try { await db.query('ALTER TABLE users ADD COLUMN experiences LONGTEXT DEFAULT NULL'); } catch(e) {}
+  try { await db.query('ALTER TABLE users ADD COLUMN education LONGTEXT DEFAULT NULL'); } catch(e) {}
+  try { await db.query('ALTER TABLE users ADD COLUMN publications LONGTEXT DEFAULT NULL'); } catch(e) {}
+  try { await db.query('ALTER TABLE users ADD COLUMN issued_date VARCHAR(64) DEFAULT NULL'); } catch(e) {}
+  try { await db.query('ALTER TABLE users ADD COLUMN press_id VARCHAR(64) DEFAULT NULL'); } catch(e) {}
 }
 initUserExtraColumns();
 
-app.get('/api/users', async (req, res) => {
+const safeParseJsonArray = (val) => {
+  if (!val) return [];
+  if (Array.isArray(val)) return val;
+  if (typeof val === 'string') {
+    try {
+      const p = JSON.parse(val);
+      return Array.isArray(p) ? p : [];
+    } catch (e) {
+      return [];
+    }
+  }
+  return [];
+};
+
+app.get('/api/users', optionalAuth, async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT id, full_name, email, role, bio, avatar_url, linkedin, is_default_admin, is_blocked, phone, country, phone_country_code, created_at FROM users ORDER BY id ASC');
+    const [rows] = await db.query('SELECT id, full_name, email, role, writer_type, cycle_started_at, block_reason, bio, avatar_url, linkedin, is_default_admin, is_blocked, phone, country, phone_country_code, experiences, education, publications, issued_date, press_id, created_at FROM users ORDER BY id ASC');
     const usersList = (rows || []).map((u) => ({
       ...u,
+      writer_type: u.writer_type || 'staff',
       is_default_admin: Boolean(u.is_default_admin),
       is_blocked: Boolean(u.is_blocked),
+      experiences: safeParseJsonArray(u.experiences),
+      education: safeParseJsonArray(u.education),
+      publications: safeParseJsonArray(u.publications),
     }));
     const usersMap = {};
     usersList.forEach((u) => {
@@ -2145,14 +2369,62 @@ app.get('/api/users', async (req, res) => {
   }
 });
 
-app.get('/api/users/:email', async (req, res) => {
+// Sanitized public writers list for search and author directory (excludes Readers, Admins, Passwords, and PII)
+app.get('/api/writers', async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      `SELECT id, full_name, email, role, writer_type, bio, avatar_url, linkedin, country, experiences, education, publications, issued_date, press_id 
+       FROM users 
+       WHERE LOWER(role) IN ('writer', 'author') 
+         AND (is_blocked IS NULL OR is_blocked = 0)
+       ORDER BY full_name ASC, id ASC`
+    );
+    const sanitizedRows = (rows || []).map((w) => ({
+      ...w,
+      experiences: safeParseJsonArray(w.experiences),
+      education: safeParseJsonArray(w.education),
+      publications: safeParseJsonArray(w.publications),
+    }));
+    res.status(200).json({ success: true, list: sanitizedRows, writers: sanitizedRows });
+  } catch (dbErr) {
+    console.error('MySQL Writers Fetch Error:', dbErr.message);
+    res.status(500).json({ success: false, message: 'Failed to fetch writers' });
+  }
+});
+
+app.get('/api/users/:email', optionalAuth, async (req, res) => {
   const email = (req.params.email || '').toLowerCase().trim();
   try {
-    const [rows] = await db.query('SELECT id, full_name, email, role, bio, avatar_url, linkedin, is_default_admin, is_blocked, phone, country, phone_country_code FROM users WHERE LOWER(email) = ?', [email]);
+    const [rows] = await db.query('SELECT id, full_name, email, role, writer_type, cycle_started_at, block_reason, bio, avatar_url, linkedin, is_default_admin, is_blocked, phone, country, phone_country_code, experiences, education, publications, issued_date, press_id FROM users WHERE LOWER(email) = ?', [email]);
     if (rows && rows.length > 0) {
-      const user = rows[0];
+      const user = { ...rows[0] };
+      user.writer_type = user.writer_type || 'staff';
       user.is_default_admin = Boolean(user.is_default_admin);
       user.is_blocked = Boolean(user.is_blocked);
+      user.experiences = safeParseJsonArray(user.experiences);
+      user.education = safeParseJsonArray(user.education);
+      user.publications = safeParseJsonArray(user.publications);
+
+      // Privacy check: only self or admin can view phone, country, phone_country_code
+      // Country is public for writers and contributors so readers can see their country on the byline/writer page
+      let isPrivileged = false;
+      if (req.user) {
+        const callerEmail = String(req.user.email || '').toLowerCase().trim();
+        const callerRole = String(req.user.role || '').toLowerCase().trim();
+        if (callerEmail === email || callerRole === 'admin') {
+          isPrivileged = true;
+        }
+      }
+
+      if (!isPrivileged) {
+        delete user.phone;
+        const uRole = (user.role || '').toLowerCase();
+        if (uRole !== 'writer' && uRole !== 'author') {
+          delete user.country;
+        }
+        delete user.phone_country_code;
+      }
+
       return res.status(200).json({ success: true, user });
     }
     return res.status(404).json({ success: false, message: 'User not found' });
@@ -2162,7 +2434,7 @@ app.get('/api/users/:email', async (req, res) => {
 });
 
 // Update Profile endpoint
-app.post('/api/users', async (req, res) => {
+app.post('/api/users', protect, async (req, res) => {
   try {
     const userData = req.body;
     if (!userData || !userData.email) {
@@ -2170,11 +2442,22 @@ app.post('/api/users', async (req, res) => {
     }
 
     const email = userData.email.toLowerCase().trim();
+    const isTargetingSelf = (req.user.email || '').toLowerCase().trim() === email;
+    const isAdmin = req.user.role === 'admin';
+
+    if (!isTargetingSelf && !isAdmin) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied: You can only update your own profile.',
+      });
+    }
+
     const fullName = userData.full_name || userData.name || '';
     const bio = userData.bio !== undefined ? userData.bio : null;
     let avatarUrl = userData.avatar_url || userData.image || userData.avatar || null;
     const linkedin = userData.linkedin || userData.linkedinUrl || null;
-    const role = userData.role || null;
+    // Only administrators can change roles
+    const role = isAdmin ? (userData.role || null) : null;
 
     if (avatarUrl && avatarUrl.startsWith('data:image/')) {
       try {
@@ -2190,10 +2473,15 @@ app.post('/api/users', async (req, res) => {
     const phone = userData.phone !== undefined ? userData.phone : null;
     const country = userData.country !== undefined ? userData.country : null;
     const phoneCountryCode = userData.phone_country_code || userData.dial_code || null;
+    const experiences = userData.experiences !== undefined ? JSON.stringify(userData.experiences || []) : null;
+    const education = userData.education !== undefined ? JSON.stringify(userData.education || []) : null;
+    const publications = userData.publications !== undefined ? JSON.stringify(userData.publications || []) : null;
+    const lookupEmail = (userData.old_email || userData.previous_email || email).toLowerCase().trim();
 
     try {
       await db.query(
         `UPDATE users SET 
+           email = ?,
            full_name = COALESCE(NULLIF(?, ''), full_name),
            role = COALESCE(?, role),
            bio = COALESCE(?, bio),
@@ -2201,10 +2489,16 @@ app.post('/api/users', async (req, res) => {
            linkedin = COALESCE(?, linkedin),
            phone = COALESCE(?, phone),
            country = COALESCE(?, country),
-           phone_country_code = COALESCE(?, phone_country_code)
+           phone_country_code = COALESCE(?, phone_country_code),
+           experiences = COALESCE(?, experiences),
+           education = COALESCE(?, education),
+           publications = COALESCE(?, publications)
          WHERE LOWER(email) = ?`,
-        [fullName, role, bio, avatarUrl, linkedin, phone, country, phoneCountryCode, email]
+        [email, fullName, role, bio, avatarUrl, linkedin, phone, country, phoneCountryCode, experiences, education, publications, lookupEmail]
       );
+      if (email !== lookupEmail) {
+        await db.query('UPDATE posts SET authorEmail = ? WHERE LOWER(authorEmail) = ?', [email, lookupEmail]);
+      }
     } catch (dbErr) {
       console.warn("MySQL Profile Update Notice:", dbErr.message);
     }
@@ -2222,11 +2516,14 @@ app.post('/api/users', async (req, res) => {
       }
     }
 
-    const [rows] = await db.query('SELECT id, full_name, email, role, bio, avatar_url, linkedin, is_default_admin, is_blocked, phone, country, phone_country_code FROM users WHERE LOWER(email) = ?', [email]);
+    const [rows] = await db.query('SELECT id, full_name, email, role, writer_type, bio, avatar_url, linkedin, is_default_admin, is_blocked, phone, country, phone_country_code, experiences, education, publications, issued_date, press_id FROM users WHERE LOWER(email) = ?', [email]);
     if (rows && rows.length > 0) {
       const user = rows[0];
       user.is_default_admin = Boolean(user.is_default_admin);
       user.is_blocked = Boolean(user.is_blocked);
+      user.experiences = safeParseJsonArray(user.experiences);
+      user.education = safeParseJsonArray(user.education);
+      user.publications = safeParseJsonArray(user.publications);
       return res.status(200).json({ success: true, user });
     }
 
@@ -2240,7 +2537,7 @@ app.post('/api/users', async (req, res) => {
 const registerUserHandler = async (req, res) => {
   const bcrypt = require('bcryptjs');
   try {
-    const { name, full_name, email, password, role } = req.body || {};
+    const { name, full_name, email, password, role, writer_type } = req.body || {};
     if (!email || !password) {
       return res.status(400).json({ success: false, message: 'Email and password are required.' });
     }
@@ -2248,6 +2545,7 @@ const registerUserHandler = async (req, res) => {
     const cleanEmail = email.toLowerCase().trim();
     const userName = name || full_name || 'New User';
     const userRole = (role || 'reader').toLowerCase().trim();
+    const userWriterType = (writer_type || 'staff').toLowerCase().trim();
     const hashedPassword = await bcrypt.hash(password.trim(), 10);
 
     // 1. Check if user already exists
@@ -2262,8 +2560,8 @@ const registerUserHandler = async (req, res) => {
     let newId = Date.now();
     try {
       const [result] = await db.query(
-        'INSERT INTO users (full_name, email, password, role, bio, is_default_admin) VALUES (?, ?, ?, ?, ?, 0)',
-        [userName, cleanEmail, hashedPassword, userRole, 'Registered Website Member']
+        'INSERT INTO users (full_name, email, password, role, writer_type, cycle_started_at, bio, is_default_admin) VALUES (?, ?, ?, ?, ?, NOW(), ?, 0)',
+        [userName, cleanEmail, hashedPassword, userRole, userWriterType, 'Registered Website Member']
       );
       if (result.insertId) newId = result.insertId;
     } catch (dbErr) {
@@ -2275,6 +2573,7 @@ const registerUserHandler = async (req, res) => {
       full_name: userName,
       email: cleanEmail,
       role: userRole,
+      writer_type: userWriterType,
       is_default_admin: false,
     };
 
@@ -2288,22 +2587,61 @@ const registerUserHandler = async (req, res) => {
   }
 };
 
-app.post('/api/users/add', registerUserHandler);
-app.post('/api/users/signup', registerUserHandler);
+app.post('/api/users/add', requireAdmin, registerUserHandler);
+app.post('/api/users/signup', (req, res, next) => {
+  if (req.body) req.body.role = 'reader';
+  registerUserHandler(req, res, next);
+});
 
 // Edit Existing User
-app.put('/api/users/edit', async (req, res) => {
+app.put('/api/users/edit', protect, async (req, res) => {
   const bcrypt = require('bcryptjs');
   try {
-    const { id, full_name, name, email, role, password, bio, linkedin, phone, country, phone_country_code, is_blocked } = req.body;
+    const { id, full_name, name, email, role, writer_type, password, bio, linkedin, phone, country, phone_country_code, is_blocked, original_email, old_email, experiences, education, publications, issued_date, press_id, avatar_url } = req.body;
     if (!email) {
       return res.status(400).json({ success: false, message: 'Email required for edit.' });
     }
 
     const cleanEmail = email.toLowerCase().trim();
+    const lookupEmail = (original_email || old_email || email).toLowerCase().trim();
+    const requesterRole = (req.user?.role || '').toLowerCase().trim();
+    const requesterEmail = (req.user?.email || '').toLowerCase().trim();
+
+    // Non-admin can only edit their own profile
+    if (requesterRole !== 'admin' && lookupEmail !== requesterEmail) {
+      return res.status(403).json({ success: false, message: 'Access denied: You can only edit your own profile.' });
+    }
+
     const userName = full_name || name;
-    const userRole = role ? role.toLowerCase().trim() : undefined;
-    const blockedVal = is_blocked !== undefined ? (is_blocked ? 1 : 0) : null;
+    // Only admin can change user roles, writer types, or block status
+    const userRole = requesterRole === 'admin' && role ? role.toLowerCase().trim() : undefined;
+    const userWriterType = requesterRole === 'admin' && writer_type ? writer_type.toLowerCase().trim() : undefined;
+    const blockedVal = requesterRole === 'admin' && is_blocked !== undefined ? (is_blocked ? 1 : 0) : null;
+    const experiencesJson = experiences !== undefined ? JSON.stringify(experiences || []) : null;
+    const educationJson = education !== undefined ? JSON.stringify(education || []) : null;
+    const publicationsJson = publications !== undefined ? JSON.stringify(publications || []) : null;
+    const issuedDateVal = issued_date !== undefined ? issued_date : null;
+    const pressIdVal = press_id !== undefined ? press_id : null;
+    const avatarUrlVal = avatar_url !== undefined ? avatar_url : null;
+
+    // Check duplicate Press ID / Staff ID / Contributor ID
+    if (pressIdVal && pressIdVal.trim().length > 0) {
+      const cleanPressId = pressIdVal.trim();
+      try {
+        const [existingIdRows] = await db.query(
+          'SELECT id, email, full_name FROM users WHERE LOWER(press_id) = LOWER(?) AND LOWER(email) != LOWER(?)',
+          [cleanPressId, lookupEmail]
+        );
+        if (existingIdRows && existingIdRows.length > 0) {
+          return res.status(400).json({
+            success: false,
+            message: 'This ID is allocated for another contributor or Staff writer.'
+          });
+        }
+      } catch (checkErr) {
+        console.warn('Press ID check notice:', checkErr.message);
+      }
+    }
 
     // MySQL Update
     try {
@@ -2311,32 +2649,53 @@ app.put('/api/users/edit', async (req, res) => {
         const hashedPassword = await bcrypt.hash(password.trim(), 10);
         await db.query(
           `UPDATE users SET 
+             email = ?,
              full_name = COALESCE(?, full_name), 
              role = COALESCE(?, role), 
+             writer_type = COALESCE(?, writer_type),
              password = ?, 
              bio = COALESCE(?, bio), 
              linkedin = COALESCE(?, linkedin),
              phone = COALESCE(?, phone),
              country = COALESCE(?, country),
              phone_country_code = COALESCE(?, phone_country_code),
-             is_blocked = COALESCE(?, is_blocked)
+             is_blocked = COALESCE(?, is_blocked),
+             experiences = COALESCE(?, experiences),
+             education = COALESCE(?, education),
+             publications = COALESCE(?, publications),
+             issued_date = COALESCE(?, issued_date),
+             press_id = COALESCE(?, press_id),
+             avatar_url = COALESCE(?, avatar_url)
            WHERE LOWER(email) = ?`,
-          [userName, userRole, hashedPassword, bio, linkedin, phone, country, phone_country_code, blockedVal, cleanEmail]
+          [cleanEmail, userName, userRole, userWriterType, hashedPassword, bio, linkedin, phone, country, phone_country_code, blockedVal, experiencesJson, educationJson, publicationsJson, issuedDateVal, pressIdVal, avatarUrlVal, lookupEmail]
         );
       } else {
         await db.query(
           `UPDATE users SET 
+             email = ?,
              full_name = COALESCE(?, full_name), 
              role = COALESCE(?, role), 
+             writer_type = COALESCE(?, writer_type),
              bio = COALESCE(?, bio), 
              linkedin = COALESCE(?, linkedin),
              phone = COALESCE(?, phone),
              country = COALESCE(?, country),
              phone_country_code = COALESCE(?, phone_country_code),
-             is_blocked = COALESCE(?, is_blocked)
+             is_blocked = COALESCE(?, is_blocked),
+             experiences = COALESCE(?, experiences),
+             education = COALESCE(?, education),
+             publications = COALESCE(?, publications),
+             issued_date = COALESCE(?, issued_date),
+             press_id = COALESCE(?, press_id),
+             avatar_url = COALESCE(?, avatar_url)
            WHERE LOWER(email) = ?`,
-          [userName, userRole, bio, linkedin, phone, country, phone_country_code, blockedVal, cleanEmail]
+          [cleanEmail, userName, userRole, userWriterType, bio, linkedin, phone, country, phone_country_code, blockedVal, experiencesJson, educationJson, publicationsJson, issuedDateVal, pressIdVal, avatarUrlVal, lookupEmail]
         );
+      }
+
+      // Propagate updated email & name to posts table
+      if (cleanEmail !== lookupEmail) {
+        await db.query('UPDATE posts SET authorEmail = ? WHERE LOWER(authorEmail) = ?', [cleanEmail, lookupEmail]);
       }
 
       // Propagate updated name to posts table for articles written by this author email
@@ -2358,18 +2717,20 @@ app.put('/api/users/edit', async (req, res) => {
 });
 
 // Block / Unblock User Status Endpoint
-app.put('/api/users/:email/status', async (req, res) => {
+app.put('/api/users/:email/status', requireAdmin, async (req, res) => {
   try {
     const email = (req.params.email || '').toLowerCase().trim();
     const { is_blocked } = req.body;
     const blockedVal = is_blocked ? 1 : 0;
-    const [result] = await db.query('UPDATE users SET is_blocked = ? WHERE LOWER(email) = ?', [blockedVal, email]);
-    if (result && result.affectedRows === 0) {
-      const fullName = email.split('@')[0];
+
+    if (!blockedVal) {
+      // Unblocking user -> Reset block_reason, cycle_started_at, and last_warning_email_sent
       await db.query(
-        'INSERT INTO users (full_name, email, role, is_blocked, is_default_admin, created_at, updated_at) VALUES (?, ?, ?, ?, 0, NOW(), NOW())',
-        [fullName, email, 'reader', blockedVal]
-      ).catch(() => {});
+        'UPDATE users SET is_blocked = 0, block_reason = NULL, cycle_started_at = NOW(), last_warning_email_sent = NULL WHERE LOWER(email) = ?',
+        [email]
+      );
+    } else {
+      await db.query('UPDATE users SET is_blocked = 1 WHERE LOWER(email) = ?', [email]);
     }
     console.log(`[STATUS] User ${email} block status updated to ${blockedVal} in database`);
     return res.status(200).json({ success: true, is_blocked: Boolean(is_blocked) });
@@ -2380,9 +2741,16 @@ app.put('/api/users/:email/status', async (req, res) => {
 });
 
 // Delete User (With Cascade Deletion for Writer Articles)
-app.delete('/api/users/:email', async (req, res) => {
+app.delete('/api/users/:email', optionalAuth, async (req, res) => {
   try {
     const email = (req.params.email || '').toLowerCase().trim();
+    const requesterRole = (req.user?.role || '').toLowerCase().trim();
+    const requesterEmail = (req.user?.email || '').toLowerCase().trim();
+
+    // Only admin or the account owner can delete an account (if authenticated)
+    if (req.user && requesterRole !== 'admin' && email !== requesterEmail) {
+      return res.status(403).json({ success: false, message: 'Access denied: Only administrators can delete other user accounts.' });
+    }
     try {
       const [rows] = await db.query('SELECT is_default_admin, role, full_name FROM users WHERE LOWER(email) = ?', [email]);
       if (rows.length > 0) {
@@ -2475,7 +2843,7 @@ app.get('/api/ads', async (req, res) => {
   }
 });
 
-app.post('/api/ads', async (req, res) => {
+app.post('/api/ads', requireAdmin, async (req, res) => {
   try {
     const { slots, slot } = req.body;
     const targetSlots = slots || (slot ? [slot] : []);
@@ -2639,7 +3007,7 @@ app.get('/api/billionaires', async (req, res) => {
 });
 
 // POST /api/billionaires - Save/update billionaires list in MySQL DB & upload images to Backblaze B2
-app.post('/api/billionaires', async (req, res) => {
+app.post('/api/billionaires', requireAdmin, async (req, res) => {
   try {
     let items = req.body;
     if (req.body && req.body.billionaires) {
@@ -2824,7 +3192,7 @@ app.get('/api/entrepreneurs', async (req, res) => {
 });
 
 // POST /api/entrepreneurs - Save/update entrepreneurs list in MySQL DB & upload images to Backblaze B2
-app.post('/api/entrepreneurs', async (req, res) => {
+app.post('/api/entrepreneurs', requireAdmin, async (req, res) => {
   try {
     let items = req.body;
     if (req.body && req.body.entrepreneurs) {
@@ -2923,6 +3291,44 @@ if (!fs.existsSync(BACKUPS_DIR)) {
   fs.mkdirSync(BACKUPS_DIR, { recursive: true });
 }
 
+/**
+ * Validates and sanitizes a backup file name to prevent Path Traversal:
+ * - Rejects path separators (/ and \), traversal sequences (..), null bytes, and URL encoding.
+ * - Extracts basename and permits only alphanumeric, underscore, hyphen, and dot.
+ * - Enforces non-empty name with strict .json extension.
+ * - Verifies that the resolved path is strictly within BACKUPS_DIR.
+ */
+function getSafeBackupPath(inputFileName) {
+  if (!inputFileName || typeof inputFileName !== 'string') return null;
+
+  const raw = inputFileName.trim();
+
+  // 1. Explicitly reject any path traversal sequence or separator
+  if (raw.includes('/') || raw.includes('\\') || raw.includes('..') || raw.includes('%') || raw.includes('\0')) {
+    return null;
+  }
+
+  // 2. Extract basename and remove any invalid characters
+  const base = path.basename(raw);
+  const sanitized = base.replace(/[^a-zA-Z0-9._-]/g, '');
+
+  // 3. Must be non-empty and must end with .json
+  if (!sanitized || !sanitized.endsWith('.json')) return null;
+
+  // 4. Prevent hidden or empty-name files
+  if (sanitized === '.json' || sanitized.startsWith('.')) return null;
+
+  // 5. Resolve absolute path and verify directory boundary constraint
+  const resolvedDir = path.resolve(BACKUPS_DIR);
+  const resolvedPath = path.resolve(resolvedDir, sanitized);
+
+  if (!resolvedPath.startsWith(resolvedDir + path.sep)) {
+    return null;
+  }
+
+  return { safeFileName: sanitized, fullPath: resolvedPath };
+}
+
 const seedDefaultBackups = () => {
   const defaultFiles = [
     { name: 'db_backup_manual_2026_09_09_15_04_15.json', time: '2026-09-09T15:04:15.000Z' },
@@ -2975,7 +3381,7 @@ function formatDateFormatted(dStr) {
 }
 
 // GET /api/backups - List all available backups from B2 & local directory
-app.get('/api/backups', async (req, res) => {
+app.get('/api/backups', requireAdmin, async (req, res) => {
   try {
     const b2Files = await listBackblazeFiles('backups/');
     const backupsMap = new Map();
@@ -3027,7 +3433,7 @@ app.get('/api/backups', async (req, res) => {
 });
 
 // POST /api/backups/create - Create B2 Backup Snapshot
-app.post('/api/backups/create', async (req, res) => {
+app.post('/api/backups/create', requireAdmin, async (req, res) => {
   try {
     const { payload } = req.body || {};
 
@@ -3266,9 +3672,9 @@ async function restoreDatabaseSnapshot(snapshot) {
           String(p.id),
           p.title || '',
           p.slug || String(p.id),
-          p.subheadline || null,
-          p.cardSummary || p.excerpt || null,
-          p.bodyContent || null,
+          p.subheadline ? stripHtml(p.subheadline) : null,
+          p.cardSummary || p.excerpt ? stripHtml(p.cardSummary || p.excerpt) : null,
+          p.bodyContent ? sanitizeArticleHtml(p.bodyContent) : null,
           p.category || null,
           JSON.stringify(p.subCategories || []),
           p.homepagePlacement || null,
@@ -3290,7 +3696,7 @@ async function restoreDatabaseSnapshot(snapshot) {
     if (usersList && usersList.length > 0) {
       await db.query('DELETE FROM users').catch((err) => console.warn('MySQL Delete users notice:', err.message));
       const bcrypt = require('bcryptjs');
-      const defaultPasswordHash = await bcrypt.hash('Admin123', 10);
+      const defaultPasswordHash = await bcrypt.hash(process.env.DEFAULT_FALLBACK_PASSWORD || 'ChangeMe123!', 12);
       for (let u of usersList) {
         if (!u || !u.email) continue;
         const cleanEmail = u.email.toLowerCase().trim();
@@ -3535,21 +3941,34 @@ async function restoreDatabaseSnapshot(snapshot) {
 }
 
 // POST /api/backups/upload-restore - Upload JSON File & Restore
-app.post('/api/backups/upload-restore', async (req, res) => {
+app.post('/api/backups/upload-restore', requireAdmin, async (req, res) => {
   try {
     const { snapshot, fileName } = req.body;
     if (!snapshot || typeof snapshot !== 'object') {
       return res.status(400).json({ success: false, message: 'Invalid or missing JSON snapshot data' });
     }
 
-    const targetName = fileName || `db_backup_upload_${Date.now()}.json`;
+    let targetName = `db_backup_upload_${Date.now()}.json`;
+    if (fileName && typeof fileName === 'string') {
+      const safeCheck = getSafeBackupPath(fileName);
+      if (!safeCheck) {
+        return res.status(400).json({ success: false, message: 'Invalid or prohibited backup file name. Path traversal characters are blocked.' });
+      }
+      targetName = safeCheck.safeFileName;
+    }
+
+    const safeTarget = getSafeBackupPath(targetName);
+    if (!safeTarget) {
+      return res.status(400).json({ success: false, message: 'Invalid target backup file name' });
+    }
+
     const jsonBuffer = Buffer.from(JSON.stringify(snapshot, null, 2), 'utf-8');
 
-    // 1. Save to local backups
-    fs.writeFileSync(path.join(BACKUPS_DIR, targetName), jsonBuffer);
+    // 1. Save to local backups (guaranteed strictly inside BACKUPS_DIR)
+    fs.writeFileSync(safeTarget.fullPath, jsonBuffer);
 
     // 2. Upload to B2
-    uploadToBackblazeB2(jsonBuffer, targetName, 'application/json', 'backups').catch(() => {});
+    uploadToBackblazeB2(jsonBuffer, safeTarget.safeFileName, 'application/json', 'backups').catch(() => {});
 
     // 3. Perform full database restoration
     await restoreDatabaseSnapshot(snapshot);
@@ -3566,19 +3985,23 @@ app.post('/api/backups/upload-restore', async (req, res) => {
 });
 
 // POST /api/backups/restore - Restore from existing backup file
-app.post('/api/backups/restore', async (req, res) => {
+app.post('/api/backups/restore', requireAdmin, async (req, res) => {
   try {
     const { fileName } = req.body;
     if (!fileName) {
       return res.status(400).json({ success: false, message: 'fileName is required' });
     }
 
+    const safeFile = getSafeBackupPath(fileName);
+    if (!safeFile) {
+      return res.status(400).json({ success: false, message: 'Prohibited file path: Path traversal attempt detected' });
+    }
+
     let snapshotStr = null;
-    const localPath = path.join(BACKUPS_DIR, fileName);
-    if (fs.existsSync(localPath)) {
-      snapshotStr = fs.readFileSync(localPath, 'utf-8');
+    if (fs.existsSync(safeFile.fullPath)) {
+      snapshotStr = fs.readFileSync(safeFile.fullPath, 'utf-8');
     } else {
-      snapshotStr = await downloadBackblazeFile(`backups/${fileName}`);
+      snapshotStr = await downloadBackblazeFile(`backups/${safeFile.safeFileName}`);
     }
 
     if (!snapshotStr) {
@@ -3591,7 +4014,7 @@ app.post('/api/backups/restore', async (req, res) => {
     return res.status(200).json({
       success: true,
       snapshot,
-      message: `Website database restored successfully from ${fileName}!`,
+      message: `Website database restored successfully from ${safeFile.safeFileName}!`,
     });
   } catch (err) {
     console.error('Error restoring backup:', err);
@@ -3600,20 +4023,24 @@ app.post('/api/backups/restore', async (req, res) => {
 });
 
 // GET /api/backups/download/:fileName - Force download backup file as attachment
-app.get('/api/backups/download/:fileName', async (req, res) => {
+app.get('/api/backups/download/:fileName', requireAdmin, async (req, res) => {
   try {
-    const fileName = req.params.fileName;
-    if (!fileName) {
+    const rawFileName = req.params.fileName;
+    if (!rawFileName) {
       return res.status(400).json({ success: false, message: 'fileName required' });
     }
 
-    const localPath = path.join(BACKUPS_DIR, fileName);
+    const safeFile = getSafeBackupPath(rawFileName);
+    if (!safeFile) {
+      return res.status(400).json({ success: false, message: 'Prohibited file path: Path traversal attempt detected' });
+    }
+
     let fileBuffer = null;
 
-    if (fs.existsSync(localPath)) {
-      fileBuffer = fs.readFileSync(localPath);
+    if (fs.existsSync(safeFile.fullPath)) {
+      fileBuffer = fs.readFileSync(safeFile.fullPath);
     } else {
-      const downloadedStr = await downloadBackblazeFile(`backups/${fileName}`).catch(() => null);
+      const downloadedStr = await downloadBackblazeFile(`backups/${safeFile.safeFileName}`).catch(() => null);
       if (downloadedStr) {
         fileBuffer = Buffer.from(downloadedStr, 'utf-8');
       }
@@ -3624,7 +4051,7 @@ app.get('/api/backups/download/:fileName', async (req, res) => {
     }
 
     res.setHeader('Content-Type', 'application/json');
-    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+    res.setHeader('Content-Disposition', `attachment; filename="${safeFile.safeFileName}"`);
     return res.send(fileBuffer);
   } catch (err) {
     console.error('Error downloading backup file:', err);
@@ -3633,19 +4060,23 @@ app.get('/api/backups/download/:fileName', async (req, res) => {
 });
 
 // DELETE /api/backups/:fileName - Delete backup file
-app.delete('/api/backups/:fileName', async (req, res) => {
+app.delete('/api/backups/:fileName', requireAdmin, async (req, res) => {
   try {
-    const fileName = req.params.fileName;
-    if (!fileName) {
+    const rawFileName = req.params.fileName;
+    if (!rawFileName) {
       return res.status(400).json({ success: false, message: 'fileName required' });
     }
 
-    const localPath = path.join(BACKUPS_DIR, fileName);
-    if (fs.existsSync(localPath)) {
-      fs.unlinkSync(localPath);
+    const safeFile = getSafeBackupPath(rawFileName);
+    if (!safeFile) {
+      return res.status(400).json({ success: false, message: 'Prohibited file path: Path traversal attempt detected' });
     }
 
-    await deleteBackblazeFile(`backups/${fileName}`);
+    if (fs.existsSync(safeFile.fullPath)) {
+      fs.unlinkSync(safeFile.fullPath);
+    }
+
+    await deleteBackblazeFile(`backups/${safeFile.safeFileName}`);
 
     return res.status(200).json({ success: true, message: 'Backup file deleted successfully' });
   } catch (err) {
@@ -3714,10 +4145,13 @@ app.post('/api/contact', contactLimiter, async (req, res) => {
   }
 });
 
-app.get('/api/contact/user', async (req, res) => {
+app.get('/api/contact/user', protect, async (req, res) => {
   try {
     const email = String(req.query.email || '').toLowerCase().trim();
     if (!email) return res.status(400).json({ success: false, submissions: [] });
+    if (req.user.role !== 'admin' && (req.user.email || '').toLowerCase().trim() !== email) {
+      return res.status(403).json({ success: false, message: 'Access denied' });
+    }
     await ensureContactSubmissionsTable();
     const [rows] = await db.query(`SELECT * FROM contact_submissions WHERE LOWER(user_email) = ? ORDER BY created_at DESC`, [email]);
     return res.status(200).json({ success: true, submissions: rows });
@@ -3727,7 +4161,7 @@ app.get('/api/contact/user', async (req, res) => {
   }
 });
 
-app.get('/api/contact', async (req, res) => {
+app.get('/api/contact', requireAdmin, async (req, res) => {
   try {
     await ensureContactSubmissionsTable();
     const [rows] = await db.query(`SELECT * FROM contact_submissions ORDER BY created_at DESC`);
@@ -3738,7 +4172,7 @@ app.get('/api/contact', async (req, res) => {
   }
 });
 
-app.put('/api/contact/:id', async (req, res) => {
+app.put('/api/contact/:id', requireAdmin, async (req, res) => {
   try {
     const { status } = req.body || {};
     const { id } = req.params;
@@ -3750,7 +4184,7 @@ app.put('/api/contact/:id', async (req, res) => {
   }
 });
 
-app.delete('/api/contact/:id', async (req, res) => {
+app.delete('/api/contact/:id', requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     await ensureContactSubmissionsTable();
@@ -3820,7 +4254,7 @@ app.post('/api/advertise-leads', advertiseLimiter, async (req, res) => {
   }
 });
 
-app.get('/api/advertise-leads', async (req, res) => {
+app.get('/api/advertise-leads', requireAdmin, async (req, res) => {
   try {
     await ensureAdvertiseLeadsTable();
     const [rows] = await db.query(`SELECT * FROM advertise_leads ORDER BY created_at DESC`);
@@ -3831,7 +4265,7 @@ app.get('/api/advertise-leads', async (req, res) => {
   }
 });
 
-app.put('/api/advertise-leads/:id', async (req, res) => {
+app.put('/api/advertise-leads/:id', requireAdmin, async (req, res) => {
   try {
     const { status } = req.body || {};
     const { id } = req.params;
@@ -3843,7 +4277,7 @@ app.put('/api/advertise-leads/:id', async (req, res) => {
   }
 });
 
-app.delete('/api/advertise-leads/:id', async (req, res) => {
+app.delete('/api/advertise-leads/:id', requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     await ensureAdvertiseLeadsTable();
@@ -4154,7 +4588,7 @@ app.get('/api/subscriptions/user', async (req, res) => {
   }
 });
 
-app.get('/api/subscriptions', async (req, res) => {
+app.get('/api/subscriptions', requireAdmin, async (req, res) => {
   try {
     await ensureSubscriptionRequestsTable();
     const [rows] = await db.query(`SELECT * FROM subscription_requests ORDER BY id ASC`);
@@ -4174,7 +4608,7 @@ app.get('/api/subscriptions', async (req, res) => {
   }
 });
 
-app.put('/api/subscriptions/:id', async (req, res) => {
+app.put('/api/subscriptions/:id', requireAdmin, async (req, res) => {
   try {
     const { status } = req.body || {};
     const { id } = req.params;
@@ -4188,7 +4622,7 @@ app.put('/api/subscriptions/:id', async (req, res) => {
   }
 });
 
-app.delete('/api/subscriptions/:id', async (req, res) => {
+app.delete('/api/subscriptions/:id', requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -4261,7 +4695,7 @@ app.get('/api/comments/:articleSlug', async (req, res) => {
   }
 });
 
-app.post('/api/comments', async (req, res) => {
+app.post('/api/comments', commentsLimiter, async (req, res) => {
   try {
     await ensureCommentsTable();
     const { id, articleSlug, text, authorName, authorEmail } = req.body || {};
@@ -4282,14 +4716,19 @@ app.post('/api/comments', async (req, res) => {
       ? id.trim()
       : `comment_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
 
+    const sanitizedText = stripHtml(text);
+    if (!sanitizedText) {
+      return res.status(400).json({ success: false, message: 'Comment text cannot be empty or malicious HTML' });
+    }
+
     const newComment = {
       id: commentId,
       articleSlug: articleSlug.trim(),
-      authorName: (authorName || 'Anonymous').trim(),
-      authorEmail: (authorEmail || '').trim(),
+      authorName: stripHtml(authorName || 'Anonymous') || 'Anonymous',
+      authorEmail: stripHtml(authorEmail || ''),
       createdAt: formattedDate,
       timestamp: Date.now(),
-      text: text.trim(),
+      text: sanitizedText,
     };
 
     await db.query(
@@ -4304,10 +4743,24 @@ app.post('/api/comments', async (req, res) => {
   }
 });
 
-app.delete('/api/comments/:id', async (req, res) => {
+app.delete('/api/comments/:id', protect, async (req, res) => {
   try {
     const rawId = req.params.id || '';
     const targetId = decodeURIComponent(rawId).trim();
+
+    if (req.user.role !== 'admin') {
+      const [existing] = await db.query('SELECT * FROM comments WHERE id = ?', [targetId]);
+      if (existing.length === 0) {
+        return res.status(404).json({ success: false, message: 'Comment not found' });
+      }
+      const comment = existing[0];
+      const userEmail = (req.user.email || '').toLowerCase().trim();
+      const commentEmail = (comment.authorEmail || '').toLowerCase().trim();
+      if (commentEmail && userEmail !== commentEmail) {
+        return res.status(403).json({ success: false, message: 'Access denied: You can only delete your own comments' });
+      }
+    }
+
     const [result] = await db.query('DELETE FROM comments WHERE id = ?', [targetId]);
     if (result.affectedRows === 0) {
       return res.status(404).json({ success: false, message: 'Comment not found' });
@@ -4439,6 +4892,21 @@ ${itemsXml}
 </rss>`;
 
   res.send(rssXml);
+});
+
+// Centralized Error Handling Middleware
+app.use((err, req, res, next) => {
+  if (err && err.type === 'entity.too.large') {
+    return res.status(413).json({
+      success: false,
+      message: 'Payload too large. Request body exceeds maximum allowed size.',
+    });
+  }
+  console.error('Unhandled Application Error:', err);
+  return res.status(err.status || 500).json({
+    success: false,
+    message: err.message || 'Internal Server Error',
+  });
 });
 
 // Start server

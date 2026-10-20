@@ -134,9 +134,9 @@ export const TechCategorySection: React.FC = () => {
       </div>
 
       {/* Main Grid: Left Hero (8 cols), Right 3 Stories (4 cols) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-[0.4cm] items-start pt-[24px] lg:pt-0">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 lg:gap-[0.4cm] items-start pt-0 lg:pt-0">
         {/* LEFT HERO AREA */}
-        <div className="lg:col-span-8 flex flex-col justify-start pb-[24px] lg:pb-0 border-b lg:border-b-0 border-dashed border-[#CCCCCC]">
+        <div className="lg:col-span-8 flex flex-col justify-start pt-3 lg:pt-0 pb-5 lg:pb-0 border-b lg:border-b-0 border-dashed border-[#CCCCCC]">
           {heroItem.imageUrl && (
             <Link
               href={`/article/${heroItem.slug}`}
@@ -175,9 +175,9 @@ export const TechCategorySection: React.FC = () => {
         </div>
 
         {/* RIGHT STORIES AREA */}
-        <div className="lg:col-span-4 pl-0 lg:pl-2 flex flex-col justify-start pt-[20px] lg:pt-0 pb-[24px] mb-[35px] lg:pb-0 lg:mb-0 border-b lg:border-b-0 border-dashed border-[#CCCCCC]">
+        <div className="lg:col-span-4 pl-0 lg:pl-2 flex flex-col justify-start pt-0 lg:pt-0 pb-0 lg:pb-0 mb-0 lg:mb-0 border-b-0 lg:border-b-0 border-dashed border-[#CCCCCC]">
           {/* Story 1 */}
-          <article className="pb-[24px] lg:pb-3 border-b border-dashed border-[#CCCCCC]">
+          <article className="pt-5 lg:pt-0 pb-5 lg:pb-3 border-b border-dashed border-[#CCCCCC]">
             <h4 className="font-serif font-bold text-[17px] sm:text-[18px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-1.5" style={{ fontFamily: "Georgia, serif" }}>
               <Link href={`/article/${side1.slug}`}>
                 {side1.title}
@@ -194,7 +194,7 @@ export const TechCategorySection: React.FC = () => {
           </article>
 
           {/* Story 2 */}
-          <article className="py-[24px] lg:py-3 border-b border-dashed border-[#CCCCCC]">
+          <article className="py-5 lg:py-3 border-b border-dashed border-[#CCCCCC]">
             <h4 className="font-serif font-bold text-[17px] sm:text-[18px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-1.5" style={{ fontFamily: "Georgia, serif" }}>
               <Link href={`/article/${side2.slug}`}>
                 {side2.title}
@@ -211,7 +211,7 @@ export const TechCategorySection: React.FC = () => {
           </article>
 
           {/* Story 3 */}
-          <article className="pt-[24px] lg:pt-3">
+          <article className="pt-5 lg:pt-3 pb-0 lg:pb-0">
             <h4 className="font-serif font-bold text-[17px] sm:text-[18px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-1.5" style={{ fontFamily: "Georgia, serif" }}>
               <Link href={`/article/${side3.slug}`}>
                 {side3.title}

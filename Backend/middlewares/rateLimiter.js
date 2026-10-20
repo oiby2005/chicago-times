@@ -60,9 +60,37 @@ const subscribeLimiter = rateLimit({
   statusCode: 429,
 });
 
+// 5. Comments Rate Limiter: 5 comments per 1 minute per IP
+const commentsLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: 'Too many comments submitted from this connection. Please wait 1 minute before posting another comment.',
+  },
+  statusCode: 429,
+});
+
+// 6. Password Reset Rate Limiter: 10 requests per 15 minutes per IP
+const passwordResetLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: 'Too many password reset requests from this connection. Please wait 15 minutes before trying again.',
+  },
+  statusCode: 429,
+});
+
 module.exports = {
   signInLimiter,
   contactLimiter,
   advertiseLimiter,
   subscribeLimiter,
+  commentsLimiter,
+  passwordResetLimiter,
 };

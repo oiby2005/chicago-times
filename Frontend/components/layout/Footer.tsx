@@ -52,11 +52,12 @@ const featuredLinksCol2 = [
 ];
 
 // ABOUT Column
-const aboutLinks = [
+const aboutLinks: { name: string; href?: string; target?: string; disabled?: boolean; hidden?: boolean }[] = [
   { name: "About us", href: "/about-us" },
   { name: "Terms & Conditions", href: "/terms-and-conditions" },
-  { name: "Leadership", href: "/leadership" },
+  { name: "Careers", href: "/careers" },
   { name: "RSS Feed", href: "/rss.xml", target: "_blank" },
+  { name: "Leadership", href: "/leadership", hidden: true },
 ];
 
 export const Footer: React.FC = () => {
@@ -233,16 +234,22 @@ export const Footer: React.FC = () => {
                 ABOUT
               </h3>
               <ul className="space-y-2.5 text-xs text-[#444444]">
-                {aboutLinks.map((item) => (
+                {aboutLinks.filter((item) => !item.hidden).map((item) => (
                   <li key={item.name}>
-                    <a
-                      href={item.href}
-                      target={item.target || undefined}
-                      rel={item.target === "_blank" ? "noopener noreferrer" : undefined}
-                      className="hover:text-[#00558c] transition-colors block"
-                    >
-                      {item.name}
-                    </a>
+                    {item.disabled ? (
+                      <span className="text-[#999999] cursor-default select-none block">
+                        {item.name}
+                      </span>
+                    ) : (
+                      <a
+                        href={item.href}
+                        target={item.target || undefined}
+                        rel={item.target === "_blank" ? "noopener noreferrer" : undefined}
+                        className="hover:text-[#00558c] transition-colors block"
+                      >
+                        {item.name}
+                      </a>
+                    )}
                   </li>
                 ))}
               </ul>

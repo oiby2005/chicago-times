@@ -122,7 +122,15 @@ export default function MostReadSidebar({ authorName, authorEmail }: MostReadSid
           (targetSlug && pSlug && (pSlug === targetSlug || pSlug.includes(targetSlug) || targetSlug.includes(pSlug))) ||
           (targetName && profileName && (profileName === targetName || profileName.includes(targetName) || targetName.includes(profileName)));
 
-        return isEmailMatch || isNameMatch;
+        const isSubWriterMatch = Array.isArray(p.sub_writers) && p.sub_writers.some((sw: any) => {
+          const swEmail = cleanStr(sw.email);
+          const swName = cleanStr(sw.name || sw.full_name || (typeof sw === "string" ? sw : ""));
+          if (targetEmail && swEmail && swEmail === targetEmail) return true;
+          if (targetName && swName && (swName === targetName || swName.includes(targetName) || targetName.includes(swName))) return true;
+          return false;
+        });
+
+        return isEmailMatch || isNameMatch || isSubWriterMatch;
       });
 
       if (filtered.length > 0) {
@@ -180,7 +188,7 @@ export default function MostReadSidebar({ authorName, authorEmail }: MostReadSid
       {/* Header with Trending Up Icon */}
       <div className="flex items-center gap-2 border-b border-[#e5e7eb] pb-3 mb-4">
         <h3 className="font-poppins font-sans font-bold text-xs uppercase tracking-wider text-[#111111]">
-          MOST READ
+          MOST READ ARTICLES
         </h3>
         <svg
           className="w-4 h-4 text-[#111111]"

@@ -4,7 +4,9 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import ProfileSettingsModal, { UserProfile } from "@/components/ui/ProfileSettingsModal";
+import PressIdModal from "@/components/ui/PressIdModal";
 import { getAuthorSlugForUser, slugifyAuthorName, getEditPostUrl } from "@/data/authors";
+import { getAuthHeaders } from "@/lib/authHeader";
 
 interface PostItem {
   id: string;
@@ -62,8 +64,68 @@ export default function WriterDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showPressIdModal, setShowPressIdModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
+
+  // Contributor Quota & Live Countdown State
+  interface QuotaStatus {
+    is_contributor: boolean;
+    writer_type?: string;
+    is_blocked?: boolean;
+    block_reason?: string;
+    weeklyTarget?: number;
+    weeklyPublished?: number;
+    weeklyRemaining?: number;
+    monthlyTarget?: number;
+    monthlyPublished?: number;
+    monthlyRemaining?: number;
+    cycleStartMs?: number;
+    cycleEndMs?: number;
+    msLeft?: number;
+    daysLeft?: number;
+    dayOfCycle?: number;
+    isWarningPeriod?: boolean;
+  }
+  const [quotaStatus, setQuotaStatus] = useState<QuotaStatus | null>(null);
+  const [countdown, setCountdown] = useState<{ days: number; hours: number; minutes: number; seconds: number }>({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+  });
+
+  const fetchQuotaStatus = async (email: string) => {
+    if (!email) return;
+    try {
+      const token = typeof window !== "undefined" ? localStorage.getItem("wsj_token") : null;
+      const res = await fetch(`http://localhost:5000/api/contributors/quota-status?email=${encodeURIComponent(email)}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          setQuotaStatus(data);
+        }
+      }
+    } catch (err) {}
+  };
+
+  useEffect(() => {
+    if (!quotaStatus?.cycleEndMs) return;
+    const updateCountdown = () => {
+      const now = Date.now();
+      const diff = Math.max(0, (quotaStatus.cycleEndMs || 0) - now);
+      const days = Math.floor(diff / (24 * 60 * 60 * 1000));
+      const hours = Math.floor((diff % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+      const minutes = Math.floor((diff % (60 * 60 * 1000)) / (60 * 1000));
+      const seconds = Math.floor((diff % (60 * 1000)) / 1000);
+      setCountdown({ days, hours, minutes, seconds });
+    };
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 1000);
+    return () => clearInterval(interval);
+  }, [quotaStatus?.cycleEndMs]);
 
   const [deleteConfirmModal, setDeleteConfirmModal] = useState<{
     isOpen: boolean;
@@ -220,7 +282,7 @@ export default function WriterDashboard() {
 
         fetch("http://localhost:5000/api/posts", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: getAuthHeaders({ "Content-Type": "application/json" }),
           body: JSON.stringify(updatedLocal),
         }).catch(() => null);
       } catch (err) {}
@@ -262,7 +324,7 @@ export default function WriterDashboard() {
 
         fetch("http://localhost:5000/api/posts", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: getAuthHeaders({ "Content-Type": "application/json" }),
           body: JSON.stringify(updatedLocal),
         }).catch(() => null);
       } catch (err) {}
@@ -286,6 +348,7 @@ export default function WriterDashboard() {
 
         await fetch(`http://localhost:5000/api/posts/${encodeURIComponent(targetId)}`, {
           method: "DELETE",
+          headers: getAuthHeaders(),
         }).catch(() => null);
       } catch (err) {}
     }
@@ -313,7 +376,11 @@ export default function WriterDashboard() {
         }
 
         try {
-          const res = await fetch(`http://localhost:5000/api/users/${encodeURIComponent(cleanEmail)}`);
+          const token = typeof window !== "undefined" ? localStorage.getItem("wsj_token") : null;
+          const res = await fetch(`http://localhost:5000/api/users/${encodeURIComponent(cleanEmail)}`, {
+            credentials: "include",
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          });
           if (res.ok) {
             const data = await res.json();
             if (data.success && data.user) {
@@ -324,6 +391,7 @@ export default function WriterDashboard() {
         } catch (e) {}
 
         setCurrentUser(parsed);
+        fetchQuotaStatus(cleanEmail);
       } else {
         router.push("/signin");
       }
@@ -564,8 +632,28 @@ export default function WriterDashboard() {
                     <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
-                    <span>View Writer Page</span>
+                    <span>
+                      {(quotaStatus?.is_contributor || (currentUser?.writer_type || "").toLowerCase() === "contributor")
+                        ? "Contributor page"
+                        : "Staff Writer"}
+                    </span>
                   </Link>
+                  <button
+                    onClick={() => {
+                      setShowDropdown(false);
+                      setShowPressIdModal(true);
+                    }}
+                    className="w-full flex items-center space-x-3 px-4 py-2.5 text-xs font-bold text-gray-700 hover:bg-gray-50 transition-colors text-left cursor-pointer"
+                  >
+                    <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5zm6-10.125a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0zm1.294 6.364a4.125 4.125 0 00-6.338 0 .375.375 0 00.287.636h5.764a.375.375 0 00.287-.636z" />
+                    </svg>
+                    <span>
+                      {(quotaStatus?.is_contributor || (currentUser?.writer_type || "").toLowerCase() === "contributor")
+                        ? "Contributor ID"
+                        : "Staff ID"}
+                    </span>
+                  </button>
                   <button
                     onClick={() => {
                       setShowDropdown(false);
@@ -646,164 +734,487 @@ export default function WriterDashboard() {
             </div>
           </div>
 
-          {/* Main Card Container */}
-          <div className="bg-white border border-[#e2e8f0] rounded-2xl shadow-2xs py-4 sm:py-5 min-h-[400px] flex flex-col relative overflow-hidden">
-
-            {/* Posts Table (Non-Scrollable) */}
-            {filteredPosts.length > 0 ? (
-              <div className="w-full">
-                <table className="w-full text-left font-sans border-collapse">
-                  <thead>
-                    <tr
-                      style={{ fontFamily: '"SF Mono", SFMono-Regular, ui-monospace, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace' }}
-                      className="bg-[#f8fafc] border-t border-b border-[#e2e8f0] text-[8.5px] xs:text-[9px] font-bold text-[#94a3b8] uppercase tracking-wider"
-                    >
-                      <th className="py-2 sm:py-2.5 pl-3 sm:pl-8 pr-2 sm:pr-3 font-bold">POST TITLE & SUMMARY</th>
-                      <th className="py-2 sm:py-2.5 px-2 sm:px-4 font-bold whitespace-nowrap">CATEGORY</th>
-                      <th className="py-2 sm:py-2.5 px-2 sm:px-4 font-bold whitespace-nowrap hidden xs:table-cell">DATE</th>
-                      <th className="py-2 sm:py-2.5 px-2 sm:px-4 font-bold text-center whitespace-nowrap">STATUS</th>
-                      <th className="py-2 sm:py-2.5 pl-2 sm:pl-4 pr-3 sm:pr-8 font-bold text-right whitespace-nowrap">ACTIONS</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#f1f5f9]">
-                    {filteredPosts.map((post) => (
-                      <tr key={post.id} className="hover:bg-slate-50/70 transition-colors">
-                        {/* POST TITLE & SUMMARY */}
-                        <td className="py-3 sm:py-4 pl-3 sm:pl-8 pr-2 sm:pr-3 text-left">
-                          <div className="max-w-[160px] xs:max-w-[240px] sm:max-w-[420px]">
-                            <div className="font-bold text-xs sm:text-[13px] text-[#0f172a] font-sans leading-tight line-clamp-2">
-                              {post.title}
-                            </div>
-                            {post.subheadline && (
-                              <div className="hidden xs:block text-[10.5px] sm:text-[11px] text-[#475569] font-sans mt-0.5 leading-snug line-clamp-1 sm:line-clamp-2">
-                                {post.subheadline}
+          {/* Side-by-Side Layout for Contributor (Compressed Table on Left, Countdown on Right) OR Full Table for Staff Writer */}
+          {quotaStatus?.is_contributor ? (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+              {/* Left Column: Compressed Table */}
+              <div className="lg:col-span-8 bg-white border border-[#e2e8f0] rounded-2xl shadow-2xs py-3 sm:py-4 flex flex-col relative overflow-hidden">
+                {filteredPosts.length > 0 ? (
+                  <div className="w-full max-h-[500px] overflow-y-auto">
+                    <table className="w-full text-left font-sans border-collapse">
+                      <thead className="sticky top-0 z-10">
+                        <tr
+                          style={{ fontFamily: '"SF Mono", SFMono-Regular, ui-monospace, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace' }}
+                          className="bg-[#f8fafc] border-t border-b border-[#e2e8f0] text-[8.5px] xs:text-[9px] font-bold text-[#94a3b8] uppercase tracking-wider"
+                        >
+                          <th className="py-2.5 pl-3 sm:pl-6 pr-2 font-bold">POST TITLE & SUMMARY</th>
+                          <th className="py-2.5 px-2 sm:px-3 font-bold whitespace-nowrap">CATEGORY</th>
+                          <th className="py-2.5 px-2 sm:px-3 font-bold whitespace-nowrap hidden sm:table-cell">DATE</th>
+                          <th className="py-2.5 px-2 sm:px-3 font-bold text-center whitespace-nowrap">STATUS</th>
+                          <th className="py-2.5 pl-2 pr-3 sm:pr-6 font-bold text-right whitespace-nowrap">ACTIONS</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#f1f5f9]">
+                        {filteredPosts.map((post) => (
+                          <tr key={post.id} className="hover:bg-slate-50/70 transition-colors">
+                            {/* POST TITLE & SUMMARY */}
+                            <td className="py-2.5 sm:py-3 pl-3 sm:pl-6 pr-2 text-left">
+                              <div className="max-w-[160px] xs:max-w-[220px] sm:max-w-[320px]">
+                                <div className="font-bold text-xs sm:text-[13px] text-[#0f172a] font-sans leading-tight line-clamp-2">
+                                  {post.title}
+                                </div>
+                                {post.subheadline && (
+                                  <div className="hidden xs:block text-[10.5px] sm:text-[11px] text-[#475569] font-sans mt-0.5 leading-snug line-clamp-1">
+                                    {post.subheadline}
+                                  </div>
+                                )}
+                                <div className="text-[8.5px] sm:text-[9px] font-mono text-[#94a3b8] mt-0.5 font-normal lowercase">
+                                  {post.readDuration ? post.readDuration.toLowerCase() : "5 min read"}
+                                </div>
                               </div>
-                            )}
-                            <div className="text-[8.5px] sm:text-[9px] font-mono text-[#94a3b8] mt-0.5 sm:mt-1 font-normal lowercase">
-                              {post.readDuration ? post.readDuration.toLowerCase() : "5 min read"}
-                            </div>
-                          </div>
-                        </td>
+                            </td>
 
-                        {/* CATEGORY */}
-                        <td className="py-3 sm:py-4 px-2 sm:px-4 text-[10px] sm:text-[11.5px] font-bold text-[#0f172a] whitespace-nowrap">
-                          {post.category}
-                        </td>
+                            {/* CATEGORY */}
+                            <td className="py-2.5 sm:py-3 px-2 sm:px-3 text-[10px] sm:text-[11.5px] font-bold text-[#0f172a] whitespace-nowrap">
+                              {post.category}
+                            </td>
 
-                        {/* DATE */}
-                        <td className="py-3 sm:py-4 px-2 sm:px-4 text-[9.5px] sm:text-[11px] text-[#64748b] font-mono whitespace-nowrap hidden xs:table-cell">
-                          {post.date}
-                        </td>
+                            {/* DATE */}
+                            <td className="py-2.5 sm:py-3 px-2 sm:px-3 text-[9.5px] sm:text-[11px] text-[#64748b] font-mono whitespace-nowrap hidden sm:table-cell">
+                              {post.date}
+                            </td>
 
-                        {/* STATUS */}
-                        <td className="py-3 sm:py-4 px-2 sm:px-4 text-center whitespace-nowrap">
-                          {post.status === "Trash" ? (
-                            <span className="inline-block bg-[#fef2f2] text-[#ef4444] border border-[#fecaca] text-[8px] sm:text-[9.5px] font-extrabold px-1.5 sm:px-2.5 py-0.5 rounded-full uppercase tracking-wider font-mono">
-                              TRASH
-                            </span>
-                          ) : post.status === "Pending review" ? (
-                            <span className="inline-block bg-[#fef3c7] text-[#d97706] border border-[#fde68a] text-[8px] sm:text-[9.5px] font-extrabold px-1.5 sm:px-2.5 py-0.5 rounded-full uppercase tracking-wider font-mono">
-                              PENDING
-                            </span>
-                          ) : post.status === "Rejected" ? (
-                            <span className="inline-block bg-[#ffe4e6] text-[#e11d48] border border-[#fecdd3] text-[8px] sm:text-[9.5px] font-extrabold px-1.5 sm:px-2.5 py-0.5 rounded-full uppercase tracking-wider font-mono">
-                              REJECTED
-                            </span>
-                          ) : post.status === "Published" ? (
-                            <span className="inline-block bg-[#d1fae5] text-[#059669] border border-[#a7f3d0] text-[8px] sm:text-[9.5px] font-extrabold px-1.5 sm:px-2.5 py-0.5 rounded-full uppercase tracking-wider font-mono">
-                              PUBLISHED
-                            </span>
-                          ) : (
-                            <span className="inline-block bg-[#f1f5f9] text-[#1e293b] border border-[#e2e8f0] text-[8px] sm:text-[9.5px] font-bold px-2 sm:px-3 py-0.5 rounded-full uppercase tracking-wider font-mono">
-                              DRAFT
-                            </span>
-                          )}
-                        </td>
+                            {/* STATUS */}
+                            <td className="py-2.5 sm:py-3 px-2 sm:px-3 text-center whitespace-nowrap">
+                              {post.status === "Trash" ? (
+                                <span className="inline-block bg-[#fef2f2] text-[#ef4444] border border-[#fecaca] text-[8px] sm:text-[9.5px] font-extrabold px-1.5 sm:px-2.5 py-0.5 rounded-full uppercase tracking-wider font-mono">
+                                  TRASH
+                                </span>
+                              ) : post.status === "Pending review" ? (
+                                <span className="inline-block bg-[#fef3c7] text-[#d97706] border border-[#fde68a] text-[8px] sm:text-[9.5px] font-extrabold px-1.5 sm:px-2.5 py-0.5 rounded-full uppercase tracking-wider font-mono">
+                                  PENDING
+                                </span>
+                              ) : post.status === "Rejected" ? (
+                                <span className="inline-block bg-[#ffe4e6] text-[#e11d48] border border-[#fecdd3] text-[8px] sm:text-[9.5px] font-extrabold px-1.5 sm:px-2.5 py-0.5 rounded-full uppercase tracking-wider font-mono">
+                                  REJECTED
+                                </span>
+                              ) : post.status === "Published" ? (
+                                <span className="inline-block bg-[#d1fae5] text-[#059669] border border-[#a7f3d0] text-[8px] sm:text-[9.5px] font-extrabold px-1.5 sm:px-2.5 py-0.5 rounded-full uppercase tracking-wider font-mono">
+                                  PUBLISHED
+                                </span>
+                              ) : (
+                                <span className="inline-block bg-[#f1f5f9] text-[#1e293b] border border-[#e2e8f0] text-[8px] sm:text-[9.5px] font-bold px-2 sm:px-3 py-0.5 rounded-full uppercase tracking-wider font-mono">
+                                  DRAFT
+                                </span>
+                              )}
+                            </td>
 
-                        {/* ACTIONS */}
-                        <td className="py-3 sm:py-4 pl-2 sm:pl-4 pr-3 sm:pr-8 text-right whitespace-nowrap">
-                          {post.status === "Trash" ? (
-                            <div className="inline-flex items-center justify-end space-x-1.5 sm:space-x-3 font-sans font-bold text-[10px] sm:text-[11px]">
-                              <button
-                                type="button"
-                                onClick={(e) => handleRestoreFromTrash(post.id, e)}
-                                className="text-[#0f172a] hover:text-[#2563eb] transition-colors cursor-pointer"
-                              >
-                                Restore
-                              </button>
-                              <button
-                                type="button"
-                                onClick={(e) => confirmDeletePermanently(post, e)}
-                                className="text-[#0f172a] hover:text-red-600 transition-colors cursor-pointer"
-                              >
-                                Delete
-                              </button>
-                            </div>
-                          ) : (
-                            <div className="inline-flex items-center justify-end space-x-2.5 sm:space-x-3 whitespace-nowrap">
-                              <button
-                                type="button"
-                                onClick={() => router.push(getEditPostUrl(post, currentUser))}
-                                className="text-[#2563eb] hover:text-[#1d4ed8] font-bold text-[10.5px] sm:text-[11.5px] font-sans transition-colors cursor-pointer whitespace-nowrap"
-                              >
-                                Edit
-                              </button>
-                              <button
-                                type="button"
-                                onClick={(e) => handleMoveToTrash(post.id, e)}
-                                className="text-gray-400 hover:text-red-600 active:text-red-700 transition-colors cursor-pointer p-1.5 rounded-md hover:bg-red-50 active:bg-red-100"
-                                aria-label="Move to Trash"
-                              >
-                                <svg className="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                              </button>
-                            </div>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                            {/* ACTIONS */}
+                            <td className="py-2.5 sm:py-3 pl-2 pr-3 sm:pr-6 text-right whitespace-nowrap">
+                              {post.status === "Trash" ? (
+                                <div className="inline-flex items-center justify-end space-x-1.5 sm:space-x-3 font-sans font-bold text-[10px] sm:text-[11px]">
+                                  <button
+                                    type="button"
+                                    onClick={(e) => handleRestoreFromTrash(post.id, e)}
+                                    className="text-[#0f172a] hover:text-[#2563eb] transition-colors cursor-pointer"
+                                  >
+                                    Restore
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={(e) => confirmDeletePermanently(post, e)}
+                                    className="text-[#0f172a] hover:text-red-600 transition-colors cursor-pointer"
+                                  >
+                                    Delete
+                                  </button>
+                                </div>
+                              ) : (
+                                <div className="inline-flex items-center justify-end space-x-2 sm:space-x-3 whitespace-nowrap">
+                                  <button
+                                    type="button"
+                                    onClick={() => router.push(getEditPostUrl(post, currentUser))}
+                                    className="text-[#2563eb] hover:text-[#1d4ed8] font-bold text-[10.5px] sm:text-[11.5px] font-sans transition-colors cursor-pointer whitespace-nowrap"
+                                  >
+                                    Edit
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={(e) => handleMoveToTrash(post.id, e)}
+                                    className="text-gray-400 hover:text-red-600 active:text-red-700 transition-colors cursor-pointer p-1.5 rounded-md hover:bg-red-50 active:bg-red-100"
+                                    aria-label="Move to Trash"
+                                  >
+                                    <svg className="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                  </button>
+                                </div>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="my-auto py-8 flex flex-col items-center justify-center text-center">
+                    <div className="relative w-24 h-24 flex items-center justify-center mb-3">
+                      <div className="absolute top-2 left-4 w-5 h-5 bg-[#1e293b] rounded-lg transform -rotate-12 shadow-2xs" />
+                      <div className="absolute bottom-2 right-4 w-4 h-4 bg-[#10b981] rounded-full shadow-2xs" />
+                      <div className="absolute bottom-1 left-6 w-10 h-5 bg-[#f59e0b] rounded-b-full transform -rotate-6" />
+                      <div className="relative z-10 w-10 h-10 bg-[#2563eb] text-white rounded-xl shadow-lg flex items-center justify-center">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        </svg>
+                      </div>
+                    </div>
+                    <h3 className="text-sm sm:text-base font-bold text-[#0f172a] font-sans tracking-tight">
+                      Share what's on your mind
+                    </h3>
+                    <p className="text-xs text-gray-500 font-sans mt-0.5">
+                      Create or import posts to start publishing.
+                    </p>
+                    <button
+                      onClick={() => router.push(getCreatePostUrl())}
+                      className="text-[#2563eb] hover:text-[#1d4ed8] font-bold text-xs mt-3 flex items-center space-x-1 transition-colors cursor-pointer hover:underline"
+                    >
+                      <span className="text-base leading-none">+</span>
+                      <span>Create Post</span>
+                    </button>
+                  </div>
+                )}
               </div>
-            ) : (
-              /* Centralized Empty State Graphical Artwork */
-              <div className="my-auto py-8 flex flex-col items-center justify-center text-center">
-                <div className="relative w-28 h-28 flex items-center justify-center mb-4">
-                  <div className="absolute top-2 left-4 w-6 h-6 bg-[#1e293b] rounded-lg transform -rotate-12 shadow-2xs" />
-                  <div className="absolute bottom-3 right-4 w-5 h-5 bg-[#10b981] rounded-full shadow-2xs" />
-                  <div className="absolute bottom-1 left-7 w-12 h-6 bg-[#f59e0b] rounded-b-full transform -rotate-6" />
-                  <svg className="absolute top-1 right-2 w-14 h-14 text-[#f472b6]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 100 100">
-                    <path d="M 30,70 A 30,30 0 0,1 70,30" strokeLinecap="round" />
-                  </svg>
-                  <div className="absolute top-6 right-8 w-1.5 h-1.5 bg-[#1e293b] rounded-full" />
-                  <div className="absolute bottom-7 left-12 w-1.5 h-1.5 bg-[#94a3b8] rounded-full" />
-                  <div className="relative z-10 w-12 h-12 bg-[#2563eb] text-white rounded-2xl shadow-lg flex items-center justify-center transform rotate-3">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                    </svg>
+
+              {/* Right Column: Contributor Quota & Live Countdown Widget */}
+              <div className="lg:col-span-4 flex flex-col space-y-4" style={{ fontFamily: "'Poppins', sans-serif" }}>
+                <div className="bg-white border border-[#e2e8f0] shadow-2xs overflow-hidden">
+                  
+                  {/* Countdown Timer at the Top (Clean White/Ash Theme, No Header Above) */}
+                  <div className="p-4 sm:p-5 border-b border-[#e2e8f0] bg-white">
+                    <div className="grid grid-cols-4 gap-2 text-center">
+                      <div className="bg-[#f8fafc] border border-[#e2e8f0] py-2 px-1">
+                        <span className="text-base sm:text-lg font-bold text-[#0f172a] block leading-tight">
+                          {String(countdown.days).padStart(2, '0')}
+                        </span>
+                        <span className="text-[9px] text-[#64748b] font-semibold uppercase tracking-wider block mt-0.5">
+                          Days
+                        </span>
+                      </div>
+                      <div className="bg-[#f8fafc] border border-[#e2e8f0] py-2 px-1">
+                        <span className="text-base sm:text-lg font-bold text-[#0f172a] block leading-tight">
+                          {String(countdown.hours).padStart(2, '0')}
+                        </span>
+                        <span className="text-[9px] text-[#64748b] font-semibold uppercase tracking-wider block mt-0.5">
+                          Hours
+                        </span>
+                      </div>
+                      <div className="bg-[#f8fafc] border border-[#e2e8f0] py-2 px-1">
+                        <span className="text-base sm:text-lg font-bold text-[#0f172a] block leading-tight">
+                          {String(countdown.minutes).padStart(2, '0')}
+                        </span>
+                        <span className="text-[9px] text-[#64748b] font-semibold uppercase tracking-wider block mt-0.5">
+                          Mins
+                        </span>
+                      </div>
+                      <div className="bg-[#f8fafc] border border-[#e2e8f0] py-2 px-1">
+                        <span className="text-base sm:text-lg font-bold text-[#0f172a] block leading-tight">
+                          {String(countdown.seconds).padStart(2, '0')}
+                        </span>
+                        <span className="text-[9px] text-[#64748b] font-semibold uppercase tracking-wider block mt-0.5">
+                          Secs
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Progress Details & Rules */}
+                  <div className="p-4 sm:p-5 space-y-4 bg-white">
+                    {/* 1. Weekly Progress */}
+                    <div className="bg-[#f8fafc] border border-[#e2e8f0] p-3.5">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="font-bold text-[11px] text-[#0f172a] tracking-tight">WEEKLY REQUIREMENT</span>
+                        <span className="font-mono font-bold text-[11px] text-[#1e293b]">
+                          {Math.min(quotaStatus.weeklyTarget || 4, quotaStatus.weeklyPublished || 0)} / {quotaStatus.weeklyTarget || 4} Submitted
+                        </span>
+                      </div>
+                      <div className="w-full bg-[#e2e8f0] h-2 overflow-hidden mb-2">
+                        <div
+                          className={`h-full transition-all duration-500 ${
+                            (quotaStatus.weeklyPublished || 0) >= (quotaStatus.weeklyTarget || 4)
+                              ? "bg-emerald-500"
+                              : (quotaStatus.isWarningPeriod ? "bg-red-500" : "bg-blue-600")
+                          }`}
+                          style={{
+                            width: `${Math.min(100, (((quotaStatus.weeklyPublished || 0) / (quotaStatus.weeklyTarget || 4)) * 100))}%`
+                          }}
+                        />
+                      </div>
+                      <div className="text-[11px]">
+                        {(quotaStatus.weeklyRemaining || 0) > 0 ? (
+                          <span className="text-red-600 font-semibold">{quotaStatus.weeklyRemaining} more article{(quotaStatus.weeklyRemaining || 0) > 1 ? 's' : ''} to submit</span>
+                        ) : (
+                          <span className="text-emerald-700 font-semibold">✓ Weekly requirement satisfied</span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* 2. Monthly Progress */}
+                    <div className="bg-[#f8fafc] border border-[#e2e8f0] p-3.5">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="font-bold text-[11px] text-[#0f172a] tracking-tight">MONTHLY REQUIREMENT</span>
+                        <span className="font-mono font-bold text-[11px] text-[#1e293b]">
+                          {Math.min(quotaStatus.monthlyTarget || 16, quotaStatus.monthlyPublished || 0)} / {quotaStatus.monthlyTarget || 16} Submitted
+                        </span>
+                      </div>
+                      <div className="w-full bg-[#e2e8f0] h-2 overflow-hidden mb-2">
+                        <div
+                          className={`h-full transition-all duration-500 ${
+                            (quotaStatus.monthlyPublished || 0) >= (quotaStatus.monthlyTarget || 16)
+                              ? "bg-emerald-500"
+                              : "bg-indigo-600"
+                          }`}
+                          style={{
+                            width: `${Math.min(100, (((quotaStatus.monthlyPublished || 0) / (quotaStatus.monthlyTarget || 16)) * 100))}%`
+                          }}
+                        />
+                      </div>
+                      <div className="text-[11px]">
+                        {(quotaStatus.monthlyRemaining || 0) > 0 ? (
+                          <span className="text-[#475569] font-medium">{quotaStatus.monthlyRemaining} more left this month</span>
+                        ) : (
+                          <span className="text-emerald-700 font-semibold">✓ Monthly quota fulfilled</span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Warning Alert if Day 5+ */}
+                    {quotaStatus.isWarningPeriod && (
+                      <div className="bg-red-50 border border-red-200 p-3 flex items-start space-x-2 text-red-900">
+                        <svg className="w-4 h-4 text-red-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <div className="text-[11px] leading-tight">
+                          <strong className="block font-bold text-red-900 mb-0.5">Urgent: {quotaStatus.weeklyRemaining} Article(s) Left ({quotaStatus.daysLeft || 1}d remaining)</strong>
+                          Submit articles before cycle deadline to avoid automatic account suspension.
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Bullet Points with Contributor Common Rules */}
+                    <div className="bg-[#f8fafc] border border-[#e2e8f0] p-3.5 text-xs text-[#334155] space-y-2">
+                      <div className="font-semibold text-[#0f172a] text-[11.5px] flex items-center gap-1.5 pb-1 border-b border-[#e2e8f0]">
+                        <svg className="w-3.5 h-3.5 text-[#2563eb] shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>Contributor Policy & Requirements</span>
+                      </div>
+                      <ul className="space-y-1.5 text-[11px] leading-relaxed text-[#475569] list-disc list-inside">
+                        <li>You must publish a minimum of <strong>4 articles per week</strong> (every 7 days).</li>
+                        <li>You must publish a minimum of <strong>16 articles per month</strong> (every 30 days).</li>
+                        <li>If you fail to meet these minimums, your account will be <strong>automatically suspended</strong> and login will be blocked.</li>
+                      </ul>
+                    </div>
                   </div>
                 </div>
-
-                <h3 className="text-base sm:text-lg font-bold text-[#0f172a] font-sans tracking-tight">
-                  Share what's on your mind
-                </h3>
-                <p className="text-xs sm:text-sm text-gray-500 font-sans mt-1">
-                  Create or import posts to start publishing.
-                </p>
-
-                <button
-                  onClick={() => router.push(getCreatePostUrl())}
-                  className="text-[#2563eb] hover:text-[#1d4ed8] font-bold text-xs sm:text-sm mt-4 flex items-center space-x-1 transition-colors cursor-pointer hover:underline"
-                >
-                  <span className="text-base leading-none">+</span>
-                  <span>Create Post</span>
-                </button>
               </div>
-            )}
-          </div>
+            </div>
+          ) : (
+            /* Staff Writer View: Clean Full-Width Posts Table (No Quota Banner, No Countdown) */
+            <div className="w-full bg-white border border-[#e2e8f0] rounded-2xl shadow-2xs py-3 sm:py-4 flex flex-col relative overflow-hidden">
+              {filteredPosts.length > 0 ? (
+                <div className="w-full max-h-[500px] overflow-y-auto">
+                  <table className="w-full text-left font-sans border-collapse">
+                    <thead className="sticky top-0 z-10">
+                      <tr
+                        style={{ fontFamily: '"SF Mono", SFMono-Regular, ui-monospace, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace' }}
+                        className="bg-[#f8fafc] border-t border-b border-[#e2e8f0] text-[8.5px] xs:text-[9px] font-bold text-[#94a3b8] uppercase tracking-wider"
+                      >
+                        <th className="py-2.5 pl-3 sm:pl-8 pr-2 font-bold">POST TITLE & SUMMARY</th>
+                        <th className="py-2.5 px-2 sm:px-4 font-bold whitespace-nowrap">CATEGORY</th>
+                        <th className="py-2.5 px-2 sm:px-4 font-bold whitespace-nowrap hidden sm:table-cell">DATE</th>
+                        <th className="py-2.5 px-2 sm:px-4 font-bold text-center whitespace-nowrap">STATUS</th>
+                        <th className="py-2.5 pl-2 pr-3 sm:pr-8 font-bold text-right whitespace-nowrap">ACTIONS</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#f1f5f9]">
+                      {filteredPosts.map((post) => (
+                        <tr key={post.id} className="hover:bg-slate-50/70 transition-colors">
+                          {/* POST TITLE & SUMMARY */}
+                          <td className="py-2.5 sm:py-3 pl-3 sm:pl-8 pr-2 text-left">
+                            <div className="max-w-[180px] xs:max-w-[280px] sm:max-w-[440px]">
+                              <div className="font-bold text-xs sm:text-[13px] text-[#0f172a] font-sans leading-tight line-clamp-2">
+                                {post.title}
+                              </div>
+                              {post.subheadline && (
+                                <div className="hidden xs:block text-[10.5px] sm:text-[11px] text-[#475569] font-sans mt-0.5 leading-snug line-clamp-1">
+                                  {post.subheadline}
+                                </div>
+                              )}
+                              <div className="text-[8.5px] sm:text-[9px] font-mono text-[#94a3b8] mt-0.5 font-normal lowercase">
+                                {post.readDuration ? post.readDuration.toLowerCase() : "5 min read"}
+                              </div>
+                            </div>
+                          </td>
+
+                          {/* CATEGORY */}
+                          <td className="py-2.5 sm:py-3 px-2 sm:px-4 text-[10px] sm:text-[11.5px] font-bold text-[#0f172a] whitespace-nowrap">
+                            {post.category}
+                          </td>
+
+                          {/* DATE */}
+                          <td className="py-2.5 sm:py-3 px-2 sm:px-4 text-[9.5px] sm:text-[11px] text-[#64748b] font-mono whitespace-nowrap hidden sm:table-cell">
+                            {post.date}
+                          </td>
+
+                          {/* STATUS */}
+                          <td className="py-2.5 sm:py-3 px-2 sm:px-4 text-center whitespace-nowrap">
+                            {post.status === "Trash" ? (
+                              <span className="inline-block bg-[#fef2f2] text-[#ef4444] border border-[#fecaca] text-[8px] sm:text-[9.5px] font-extrabold px-1.5 sm:px-2.5 py-0.5 rounded-full uppercase tracking-wider font-mono">
+                                TRASH
+                              </span>
+                            ) : post.status === "Pending review" ? (
+                              <span className="inline-block bg-[#fef3c7] text-[#d97706] border border-[#fde68a] text-[8px] sm:text-[9.5px] font-extrabold px-1.5 sm:px-2.5 py-0.5 rounded-full uppercase tracking-wider font-mono">
+                                PENDING
+                              </span>
+                            ) : post.status === "Rejected" ? (
+                              <span className="inline-block bg-[#ffe4e6] text-[#e11d48] border border-[#fecdd3] text-[8px] sm:text-[9.5px] font-extrabold px-1.5 sm:px-2.5 py-0.5 rounded-full uppercase tracking-wider font-mono">
+                                REJECTED
+                              </span>
+                            ) : post.status === "Published" ? (
+                              <span className="inline-block bg-[#d1fae5] text-[#059669] border border-[#a7f3d0] text-[8px] sm:text-[9.5px] font-extrabold px-1.5 sm:px-2.5 py-0.5 rounded-full uppercase tracking-wider font-mono">
+                                PUBLISHED
+                              </span>
+                            ) : (
+                              <span className="inline-block bg-[#f1f5f9] text-[#1e293b] border border-[#e2e8f0] text-[8px] sm:text-[9.5px] font-bold px-2 sm:px-3 py-0.5 rounded-full uppercase tracking-wider font-mono">
+                                DRAFT
+                              </span>
+                            )}
+                          </td>
+
+                          {/* ACTIONS */}
+                          <td className="py-2.5 sm:py-3 pl-2 pr-3 sm:pr-8 text-right whitespace-nowrap">
+                            {post.status === "Trash" ? (
+                              <div className="inline-flex items-center justify-end space-x-1.5 sm:space-x-3 font-sans font-bold text-[10px] sm:text-[11px]">
+                                <button
+                                  type="button"
+                                  onClick={(e) => handleRestoreFromTrash(post.id, e)}
+                                  className="text-[#0f172a] hover:text-[#2563eb] transition-colors cursor-pointer"
+                                >
+                                  Restore
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={(e) => confirmDeletePermanently(post, e)}
+                                  className="text-[#0f172a] hover:text-red-600 transition-colors cursor-pointer"
+                                >
+                                  Delete
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="inline-flex items-center justify-end space-x-2.5 sm:space-x-3 whitespace-nowrap">
+                                <button
+                                  type="button"
+                                  onClick={() => router.push(getEditPostUrl(post, currentUser))}
+                                  className="text-[#2563eb] hover:text-[#1d4ed8] font-bold text-[10.5px] sm:text-[11.5px] font-sans transition-colors cursor-pointer whitespace-nowrap"
+                                >
+                                  Edit
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={(e) => handleMoveToTrash(post.id, e)}
+                                  className="text-gray-400 hover:text-red-600 active:text-red-700 transition-colors cursor-pointer p-1.5 rounded-md hover:bg-red-50 active:bg-red-100"
+                                  aria-label="Move to Trash"
+                                >
+                                  <svg className="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                  </svg>
+                                </button>
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="my-auto py-8 flex flex-col items-center justify-center text-center">
+                  <div className="relative w-28 h-28 flex items-center justify-center mb-4">
+                    <div className="absolute top-2 left-4 w-6 h-6 bg-[#1e293b] rounded-lg transform -rotate-12 shadow-2xs" />
+                    <div className="absolute bottom-3 right-4 w-5 h-5 bg-[#10b981] rounded-full shadow-2xs" />
+                    <div className="absolute bottom-1 left-7 w-12 h-6 bg-[#f59e0b] rounded-b-full transform -rotate-6" />
+                    <div className="relative z-10 w-12 h-12 bg-[#2563eb] text-white rounded-2xl shadow-lg flex items-center justify-center transform rotate-3">
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                      </svg>
+                    </div>
+                  </div>
+
+                  <h3 className="text-base sm:text-lg font-bold text-[#0f172a] font-sans tracking-tight">
+                    Share what's on your mind
+                  </h3>
+                  <p className="text-xs sm:text-sm text-gray-500 font-sans mt-1">
+                    Create or import posts to start publishing.
+                  </p>
+
+                  <button
+                    onClick={() => router.push(getCreatePostUrl())}
+                    className="text-[#2563eb] hover:text-[#1d4ed8] font-bold text-xs sm:text-sm mt-4 flex items-center space-x-1 transition-colors cursor-pointer hover:underline"
+                  >
+                    <span className="text-base leading-none">+</span>
+                    <span>Create Post</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </main>
       </div>
+
+      {/* SUSPENDED CONTRIBUTOR OVERLAY MODAL */}
+      {quotaStatus?.is_blocked && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl text-center space-y-4 border border-red-100 font-sans animate-in zoom-in-95">
+            <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-2">
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <span className="inline-block bg-red-100 text-red-800 text-[10px] font-mono font-black uppercase tracking-wider px-3 py-1 rounded-full">
+              ACCOUNT SUSPENDED
+            </span>
+            <h3 className="font-serif font-bold text-xl text-slate-900 leading-snug">
+              Contributor Access Restricted
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+              {quotaStatus.block_reason || "Your Contributor account has been suspended because the mandatory publication quota was not met (minimum 4 articles per week or 16 per month)."}
+            </p>
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-xs text-slate-600 text-left space-y-1">
+              <div><strong>Account:</strong> {currentUser?.email}</div>
+              <div><strong>Policy:</strong> Contributor Quota Enforcement (Weekly 4 / Monthly 16)</div>
+              <div><strong>Status:</strong> Blocked — Cannot Sign In / Submit Posts</div>
+            </div>
+            <div className="pt-2 flex flex-col sm:flex-row gap-3 justify-center">
+              <a
+                href={`mailto:worldnews@timeschicago.com?subject=Contributor%20Account%20Reactivation%20Request%20-%20${encodeURIComponent(currentUser?.email || '')}`}
+                className="inline-flex items-center justify-center bg-red-600 hover:bg-red-700 text-white font-bold text-xs uppercase tracking-wider px-6 py-3 rounded-xl transition-all shadow-sm"
+              >
+                Contact Administration via Email
+              </a>
+              <button
+                type="button"
+                onClick={() => {
+                  sessionStorage.clear();
+                  localStorage.clear();
+                  window.location.href = "/signin";
+                }}
+                className="inline-flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs uppercase tracking-wider px-6 py-3 rounded-xl transition-colors cursor-pointer"
+              >
+                Sign Out
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ================================================================= */}
       {/* CREATE POST MODAL                                                 */}
@@ -906,6 +1317,13 @@ export default function WriterDashboard() {
         onClose={() => setShowProfileModal(false)}
         currentUser={currentUser}
         onSave={(updated) => setCurrentUser(updated)}
+      />
+
+      {/* Render Press ID Card Modal */}
+      <PressIdModal
+        isOpen={showPressIdModal}
+        onClose={() => setShowPressIdModal(false)}
+        user={currentUser}
       />
 
       {/* Delete Confirmation Modal */}

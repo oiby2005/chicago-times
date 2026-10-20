@@ -1,0 +1,66 @@
+================================================================================
+TIMES CHICAGO - INSTRUCTIONS TO RUN THE WEBSITE ON THIS COMPUTER
+================================================================================
+
+PREREQUISITES:
+1. Node.js (v18 or higher recommended) - download from https://nodejs.org
+2. MySQL Server (e.g. via XAMPP, WAMP, MySQL Workbench, or standalone MySQL)
+
+--------------------------------------------------------------------------------
+STEP 1: SET UP THE DATABASE
+--------------------------------------------------------------------------------
+1. Start your local MySQL service (e.g. click "Start" next to MySQL in XAMPP).
+2. Open phpMyAdmin (http://localhost/phpmyadmin) or MySQL Workbench / terminal.
+3. Create a new database named:
+     timeschicago_db
+4. Import the included SQL file located in the root of this folder:
+     timeschicago_db.sql
+   (In phpMyAdmin: Click 'Import' -> Choose 'timeschicago_db.sql' -> Click 'Go').
+
+* NOTE ON DATABASE PASSWORD:
+  By default, Backend/.env is configured for standard local MySQL:
+    DB_HOST=127.0.0.1
+    DB_USER=root
+    DB_PASSWORD=
+    DB_NAME=timeschicago_db
+  If your MySQL root user has a password, open Backend/.env and set:
+    DB_PASSWORD=your_password
+
+--------------------------------------------------------------------------------
+STEP 2: START THE BACKEND SERVER (PORT 5000)
+--------------------------------------------------------------------------------
+1. Open Command Prompt or Terminal.
+2. Navigate to the 'Backend' folder:
+     cd Backend
+3. Install dependencies (only required the first time):
+     npm install
+4. Start the server:
+     node server.js
+
+You should see:
+  Server running on port 5000
+  MySQL connected successfully to timeschicago_db
+
+* The backend is already pre-configured in Backend/.env with:
+  - Backblaze B2 Cloud Storage (for images and backups)
+  - Private Email SMTP (worldnews@timeschicago.com)
+  - Google OAuth Authentication
+
+--------------------------------------------------------------------------------
+STEP 3: START THE FRONTEND WEBSITE (PORT 3000)
+--------------------------------------------------------------------------------
+1. Open a second Command Prompt or Terminal window.
+2. Navigate to the 'Frontend' folder:
+     cd Frontend
+3. Install dependencies (only required the first time):
+     npm install
+4. Start the frontend web application:
+     npm run dev
+   (Or for production: npm run build && npm start)
+
+5. Open your web browser and navigate to:
+     http://localhost:3000
+
+================================================================================
+ALL DONE! The website, database, cloud media, and email are fully operational.
+================================================================================

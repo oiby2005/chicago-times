@@ -9,8 +9,8 @@ interface Ad7SectionProps {
 
 export const Ad7Section: React.FC<Ad7SectionProps> = ({ className = "" }) => {
   return (
-    <div className={`w-full font-sans  my-0 ${className}`}>
-      <AdPlaceholder slotId="hp_slot_7" width="w-full" height="h-[320px]" resolution="300 × 320" className="my-0" />
+    <div className={`w-full font-sans my-0 flex justify-center lg:block ${className}`}>
+      <AdPlaceholder slotId="hp_slot_7" width="w-full max-w-[300px]" height="h-[320px]" resolution="300 × 320" className="my-0 mx-auto" />
     </div>
   );
 };

@@ -574,7 +574,7 @@ export default function BillionaireProfileClient({ id }: { id: string }) {
         <div className="w-full bg-[#FAF8F5] border border-[#E5E0D5] overflow-hidden my-2 sm:my-4 shadow-2xs">
           <div className="grid grid-cols-1 lg:grid-cols-12 items-stretch">
             {/* Left Column */}
-            <div className="lg:col-span-7 p-5 sm:p-7 flex flex-col justify-between space-y-4">
+            <div className="lg:col-span-7 p-5 sm:p-7 flex flex-col justify-between space-y-4 order-2 lg:order-1">
               <div>
                 <div className="flex items-center space-x-2">
                   <span className="font-sans font-extrabold text-[11px] uppercase tracking-widest text-[#111111]">
@@ -639,7 +639,7 @@ export default function BillionaireProfileClient({ id }: { id: string }) {
             </div>
 
             {/* Right Photo Column (Compact height matching Image 2) */}
-            <div className="lg:col-span-5 h-[260px] sm:h-[300px] lg:h-[320px] relative overflow-hidden bg-[#FAF8F5] border-t lg:border-t-0 lg:border-l border-[#E5E0D5]">
+            <div className="lg:col-span-5 h-[260px] sm:h-[300px] lg:h-[320px] relative overflow-hidden bg-[#FAF8F5] border-b lg:border-b-0 lg:border-l border-[#E5E0D5] order-1 lg:order-2">
               <img
                 src={item.photoUrl || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80"}
                 alt={item.name}
@@ -732,9 +732,9 @@ export default function BillionaireProfileClient({ id }: { id: string }) {
                   <span className="text-[#111111] font-semibold">{item.children || 14}</span>
                 </div>
 
-                <div className="py-3 px-2 bg-white flex items-center justify-between">
-                  <span className="font-bold text-[#111111]">Education</span>
-                  <span className="text-[#111111] font-semibold">{item.education || "Bachelor of Arts/Science, University of Pennsylvania"}</span>
+                <div className="py-3 px-2 bg-white flex items-start sm:items-center justify-between gap-4">
+                  <span className="font-bold text-[#111111] shrink-0">Education</span>
+                  <span className="text-[#111111] font-semibold text-right break-words max-w-[70%] sm:max-w-none">{item.education || "Bachelor of Arts/Science, University of Pennsylvania"}</span>
                 </div>
               </div>
             </div>
@@ -935,7 +935,7 @@ export default function BillionaireProfileClient({ id }: { id: string }) {
         {/* ==================== CONTAINER BLOCK 2 ("MORE FROM TIMES CHICAGO" & STICKY AD) ==================== */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 my-6">
           {/* Main Content Column (More from Times Chicago with Inline Ad & Pagination) */}
-          <div className="lg:col-span-8 space-y-8 border-b lg:border-b-0 lg:border-r border-dashed border-[#CCCCCC] pr-0 lg:pr-8 pb-8 lg:pb-0">
+          <div className="lg:col-span-8 space-y-8 border-b-0 md:border-b lg:border-b-0 lg:border-r border-dashed border-[#CCCCCC] pr-0 lg:pr-8 pb-8 lg:pb-0">
             <div className="w-full pt-8 pb-4 border-t border-[#111111]">
               <h3
                 className="font-bold text-[20px] text-[#111111] mb-6"
@@ -981,7 +981,7 @@ export default function BillionaireProfileClient({ id }: { id: string }) {
 
                     {/* Inline Advertisement inserted directly after 3rd article (index 2) cleanly without border box */}
                     {index === 2 && (
-                      <div className="w-full flex flex-col items-center justify-center my-6 py-2">
+                      <div className="hidden md:flex w-full flex-col items-center justify-center my-6 py-2">
                         <AdPlaceholder
                           slotId="billionaire_profile_inline_ad"
                           width="w-full"
@@ -996,7 +996,7 @@ export default function BillionaireProfileClient({ id }: { id: string }) {
 
               {/* "More articles" Action Button */}
               {visibleArticleCount < articlesList.length && (
-                <div className="flex justify-center mt-8 pt-4 border-t border-[#E5E0D5]">
+                <div className="flex justify-center mt-8 pt-4 border-t-0 md:border-t border-[#E5E0D5]">
                   <button
                     type="button"
                     onClick={() => setVisibleArticleCount((prev) => Math.min(prev + 3, articlesList.length))}

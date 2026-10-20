@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import Container from "@/components/layout/Container";
 import WSJLogo from "@/components/ui/WSJLogo";
+import PressIdModal from "@/components/ui/PressIdModal";
 import SpecialOfferPopover from "@/components/navigation/SpecialOfferPopover";
 import ProfileSettingsModal, { UserProfile } from "@/components/ui/ProfileSettingsModal";
 import MobileNavDrawer from "@/components/navigation/MobileNavDrawer";
@@ -19,6 +20,7 @@ export const LogoHeader: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showPressIdModal, setShowPressIdModal] = useState(false);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
   const [isSearchOverlayOpen, setIsSearchOverlayOpen] = useState(false);
   const [showEditionDropdown, setShowEditionDropdown] = useState(false);
@@ -37,10 +39,10 @@ export const LogoHeader: React.FC = () => {
         return;
       }
     }
-    if (currentUser?.role === "admin") {
-      const nameStr = currentUser.username || currentUser.name || "admin1";
+    if (currentUser && currentUser.role === "admin") {
+      const nameStr = currentUser.username || currentUser.name || currentUser.full_name || "admin1";
       setLogoHref(`/admin/${nameStr.toLowerCase().trim().replace(/\s+/g, "-")}`);
-    } else if ((currentUser?.role || "").toLowerCase() === "writer") {
+    } else if (currentUser && (currentUser.role || "").toLowerCase() === "writer") {
       const writerName = currentUser.full_name || currentUser.name || "writer";
       setLogoHref(`/${slugifyAuthorName(writerName)}`);
     } else {
@@ -98,7 +100,7 @@ export const LogoHeader: React.FC = () => {
           email: authorObj?.email || `${slug}@gmail.com`,
           role: role,
           bio: authorObj?.bio || "",
-          avatar_url: authorObj?.avatarUrl || "",
+          avatar_url: authorObj?.avatarUrl || authorObj?.image || "",
         };
       }
     }
@@ -124,7 +126,11 @@ export const LogoHeader: React.FC = () => {
     // Revalidate with backend to ensure the latest user profile and name in the active tab
     if (parsed && parsed.email) {
       const cleanEmail = (parsed.email || "").toLowerCase().trim();
-      fetch(`http://localhost:5000/api/users/${encodeURIComponent(cleanEmail)}`)
+      const token = typeof window !== "undefined" ? localStorage.getItem("wsj_token") : null;
+      fetch(`http://localhost:5000/api/users/${encodeURIComponent(cleanEmail)}`, {
+        credentials: "include",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      })
         .then((res) => (res.ok ? res.json() : null))
         .then((data) => {
           if (data && data.success && data.user) {
@@ -151,6 +157,7 @@ export const LogoHeader: React.FC = () => {
   useEffect(() => {
     const handleUpdate = () => loadUserFromStorage();
     const handleOpenModal = () => setShowProfileModal(true);
+    const handleOpenPressId = () => setShowPressIdModal(true);
 
     let channel: BroadcastChannel | null = null;
     try {
@@ -171,11 +178,13 @@ export const LogoHeader: React.FC = () => {
 
     window.addEventListener("wsj_user_updated", handleUpdate);
     window.addEventListener("wsj_open_profile_modal", handleOpenModal);
+    window.addEventListener("wsj_open_press_id_modal", handleOpenPressId);
     window.addEventListener("storage", handleStorage);
 
     return () => {
       window.removeEventListener("wsj_user_updated", handleUpdate);
       window.removeEventListener("wsj_open_profile_modal", handleOpenModal);
+      window.removeEventListener("wsj_open_press_id_modal", handleOpenPressId);
       window.removeEventListener("storage", handleStorage);
       if (channel) channel.close();
     };
@@ -199,6 +208,11 @@ export const LogoHeader: React.FC = () => {
 
   const handleSignOut = () => {
     if (typeof window !== "undefined") {
+      fetch("http://localhost:5000/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      }).catch(() => null);
+
       sessionStorage.clear();
       localStorage.removeItem("wsj_user");
       localStorage.removeItem("wsj_token");
@@ -277,8 +291,31 @@ export const LogoHeader: React.FC = () => {
             <svg className="w-4 h-4 text-[#2563eb] shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
-            <span>Writer Page</span>
+            <span>
+              {(currentUser?.writer_type || "").toLowerCase() === "contributor"
+                ? "Contributor page"
+                : "Staff Writer"}
+            </span>
           </Link>
+        )}
+
+        {userRole === "writer" && (
+          <div
+            onClick={() => {
+              setShowDropdown(false);
+              setShowPressIdModal(true);
+            }}
+            className="flex items-center space-x-3 px-3 py-2.5 hover:bg-slate-50 rounded-xl text-xs font-bold text-[#1e293b] transition-colors cursor-pointer group"
+          >
+            <svg className="w-4 h-4 text-[#475569] shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5zm6-10.125a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0zm1.294 6.364a4.125 4.125 0 00-6.338 0 .375.375 0 00.287.636h5.764a.375.375 0 00.287-.636z" />
+            </svg>
+            <span>
+              {(currentUser?.writer_type || "").toLowerCase() === "contributor"
+                ? "Contributor ID"
+                : "Staff ID"}
+            </span>
+          </div>
         )}
 
         <div
@@ -338,10 +375,10 @@ export const LogoHeader: React.FC = () => {
           </div>
 
           {/* Desktop Left Action Button: Newsletter (visible on md+) */}
-          <div className="hidden md:flex items-center flex-1 justify-start pt-1">
+          <div className="hidden md:flex items-center md:flex-initial lg:flex-1 justify-start pt-1 shrink-0">
             <Link
               href="/newsletters"
-              className="bg-black hover:bg-gray-900 text-white font-sans text-[11.5px] font-medium px-5 py-2 h-auto flex items-center justify-center rounded-none tracking-tight transition-colors whitespace-nowrap cursor-pointer inline-flex leading-none shadow-xs"
+              className="bg-black hover:bg-gray-900 text-white font-sans text-[11.5px] font-medium px-4 md:px-3.5 lg:px-5 py-2 h-auto flex items-center justify-center rounded-none tracking-tight transition-colors whitespace-nowrap cursor-pointer inline-flex leading-none shadow-xs"
               suppressHydrationWarning
             >
               Newsletter
@@ -349,7 +386,7 @@ export const LogoHeader: React.FC = () => {
           </div>
 
           {/* Centered Masthead Logo */}
-          <div className="flex-1 text-center py-0 my-0 flex items-center justify-center">
+          <div className="flex-1 text-center py-0 my-0 flex items-center justify-center min-w-0">
             <Link
               href={logoHref}
               className="inline-block py-0 my-0 leading-none"
@@ -372,36 +409,43 @@ export const LogoHeader: React.FC = () => {
             </button>
           </div>
 
-          {/* Desktop Right Action Buttons: Special Offer & Sign In (visible on md+) */}
-          <div className="hidden md:flex items-center space-x-2.5 flex-1 justify-end pt-1 relative z-[100]">
-            <SpecialOfferPopover>
-              <button
-                className="bg-[#007cb9] hover:bg-[#006996] text-white font-sans text-[11.5px] font-medium px-5 py-2 h-auto flex items-center justify-center rounded-none tracking-tight transition-colors whitespace-nowrap cursor-pointer shadow-xs leading-none"
-                suppressHydrationWarning
-              >
-                Special Offer
-              </button>
-            </SpecialOfferPopover>
+          {/* Desktop Right Action Buttons (visible on md+) */}
+          <div className="hidden md:flex items-center md:flex-initial lg:flex-1 justify-end space-x-2 sm:space-x-3 pt-1 shrink-0">
+            {/* Search Icon Button */}
+            <button
+              onClick={() => setIsSearchOverlayOpen(true)}
+              className="p-1.5 text-black hover:text-gray-700 transition-colors cursor-pointer focus:outline-none"
+              aria-label="Search"
+              suppressHydrationWarning
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </button>
 
+            {/* Special Offer Popover */}
+            {!hideSpecialOffer && <SpecialOfferPopover />}
+
+            {/* User Profile / Sign In */}
             {isLoggedIn ? (
-              <div className="relative" ref={dropdownRef}>
+              <div className="relative inline-block text-left" ref={dropdownRef}>
                 <button
-                  onClick={() => setShowDropdown(!showDropdown)}
-                  className="w-8 h-8 sm:w-9 sm:h-9 bg-[#f3f4f6] hover:bg-[#e5e7eb] border-none rounded-full flex items-center justify-center relative overflow-hidden transition-colors cursor-pointer shadow-xs"
-                  aria-label="User Profile"
-                  title={`${displayName} (${displayEmail})`}
+                  type="button"
                   suppressHydrationWarning
+                  onClick={() => setShowDropdown(!showDropdown)}
+                  className="relative p-0.5 rounded-full border border-gray-300 hover:border-gray-500 transition-colors focus:outline-none cursor-pointer flex items-center justify-center bg-gray-100"
+                  aria-label="User Profile"
                 >
-                  {currentUser?.avatar_url ? (
+                  {currentUser?.avatar_url || (currentUser as any)?.image ? (
                     <img
-                      src={currentUser.avatar_url}
+                      src={currentUser.avatar_url || (currentUser as any).image}
                       alt={displayName}
-                      className="w-full h-full object-cover rounded-full"
+                      className="w-7 h-7 rounded-full object-cover"
                     />
                   ) : (
-                    <svg className="w-5 h-5 text-[#1e293b]" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                    </svg>
+                    <div className="w-7 h-7 rounded-full bg-slate-700 text-white flex items-center justify-center text-xs font-bold font-sans">
+                      {displayName ? displayName.charAt(0).toUpperCase() : "U"}
+                    </div>
                   )}
                   <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#00c853] border-2 border-white rounded-full shadow-2xs z-10" />
                 </button>
@@ -422,7 +466,7 @@ export const LogoHeader: React.FC = () => {
         </div>
 
         {/* Sub-Utility Edition Navigation */}
-        <div className="flex items-center justify-center max-w-full overflow-x-hidden sm:overflow-visible no-scrollbar w-full text-[10px] min-[360px]:text-[10.5px] min-[390px]:text-[11px] sm:text-[12px] font-['Century_Gothic','Publica_Sans_Light','Kumbh_Sans',sans-serif] font-normal text-[#333333] tracking-tight z-30 whitespace-nowrap my-1.5 pt-2 pb-2.5 md:pb-0.5 px-1 sm:px-1 border-b md:border-b-0 border-gray-200">
+        <div className="flex items-center justify-center max-w-full overflow-hidden md:overflow-x-auto lg:overflow-visible no-scrollbar w-full text-[10px] min-[360px]:text-[10.5px] min-[390px]:text-[11px] md:text-[12px] font-['Century_Gothic','Publica_Sans_Light','Kumbh_Sans',sans-serif] font-normal text-[#333333] tracking-tight z-30 whitespace-normal text-center md:whitespace-nowrap flex-wrap md:flex-nowrap my-1.5 pt-2 pb-2.5 md:pb-0.5 px-1 sm:px-1 border-b md:border-b-0 border-gray-200">
           {/* Edition Selection Dropdown Card - Desktop and Laptop only */}
           <div className="hidden md:inline-block relative" ref={editionRef}>
             <button
@@ -510,6 +554,13 @@ export const LogoHeader: React.FC = () => {
         onSave={(updated) => {
           setCurrentUser(updated);
         }}
+      />
+
+      {/* Render Press ID Card Modal */}
+      <PressIdModal
+        isOpen={showPressIdModal}
+        onClose={() => setShowPressIdModal(false)}
+        user={currentUser}
       />
     </div>
   );

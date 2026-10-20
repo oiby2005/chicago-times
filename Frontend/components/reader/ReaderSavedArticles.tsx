@@ -161,11 +161,15 @@ export default function ReaderDashboard() {
     loadSavedArticles();
 
     if (typeof window !== "undefined") {
+      const handleSavedArticlesUpdated = () => {
+        loadSavedArticles();
+      };
+
       window.addEventListener("wsj_user_updated", loadUser);
-      window.addEventListener("wsj_saved_articles_updated", loadSavedArticles);
+      window.addEventListener("wsj_saved_articles_updated", handleSavedArticlesUpdated);
       return () => {
         window.removeEventListener("wsj_user_updated", loadUser);
-        window.removeEventListener("wsj_saved_articles_updated", loadSavedArticles);
+        window.removeEventListener("wsj_saved_articles_updated", handleSavedArticlesUpdated);
       };
     }
   }, [router]);

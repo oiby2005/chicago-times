@@ -98,6 +98,7 @@ export default function SignInPage() {
       const res = await fetch("http://localhost:5000/api/auth/google", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           credential,
           email,
@@ -386,6 +387,7 @@ export default function SignInPage() {
       const res = await fetch("http://localhost:5000/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ email: cleanEmail, password: cleanPassword }),
       });
 
@@ -396,7 +398,8 @@ export default function SignInPage() {
           const userStr = JSON.stringify(data.user);
           sessionStorage.setItem("wsj_session_active", "true");
           sessionStorage.setItem("wsj_user", userStr);
-          sessionStorage.setItem("wsj_token", data.token || "jwt_active_token");
+          sessionStorage.setItem("wsj_token", data.token || "");
+          if (data.token) localStorage.setItem("wsj_token", data.token);
           
           localStorage.removeItem("wsj_logged_out");
           localStorage.removeItem("wsj_failed_attempts");
@@ -424,7 +427,11 @@ export default function SignInPage() {
       } else {
         setLoading(false);
         if (res.status === 403 || data.is_blocked) {
-          setError(data.message || "Your account has been blocked. For further information, please contact us at worldnews@timeschicago.com");
+          const isContributor = Boolean(data.is_contributor || data.writer_type === "contributor" || (data.message && data.message.toLowerCase().includes("contributor")));
+          const suspendedMsg = isContributor
+            ? "Your Contributor account has been suspended. To appeal or reactivate your account, please contact us via email at worldnews@timeschicago.com."
+            : "Your account has been suspended. To appeal or reactivate your account, please contact us via email at worldnews@timeschicago.com.";
+          setError(suspendedMsg);
           return;
         }
         if (res.status === 429) {
@@ -502,8 +509,8 @@ export default function SignInPage() {
                   <div
                     suppressHydrationWarning
                     className={`text-xs font-sans text-center font-semibold mb-1 p-2.5 rounded-lg transition-all ${
-                      error.includes("blocked") || isLockedOut
-                        ? "bg-red-50 text-red-600 border border-red-300 shadow-2xs font-bold"
+                      error.includes("blocked") || error.includes("suspended") || isLockedOut
+                        ? "bg-red-50 text-red-600 border border-red-300 shadow-2xs font-bold leading-relaxed"
                         : "text-red-600"
                     }`}
                   >
@@ -598,12 +605,22 @@ export default function SignInPage() {
 
                 {/* Field 3: PASSWORD */}
                 <div className="space-y-1">
-                  <label
-                    htmlFor="password"
-                    className="block text-[9px] sm:text-[10px] font-sans font-bold text-[#666666] uppercase tracking-wider"
-                  >
-                    PASSWORD
-                  </label>
+                  <div className="flex items-center justify-between">
+                    <label
+                      htmlFor="password"
+                      className="block text-[9px] sm:text-[10px] font-sans font-bold text-[#666666] uppercase tracking-wider"
+                    >
+                      PASSWORD
+                    </label>
+                    {!isSignUp && (
+                      <Link
+                        href="/forgot-password"
+                        className="text-[10px] sm:text-[11px] font-sans font-semibold text-[#00558c] hover:underline"
+                      >
+                        Forgot password?
+                      </Link>
+                    )}
+                  </div>
                   <div className="relative">
                     <input
                       id="password"
@@ -728,6 +745,8 @@ export default function SignInPage() {
           </div>
         </Container>
       </div>
+
+
     </main>
   );
 }

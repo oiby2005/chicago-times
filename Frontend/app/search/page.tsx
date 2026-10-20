@@ -88,9 +88,9 @@ export default function SearchPage() {
       } catch (e) {}
     }
 
-    // 3. Backend API users
+    // 3. Backend API writers (Public sanitized endpoint)
     try {
-      const res = await fetch("http://localhost:5000/api/users").catch(() => null);
+      const res = await fetch("http://localhost:5000/api/writers").catch(() => null);
       if (res && res.ok) {
         const data = await res.json();
         const list = data.list || (data.users ? Object.values(data.users) : []);

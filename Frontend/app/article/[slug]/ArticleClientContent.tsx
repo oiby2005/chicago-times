@@ -20,8 +20,9 @@ import ArticleVideosSection from "@/components/article/ArticleVideosSection";
 import NewsletterSignupBanner from "@/components/article/NewsletterSignupBanner";
 import ArticleCommentsSection from "@/components/article/ArticleCommentsSection";
 import ShareCardModal from "@/components/article/ShareCardModal";
-import { getAuthorForArticle } from "@/data/authors";
+import { getAuthorForArticle, slugifyAuthorName } from "@/data/authors";
 import { ensureWebpUrl, migrateLocalStorageToWebP } from "@/lib/webpConverter";
+import { sanitizeArticleHtml } from "@/lib/htmlSanitizer";
 import { getRelativeTime, getFormattedDateTime } from "@/lib/relativeTime";
 import { recordArticleView } from "@/lib/viewTracker";
 
@@ -238,26 +239,42 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
   const rawImageUrl = customPost?.thumbnail || staticArticle.imageUrl || "";
   const imageUrl = ensureWebpUrl(rawImageUrl);
   const photoCaption = customPost?.photoCaption || staticArticle.photoCaption || "";
-  const rawBodyHtml = customPost?.bodyContent || null;
-  const bodyHtml = rawBodyHtml
-    ? rawBodyHtml
-        .replace(/src=["']([^"']+)["']/g, (match: string, src: string) => `src="${ensureWebpUrl(src)}"`)
-        .replace(/<a\b([^>]*)>/gi, (match: string, p1: string) => {
-          let attrs = p1;
-          if (!/target\s*=/i.test(attrs)) {
-            attrs += ' target="_blank"';
-          } else {
-            attrs = attrs.replace(/target\s*=\s*(['"])[^'"]*\1/gi, 'target="_blank"');
-          }
-          if (!/rel\s*=/i.test(attrs)) {
-            attrs += ' rel="noopener noreferrer"';
-          }
-          return `<a${attrs}>`;
-        })
-    : null;
+  const rawBodyHtml = customPost?.bodyContent || staticArticle?.bodyContent || null;
+  const bodyHtml = rawBodyHtml ? sanitizeArticleHtml(rawBodyHtml) : null;
   const tags: string[] = customPost?.tags || [];
 
   const [authorObj, setAuthorObj] = useState<any>(() => getAuthorForArticle(slug, authorName, customPost?.authorEmail));
+
+  // Resolve all writers (Main writer first, then sub writers added by admin)
+  const allArticleWriters = React.useMemo(() => {
+    const list: { name: string; slug: string; linkedinUrl?: string }[] = [];
+    if (authorObj && authorObj.name) {
+      list.push({
+        name: authorObj.name,
+        slug: authorObj.slug || slugifyAuthorName(authorObj.name),
+        linkedinUrl: authorObj.linkedinUrl,
+      });
+    } else if (authorName) {
+      list.push({
+        name: authorName,
+        slug: slugifyAuthorName(authorName),
+      });
+    }
+
+    if (customPost?.sub_writers && Array.isArray(customPost.sub_writers)) {
+      customPost.sub_writers.forEach((sw: any) => {
+        const swName = sw.name || sw.full_name || sw;
+        if (swName && typeof swName === "string" && !list.some((w) => w.name.toLowerCase() === swName.toLowerCase())) {
+          list.push({
+            name: swName,
+            slug: sw.slug || slugifyAuthorName(swName),
+            linkedinUrl: sw.linkedin || sw.linkedinUrl,
+          });
+        }
+      });
+    }
+    return list;
+  }, [authorObj, authorName, customPost]);
 
   useEffect(() => {
     if (typeof window !== "undefined" && title) {
@@ -410,12 +427,23 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
                       <div className="text-[14px] font-bold text-[#111111] leading-none flex items-center gap-2">
                         <span>
                           By{" "}
-                          <Link
-                            href={`/author/${authorObj.slug}`}
-                            className="underline hover:text-black cursor-pointer"
-                          >
-                            {authorObj.name}
-                          </Link>
+                          {allArticleWriters.map((writer, idx) => {
+                            const isLast = idx === allArticleWriters.length - 1;
+                            const isSecondToLast = idx === allArticleWriters.length - 2;
+                            return (
+                              <React.Fragment key={`${writer.slug}-${idx}`}>
+                                <Link
+                                  href={`/author/${writer.slug}`}
+                                  className="hover:underline hover:text-black cursor-pointer"
+                                >
+                                  {writer.name}
+                                </Link>
+                                {allArticleWriters.length > 1 && !isLast && (
+                                  isSecondToLast ? " and " : ", "
+                                )}
+                              </React.Fragment>
+                            );
+                          })}
                         </span>
 
                         {authorObj.linkedinUrl && (
@@ -461,7 +489,7 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
                         <BookmarkButton article={currentArticleData} variant="inline" size="sm" />
 
                         {/* Google Auto Reader / Listen Audio Control */}
-                        <ArticleAudioReader title={title} deck={deck} bodyContent={bodyHtml || undefined} />
+                        <ArticleAudioReader title={title} deck={deck} bodyContent={bodyHtml || undefined} slug={slug} />
                       </div>
 
                       <div className="text-[13px] font-semibold text-[#555555] leading-none">
@@ -493,12 +521,23 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
                       <div className="text-[14px] font-bold text-[#111111] leading-none">
                         <span>
                           By{" "}
-                          <Link
-                            href={`/author/${authorObj.slug}`}
-                            className="underline hover:text-black cursor-pointer"
-                          >
-                            {authorObj.name}
-                          </Link>
+                          {allArticleWriters.map((writer, idx) => {
+                            const isLast = idx === allArticleWriters.length - 1;
+                            const isSecondToLast = idx === allArticleWriters.length - 2;
+                            return (
+                              <React.Fragment key={`${writer.slug}-${idx}`}>
+                                <Link
+                                  href={`/author/${writer.slug}`}
+                                  className="hover:underline hover:text-black cursor-pointer"
+                                >
+                                  {writer.name}
+                                </Link>
+                                {allArticleWriters.length > 1 && !isLast && (
+                                  isSecondToLast ? " and " : ", "
+                                )}
+                              </React.Fragment>
+                            );
+                          })}
                         </span>
                       </div>
 
@@ -555,7 +594,7 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
 
                         {/* Listen Audio Reader next to action symbols */}
                         <div className="[&>div]:border-l [&>div]:border-[#CCCCCC] [&>div]:pl-2.5 [&>div]:ml-0 flex items-center shrink-0">
-                          <ArticleAudioReader title={title} deck={deck} bodyContent={bodyHtml || undefined} />
+                          <ArticleAudioReader title={title} deck={deck} bodyContent={bodyHtml || undefined} slug={slug} />
                         </div>
                       </div>
                     </div>

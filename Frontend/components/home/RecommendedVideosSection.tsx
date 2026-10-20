@@ -157,6 +157,7 @@ export const RecommendedVideosSection: React.FC = () => {
         <h3 className="font-sans font-bold text-[20px] text-[#111111] tracking-tight">
           Recommended Videos
         </h3>
+        <div className="block md:hidden border-b border-dashed border-[#CCCCCC] my-3.5" />
       </div>
 
       {/* Videos List */}
@@ -182,22 +183,12 @@ export const RecommendedVideosSection: React.FC = () => {
               key={video.id || video.slotNumber} 
               className={`flex items-start justify-between gap-3 ${idx === 0 ? "pb-[24px]" : idx === videos.length - 1 ? "pt-[24px]" : "py-[24px]"}`}
             >
-              {/* Title with Line Clamp 4 */}
-              <h4
-                className="font-poppins font-medium text-[14px] sm:text-[15px] leading-snug text-[#111111] hover:underline cursor-pointer flex-1"
-                style={{ display: "-webkit-box", WebkitLineClamp: 4, WebkitBoxOrient: "vertical", overflow: "hidden" }}
-              >
-                <a href={video.videoUrl} target="_blank" rel="noopener noreferrer" title={displayTitle}>
-                  {displayTitle}
-                </a>
-              </h4>
-
-              {/* Thumbnail with Play Icon Overlay */}
+              {/* Thumbnail with Play Icon Overlay - Left on mobile, Right on md+ */}
               <a
                 href={video.videoUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="relative w-[105px] sm:w-[115px] aspect-[16/10] overflow-hidden bg-black flex-shrink-0 group"
+                className="order-1 md:order-2 relative w-[130px] sm:w-[140px] md:w-[105px] aspect-[16/10] overflow-hidden bg-black flex-shrink-0 group"
               >
                 <img
                   src={video.thumbnailUrl || "https://images.unsplash.com/photo-1513104890138-7c749659a591?fm=webp&fit=crop&w=400&q=80"}
@@ -213,6 +204,16 @@ export const RecommendedVideosSection: React.FC = () => {
                   </svg>
                 </div>
               </a>
+
+              {/* Title with Line Clamp 4 - Right on mobile, Left on md+ */}
+              <h4
+                className="order-2 md:order-1 font-poppins font-medium text-[16px] sm:text-[16px] md:text-[14px] leading-snug text-[#111111] hover:underline cursor-pointer flex-1"
+                style={{ display: "-webkit-box", WebkitLineClamp: 4, WebkitBoxOrient: "vertical", overflow: "hidden" }}
+              >
+                <a href={video.videoUrl} target="_blank" rel="noopener noreferrer" title={displayTitle}>
+                  {displayTitle}
+                </a>
+              </h4>
             </article>
           );
         })}

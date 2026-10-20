@@ -11,33 +11,6 @@ import SidebarDrawer from "@/components/navigation/SidebarDrawer";
 import { getUserDashboardUrl } from "@/data/authors";
 import { UserProfile } from "@/components/ui/ProfileSettingsModal";
 
-const MENU_CATEGORIES = [
-  {
-    name: "News",
-    route: "/news",
-    subs: ["World", "US Politics", "Economy", "Law"],
-  },
-  {
-    name: "Business",
-    route: "/business",
-    subs: ["Markets & Finance", "Industries", "Real Estate", "Personal Finance"],
-  },
-  {
-    name: "Tech",
-    route: "/tech",
-    subs: ["AI & Software", "Cybersecurity", "Personal Tech"],
-  },
-  {
-    name: "Opinion",
-    route: "/opinion",
-    subs: ["Editorials", "Commentary", "Letters to the Editor"],
-  },
-  {
-    name: "Arts & Life",
-    route: "/lifestyle",
-    subs: ["Entertainment", "Arts", "Sports", "Fashion", "Health", "Science"],
-  },
-];
 
 interface ArticleToolbarProps {
   articleTitle?: string;
@@ -210,7 +183,7 @@ export default function ArticleToolbar({
               <BookmarkButton article={articleData} variant="inline" />
 
               {/* Vertical Divider | + Listen (Google Auto Reader with Bookmark Color) */}
-              <ArticleAudioReader title={articleTitle} deck={deck} bodyContent={bodyContent} />
+              <ArticleAudioReader title={articleTitle} deck={deck} bodyContent={bodyContent} slug={article?.slug || ""} />
             </div>
           </div>
         </Container>

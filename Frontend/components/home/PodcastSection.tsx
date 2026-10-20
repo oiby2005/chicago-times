@@ -141,7 +141,9 @@ export const PodcastSection: React.FC<PodcastSectionProps> = ({ onActiveCountCha
   const [activeVideoPodId, setActiveVideoPodId] = useState<string | null>(null);
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [durationSec, setDurationSec] = useState<number>(0);
+  const [podcastElapsedSec, setPodcastElapsedSec] = useState<number>(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const tickerRef = useRef<NodeJS.Timeout | null>(null);
   const pathname = usePathname();
 
   const extractYoutubeId = (url: string): string | null => {
@@ -151,14 +153,49 @@ export const PodcastSection: React.FC<PodcastSectionProps> = ({ onActiveCountCha
   };
 
   const stopCurrentAudio = () => {
+    if (tickerRef.current) {
+      clearInterval(tickerRef.current);
+      tickerRef.current = null;
+    }
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current = null;
     }
     setPlayingPodcastId(null);
     setCurrentTime(0);
+    setPodcastElapsedSec(0);
     setDurationSec(0);
   };
+
+  // Ticker for slow, realistic podcast time advancement
+  useEffect(() => {
+    if (playingPodcastId) {
+      tickerRef.current = setInterval(() => {
+        if (audioRef.current && !audioRef.current.paused) {
+          setPodcastElapsedSec((prev) => {
+            const activePod = podcasts.find((p) => (p.id || `podcast_${p.slotNumber}`) === playingPodcastId);
+            const maxSec = activePod ? parseDurationStrToSeconds(activePod.duration) : 2400;
+            if (prev + 1 >= maxSec) {
+              stopCurrentAudio();
+              return 0;
+            }
+            return prev + 1;
+          });
+        }
+      }, 1000);
+    } else {
+      if (tickerRef.current) {
+        clearInterval(tickerRef.current);
+        tickerRef.current = null;
+      }
+    }
+    return () => {
+      if (tickerRef.current) {
+        clearInterval(tickerRef.current);
+        tickerRef.current = null;
+      }
+    };
+  }, [playingPodcastId, podcasts]);
 
   // Automatically stop audio playback on page navigation
   useEffect(() => {
@@ -285,10 +322,12 @@ export const PodcastSection: React.FC<PodcastSectionProps> = ({ onActiveCountCha
       setActiveVideoPodId(null);
 
       const audio = new Audio(audioUrl);
+      audio.loop = true;
       audio.currentTime = 0; // Explicitly start from the beginning
       audioRef.current = audio;
 
       setCurrentTime(0);
+      setPodcastElapsedSec(0);
       setDurationSec(0);
 
       audio.ontimeupdate = () => {
@@ -298,11 +337,6 @@ export const PodcastSection: React.FC<PodcastSectionProps> = ({ onActiveCountCha
         }
       };
 
-      audio.onended = () => {
-        setPlayingPodcastId(null);
-        setCurrentTime(0);
-      };
-
       audio.play().catch((err) => console.warn("Audio play notice:", err));
       setPlayingPodcastId(podId);
     }
@@ -310,16 +344,12 @@ export const PodcastSection: React.FC<PodcastSectionProps> = ({ onActiveCountCha
 
   const handleSeek = (podcast: PodcastSlot, newDisplayTime: number) => {
     const podId = podcast.id || `podcast_${podcast.slotNumber}`;
-    const slotDurationSec = parseDurationStrToSeconds(podcast.duration);
-    const actualStreamDuration = durationSec > 0 ? durationSec : slotDurationSec;
-    const cardDurationSec = slotDurationSec > 0 ? slotDurationSec : actualStreamDuration;
-
-    const ratio = cardDurationSec > 0 ? newDisplayTime / cardDurationSec : 0;
-    const targetAudioTime = ratio * actualStreamDuration;
+    setPodcastElapsedSec(newDisplayTime);
 
     if (playingPodcastId === podId && audioRef.current) {
-      audioRef.current.currentTime = targetAudioTime;
-      setCurrentTime(targetAudioTime);
+      if (audioRef.current.paused) {
+        audioRef.current.play().catch(() => {});
+      }
     } else {
       if (audioRef.current) {
         audioRef.current.pause();
@@ -328,23 +358,8 @@ export const PodcastSection: React.FC<PodcastSectionProps> = ({ onActiveCountCha
       setActiveVideoPodId(null);
       const audioUrl = getPlayableAudioUrl(podcast);
       const audio = new Audio(audioUrl);
-      audio.currentTime = targetAudioTime;
+      audio.loop = true;
       audioRef.current = audio;
-
-      setCurrentTime(targetAudioTime);
-
-      audio.ontimeupdate = () => {
-        setCurrentTime(audio.currentTime);
-        if (audio.duration && !isNaN(audio.duration)) {
-          setDurationSec(audio.duration);
-        }
-      };
-
-      audio.onended = () => {
-        setPlayingPodcastId(null);
-        setCurrentTime(0);
-      };
-
       audio.play().catch(() => {});
       setPlayingPodcastId(podId);
     }
@@ -353,9 +368,9 @@ export const PodcastSection: React.FC<PodcastSectionProps> = ({ onActiveCountCha
   const restartSong = (podcast: PodcastSlot, e: React.MouseEvent) => {
     e.stopPropagation();
     const podId = podcast.id || `podcast_${podcast.slotNumber}`;
+    setPodcastElapsedSec(0);
     if (playingPodcastId === podId && audioRef.current) {
       audioRef.current.currentTime = 0;
-      setCurrentTime(0);
       audioRef.current.play().catch(() => {});
     } else {
       togglePlay(podcast);
@@ -372,17 +387,10 @@ export const PodcastSection: React.FC<PodcastSectionProps> = ({ onActiveCountCha
         const isVideoActive = activeVideoPodId === podId && Boolean(ytId);
 
         const slotDurationSec = parseDurationStrToSeconds(podcast.duration);
-        const actualStreamDuration = playingPodcastId === podId && durationSec > 0 ? durationSec : slotDurationSec;
-        const cardDurationSec = slotDurationSec > 0 ? slotDurationSec : actualStreamDuration;
+        const cardDurationSec = slotDurationSec > 0 ? slotDurationSec : 2400;
 
-        let cardCurrentTime = 0;
-        let progressPercent = 0;
-
-        if (playingPodcastId === podId && actualStreamDuration > 0) {
-          const ratio = Math.min(1, Math.max(0, currentTime / actualStreamDuration));
-          cardCurrentTime = ratio * cardDurationSec;
-          progressPercent = ratio * 100;
-        }
+        const cardCurrentTime = playingPodcastId === podId ? podcastElapsedSec : 0;
+        const progressPercent = cardDurationSec > 0 ? Math.min(100, (cardCurrentTime / cardDurationSec) * 100) : 0;
 
         return (
           <div

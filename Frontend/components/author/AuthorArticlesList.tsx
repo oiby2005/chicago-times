@@ -214,6 +214,16 @@ export default function AuthorArticlesList({
         const pEmail = (p.authorEmail || "").toLowerCase().trim();
         const pAuthor = (p.author || "").toLowerCase().trim();
 
+        // Check if author matches as a sub writer added by admin
+        const isSubWriter = Array.isArray(p.sub_writers) && p.sub_writers.some((sw: any) => {
+          const swEmail = (sw.email || "").toLowerCase().trim();
+          const swName = (sw.name || sw.full_name || (typeof sw === "string" ? sw : "")).toLowerCase().trim();
+          if (targetEmail && swEmail && swEmail === targetEmail) return true;
+          if (targetNameLower && swName && (swName === targetNameLower || swName.includes(targetNameLower) || targetNameLower.includes(swName))) return true;
+          return false;
+        });
+        if (isSubWriter) return true;
+
         // 1. Strict filtering for writer1 (writer1@gmail.com)
         if (targetEmail === "writer1@gmail.com" || targetNameLower === "writer1") {
           return pEmail === "writer1@gmail.com" || pAuthor === "writer1";
@@ -262,15 +272,15 @@ export default function AuthorArticlesList({
 
   const isWriterUser = (() => {
     const targetEmail = (authorEmail || "").toLowerCase().trim();
-    if (targetEmail.includes("writer")) return true;
+    if (targetEmail && targetEmail !== "") return true;
     const authorLower = authorName.toLowerCase();
     return authorLower === "writer" || authorLower === "writer1" || authorLower === "writer user";
   })();
 
   // For staff writers, use baseAuthorArticlesData
-  // For Writer Users, use userArticles strictly
+  // For registered writers and sub-writers, use userArticles strictly
   const PAGE_SIZE = 10;
-  const allArticlesList = isWriterUser ? userArticles : baseAuthorArticlesData;
+  const allArticlesList = (isWriterUser || userArticles.length > 0) ? userArticles : baseAuthorArticlesData;
   const totalPages = Math.max(1, Math.ceil(allArticlesList.length / PAGE_SIZE));
   const activeArticles = allArticlesList.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 

@@ -345,12 +345,12 @@ export const SportCategorySection: React.FC = () => {
         </div>
 
         {/* RIGHT SIDEBAR STORIES AREA (2x2 Grid of 4 Articles) */}
-        <div className="lg:col-span-4 pl-0 lg:pl-4 pt-[28px] lg:pt-0">
+        <div className="lg:col-span-4 pl-0 lg:pl-4 pt-[14px] lg:pt-0">
           <div className="grid grid-cols-2 gap-0">
             
             {/* Top-Left (Item 1 of sidebar) */}
             <article className="pr-3 sm:pr-3.5 border-r border-dashed border-[#CCCCCC] flex flex-col justify-between">
-              <div className="pb-[28px] md:pb-3 border-b border-dashed border-[#CCCCCC] flex-1 flex flex-col justify-between">
+              <div className="pb-[14px] md:pb-3 border-b border-dashed border-[#CCCCCC] flex-1 flex flex-col justify-between">
                 <div>
                   <Link
                     href={`/article/${sidebarItem1.slug}`}
@@ -384,7 +384,7 @@ export const SportCategorySection: React.FC = () => {
 
             {/* Top-Right (Item 2 of sidebar) */}
             <article className="pl-3 sm:pl-3.5 flex flex-col justify-between">
-              <div className="pb-[28px] md:pb-3 border-b border-dashed border-[#CCCCCC] flex-1 flex flex-col justify-between">
+              <div className="pb-[14px] md:pb-3 border-b border-dashed border-[#CCCCCC] flex-1 flex flex-col justify-between">
                 <div>
                   <Link
                     href={`/article/${sidebarItem2.slug}`}
@@ -417,7 +417,7 @@ export const SportCategorySection: React.FC = () => {
             </article>
 
             {/* Bottom-Left (Item 3 of sidebar) */}
-            <article className="pr-3 sm:pr-3.5 pt-[28px] md:pt-4 border-r border-dashed border-[#CCCCCC] flex flex-col justify-between">
+            <article className="pr-3 sm:pr-3.5 pt-[14px] md:pt-4 border-r border-dashed border-[#CCCCCC] flex flex-col justify-between">
               <div>
                 <Link
                   href={`/article/${sidebarItem3.slug}`}
@@ -449,7 +449,7 @@ export const SportCategorySection: React.FC = () => {
             </article>
 
             {/* Bottom-Right (Item 4 of sidebar) */}
-            <article className="pl-3 sm:pl-3.5 pt-[28px] md:pt-4 flex flex-col justify-between">
+            <article className="pl-3 sm:pl-3.5 pt-[14px] md:pt-4 flex flex-col justify-between">
               <div>
                 <Link
                   href={`/article/${sidebarItem4.slug}`}

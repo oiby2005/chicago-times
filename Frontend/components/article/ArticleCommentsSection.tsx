@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { getAuthHeaders } from "@/lib/authHeader";
 
 export interface CommentItem {
   id: string;
@@ -15,6 +16,7 @@ export interface CommentItem {
 interface ArticleCommentsSectionProps {
   commentCount?: number;
   articleSlug?: string;
+  readOnly?: boolean;
 }
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
@@ -22,6 +24,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 export default function ArticleCommentsSection({
   commentCount = 0,
   articleSlug = "default",
+  readOnly = false,
 }: ArticleCommentsSectionProps) {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [comments, setComments] = useState<CommentItem[]>([]);
@@ -60,6 +63,10 @@ export default function ArticleCommentsSection({
 
   // Fetch comments for this article from backend database API & fallback to localStorage
   useEffect(() => {
+    if (readOnly) {
+      setComments([]);
+      return;
+    }
     let isMounted = true;
     const fetchCommentsFromDb = async () => {
       // First try local cache so page renders instantly
@@ -156,7 +163,7 @@ export default function ArticleCommentsSection({
     try {
       const res = await fetch(`${API_BASE_URL}/api/comments`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify({
           id: tempId,
           articleSlug,
@@ -201,6 +208,7 @@ export default function ArticleCommentsSection({
     try {
       const res = await fetch(`${API_BASE_URL}/api/comments/${encodeURIComponent(targetId)}`, {
         method: "DELETE",
+        headers: getAuthHeaders(),
       });
       if (!res.ok) {
         console.error("Failed to delete comment from backend, status:", res.status);
@@ -210,7 +218,7 @@ export default function ArticleCommentsSection({
     }
   };
 
-  const totalCommentCount = comments.length;
+  const totalCommentCount = readOnly ? 0 : comments.length;
 
   return (
     <div className="w-full pb-6  font-sans">
@@ -225,7 +233,25 @@ export default function ArticleCommentsSection({
       </div>
 
       {/* Input Section or Log In Prompt */}
-      {isLoggedIn ? (
+      {readOnly ? (
+        <form onSubmit={(e) => e.preventDefault()} className="flex items-center space-x-2.5 pt-1 mb-4 select-none">
+          <input
+            type="text"
+            value=""
+            placeholder="Add a comment..."
+            disabled={true}
+            readOnly={true}
+            className="border border-[#cbd5e1] bg-gray-50/80 rounded-full px-4 py-2.5 text-xs text-[#94a3b8] placeholder-[#94a3b8] flex-1 shadow-2xs cursor-not-allowed opacity-80"
+          />
+          <button
+            type="button"
+            disabled={true}
+            className="bg-[#a1a1aa] text-white font-sans font-extrabold text-xs px-6 py-2.5 rounded-xl uppercase tracking-wider cursor-not-allowed opacity-60 shadow-2xs"
+          >
+            POST
+          </button>
+        </form>
+      ) : isLoggedIn ? (
         <form onSubmit={handleAddComment} className="flex items-center space-x-2.5 pt-1 mb-4">
           <input
             type="text"
@@ -255,36 +281,38 @@ export default function ArticleCommentsSection({
       )}
 
       {/* Empty State message or comments list */}
-      {comments.length === 0 ? (
-        <p
-          className="text-xs italic text-[#94a3b8] pt-1 font-serif"
-          style={{ fontFamily: "Georgia, serif" }}
-        >
-          No comments yet. Be the first to share your thoughts.
-        </p>
-      ) : (
-        <div className="space-y-4 mt-4">
-          {comments.map((item) => (
-            <div key={item.id} className="border-b border-[#f1f5f9] last:border-b-0 pb-3 text-xs text-[#1e293b]">
-              <div className="flex items-center justify-between gap-2 mb-1">
-                <div className="flex items-center space-x-2 flex-wrap">
-                  <span className="font-bold text-[#0f172a] text-xs sm:text-sm">{item.authorName}</span>
-                  <span className="text-[11px] text-[#64748b] font-mono">• {item.createdAt}</span>
+      {!readOnly && (
+        comments.length === 0 ? (
+          <p
+            className="text-xs italic text-[#94a3b8] pt-1 font-serif"
+            style={{ fontFamily: "Georgia, serif" }}
+          >
+            No comments yet. Be the first to share your thoughts.
+          </p>
+        ) : (
+          <div className="space-y-4 mt-4">
+            {comments.map((item) => (
+              <div key={item.id} className="border-b border-[#f1f5f9] last:border-b-0 pb-3 text-xs text-[#1e293b]">
+                <div className="flex items-center justify-between gap-2 mb-1">
+                  <div className="flex items-center space-x-2 flex-wrap">
+                    <span className="font-bold text-[#0f172a] text-xs sm:text-sm">{item.authorName}</span>
+                    <span className="text-[11px] text-[#64748b] font-mono">• {item.createdAt}</span>
+                  </div>
+                  {isAdmin && (
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteComment(item.id)}
+                      className="text-[11px] font-bold text-red-600 hover:text-red-700 hover:underline cursor-pointer bg-red-50 hover:bg-red-100 px-2.5 py-1 rounded-md transition-colors"
+                    >
+                      Delete
+                    </button>
+                  )}
                 </div>
-                {isAdmin && (
-                  <button
-                    type="button"
-                    onClick={() => handleDeleteComment(item.id)}
-                    className="text-[11px] font-bold text-red-600 hover:text-red-700 hover:underline cursor-pointer bg-red-50 hover:bg-red-100 px-2.5 py-1 rounded-md transition-colors"
-                  >
-                    Delete
-                  </button>
-                )}
+                <p className="text-xs sm:text-sm text-[#334155] leading-relaxed pt-0.5">{item.text}</p>
               </div>
-              <p className="text-xs sm:text-sm text-[#334155] leading-relaxed pt-0.5">{item.text}</p>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )
       )}
     </div>
   );

@@ -56,7 +56,7 @@ export const StickyHeaderBar: React.FC<StickyHeaderBarProps> = ({ visible = true
           email: authorObj?.email || `${slug}@gmail.com`,
           role: role,
           bio: authorObj?.bio || "",
-          avatar_url: authorObj?.avatarUrl || "",
+          avatar_url: authorObj?.avatarUrl || authorObj?.image || "",
         };
       }
     }
@@ -171,8 +171,31 @@ export const StickyHeaderBar: React.FC<StickyHeaderBarProps> = ({ visible = true
             <svg className="w-4 h-4 text-[#2563eb] shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
-            <span>Writer Page</span>
+            <span>
+              {(currentUser?.writer_type || "").toLowerCase() === "contributor"
+                ? "Contributor page"
+                : "Staff Writer"}
+            </span>
           </Link>
+        )}
+
+        {userRole === "writer" && (
+          <div
+            onClick={() => {
+              setShowDropdown(false);
+              window.dispatchEvent(new CustomEvent("wsj_open_press_id_modal"));
+            }}
+            className="flex items-center space-x-3 px-3 py-2.5 hover:bg-slate-50 rounded-xl text-xs font-bold text-[#1e293b] transition-colors cursor-pointer group"
+          >
+            <svg className="w-4 h-4 text-[#475569] shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5zm6-10.125a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0zm1.294 6.364a4.125 4.125 0 00-6.338 0 .375.375 0 00.287.636h5.764a.375.375 0 00.287-.636z" />
+            </svg>
+            <span>
+              {(currentUser?.writer_type || "").toLowerCase() === "contributor"
+                ? "Contributor ID"
+                : "Staff ID"}
+            </span>
+          </div>
         )}
 
         <div
@@ -229,10 +252,10 @@ export const StickyHeaderBar: React.FC<StickyHeaderBarProps> = ({ visible = true
             </div>
 
             {/* Left Action Button: Newsletter (Matching LogoHeader alignment, visible on md+) */}
-            <div className="hidden md:flex items-center w-[220px] lg:w-[260px] justify-start z-10 shrink-0">
+            <div className="hidden md:flex items-center md:w-[130px] lg:w-[260px] justify-start z-10 shrink-0">
               <Link
                 href="/newsletters"
-                className="bg-black hover:bg-gray-900 text-white font-sans text-[11.5px] font-medium px-4 py-1.5 h-auto flex items-center justify-center rounded-none tracking-tight transition-colors whitespace-nowrap cursor-pointer inline-flex leading-none shadow-xs"
+                className="bg-black hover:bg-gray-900 text-white font-sans text-[11.5px] font-medium px-4 md:px-3 lg:px-4 py-1.5 h-auto flex items-center justify-center rounded-none tracking-tight transition-colors whitespace-nowrap cursor-pointer inline-flex leading-none shadow-xs"
                 suppressHydrationWarning
               >
                 Newsletter
@@ -240,12 +263,12 @@ export const StickyHeaderBar: React.FC<StickyHeaderBarProps> = ({ visible = true
             </div>
 
             {/* Centered Masthead Logo */}
-            <div className="flex-1 text-center py-0 my-0 flex items-center justify-center">
+            <div className="flex-1 text-center py-0 my-0 flex items-center justify-center min-w-0">
               <Link href="/" className="inline-block py-0 my-0 leading-none">
                 <img
                   src="/images/design-reference/Times Chicago.svg"
                   alt="Times Chicago"
-                  className="h-7 sm:h-8 md:h-9 lg:h-10 w-auto object-contain block max-h-11"
+                  className="h-7 sm:h-8 md:h-8 lg:h-10 w-auto object-contain block max-h-11"
                 />
               </Link>
             </div>
@@ -265,7 +288,7 @@ export const StickyHeaderBar: React.FC<StickyHeaderBarProps> = ({ visible = true
             </div>
 
             {/* Right Buttons: Special Offer & Sign In (Matching LogoHeader alignment, visible on md+) */}
-            <div className="hidden md:flex items-center space-x-2.5 w-[220px] lg:w-[260px] justify-end z-[100] shrink-0 relative">
+            <div className="hidden md:flex items-center space-x-2 lg:space-x-2.5 md:w-[190px] lg:w-[260px] justify-end z-[100] shrink-0 relative">
               <SpecialOfferPopover>
                 <button
                   className="bg-[#007cb9] hover:bg-[#006996] text-white font-sans text-[11.5px] font-medium px-4 py-1.5 h-auto flex items-center justify-center rounded-none tracking-tight transition-colors whitespace-nowrap cursor-pointer shadow-xs leading-none"

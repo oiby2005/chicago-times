@@ -185,14 +185,14 @@ export default function EntrepreneursClient() {
             Upcoming Top 20 Entrepreneurs
           </h1>
           <p className="font-sans font-bold text-[13px] sm:text-[14px] uppercase tracking-widest text-[#888888] mt-2 sm:mt-3 mb-1">
-            The Richest In 2026
+            Creative Minds in 2026
           </p>
         </div>
 
         {/* Secondary Headline Below Initial Header */}
         <div className="w-full bg-white text-center pt-8 sm:pt-12 pb-1">
           <div className="inline-block border-b border-[#111111] pb-2 max-w-full">
-            <h2 className="font-sans font-bold text-[12px] sm:text-[14px] md:text-[16px] lg:text-[18px] uppercase tracking-wider text-[#111111] whitespace-nowrap overflow-hidden text-ellipsis leading-tight">
+            <h2 className="font-sans font-bold text-[12px] sm:text-[14px] md:text-[16px] lg:text-[18px] uppercase tracking-wider text-[#111111] whitespace-normal md:whitespace-nowrap overflow-visible md:overflow-hidden md:text-ellipsis leading-snug md:leading-tight">
               Pioneering Founders, Disruptors, and Visionaries Reshaping Modern Industries.
             </h2>
           </div>
@@ -226,8 +226,8 @@ export default function EntrepreneursClient() {
           </div>
         </div>
 
-        {/* 900x370 Ad Slot */}
-        <div className="flex flex-col items-center justify-center my-6 sm:my-8 w-full max-w-[900px] mx-auto px-4">
+        {/* 900x370 Ad Slot (Hidden on mobile) */}
+        <div className="hidden md:flex flex-col items-center justify-center my-6 sm:my-8 w-full max-w-[900px] mx-auto px-4">
           <AdPlaceholder
             slotId="entrepreneurs_slot_1"
             width="w-full max-w-[900px]"
@@ -393,8 +393,78 @@ export default function EntrepreneursClient() {
             </div>
           </div>
 
-          {/* Table Area - Net Worth Column REMOVED per user requirement */}
-          <div className="overflow-x-auto border border-[#E2DDD0]">
+          {/* Mobile View: Vertical Scrollable Responsive Cards (No Horizontal Scroll) */}
+          <div className="block md:hidden border border-[#E2DDD0] divide-y divide-[#EFECE6] bg-white">
+            {filteredEntrepreneurs.length > 0 ? (
+              filteredEntrepreneurs.map((item) => {
+                const isExpanded = expandedId === item.id;
+                return (
+                  <div key={item.id} className="p-4 transition-colors">
+                    {/* Main Card Header Info */}
+                    <div
+                      onClick={() => setExpandedId(isExpanded ? null : item.id)}
+                      className="cursor-pointer"
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center space-x-2">
+                          <span className="font-bold text-sm text-[#555555]">#{item.rank}</span>
+                          <h3 className="font-bold text-[16px] text-[#111111] leading-tight">
+                            {item.name}
+                          </h3>
+                        </div>
+                        <span className="text-[#888888] text-xs font-bold shrink-0 ml-2">
+                          {isExpanded ? "▲" : "▼"}
+                        </span>
+                      </div>
+
+                      <div className="mt-2 space-y-1 text-[13px] font-sans text-[#444444]">
+                        <div className="flex items-center justify-between text-xs text-[#666666]">
+                          <span>{item.country}</span>
+                          <span>Age: {item.age}</span>
+                        </div>
+                        <div className="text-xs font-medium text-[#222222]">
+                          <span>{item.source}</span> • <span className="text-[#666666]">{item.industry}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Expanded Drawer on Mobile */}
+                    {isExpanded && (
+                      <div className="mt-4 pt-4 border-t border-[#E5E0D5] flex flex-col items-center space-y-3">
+                        <div className="w-28 h-32 rounded-xl overflow-hidden shrink-0 border border-[#DDD8CC] shadow-2xs bg-[#EFECE6]">
+                          <img
+                            src={item.photoUrl || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=500&q=80"}
+                            alt={item.name}
+                            onError={(e) => {
+                              (e.currentTarget as HTMLImageElement).src = "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=500&q=80";
+                            }}
+                            className="w-full h-full object-cover object-center"
+                          />
+                        </div>
+                        <p className="font-sans text-[13.5px] leading-relaxed text-[#333333] text-center">
+                          {item.bio || item.highlightText || `${item.name} is one of the world's leading emerging innovators in ${item.industry}.`}
+                        </p>
+                        <Link
+                          href={`${basePath}/${slugify(item.name)}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="bg-[#111111] hover:bg-[#333333] text-white font-sans font-bold text-[12px] px-6 py-2.5 rounded-lg shadow-2xs transition-colors whitespace-nowrap inline-block"
+                        >
+                          View Profile
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            ) : (
+              <div className="py-8 text-center text-[#777777] font-sans text-sm">
+                No entrepreneurs match your filter criteria.
+              </div>
+            )}
+          </div>
+
+          {/* Desktop, Laptop & Tablet Table Area (md+) */}
+          <div className="hidden md:block overflow-x-auto border border-[#E2DDD0]">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-white border-b border-[#E2DDD0] text-[11px] font-sans font-bold text-[#444444] uppercase tracking-wider">

@@ -74,6 +74,8 @@ CREATE TABLE `users` (
   `avatar_url` longtext DEFAULT NULL,
   `linkedin` varchar(255) DEFAULT NULL,
   `is_default_admin` tinyint(1) DEFAULT 0,
+  `reset_password_token` varchar(255) DEFAULT NULL,
+  `reset_password_expires` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB AUTO_INCREMENT=43 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

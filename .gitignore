@@ -7,6 +7,9 @@ Backend/node_modules/
 Frontend/.next/
 Frontend/out/
 Frontend/build/
+.next/
+out/
+build/
 
 # Logs & temp
 *.log
@@ -15,8 +18,14 @@ yarn-debug.log*
 yarn-error.log*
 
 # Environment files
+.env
+.env.*
 .env*.local
+Backend/.env
+Frontend/.env.local
 
-# OS
+# OS & IDE
 .DS_Store
 Thumbs.db
+.vscode/
+.idea/

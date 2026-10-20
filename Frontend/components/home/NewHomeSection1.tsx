@@ -66,7 +66,7 @@ export default function NewHomeSection1() {
       </div>
 
       {/* Mobile-only single centered dashed divider below Right Main Panel before Business section */}
-      <div className="pt-[24px] mb-[24px] lg:hidden border-b border-dashed border-[#CCCCCC]" />
+      <div className="hidden md:block lg:hidden pt-[24px] mb-[24px] border-b border-dashed border-[#CCCCCC]" />
 
       {/* ==================== ROW 3: BUSINESS CATEGORY SECTION ==================== */}
       <div className="pt-2 pb-4">
@@ -82,7 +82,7 @@ export default function NewHomeSection1() {
       <div className="pt-2 hidden lg:block">
         <Ad2Section />
       </div>
-      <div className="pt-[20px] pb-[20px] lg:hidden border-b border-dashed border-[#CCCCCC]" />
+      <div className="hidden md:block lg:hidden pt-[20px] pb-[20px] border-b border-dashed border-[#CCCCCC]" />
 
       {/* ==================== ROW 6: EDITORS PICKS SECTION ==================== */}
       <div className="pt-2">
@@ -95,7 +95,7 @@ export default function NewHomeSection1() {
         <div className="col-span-12 lg:col-span-9 pr-0 lg:pr-[0.4cm] mb-0">
           <WSJPromotionSection />
           
-          <div className="border-t border-dashed border-[#CCCCCC] mt-[24px] lg:mt-4 pt-[20px] lg:pt-4">
+          <div className="border-t-0 md:border-t border-dashed border-[#CCCCCC] mt-0 md:mt-[24px] lg:mt-4 pt-0 md:pt-[20px] lg:pt-4">
             <YourWeekendSection />
           </div>
 
@@ -103,10 +103,10 @@ export default function NewHomeSection1() {
           <div className="py-2 hidden lg:block">
             <Ad3Section />
           </div>
-          <div className="pt-[20px] pb-[20px] lg:hidden border-b border-dashed border-[#CCCCCC]" />
+          <div className="hidden md:block lg:hidden pt-[20px] pb-[20px] border-b border-dashed border-[#CCCCCC]" />
 
           {/* People to Know Section (entire section in Row 7) */}
-          <div className="pt-2">
+          <div className="pt-8 sm:pt-10 md:pt-2">
             <PeopleToKnowSection />
           </div>
         </div>
@@ -134,10 +134,10 @@ export default function NewHomeSection1() {
         </div>
 
         {/* Right 3 Cols: Most Popular News Section -> Recommended Videos Section -> Ad 05 Section */}
-        <div className="col-span-12 lg:col-span-3 pl-0 lg:pl-[0.4cm] flex flex-col justify-between">
+        <div className="col-span-12 lg:col-span-3 pl-0 lg:pl-[0.4cm] pt-8 sm:pt-10 lg:pt-0 flex flex-col justify-between">
           <div>
             <MostPopularNewsSection />
-            <div className="mt-[24px] pt-[24px] border-t border-dashed border-[#CCCCCC]">
+            <div className="mt-8 sm:mt-10 md:mt-[24px] pt-0 md:pt-[24px] border-t-0 md:border-t border-dashed border-[#CCCCCC]">
               <RecommendedVideosSection />
             </div>
           </div>
@@ -180,7 +180,7 @@ export default function NewHomeSection1() {
         {/* Right 3 Cols: Ad 07 -> Podcast Section (Sticky when active podcasts < 3, static when >= 3) */}
         <div className="col-span-12 lg:col-span-3 pl-0 lg:pl-[0.4cm] pt-[46px] relative h-full">
           <div className={isPodcastSticky ? "sticky top-[90px] z-10 self-start w-full" : "relative z-10 self-start w-full"}>
-            <Ad7Section />
+            <div className="flex justify-center lg:block"><Ad7Section /></div>
             <div className="mt-[48px] lg:mt-4">
               <PodcastSection onActiveCountChange={(count) => setActivePodcastCount(count)} />
             </div>

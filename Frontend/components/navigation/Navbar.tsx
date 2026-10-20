@@ -712,7 +712,7 @@ export const Navbar: React.FC = () => {
         onMouseLeave={() => setActiveTab(null)}
       >
         <div className="w-full max-w-[1280px] mx-auto px-4 sm:px-5 md:px-6 relative flex items-center justify-between">
-          <div className="flex items-end h-[36px] overflow-x-auto md:overflow-x-visible no-scrollbar justify-start md:justify-between w-full flex-1 gap-1 sm:gap-1.5 md:gap-0">
+          <div className="flex items-end h-[36px] overflow-x-auto lg:overflow-x-visible no-scrollbar justify-start lg:justify-between w-full flex-1 gap-1 sm:gap-1.5 md:gap-2 lg:gap-0">
             {allCategories.map((title, index) => {
               const isHovered = activeTab === title;
 
@@ -721,7 +721,7 @@ export const Navbar: React.FC = () => {
                   key={title}
                   ref={(el) => { tabRefs.current[title] = el; }}
                   onMouseEnter={() => {
-                    if (typeof window !== "undefined" && window.innerWidth < 768) return;
+                    if (typeof window !== "undefined" && window.innerWidth < 1024) return;
                     activateCategory(title);
                   }}
                   onTouchStart={() => handleTouchStart(title)}
@@ -733,10 +733,10 @@ export const Navbar: React.FC = () => {
                     href={getCategoryRoute(title, writerPrefix)}
                     prefetch={false}
                     onClick={handleCategoryClick}
-                    className={`text-[15px] md:text-[13px] font-['Century_Gothic','Publica_Sans_Light','Kumbh_Sans',sans-serif] ${
+                    className={`text-[15px] md:text-[13.5px] lg:text-[13px] font-['Century_Gothic','Publica_Sans_Light','Kumbh_Sans',sans-serif] ${
                       index === 0
-                        ? "pl-2.5 md:pl-1 pr-2.5 md:pr-1.5 lg:pr-1.5"
-                        : "px-2.5 md:px-1.5 lg:px-1.5"
+                        ? "pl-2.5 md:pl-2 lg:pl-1 pr-2.5 md:pr-2 lg:pr-1.5"
+                        : "px-2.5 md:px-2 lg:px-1.5"
                     } pb-2 pt-1 whitespace-nowrap leading-none cursor-pointer transition-colors duration-150 ${
                       isHovered
                         ? "bg-[#f9f9f8] text-[#111111] font-bold border border-[#dcd6cd] border-b-transparent rounded-t-sm z-50 relative -mb-[1px]"
@@ -749,8 +749,8 @@ export const Navbar: React.FC = () => {
               );
             })}
 
-            {/* Integrated Search Icon - Positioned next to Interviews */}
-            <div className="flex items-end flex-shrink-0 relative z-50 pb-2 pl-2 sm:pl-3 md:pl-1 pr-0 h-full">
+            {/* Integrated Search Icon - Positioned next to Interviews (Hidden on Mobile) */}
+            <div className="hidden md:flex items-end flex-shrink-0 relative z-50 pb-2 pl-2 sm:pl-3 md:pl-2 lg:pl-1 pr-0 h-full">
               <button
                 onClick={() => setIsSearchOverlayOpen(true)}
                 aria-label="Search"

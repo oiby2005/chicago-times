@@ -130,10 +130,10 @@ export const PoliticsCategorySection: React.FC = () => {
       </div>
 
       {/* 3-Column Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-0 items-start pt-[20px] md:pt-0">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-0 items-start pt-0 md:pt-0">
         {/* COLUMN 1 */}
         <article 
-          className="pr-0 md:pr-4 flex flex-col justify-start border-b md:border-b-0 md:border-r border-dashed border-[#CCCCCC] pb-[30px] md:pb-0 mb-0 md:mb-0"
+          className="pr-0 md:pr-4 flex flex-col justify-start border-b md:border-b-0 md:border-r border-dashed border-[#CCCCCC] pt-3 md:pt-0 pb-5 md:pb-0 mb-0 md:mb-0"
         >
           {col1.imageUrl && (
             <Link
@@ -164,7 +164,7 @@ export const PoliticsCategorySection: React.FC = () => {
 
         {/* COLUMN 2 */}
         <article 
-          className="px-0 md:px-4 pt-[30px] md:pt-0 flex flex-col justify-start border-b md:border-b-0 md:border-r border-dashed border-[#CCCCCC] pb-[30px] md:pb-0 mb-0 md:mb-0"
+          className="px-0 md:px-4 pt-5 md:pt-0 flex flex-col justify-start border-b md:border-b-0 md:border-r border-dashed border-[#CCCCCC] pt-3 md:pt-0 pb-5 md:pb-0 mb-0 md:mb-0"
         >
           {col2.imageUrl && (
             <Link
@@ -194,9 +194,9 @@ export const PoliticsCategorySection: React.FC = () => {
         </article>
 
         {/* COLUMN 3 */}
-        <div className="pl-0 md:pl-4 pt-[30px] md:pt-0 flex flex-col justify-start">
+        <div className="pl-0 md:pl-4 pt-0 md:pt-0 flex flex-col justify-start">
           {/* Top Story */}
-          <article className="pb-4 md:pb-3 pt-0 border-b border-dashed border-[#CCCCCC]">
+          <article className="pt-5 md:pt-0 pb-5 md:pb-3 border-b border-dashed border-[#CCCCCC]">
             <h4 className="font-serif font-bold text-[17px] sm:text-[18px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-1.5" style={{ fontFamily: "Georgia, serif" }}>
               <Link href={`/article/${col3Top.slug}`}>
                 {col3Top.title}
@@ -213,7 +213,7 @@ export const PoliticsCategorySection: React.FC = () => {
           </article>
 
           {/* Bottom Story */}
-          <article className="pt-4 md:pt-3">
+          <article className="pt-5 md:pt-3">
             <h4 className="font-serif font-bold text-[17px] sm:text-[18px] leading-[1.2] text-[#111111] hover:underline cursor-pointer mb-1.5" style={{ fontFamily: "Georgia, serif" }}>
               <Link href={`/article/${col3Bottom.slug}`}>
                 {col3Bottom.title}

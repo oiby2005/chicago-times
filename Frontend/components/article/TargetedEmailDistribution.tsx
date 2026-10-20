@@ -213,6 +213,7 @@ export const TargetedEmailDistribution: React.FC<TargetedEmailDistributionProps>
                 type="checkbox"
                 checked={tempBroadcast}
                 onChange={(e) => setTempBroadcast(e.target.checked)}
+                onClick={(e) => e.stopPropagation()}
                 className="w-4 h-4 accent-[#0284c7] rounded border-gray-300 focus:ring-0 cursor-pointer mt-0.5 shrink-0"
               />
               <div>

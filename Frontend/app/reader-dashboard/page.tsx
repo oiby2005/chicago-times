@@ -168,7 +168,11 @@ export default function ReaderDashboard() {
         setCurrentUser(parsed);
 
         // Fetch latest profile from server
-        fetch(`http://localhost:5000/api/users/${encodeURIComponent(cleanEmail)}`)
+        const token = typeof window !== "undefined" ? localStorage.getItem("wsj_token") : null;
+        fetch(`http://localhost:5000/api/users/${encodeURIComponent(cleanEmail)}`, {
+          credentials: "include",
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        })
           .then((res) => (res.ok ? res.json() : null))
           .then((data) => {
             if (data && data.success && data.user) {
@@ -210,13 +214,17 @@ export default function ReaderDashboard() {
         }
       };
 
+      const handleSavedArticlesUpdated = () => {
+        loadSavedArticles();
+      };
+
       window.addEventListener("wsj_user_updated", loadUser);
-      window.addEventListener("wsj_saved_articles_updated", loadSavedArticles);
+      window.addEventListener("wsj_saved_articles_updated", handleSavedArticlesUpdated);
       window.addEventListener("storage", handleStorage);
 
       return () => {
         window.removeEventListener("wsj_user_updated", loadUser);
-        window.removeEventListener("wsj_saved_articles_updated", loadSavedArticles);
+        window.removeEventListener("wsj_saved_articles_updated", handleSavedArticlesUpdated);
         window.removeEventListener("storage", handleStorage);
         if (channel) channel.close();
       };

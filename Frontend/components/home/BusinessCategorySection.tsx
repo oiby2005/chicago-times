@@ -195,7 +195,7 @@ export const BusinessCategorySection: React.FC = () => {
   const rightItems = articles.slice(6, 8);
 
   return (
-    <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-0 font-sans  border-b border-dashed border-[#888070] pb-5 items-stretch">
+    <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-0 font-sans border-b-0 md:border-b border-dashed border-[#888070] pb-0 md:pb-5 items-stretch">
       {/* COLUMN 1 (LEFT ~ 3 of 12 cols): Positions 1, 2, 3 */}
       <div 
         className="col-span-12 md:col-span-1 lg:col-span-3 pr-0 md:pr-[0.3cm] pb-0 lg:pb-0 flex flex-col lg:justify-between justify-start border-b lg:border-b-0 lg:border-r border-dashed border-[#888070] mb-0 lg:mb-0 lg:h-full"
@@ -211,6 +211,9 @@ export const BusinessCategorySection: React.FC = () => {
             <span className="text-[13px] font-bold leading-none">›</span>
           </div>
         </div>
+
+        {/* Mobile-only dashed divider below Business text */}
+        <div className="block md:hidden border-b border-dashed border-[#CCCCCC] my-3.5" />
 
         {/* Articles List with equal space for all 3 articles on desktop */}
         <div className="divide-y divide-dashed divide-[#888070] lg:flex-1 lg:flex lg:flex-col lg:min-h-0">

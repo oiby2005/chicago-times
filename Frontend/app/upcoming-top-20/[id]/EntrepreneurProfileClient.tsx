@@ -108,6 +108,13 @@ export default function EntrepreneurProfileClient({ id }: { id: string }) {
   const [showAllEntrepreneurs, setShowAllEntrepreneurs] = useState(false);
   const [visibleArticleCount, setVisibleArticleCount] = useState(5);
   const [userPosts, setUserPosts] = useState<any[]>([]);
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   const slugify = (str: string) =>
     (str || "")
@@ -419,7 +426,7 @@ export default function EntrepreneurProfileClient({ id }: { id: string }) {
     { id: "c4", name: "Neuralink", role: "Founder", website: "www.neuralink.com", logoUrl: "https://upload.wikimedia.org/wikipedia/commons/8/87/Neuralink_logo.svg" },
   ];
 
-  const maxVisiblePerSlide = 4;
+  const maxVisiblePerSlide = isMobile ? 2 : 4;
   const totalSlides = Math.min(5, Math.max(1, Math.ceil(companiesList.length / maxVisiblePerSlide)));
   const currentSlideCompanies = companiesList.slice(
     carouselIndex * maxVisiblePerSlide,
@@ -522,7 +529,7 @@ export default function EntrepreneurProfileClient({ id }: { id: string }) {
         <div className="w-full bg-white border border-[#E5E0D5] rounded-none overflow-hidden my-3 sm:my-5 shadow-2xs">
           <div className="grid grid-cols-1 lg:grid-cols-12 items-stretch">
             {/* Left Column (expanded to ~67%-75% width on desktop for company carousel) */}
-            <div className="lg:col-span-8 xl:col-span-9 p-6 sm:p-8 md:p-9 flex flex-col justify-between bg-white">
+            <div className="lg:col-span-8 xl:col-span-9 p-6 sm:p-8 md:p-9 flex flex-col justify-between bg-white order-2 lg:order-1">
               <div>
                 {/* Tracker Label */}
                 <span className="font-sans font-extrabold text-[11px] uppercase tracking-[0.2em] text-[#555555]">
@@ -585,7 +592,7 @@ export default function EntrepreneurProfileClient({ id }: { id: string }) {
                       </button>
 
                       {/* 4 Company Columns Exactly Matching Image 1 (No Card Boxes, Divided by Lines, Single Line Name) */}
-                      <div className="flex-1 grid grid-cols-2 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-[#E5E0D5]">
+                      <div className="flex-1 grid grid-cols-2 md:grid-cols-4 divide-x divide-[#E5E0D5]">
                         {displayedCompanies.map((comp, idx) => {
                           const domain = getCleanDomain(comp.website);
                           const effectiveLogo = comp.logoUrl || (domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=128` : "");
@@ -694,7 +701,7 @@ export default function EntrepreneurProfileClient({ id }: { id: string }) {
             </div>
 
             {/* Right Column: Rectangular Portrait Image (~25%-33% width on desktop) */}
-            <div className="lg:col-span-4 xl:col-span-3 relative bg-[#EAE6DA] border-t lg:border-t-0 lg:border-l border-[#E5E0D5] min-h-[340px] sm:min-h-[400px] flex items-center justify-center overflow-hidden">
+            <div className="lg:col-span-4 xl:col-span-3 relative bg-[#EAE6DA] border-b lg:border-b-0 lg:border-l border-[#E5E0D5] min-h-[340px] sm:min-h-[400px] flex items-center justify-center overflow-hidden order-1 lg:order-2">
               <img
                 src={item.photoUrl || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80"}
                 alt={item.name}
@@ -791,9 +798,9 @@ export default function EntrepreneurProfileClient({ id }: { id: string }) {
                   <span className="text-[#111111] font-semibold">{item.children ?? 0}</span>
                 </div>
 
-                <div className="py-3 px-2 bg-white flex items-center justify-between">
-                  <span className="font-bold text-[#111111]">Education</span>
-                  <span className="text-[#111111] font-semibold">{item.education || "Bachelor of Science, Stanford University"}</span>
+                <div className="py-3 px-2 bg-white flex items-start sm:items-center justify-between gap-4">
+                  <span className="font-bold text-[#111111] shrink-0">Education</span>
+                  <span className="text-[#111111] font-semibold text-right break-words max-w-[70%] sm:max-w-none">{item.education || "Bachelor of Science, Stanford University"}</span>
                 </div>
 
                 {item.netWorthMillions && (
@@ -1004,7 +1011,7 @@ export default function EntrepreneurProfileClient({ id }: { id: string }) {
         {/* ========================================================================= */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 my-6">
           {/* Main Content Column (More from Times Chicago with Inline Ad & Pagination) */}
-          <div className="lg:col-span-8 space-y-8 border-b lg:border-b-0 lg:border-r border-dashed border-[#CCCCCC] pr-0 lg:pr-8 pb-8 lg:pb-0">
+          <div className="lg:col-span-8 space-y-8 border-b-0 md:border-b lg:border-b-0 lg:border-r border-dashed border-[#CCCCCC] pr-0 lg:pr-8 pb-8 lg:pb-0">
             <div className="w-full pt-8 pb-4 border-t border-[#111111]">
               <div className="flex items-center justify-between mb-6">
                 <h3
@@ -1053,7 +1060,7 @@ export default function EntrepreneurProfileClient({ id }: { id: string }) {
 
                     {/* Inline Advertisement inserted directly after 3rd article (index 2) */}
                     {index === 2 && (
-                      <div className="w-full flex flex-col items-center justify-center my-6 py-2">
+                      <div className="hidden md:flex w-full flex-col items-center justify-center my-6 py-2">
                         <AdPlaceholder
                           slotId="entrepreneur_profile_inline_ad"
                           width="w-full"
@@ -1068,7 +1075,7 @@ export default function EntrepreneurProfileClient({ id }: { id: string }) {
 
               {/* "More articles" Action Button */}
               {visibleArticleCount < articlesList.length && (
-                <div className="flex justify-center mt-8 pt-4 border-t border-[#E5E0D5]">
+                <div className="flex justify-center mt-8 pt-4 border-t-0 md:border-t border-[#E5E0D5]">
                   <button
                     type="button"
                     onClick={() => setVisibleArticleCount((prev) => Math.min(prev + 3, articlesList.length))}

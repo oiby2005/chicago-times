@@ -139,9 +139,9 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({
       } catch (e) {}
     }
 
-    // 3. Backend API users list
+    // 3. Backend API writers list (Public sanitized endpoint)
     try {
-      const res = await fetch("http://localhost:5000/api/users").catch(() => null);
+      const res = await fetch("http://localhost:5000/api/writers").catch(() => null);
       if (res && res.ok) {
         const data = await res.json();
         const list = data.list || (data.users ? Object.values(data.users) : []);
@@ -564,20 +564,6 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({
               )}
             </div>
           )}
-        </div>
-
-        {/* Modal Footer Bar (Matching Image 3) */}
-        <div className="px-5 sm:px-6 py-3 bg-slate-50/90 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400 font-sans">
-          <div className="flex items-center space-x-4">
-            <span className="flex items-center space-x-1">
-              <kbd className="px-1.5 py-0.5 bg-white border border-slate-200 rounded text-[10px] font-mono shadow-2xs text-slate-600 font-bold">Enter</kbd>
-              <span>to search</span>
-            </span>
-            <span className="flex items-center space-x-1">
-              <kbd className="px-1.5 py-0.5 bg-white border border-slate-200 rounded text-[10px] font-mono shadow-2xs text-slate-600 font-bold">Esc</kbd>
-              <span>to close</span>
-            </span>
-          </div>
         </div>
       </div>
     </div>

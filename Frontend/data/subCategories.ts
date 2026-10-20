@@ -67,7 +67,6 @@ export const ALL_69_SUBCATEGORIES: string[] = [
   "Research",
   "Opinion",
   "Editorials",
-  "Personal Finance",
   "Interviews"
 ];
 

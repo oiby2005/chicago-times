@@ -221,17 +221,17 @@ export function ArticleVideosSection({ hideTopBorder = false, className = "" }: 
             } bg-black opacity-90 group-hover:scale-105 transition-transform duration-300`}
           />
           <div className="absolute inset-0 bg-black/20 flex items-center justify-center group-hover:bg-black/10 transition-colors">
-            <div className="w-14 h-14 rounded-full bg-white/90 text-black flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-              <svg className="w-6 h-6 fill-current translate-x-0.5" viewBox="0 0 24 24">
+            <div className="w-6 h-6 md:w-14 md:h-14 rounded-full bg-white/90 text-black flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+              <svg className="w-2.5 h-2.5 md:w-6 md:h-6 fill-current translate-x-0.5" viewBox="0 0 24 24">
                 <path d="M8 5v14l11-7z" />
               </svg>
             </div>
           </div>
 
           {/* Top Left Badge */}
-          <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-xs text-white font-mono text-xs px-3 py-1.5 rounded-full flex items-center gap-2">
-            <span className="w-5 h-5 rounded-full border border-white/40 flex items-center justify-center text-[10px]">▶</span>
-            <span className="font-bold tracking-wider uppercase text-[10px]">{activeVideo.platform || "WATCH VIDEO"}</span>
+          <div className="absolute top-2 left-2 md:top-4 md:left-4 bg-black/60 backdrop-blur-xs text-white font-mono text-[9px] md:text-xs px-2 py-0.5 md:px-3 md:py-1.5 rounded-full flex items-center gap-1.5 md:gap-2">
+            <span className="w-3.5 h-3.5 md:w-5 md:h-5 rounded-full border border-white/40 flex items-center justify-center text-[8px] md:text-[10px]">▶</span>
+            <span className="font-bold tracking-wider uppercase text-[8px] md:text-[10px]">{activeVideo.platform || "WATCH VIDEO"}</span>
           </div>
         </a>
       )}

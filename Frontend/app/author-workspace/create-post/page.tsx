@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
 import { ALL_69_SUBCATEGORIES } from "@/data/subCategories";
 import { convertFileToWebP } from "@/lib/webpConverter";
+import { getAuthHeaders } from "@/lib/authHeader";
+import { sanitizeArticleHtml } from "@/lib/htmlSanitizer";
 
 const ALL_MAIN_CATEGORIES = [
   "News", "U.S. News", "International News",
@@ -137,7 +139,7 @@ const safeSavePostsToStorage = (posts: any[]): boolean => {
     try {
       fetch("http://localhost:5000/api/posts", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify(posts),
       })
         .then((res) => res.json())
@@ -428,41 +430,54 @@ export default function CreateNewPostPage() {
 
   React.useEffect(() => {
     if (typeof window !== "undefined") {
+      const storedUser = sessionStorage.getItem("wsj_user") || localStorage.getItem("currentUser");
+      const token = sessionStorage.getItem("wsj_token") || localStorage.getItem("wsj_token");
+
+      if (!storedUser || !token) {
+        router.push("/signin");
+        return;
+      }
+
       try {
-        const storedUser = sessionStorage.getItem("wsj_user");
-        if (storedUser) {
-          let parsed = JSON.parse(storedUser);
-          if (parsed && (parsed.email || parsed.full_name || parsed.name)) {
-            const userEmail = (parsed.email || "writer@gmail.com").toLowerCase().trim();
-            try {
-              const map = JSON.parse(localStorage.getItem("wsj_users_by_email") || "{}");
-              const savedForEmail = map[userEmail];
-              if (savedForEmail) {
-                parsed = { ...parsed, ...savedForEmail };
-              }
-            } catch (e) {}
-            setCurrentUser({ ...parsed, email: userEmail });
-          } else {
-            setCurrentUser({ full_name: "Writer User", name: "Writer User", email: "writer@gmail.com", role: "writer" });
-          }
-        } else {
-          setCurrentUser({ full_name: "Writer User", name: "Writer User", email: "writer@gmail.com", role: "writer" });
+        let parsed = JSON.parse(storedUser);
+        const role = (parsed?.role || "").toLowerCase().trim();
+        if (role !== "writer" && role !== "admin" && role !== "default admin") {
+          router.push(role === "reader" ? "/reader-dashboard" : "/signin");
+          return;
         }
+        if (parsed?.is_blocked) {
+          sessionStorage.clear();
+          localStorage.removeItem("wsj_token");
+          router.push("/signin");
+          return;
+        }
+
+        const userEmail = (parsed.email || "").toLowerCase().trim();
+        if (userEmail) {
+          try {
+            const map = JSON.parse(localStorage.getItem("wsj_users_by_email") || "{}");
+            const savedForEmail = map[userEmail];
+            if (savedForEmail) {
+              parsed = { ...parsed, ...savedForEmail };
+            }
+          } catch (e) {}
+        }
+        setCurrentUser({ ...parsed, email: userEmail });
       } catch (e) {
-        setCurrentUser({ full_name: "Writer User", name: "Writer User", email: "writer@gmail.com", role: "writer" });
+        router.push("/signin");
       }
     }
-  }, []);
+  }, [router]);
 
   React.useEffect(() => {
     const reloadUser = () => {
       if (typeof window !== "undefined") {
         try {
-          const storedUser = sessionStorage.getItem("wsj_user");
+          const storedUser = sessionStorage.getItem("wsj_user") || localStorage.getItem("currentUser");
           if (storedUser) {
             let parsed = JSON.parse(storedUser);
             if (parsed && (parsed.email || parsed.full_name || parsed.name)) {
-              const userEmail = (parsed.email || "writer@gmail.com").toLowerCase().trim();
+              const userEmail = (parsed.email || "").toLowerCase().trim();
               try {
                 const map = JSON.parse(localStorage.getItem("wsj_users_by_email") || "{}");
                 const savedForEmail = map[userEmail];
@@ -1320,7 +1335,7 @@ export default function CreateNewPostPage() {
         const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
         const res = await fetch(`${backendUrl}/api/upload-url`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: getAuthHeaders({ "Content-Type": "application/json" }),
           body: JSON.stringify({ url: finalUrl, folder: "articles" }),
         });
         if (res.ok) {
@@ -1635,7 +1650,7 @@ export default function CreateNewPostPage() {
     try {
       await fetch("http://localhost:5000/api/posts", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify(newDraftPost),
       });
     } catch (err) {}
@@ -1733,7 +1748,7 @@ export default function CreateNewPostPage() {
     try {
       await fetch("http://localhost:5000/api/posts", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify(newPendingPost),
       });
     } catch (err) {}
@@ -1857,7 +1872,7 @@ export default function CreateNewPostPage() {
             {/* ==================== LEFT COLUMN: EDITOR CANVAS ==================== */}
             <div className="w-full lg:flex-1 max-w-[840px]">
               {/* Main Article Paper Editor Card with Integrated Top Toolbar */}
-              <div className="bg-white border border-[#e2e8f0] rounded-2xl p-3.5 sm:p-6 min-h-[320px] sm:min-h-[480px] lg:min-h-[640px] h-auto shadow-sm space-y-5 sm:space-y-6 overflow-visible">
+              <div className="bg-white border border-[#e2e8f0] rounded-2xl p-3.5 sm:p-6 min-h-[320px] sm:min-h-[480px] lg:min-h-[640px] shadow-sm space-y-5 sm:space-y-6">
                 
                 {/* Integrated Rich Text Editor Formatting Toolbar */}
                 <div className="bg-[#f8fafc] border border-[#e2e8f0] rounded-xl p-2 sm:p-2.5 flex items-center justify-start space-x-2 sm:space-x-3 shadow-sm overflow-x-auto no-scrollbar font-sans text-xs">
@@ -2254,21 +2269,6 @@ export default function CreateNewPostPage() {
                     {/* DETAILS TAB CONTENT */}
                     {sidebarTab === "DETAILS" && (
                       <div className="space-y-5">
-                        {/* EXCLUSIVE BADGE TOGGLE */}
-                        <div className="bg-[#f8fafc] border border-[#e2e8f0] rounded-xl p-3">
-                          <label className="flex items-center space-x-2.5 text-xs font-bold text-[#1e293b] cursor-pointer ">
-                            <input
-                              type="checkbox"
-                              checked={isExclusive}
-                              onChange={(e) => setIsExclusive(e.target.checked)}
-                              className="w-4 h-4 accent-[#2563eb] rounded border-gray-300 focus:ring-0 cursor-pointer"
-                            />
-                            <span className="uppercase text-[11px] font-sans font-bold tracking-wider text-[#1e293b]">
-                              Mark as EXCLUSIVE Article
-                            </span>
-                          </label>
-                        </div>
-
                         {/* 1. SELECT CATEGORY (MAIN) */}
                         <div className="space-y-1.5">
                           <label className="block text-[10.5px] font-mono font-bold text-[#94a3b8] uppercase tracking-wider">
@@ -2797,13 +2797,8 @@ export default function CreateNewPostPage() {
                   <span>BACK TO NEWSFEED</span>
                 </div>
 
-                {/* Category & EXCLUSIVE Badge matching Image 1 styling */}
+                {/* Category matching Image 1 styling */}
                 <div className="flex items-center space-x-3 mb-3 font-sans">
-                  {isExclusive && (
-                    <span className="inline-block border border-[#333333] rounded-[3px] px-2 py-[2px] text-[11.5px] font-sans font-bold text-[#111111] tracking-wider leading-none ">
-                      EXCLUSIVE
-                    </span>
-                  )}
                   <span className="text-[12px] font-sans font-bold text-[#666666] tracking-wider uppercase">
                     {mainCategory.toUpperCase()}
                   </span>
@@ -2818,7 +2813,10 @@ export default function CreateNewPostPage() {
 
                 {/* Subheadline / Deck */}
                 {subheadline.trim() && (
-                  <p className="text-base sm:text-lg md:text-[19px] text-[#333333] font-georgia-serif leading-relaxed mb-6" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
+                  <p
+                    className="font-georgia-serif font-bold text-base sm:text-lg md:text-[19px] text-[#111111] leading-relaxed mb-6"
+                    style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontWeight: 700, color: "#111111" }}
+                  >
                     {subheadline}
                   </p>
                 )}
@@ -2920,7 +2918,7 @@ export default function CreateNewPostPage() {
                     <div
                       style={{ fontSize: fontSizePixel }}
                       className={`preview-body-text editor-body-text ${fontSizeClass} flow-root text-[#1a1a1a] leading-[1.75] font-serif space-y-5 [&_p]:mb-5 [&_p]:leading-[1.75] [&_img]:rounded-xl [&_img]:max-w-full [&_blockquote]:border-l-[5px] [&_blockquote]:border-[#ea580c] [&_blockquote]:bg-[#f8fafc] [&_blockquote]:py-3.5 [&_blockquote]:px-5 [&_blockquote]:my-3 [&_blockquote]:rounded-r-md [&_blockquote]:italic [&_blockquote]:text-[#334155] [&_blockquote]:flow-root [&_pre]:bg-[#f1f5f9] [&_pre]:border-none [&_pre]:outline-none [&_pre]:p-5 [&_pre]:rounded-xl [&_pre]:italic [&_pre]:text-[#334155] [&_pre]:text-base [&_pre]:my-4 [&_pre]:max-w-full [&_pre]:box-border [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_pre]:flow-root transition-all duration-150`}
-                      dangerouslySetInnerHTML={{ __html: bodyContent }}
+                      dangerouslySetInnerHTML={{ __html: sanitizeArticleHtml(bodyContent) }}
                     />
                   );
                 })()}
@@ -2936,7 +2934,7 @@ export default function CreateNewPostPage() {
 
                 {/* Comments Section */}
                 <div className="border-t border-[#e2e8f0] pt-6 mt-8 font-sans">
-                  <ArticleCommentsSection articleSlug="create-post-preview" commentCount={0} />
+                  <ArticleCommentsSection articleSlug="preview-mode" commentCount={0} readOnly={true} />
                 </div>
 
               </div>

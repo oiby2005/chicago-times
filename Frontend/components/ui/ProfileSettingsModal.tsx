@@ -3,16 +3,41 @@
 import React, { useState, useEffect, useRef } from "react";
 import { convertFileToWebP } from "@/lib/webpConverter";
 import { slugifyAuthorName } from "@/data/authors";
+import { getAuthHeaders } from "@/lib/authHeader";
+
+import { ExperienceItem, EducationItem, PublicationItem } from "@/components/author/AuthorCredentialsSidebar";
+import CredentialsEditor from "@/components/ui/CredentialsEditor";
 
 export interface UserProfile {
-  id?: number;
-  full_name: string;
+  id?: number | string;
+  full_name?: string;
+  name?: string;
+  displayName?: string;
+  username?: string;
   email: string;
   role: string;
+  writer_type?: string;
   bio?: string;
   linkedin?: string;
+  country?: string;
   avatar_url?: string;
+  is_default_admin?: boolean;
+  is_blocked?: boolean;
+  experiences?: ExperienceItem[];
+  education?: EducationItem[];
+  publications?: PublicationItem[];
+  issued_date?: string;
+  press_id?: string;
 }
+
+const COUNTRIES_LIST = [
+  "United States", "United Kingdom", "Canada", "Australia", "Germany", "France", "India",
+  "Japan", "China", "Brazil", "Mexico", "Italy", "Spain", "Netherlands", "Switzerland",
+  "Sweden", "Singapore", "South Korea", "United Arab Emirates", "Saudi Arabia", "South Africa",
+  "New Zealand", "Ireland", "Norway", "Denmark", "Finland", "Belgium", "Austria", "Poland",
+  "Portugal", "Greece", "Argentina", "Chile", "Colombia", "Egypt", "Indonesia", "Israel",
+  "Malaysia", "Nigeria", "Pakistan", "Philippines", "Qatar", "Sri Lanka", "Thailand", "Turkey", "Vietnam", "Other"
+];
 
 interface ProfileSettingsModalProps {
   isOpen: boolean;
@@ -32,29 +57,41 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
   // Form state initialized with fallback defaults matching screenshot
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
+  const [country, setCountry] = useState("United States");
   const [role, setRole] = useState("READER");
   const [bio, setBio] = useState("");
   const [linkedin, setLinkedin] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
+  const [experiences, setExperiences] = useState<ExperienceItem[]>([]);
+  const [education, setEducation] = useState<EducationItem[]>([]);
+  const [publications, setPublications] = useState<PublicationItem[]>([]);
   const [showSavedToast, setShowSavedToast] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     setIsSaving(false);
     if (currentUser) {
-      setFullName(currentUser.full_name || (currentUser as any).name || "User");
+      setFullName(currentUser.full_name || currentUser.name || "User");
       setEmail(currentUser.email || "user@gmail.com");
+      setCountry(currentUser.country || (currentUser as any).country || "United States");
       setRole((currentUser.role || "READER").toUpperCase());
       setBio(currentUser.bio || "News Enthusiast");
       setLinkedin(currentUser.linkedin || "");
       setAvatarUrl(currentUser.avatar_url || "");
+      setExperiences(Array.isArray(currentUser.experiences) ? currentUser.experiences : []);
+      setEducation(Array.isArray(currentUser.education) ? currentUser.education : []);
+      setPublications(Array.isArray(currentUser.publications) ? currentUser.publications : []);
     } else {
       setFullName("User");
       setEmail("user@gmail.com");
+      setCountry("United States");
       setRole("READER");
       setBio("News Enthusiast");
       setLinkedin("");
       setAvatarUrl("");
+      setExperiences([]);
+      setEducation([]);
+      setPublications([]);
     }
   }, [currentUser, isOpen]);
 
@@ -92,7 +129,11 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
       role: role.toLowerCase(),
       bio: bio,
       linkedin: linkedin,
+      country: country,
       avatar_url: avatarUrl,
+      experiences: experiences,
+      education: education,
+      publications: publications,
     };
 
     // 1. Immediately apply to active session & trigger instant UI updates
@@ -118,10 +159,11 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
     // 2. Persist to Express Backend API & MySQL in background
     try {
       const prevName = currentUser?.full_name || (currentUser as any)?.name || "";
+      const prevEmail = currentUser?.email || email;
       const res = await fetch("http://localhost:5000/api/users", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...updatedUser, old_full_name: prevName }),
+        headers: getAuthHeaders({ "Content-Type": "application/json" }),
+        body: JSON.stringify({ ...updatedUser, old_full_name: prevName, old_email: prevEmail }),
       });
       if (res.ok) {
         const resData = await res.json();
@@ -181,7 +223,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
       if (updatedPosts && updatedPosts.length > 0) {
         fetch("http://localhost:5000/api/posts", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: getAuthHeaders({ "Content-Type": "application/json" }),
           body: JSON.stringify(updatedPosts),
         }).catch(() => {});
       }
@@ -198,10 +240,12 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
         if (idx !== -1) {
           accounts[idx] = {
             ...accounts[idx],
+            email: email,
             full_name: fullName,
             name: fullName,
             bio: bio,
             linkedin: linkedin,
+            country: country,
             avatar_url: updatedUser.avatar_url,
             image: updatedUser.avatar_url,
           };
@@ -256,7 +300,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-black/50 backdrop-blur-xs transition-opacity animate-in fade-in duration-200">
       {/* Modal Dialog Box matching screenshot */}
-      <div className="bg-white rounded-2xl w-full max-w-[480px] p-5 sm:p-7 shadow-2xl relative border border-[#e2e8f0] transform transition-all animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-2xl w-full max-w-[580px] sm:max-w-[640px] p-5 sm:p-7 shadow-2xl relative border border-[#e2e8f0] transform transition-all animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
         
         {/* Toast Notification on Save */}
         {showSavedToast && (
@@ -345,6 +389,38 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
             />
           </div>
 
+          {/* EMAIL & COUNTRY Fields */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <div>
+              <label className="block font-mono text-[11px] font-bold text-[#64748b] tracking-wider uppercase mb-1.5">
+                EMAIL ADDRESS
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-4 py-3 bg-white border border-[#e2e8f0] rounded-xl text-[#1e293b] font-sans text-[15px] focus:outline-none focus:border-[#00528a] focus:ring-2 focus:ring-[#00528a]/15 transition-all"
+                placeholder="name@timeschicago.com"
+              />
+            </div>
+            <div>
+              <label className="block font-mono text-[11px] font-bold text-[#64748b] tracking-wider uppercase mb-1.5">
+                COUNTRY
+              </label>
+              <select
+                value={country}
+                onChange={(e) => setCountry(e.target.value)}
+                className="w-full px-4 py-3 bg-white border border-[#e2e8f0] rounded-xl text-[#1e293b] font-sans text-[15px] focus:outline-none focus:border-[#00528a] focus:ring-2 focus:ring-[#00528a]/15 transition-all cursor-pointer"
+              >
+                {COUNTRIES_LIST.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
           {/* BIO Field */}
           <div>
             <label className="block font-mono text-[11px] font-bold text-[#64748b] tracking-wider uppercase mb-1.5">
@@ -384,6 +460,18 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
             <p className="font-sans text-[12px] text-[#94a3b8] mt-1.5">
               Shown on your article bylines so readers can connect with you.
             </p>
+          </div>
+
+          {/* Experience, Publications & Education for Staff Writers & Contributors */}
+          <div className="pt-2 border-t border-slate-100">
+            <CredentialsEditor
+              experiences={experiences}
+              setExperiences={setExperiences}
+              education={education}
+              setEducation={setEducation}
+              publications={publications}
+              setPublications={setPublications}
+            />
           </div>
         </div>
 

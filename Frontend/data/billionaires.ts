@@ -1,3 +1,5 @@
+import { getAuthHeaders } from "@/lib/authHeader";
+
 export interface WealthPoint {
   year: number;
   value: number; // Value in Billions USD
@@ -306,7 +308,7 @@ export function saveBillionairesList(items: BillionaireItem[]): void {
   // Save to MySQL database & upload headshots to Backblaze B2
   fetch("http://localhost:5000/api/billionaires", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: getAuthHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify({ billionaires: trimmed }),
   })
     .then((res) => res.ok ? res.json() : null)

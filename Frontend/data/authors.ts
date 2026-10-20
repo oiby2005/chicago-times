@@ -7,6 +7,8 @@ export interface Author {
   image: string;
   linkedinUrl?: string;
   twitterUrl?: string;
+  id?: string | number;
+  avatarUrl?: string;
 }
 
 export const defaultWritersMap: Record<string, Author> = {

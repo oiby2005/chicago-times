@@ -10,6 +10,7 @@ import AuthorHeader from "@/components/author/AuthorHeader";
 import AuthorArticlesList from "@/components/author/AuthorArticlesList";
 import MostReadSidebar from "@/components/author/MostReadSidebar";
 import LouisVuittonAdBanner from "@/components/author/LouisVuittonAdBanner";
+import AuthorCredentialsSidebar from "@/components/author/AuthorCredentialsSidebar";
 import { getAuthorBySlug, slugifyAuthorName } from "@/data/authors";
 
 export default function AuthorClientContent() {
@@ -44,8 +45,14 @@ export default function AuthorClientContent() {
 
       const targetEmail = (authorData?.email || "").toLowerCase().trim();
       const published = posts.filter((p: any) => {
-        if (!p || p.status !== "Published") return false;
+        if (!p || (p.status !== "Published" && p.status !== "APPROVED")) return false;
         const pEmail = (p.authorEmail || "").toLowerCase().trim();
+        const isSubWriter = Array.isArray(p.sub_writers) && p.sub_writers.some((sw: any) => {
+          const swEmail = (sw.email || "").toLowerCase().trim();
+          const swSlug = (sw.slug || "").toLowerCase().trim();
+          return (targetEmail && swEmail === targetEmail) || (slug && swSlug === slug.toLowerCase());
+        });
+        if (isSubWriter) return true;
         if (pEmail && targetEmail) return pEmail === targetEmail;
         if (!targetEmail || targetEmail === "writer@gmail.com") return !pEmail || pEmail === "writer@gmail.com";
         return false;
@@ -74,8 +81,9 @@ export default function AuthorClientContent() {
                 <AuthorArticlesList authorName={authorData.name.toUpperCase()} authorEmail={authorData.email} />
               </div>
 
-              {/* Right Column: Top Right Sidebar with Louis Vuitton Ad Banner */}
+              {/* Right Column: Top Right Sidebar with Experience, Publications, Education, Most Read Articles, and Louis Vuitton Ad Banner */}
               <div className="lg:col-span-4 sticky top-6 pl-0 lg:pl-4 space-y-6">
+                <AuthorCredentialsSidebar authorEmail={authorData.email} authorName={authorData.name} />
                 {hasPublishedArticles && (
                   <MostReadSidebar authorName={authorData.name} authorEmail={authorData.email} />
                 )}

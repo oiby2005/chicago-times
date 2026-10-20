@@ -12,6 +12,7 @@ export interface AuthorProfile {
   bio: string;
   image: string;
   email?: string;
+  country?: string;
   linkedinUrl?: string;
   twitterUrl?: string;
 }
@@ -22,12 +23,20 @@ interface AuthorHeaderProps {
 
 const defaultAuthor: AuthorProfile = {
   name: "Writer User",
-  role: "WRITER",
+  role: "STAFF WRITER",
   bio: "Journalist & Columnist",
   image: "",
   email: "writer@gmail.com",
+  country: "United States",
   linkedinUrl: "https://www.linkedin.com",
   twitterUrl: "https://x.com",
+};
+
+const getFormattedRole = (u?: any, fallbackRole: string = "STAFF WRITER") => {
+  if ((u?.writer_type || "").toLowerCase() === "contributor") return "CONTRIBUTOR";
+  const r = (u?.role || fallbackRole || "STAFF WRITER").toUpperCase();
+  if (r === "WRITER") return "STAFF WRITER";
+  return r;
 };
 
 export default function AuthorHeader({ author = defaultAuthor }: AuthorHeaderProps) {
@@ -52,10 +61,11 @@ export default function AuthorHeader({ author = defaultAuthor }: AuthorHeaderPro
             const u = data.user;
             setProfile({
               name: extractSingleAuthorName(u.full_name || u.name || author.name),
-              role: (u.role || author.role || "WRITER").toUpperCase(),
+              role: getFormattedRole(u, author.role),
               bio: u.bio !== undefined && u.bio !== "" ? u.bio : (author?.bio || "Journalist & Writer"),
               image: u.avatar_url || u.image || author?.image || "",
               email: u.email || author?.email || "worldnews@timeschicago.com",
+              country: u.country || (u as any).country || author?.country || "",
               linkedinUrl: u.linkedin || u.linkedinUrl || author?.linkedinUrl || "https://www.linkedin.com",
               twitterUrl: u.twitter || u.twitterUrl || author?.twitterUrl || "https://x.com",
             });
@@ -73,10 +83,11 @@ export default function AuthorHeader({ author = defaultAuthor }: AuthorHeaderPro
         const u = map[authorEmailLower];
         setProfile({
           name: extractSingleAuthorName(u.full_name || u.name || author.name),
-          role: (u.role || author.role || "WRITER").toUpperCase(),
+          role: getFormattedRole(u, author.role),
           bio: u.bio !== undefined && u.bio !== "" ? u.bio : author?.bio || "Journalist & Writer",
           image: u.avatar_url || u.image || author?.image || "",
           email: u.email || author?.email || "worldnews@timeschicago.com",
+          country: u.country || (u as any).country || author?.country || "",
           linkedinUrl: u.linkedin || u.linkedinUrl || author?.linkedinUrl || "https://www.linkedin.com",
           twitterUrl: u.twitter || u.twitterUrl || author?.twitterUrl || "https://x.com",
         });
@@ -93,10 +104,11 @@ export default function AuthorHeader({ author = defaultAuthor }: AuthorHeaderPro
         if (authorSlugLower === uSlug || authorSlugLower === emailPrefix || (authorNameLower && authorNameLower === uNameLower)) {
           setProfile({
             name: extractSingleAuthorName(u.full_name || u.name || author.name),
-            role: (u.role || author.role || "WRITER").toUpperCase(),
+            role: getFormattedRole(u, author.role),
             bio: u.bio !== undefined && u.bio !== "" ? u.bio : author?.bio || "Journalist & Writer",
             image: u.avatar_url || u.image || author?.image || "",
             email: u.email || author?.email || "worldnews@timeschicago.com",
+            country: u.country || (u as any).country || author?.country || "",
             linkedinUrl: u.linkedin || u.linkedinUrl || author?.linkedinUrl || "https://www.linkedin.com",
             twitterUrl: u.twitter || u.twitterUrl || author?.twitterUrl || "https://x.com",
           });
@@ -109,6 +121,7 @@ export default function AuthorHeader({ author = defaultAuthor }: AuthorHeaderPro
       ...author,
       name: extractSingleAuthorName(author.name),
       email: author?.email || "worldnews@timeschicago.com",
+      country: author?.country || "",
       linkedinUrl: author?.linkedinUrl || "https://www.linkedin.com",
       twitterUrl: author?.twitterUrl || "https://x.com",
     });
@@ -168,26 +181,36 @@ export default function AuthorHeader({ author = defaultAuthor }: AuthorHeaderPro
 
           {/* Author Details - Positioned directly UNDER the image & centered */}
           <div className="w-full text-center space-y-2">
-            {/* 1. Name */}
-            <h1 className="font-serif font-bold text-2xl sm:text-3xl md:text-4xl text-[#111111] leading-tight text-center">
-              {profile.name}
-            </h1>
-
-            {/* 2. Role Badge (e.g. WRITER) */}
-            <div className="font-sans font-bold text-xs sm:text-sm uppercase tracking-wider text-[#990000] text-center">
-              {profile.role}
+            {/* 1. Name & Country (Writer name strictly centralized, Country positioned to the right aligned with bottom edge) */}
+            <div className="flex items-center justify-center">
+              <div className="relative inline-flex items-baseline">
+                <h1 className="font-serif font-bold text-2xl sm:text-3xl md:text-4xl text-[#111111] leading-tight text-center">
+                  {profile.name}
+                </h1>
+                {profile.country && (
+                  <span className="absolute left-full ml-2 whitespace-nowrap font-sans text-xs sm:text-sm font-normal text-[#666666] bottom-0.5 sm:bottom-1">
+                    ({profile.country})
+                  </span>
+                )}
+              </div>
             </div>
 
-            {/* 3. ONLY LinkedIn Icon - Centered directly UNDER Name & Role with sharp corners */}
-            <div className="flex items-center justify-center pt-1 pb-1">
+            {/* 2. Role Badge (e.g. STAFF WRITER / CONTRIBUTOR) */}
+            <div className="font-sans font-bold text-xs sm:text-sm uppercase tracking-wider text-[#990000] text-center">
+              {profile.role?.toUpperCase() === "WRITER" || !profile.role ? "STAFF WRITER" : profile.role}
+            </div>
+
+            {/* 3. Social Icons: LinkedIn & Email */}
+            <div className="flex items-center justify-center gap-2 pt-1 pb-1">
+              {/* LinkedIn Icon */}
               <a
                 href={profile.linkedinUrl || "https://www.linkedin.com"}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center justify-center hover:opacity-90 transition-opacity cursor-pointer shrink-0 rounded-none"
+                className="inline-flex items-center justify-center hover:opacity-90 transition-opacity cursor-pointer shrink-0 rounded-none h-5"
                 title={`${profile.name}'s LinkedIn Profile`}
               >
-                <svg className="w-6 h-6 sm:w-7 sm:h-7 rounded-none" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 rounded-none" viewBox="0 0 24 24">
                   <rect width="24" height="24" fill="#0077b5" rx="0" />
                   <path
                     d="M8 19H5V8h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3V8h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"
@@ -195,6 +218,30 @@ export default function AuthorHeader({ author = defaultAuthor }: AuthorHeaderPro
                   />
                 </svg>
               </a>
+
+              {/* Email Icon (Same vertical height as LinkedIn) */}
+              {profile.email && (
+                <a
+                  href={`mailto:${profile.email}`}
+                  className="inline-flex items-center justify-center hover:opacity-80 transition-opacity cursor-pointer shrink-0 h-5"
+                  title={`Send email to ${profile.email}`}
+                >
+                  <svg
+                    className="h-5 w-auto text-[#111111] hover:text-[#005a9c] transition-colors"
+                    viewBox="1 3 22 18"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <rect x="2" y="4" width="20" height="16" rx="2" />
+                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                    <path d="m3 19 6.5-6" />
+                    <path d="m21 19-6.5-6" />
+                  </svg>
+                </a>
+              )}
             </div>
 
             {/* 4. Bio Description - Positioned directly UNDER the LinkedIn Icon */}

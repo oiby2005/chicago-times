@@ -5,7 +5,7 @@ interface WSJLogoProps {
 }
 
 export const WSJLogo: React.FC<WSJLogoProps> = ({
-  className = "w-full max-w-[320px] sm:max-w-[370px] md:max-w-[420px] h-[50px] sm:h-[58px] md:h-[66px] mx-auto block  overflow-visible",
+  className = "w-full max-w-[320px] sm:max-w-[370px] md:max-w-[330px] lg:max-w-[420px] h-[50px] sm:h-[58px] md:h-[56px] lg:h-[66px] mx-auto block overflow-visible",
 }) => {
   return (
     <div className={className}>

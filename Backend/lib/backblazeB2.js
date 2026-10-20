@@ -1,5 +1,6 @@
 const fs = require('fs');
 require('dotenv').config();
+const { validateUrlForSsrf } = require('./ssrfValidator');
 
 let b2AuthCache = {
   authToken: null,
@@ -193,7 +194,13 @@ async function uploadAllBase64InHtml(htmlContent, prefix = 'article', folder = '
 
 async function uploadRemoteUrlToB2(remoteUrl, defaultName = 'cover_img', folder = 'cover images') {
   if (!remoteUrl || typeof remoteUrl !== 'string') return null;
-  if (!remoteUrl.startsWith('http://') && !remoteUrl.startsWith('https://')) return null;
+
+  // SSRF Protection: Validate remoteUrl against internal IPs, private networks, cloud metadata, and forbidden ports
+  const validation = await validateUrlForSsrf(remoteUrl);
+  if (!validation.valid) {
+    console.warn(`[SSRF Blocked] uploadRemoteUrlToB2 rejected "${remoteUrl}": ${validation.reason}`);
+    return null;
+  }
 
   let targetUrl = remoteUrl;
   if (targetUrl.includes('mzstatic.com')) {
@@ -201,12 +208,17 @@ async function uploadRemoteUrlToB2(remoteUrl, defaultName = 'cover_img', folder 
     if (!targetUrl.endsWith('/1200x1200bb.jpg') && targetUrl.includes('.jpg')) {
       targetUrl = targetUrl.split('?')[0].replace(/\.jpg\/.*$/i, '.jpg/1200x1200bb.jpg');
     }
+    const targetValidation = await validateUrlForSsrf(targetUrl);
+    if (!targetValidation.valid) {
+      targetUrl = remoteUrl;
+    }
   }
 
   try {
     let res = await fetch(targetUrl, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        Accept: 'image/webp,image/avif,image/jpeg,image/png,image/*;q=0.8',
       },
     });
 
@@ -215,6 +227,7 @@ async function uploadRemoteUrlToB2(remoteUrl, defaultName = 'cover_img', folder 
       res = await fetch(remoteUrl, {
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          Accept: 'image/webp,image/avif,image/jpeg,image/png,image/*;q=0.8',
         },
       });
     }
@@ -224,9 +237,21 @@ async function uploadRemoteUrlToB2(remoteUrl, defaultName = 'cover_img', folder 
       return null;
     }
 
-    const arrayBuffer = await res.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
     const mimeType = res.headers.get('content-type') || 'image/jpeg';
+    // Reject non-image content and SVG (prevent stored SVG XSS in B2)
+    if (!mimeType.toLowerCase().startsWith('image/') || mimeType.toLowerCase().includes('svg')) {
+      console.warn('[SSRF/Security] Rejected non-image or SVG MIME type from remote URL:', mimeType);
+      return null;
+    }
+
+    const arrayBuffer = await res.arrayBuffer();
+    // Cap at 15MB
+    if (arrayBuffer.byteLength > 15 * 1024 * 1024) {
+      console.warn('[Security] Remote image exceeds 15MB limit:', arrayBuffer.byteLength);
+      return null;
+    }
+
+    const buffer = Buffer.from(arrayBuffer);
     const ext = mimeType.includes('png') ? 'png' : mimeType.includes('webp') ? 'webp' : 'jpg';
     const cleanName = `${defaultName.replace(/\.[^/.]+$/, '')}_${Date.now()}.${ext}`;
 

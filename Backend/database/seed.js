@@ -122,12 +122,15 @@ async function seedDatabase() {
 
     console.log('Tables "users", "posts", "saved_articles", "newsletter_subscriptions", "wsj_ad_slots" verified/created successfully.');
 
-    // Step 4: Required Accounts
+    // Step 4: Required Accounts (Passwords loaded from environment variables)
+    const seedAdminPassword = process.env.SEED_ADMIN_PASSWORD || 'ChangeMeAdmin979!';
+    const seedUserPassword = process.env.SEED_USER_PASSWORD || 'ChangeMeUser123!';
+
     const dummyUsers = [
       {
         full_name: 'Akram Yanoos',
         email: 'akramyoonos006@gmail.com',
-        plainPassword: 'Admin123',
+        plainPassword: seedAdminPassword,
         role: 'admin',
         bio: 'Default System Administrator',
         linkedin: '',
@@ -136,7 +139,7 @@ async function seedDatabase() {
       {
         full_name: 'Geeth Liyanage',
         email: 'geethliyanage979@gmail.com',
-        plainPassword: 'Admin123',
+        plainPassword: seedAdminPassword,
         role: 'admin',
         bio: 'Default System Administrator',
         linkedin: '',
@@ -145,7 +148,7 @@ async function seedDatabase() {
       {
         full_name: 'Times Chicago',
         email: 'timeschicago17@gmail.com',
-        plainPassword: 'times+chicago1724##',
+        plainPassword: seedAdminPassword,
         role: 'admin',
         bio: 'Default System Administrator',
         linkedin: '',
@@ -154,7 +157,7 @@ async function seedDatabase() {
       {
         full_name: 'Admin User',
         email: 'admin@gmail.com',
-        plainPassword: 'admin123',
+        plainPassword: seedAdminPassword,
         role: 'admin',
         bio: 'System Administrator',
         linkedin: '',
@@ -163,7 +166,7 @@ async function seedDatabase() {
       {
         full_name: 'Writer User',
         email: 'writer@gmail.com',
-        plainPassword: 'writer123',
+        plainPassword: seedUserPassword,
         role: 'writer',
         bio: 'Journalist & Columnist covering business, economic policy, and global markets.',
         linkedin: 'https://www.linkedin.com/in/your-profile',
@@ -172,7 +175,7 @@ async function seedDatabase() {
       {
         full_name: 'writer1',
         email: 'writer1@gmail.com',
-        plainPassword: 'writer456',
+        plainPassword: seedUserPassword,
         role: 'writer',
         bio: 'Journalist & Writer covering technology, innovation, and global developments.',
         linkedin: 'https://www.linkedin.com/in/your-profile',
@@ -181,7 +184,7 @@ async function seedDatabase() {
       {
         full_name: 'Reader User',
         email: 'reader@gmail.com',
-        plainPassword: 'reader123',
+        plainPassword: seedUserPassword,
         role: 'reader',
         bio: 'Avid Reader and Community Subscriber',
         linkedin: '',
@@ -189,9 +192,9 @@ async function seedDatabase() {
       },
     ];
 
-    // Step 5: Hash passwords and insert/update users by unique email
+    // Step 5: Hash passwords using 12 salt rounds and insert/update users by unique email
     for (const u of dummyUsers) {
-      const hashedPassword = await bcrypt.hash(u.plainPassword, 10);
+      const hashedPassword = await bcrypt.hash(u.plainPassword, 12);
       const insertOrUpdateQuery = `
         INSERT INTO users (full_name, email, password, role, bio, linkedin, is_default_admin)
         VALUES (?, ?, ?, ?, ?, ?, ?)

@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
 import { BillionaireItem, WealthPoint, getBillionairesList, saveBillionairesList } from "@/data/billionaires";
+import { getAuthHeaders } from "@/lib/authHeader";
 
 export const INDUSTRY_OPTIONS = [
   "Technology",
@@ -310,6 +311,7 @@ export default function BillionairesAdminDesk() {
     try {
       const res = await fetch("http://localhost:5000/api/upload", {
         method: "POST",
+        headers: getAuthHeaders(),
         body: formData,
       });
       if (res.ok) {
@@ -341,8 +343,9 @@ export default function BillionairesAdminDesk() {
       const updated = { ...prev };
       newYears.forEach((yr, idx) => {
         if (updated[yr] === undefined) {
-          const prevYrVal = updated[yr - 1];
-          updated[yr] = prevYrVal ? Math.round(prevYrVal * 1.1) : (idx + 1) * 30;
+          const rawPrev = updated[yr - 1];
+          const numPrev = typeof rawPrev === "number" ? rawPrev : Number(rawPrev);
+          updated[yr] = !isNaN(numPrev) && numPrev > 0 ? Math.round(numPrev * 1.1) : (idx + 1) * 30;
         }
       });
       return updated;

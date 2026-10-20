@@ -7,6 +7,9 @@ import ProfileSettingsModal, { UserProfile } from "@/components/ui/ProfileSettin
 import { getUserDashboardUrl } from "@/data/authors";
 import BillionairesAdminDesk from "@/components/admin/BillionairesAdminDesk";
 import EntrepreneursAdminDesk from "@/components/admin/EntrepreneursAdminDesk";
+import { getAuthHeaders } from "@/lib/authHeader";
+import CredentialsEditor from "@/components/ui/CredentialsEditor";
+import { formatDurationRange, formatPublicationDate } from "@/components/author/AuthorCredentialsSidebar";
 
 interface ProjectItem {
   id: string;
@@ -39,6 +42,7 @@ interface NewsletterSub {
 interface PublishedPostItem {
   id: string;
   title: string;
+  slug?: string;
   subheadline?: string;
   cardSummary?: string;
   bodyContent?: string;
@@ -58,6 +62,7 @@ export interface ShortReelItem {
   videoUrl: string;
   platform:
     | "Youtube Video"
+    | "YouTube Shorts"
     | "Rumble Video"
     | "Facebook Short"
     | "Instagram shorts"
@@ -205,6 +210,7 @@ const DEFAULT_PODCAST_SLOTS: ShortReelItem[] = [
 export default function AdminDashboard() {
   const router = useRouter();
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<
     | "Overview"
     | "Newsletter"
@@ -708,6 +714,9 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
     full_name: string;
     email: string;
     role: string;
+    writer_type?: string;
+    cycle_started_at?: string;
+    block_reason?: string;
     bio?: string;
     avatar_url?: string;
     linkedin?: string;
@@ -718,6 +727,11 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
     is_blocked?: boolean;
     is_default_admin?: boolean;
     created_at?: string;
+    experiences?: any[];
+    education?: any[];
+    publications?: any[];
+    issued_date?: string;
+    press_id?: string;
   }
 
   const DEFAULT_ADMIN_EMAILS = [
@@ -737,6 +751,7 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
   const [newUserEmail, setNewUserEmail] = useState("");
   const [newUserPassword, setNewUserPassword] = useState("");
   const [newUserRole, setNewUserRole] = useState<"admin" | "writer" | "reader">("writer");
+  const [newUserWriterType, setNewUserWriterType] = useState<"staff" | "contributor">("staff");
   const [addUserError, setAddUserError] = useState("");
   const [isSubmittingUser, setIsSubmittingUser] = useState(false);
 
@@ -744,12 +759,18 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
   const [editUserName, setEditUserName] = useState("");
   const [editUserEmail, setEditUserEmail] = useState("");
   const [editUserRole, setEditUserRole] = useState<"admin" | "writer" | "reader">("writer");
+  const [editUserWriterType, setEditUserWriterType] = useState<"staff" | "contributor">("staff");
   const [editUserPassword, setEditUserPassword] = useState("");
   const [showEditUserPasswordText, setShowEditUserPasswordText] = useState(false);
   const [editUserBio, setEditUserBio] = useState("");
   const [editUserLinkedin, setEditUserLinkedin] = useState("");
   const [editUserPhone, setEditUserPhone] = useState("");
   const [editUserCountry, setEditUserCountry] = useState("United States");
+  const [editUserExperiences, setEditUserExperiences] = useState<any[]>([]);
+  const [editUserEducation, setEditUserEducation] = useState<any[]>([]);
+  const [editUserPublications, setEditUserPublications] = useState<any[]>([]);
+  const [editUserIssuedDate, setEditUserIssuedDate] = useState("");
+  const [editUserPressId, setEditUserPressId] = useState("");
   const [editUserError, setEditUserError] = useState("");
   const [isSubmittingEditUser, setIsSubmittingEditUser] = useState(false);
   const [userToDelete, setUserToDelete] = useState<UserDeskItem | null>(null);
@@ -770,6 +791,7 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
   const [shortVideoUrl, setShortVideoUrl] = useState("");
   const [shortPlatform, setShortPlatform] = useState<
     | "Youtube Video"
+    | "YouTube Shorts"
     | "Rumble Video"
     | "Facebook Short"
     | "Instagram shorts"
@@ -842,8 +864,10 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
     phone?: string;
     whatsapp?: string;
     inquiry_type?: string;
+    inquiryType?: string;
     message: string;
     status?: string;
+    details?: string;
   }
 
   interface AdvertiseLeadItem {
@@ -855,8 +879,13 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
     phone?: string;
     whatsapp?: string;
     service_option?: string;
+    serviceOption?: string;
     requirements: string;
     status?: string;
+    details?: string;
+    budget_range?: string;
+    target_website?: string;
+    timeline?: string;
   }
 
   interface SubscriptionRequestItem {
@@ -874,7 +903,7 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
     try {
       const d = new Date(rawDate);
       if (isNaN(d.getTime())) return rawDate;
-      const datePart = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+      const datePart = d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
       const timePart = d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
       return `${datePart}, ${timePart}`;
     } catch (e) {
@@ -920,7 +949,9 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
 
   const fetchContactSubmissions = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/contact").catch(() => null);
+      const res = await fetch("http://localhost:5000/api/contact", {
+        headers: getAuthHeaders(),
+      }).catch(() => null);
       if (res && res.ok) {
         const data = await res.json();
         const list = data.submissions || (Array.isArray(data) ? data : []);
@@ -933,7 +964,9 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
 
   const fetchAdvertiseLeads = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/advertise-leads").catch(() => null);
+      const res = await fetch("http://localhost:5000/api/advertise-leads", {
+        headers: getAuthHeaders(),
+      }).catch(() => null);
       if (res && res.ok) {
         const data = await res.json();
         const list = data.leads || (Array.isArray(data) ? data : []);
@@ -946,7 +979,9 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
 
   const fetchSubscriptionRequests = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/subscriptions").catch(() => null);
+      const res = await fetch("http://localhost:5000/api/subscriptions", {
+        headers: getAuthHeaders(),
+      }).catch(() => null);
       if (res && res.ok) {
         const data = await res.json();
         const list = data.subscriptions || (Array.isArray(data) ? data : []);
@@ -964,7 +999,7 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
     try {
       await fetch(`http://localhost:5000/api/contact/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify({ status: newStatus }),
       });
     } catch (e) {
@@ -975,7 +1010,10 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
   const handleDeleteContactSubmission = async (id: string) => {
     setContactSubmissions((prev) => prev.filter((item) => item.id !== id));
     try {
-      await fetch(`http://localhost:5000/api/contact/${id}`, { method: "DELETE" });
+      await fetch(`http://localhost:5000/api/contact/${id}`, {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+      });
     } catch (e) {
       console.error("Failed to delete contact submission:", e);
     }
@@ -988,7 +1026,7 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
     try {
       await fetch(`http://localhost:5000/api/advertise-leads/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify({ status: newStatus }),
       });
     } catch (e) {
@@ -999,7 +1037,10 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
   const handleDeleteAdvertiseLead = async (id: string) => {
     setAdvertiseLeads((prev) => prev.filter((item) => item.id !== id));
     try {
-      await fetch(`http://localhost:5000/api/advertise-leads/${id}`, { method: "DELETE" });
+      await fetch(`http://localhost:5000/api/advertise-leads/${id}`, {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+      });
     } catch (e) {
       console.error("Failed to delete advertise lead:", e);
     }
@@ -1013,7 +1054,7 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
       confirmText: "Delete Lead",
       onConfirm: async () => {
         await handleDeleteAdvertiseLead(item.id);
-        setDeleteConfirmModal((prev) => ({ ...prev, isOpen: false }));
+        setDeleteConfirmModal(null);
       },
     });
   };
@@ -1025,7 +1066,7 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
     try {
       await fetch(`http://localhost:5000/api/subscriptions/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify({ status: newStatus }),
       });
     } catch (e) {
@@ -1036,7 +1077,10 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
   const handleDeleteSubscriptionRequest = async (id: string) => {
     setSubscriptionRequests((prev) => prev.filter((item) => item.id !== id));
     try {
-      await fetch(`http://localhost:5000/api/subscriptions/${id}`, { method: "DELETE" });
+      await fetch(`http://localhost:5000/api/subscriptions/${id}`, {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+      });
     } catch (e) {
       console.error("Failed to delete subscription request:", e);
     }
@@ -1050,7 +1094,7 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
       confirmText: "Delete Request",
       onConfirm: async () => {
         await handleDeleteSubscriptionRequest(item.id);
-        setDeleteConfirmModal((prev) => ({ ...prev, isOpen: false }));
+        setDeleteConfirmModal(null);
       },
     });
   };
@@ -1099,7 +1143,9 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
 
   const fetchBackupsList = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/backups").catch(() => null);
+      const res = await fetch("http://localhost:5000/api/backups", {
+        headers: getAuthHeaders(),
+      }).catch(() => null);
       if (res && res.ok) {
         const data = await res.json();
         if (data.success && Array.isArray(data.backups)) {
@@ -1156,7 +1202,7 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
     try {
       const res = await fetch("http://localhost:5000/api/backups/create", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify({ payload }),
       });
       const data = await res.json();
@@ -1186,7 +1232,7 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
         setIsRestoringBackup(true);
         const res = await fetch("http://localhost:5000/api/backups/upload-restore", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: getAuthHeaders({ "Content-Type": "application/json" }),
           body: JSON.stringify({ snapshot, fileName: file.name }),
         });
         const data = await res.json();
@@ -1256,7 +1302,7 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
     try {
       const res = await fetch("http://localhost:5000/api/backups/restore", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify({ fileName }),
       });
       const data = await res.json();
@@ -1316,7 +1362,9 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
       const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
       const downloadEndpoint = `${backendUrl}/api/backups/download/${encodeURIComponent(backup.fileName)}`;
 
-      const res = await fetch(downloadEndpoint).catch(() => null);
+      const res = await fetch(downloadEndpoint, {
+        headers: getAuthHeaders(),
+      }).catch(() => null);
       if (res && res.ok) {
         const blob = await res.blob();
         const downloadUrl = URL.createObjectURL(blob);
@@ -1347,6 +1395,7 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
     try {
       const res = await fetch(`http://localhost:5000/api/backups/${encodeURIComponent(fileName)}`, {
         method: "DELETE",
+        headers: getAuthHeaders(),
       });
       const data = await res.json();
       if (data.success) {
@@ -1697,7 +1746,7 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
           try {
             const res = await fetch("http://localhost:5000/api/upload", {
               method: "POST",
-              headers: { "Content-Type": "application/json" },
+              headers: getAuthHeaders({ "Content-Type": "application/json" }),
               body: JSON.stringify({
                 imageBase64: base64,
                 fileName: `cover_${Date.now()}.${file.name.split('.').pop() || 'webp'}`,
@@ -1862,7 +1911,7 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
     try {
       const res = await fetch("http://localhost:5000/api/shorts", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify({ subTab: shortsSubTab, slots: updated }),
       });
       if (res.ok) {
@@ -1961,7 +2010,7 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
 
         fetch("http://localhost:5000/api/shorts", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: getAuthHeaders({ "Content-Type": "application/json" }),
           body: JSON.stringify({ subTab: shortsSubTab, slots: normalized }),
         }).catch((err) => console.log("Backend shorts delete sync skipped:", err));
 
@@ -1975,11 +2024,24 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
 
   const fetchUsers = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/users").catch(() => null);
+      const res = await fetch("http://localhost:5000/api/users", {
+        headers: getAuthHeaders(),
+        credentials: "include",
+      }).catch(() => null);
       if (res && res.ok) {
         const data = await res.json();
         if (data.success && Array.isArray(data.list)) {
           setUsersList(data.list);
+
+          if (typeof window !== "undefined") {
+            try {
+              const freshMap: Record<string, any> = {};
+              data.list.forEach((u: any) => {
+                if (u.email) freshMap[u.email.toLowerCase().trim()] = u;
+              });
+              localStorage.setItem("wsj_users_by_email", JSON.stringify(freshMap));
+            } catch (e) {}
+          }
 
           const tabUserStr = typeof window !== "undefined" ? sessionStorage.getItem("wsj_user") : null;
           let currentEmail = "";
@@ -2047,12 +2109,13 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
     try {
       const res = await fetch("http://localhost:5000/api/users/add", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify({
           name: newUserName.trim(),
           email: newUserEmail.trim(),
           password: newUserPassword.trim(),
           role: newUserRole,
+          writer_type: newUserRole === "writer" ? newUserWriterType : "staff",
         }),
       });
       const data = await res.json();
@@ -2080,12 +2143,18 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
     setEditUserName(user.full_name || "");
     setEditUserEmail(user.email || "");
     setEditUserRole((user.role?.toLowerCase() as any) || "writer");
+    setEditUserWriterType(((user.writer_type || "").toLowerCase() === "contributor") ? "contributor" : "staff");
     setEditUserPassword("");
     setShowEditUserPasswordText(false);
     setEditUserBio(user.bio || "");
     setEditUserLinkedin(user.linkedin || "");
     setEditUserPhone(user.phone || (user as any).mobile || "");
     setEditUserCountry(user.country || "United States");
+    setEditUserExperiences(Array.isArray(user.experiences) ? user.experiences : []);
+    setEditUserEducation(Array.isArray(user.education) ? user.education : []);
+    setEditUserPublications(Array.isArray(user.publications) ? user.publications : []);
+    setEditUserIssuedDate(user.issued_date || "");
+    setEditUserPressId(user.press_id || "");
     setEditUserError("");
   };
 
@@ -2094,20 +2163,42 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
     setEditUserError("");
     if (!editUserEmail) return;
 
+    const cleanPressId = editUserPressId.trim();
+    if (cleanPressId) {
+      const isDuplicate = usersList.some(
+        (u) =>
+          (u.press_id || "").trim().toLowerCase() === cleanPressId.toLowerCase() &&
+          (u.email || "").trim().toLowerCase() !== (showEditUserModal?.email || "").trim().toLowerCase()
+      );
+      if (isDuplicate) {
+        setEditUserError("This ID is allocated for another contributor or Staff writer.");
+        return;
+      }
+    }
+
     setIsSubmittingEditUser(true);
     try {
+      const originalEmail = showEditUserModal?.email || editUserEmail;
       const res = await fetch("http://localhost:5000/api/users/edit", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify({
+          original_email: originalEmail,
+          id: showEditUserModal?.id,
           email: editUserEmail,
           full_name: editUserName.trim(),
           role: editUserRole,
+          writer_type: editUserRole === "writer" ? editUserWriterType : "staff",
           password: editUserPassword.trim() || undefined,
           bio: editUserBio.trim(),
           linkedin: editUserLinkedin.trim(),
           phone: editUserPhone.trim(),
           country: editUserCountry.trim(),
+          experiences: editUserExperiences,
+          education: editUserEducation,
+          publications: editUserPublications,
+          issued_date: editUserIssuedDate.trim(),
+          press_id: editUserPressId.trim(),
         }),
       });
       const data = await res.json();
@@ -2120,17 +2211,30 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
       if (typeof window !== "undefined") {
         try {
           const map = JSON.parse(localStorage.getItem("wsj_users_by_email") || "{}");
+          const oldCleanKey = (originalEmail || "").toLowerCase().trim();
           const cleanKey = editUserEmail.toLowerCase().trim();
+          if (oldCleanKey && oldCleanKey !== cleanKey) {
+            delete map[oldCleanKey];
+          }
           map[cleanKey] = {
             ...(map[cleanKey] || {}),
+            id: showEditUserModal?.id,
+            email: editUserEmail,
             full_name: editUserName.trim(),
             role: editUserRole,
+            writer_type: editUserRole === "writer" ? editUserWriterType : "staff",
             bio: editUserBio.trim(),
             linkedin: editUserLinkedin.trim(),
             phone: editUserPhone.trim(),
             country: editUserCountry.trim(),
+            experiences: editUserExperiences,
+            education: editUserEducation,
+            publications: editUserPublications,
+          issued_date: editUserIssuedDate.trim(),
+          press_id: editUserPressId.trim(),
           };
           localStorage.setItem("wsj_users_by_email", JSON.stringify(map));
+          window.dispatchEvent(new Event("wsj_user_updated"));
 
           const tabUserStr = sessionStorage.getItem("wsj_user");
           if (tabUserStr) {
@@ -2141,10 +2245,13 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
                 full_name: editUserName.trim(),
                 name: editUserName.trim(),
                 role: editUserRole,
+          writer_type: editUserRole === "writer" ? editUserWriterType : "staff",
                 bio: editUserBio.trim(),
                 linkedin: editUserLinkedin.trim(),
                 phone: editUserPhone.trim(),
                 country: editUserCountry.trim(),
+                issued_date: editUserIssuedDate.trim(),
+                press_id: editUserPressId.trim(),
               };
               sessionStorage.setItem("wsj_user", JSON.stringify(updatedSessionUser));
             }
@@ -2164,6 +2271,36 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
 
       setShowEditUserModal(null);
       setIsSubmittingEditUser(false);
+
+      const updatedUserObj: Partial<UserDeskItem> = {
+        id: showEditUserModal?.id,
+        email: editUserEmail,
+        full_name: editUserName.trim(),
+        role: editUserRole,
+        writer_type: editUserRole === "writer" ? editUserWriterType : "staff",
+        bio: editUserBio.trim(),
+        linkedin: editUserLinkedin.trim(),
+        phone: editUserPhone.trim(),
+        country: editUserCountry.trim(),
+        experiences: editUserExperiences,
+        education: editUserEducation,
+        publications: editUserPublications,
+        issued_date: editUserIssuedDate.trim(),
+        press_id: editUserPressId.trim(),
+      };
+
+      setUsersList((prev) =>
+        prev.map((u) =>
+          u.id === showEditUserModal?.id || (u.email && u.email.toLowerCase() === (originalEmail || "").toLowerCase())
+            ? ({ ...u, ...updatedUserObj } as UserDeskItem)
+            : u
+        )
+      );
+
+      if (showViewUserModal && (showViewUserModal.id === showEditUserModal?.id || showViewUserModal.email.toLowerCase() === (originalEmail || "").toLowerCase())) {
+        setShowViewUserModal((prev) => (prev ? ({ ...prev, ...updatedUserObj } as UserDeskItem) : null));
+      }
+
       fetchUsers();
       loadPostsData();
     } catch (err) {
@@ -2180,7 +2317,7 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
     try {
       const res = await fetch(`http://localhost:5000/api/users/${encodeURIComponent(cleanEmail)}/status`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify({ is_blocked: newBlockedState }),
       });
       const data = await res.json().catch(() => null);
@@ -2224,33 +2361,46 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
     }
 
     try {
+      // 1. Immediately purge from localStorage so stale cached entries like Sophia vanish permanently
+      if (typeof window !== "undefined") {
+        try {
+          const storedMap = localStorage.getItem("wsj_users_by_email");
+          if (storedMap) {
+            const map = JSON.parse(storedMap);
+            delete map[cleanEmail];
+            localStorage.setItem("wsj_users_by_email", JSON.stringify(map));
+          }
+        } catch (e) {}
+      }
+
+      // 2. Immediately remove from current component state
+      setUsersList((prev) => prev.filter((u) => (u.email || "").toLowerCase().trim() !== cleanEmail));
+
       const res = await fetch(`http://localhost:5000/api/users/${encodeURIComponent(cleanEmail)}`, {
         method: "DELETE",
+        headers: getAuthHeaders(),
       });
-      const data = await res.json();
-      if (data.success) {
-        // Cascade delete all articles written by this writer from state & localStorage
-        if (userToDelete && userToDelete.role?.toLowerCase() === "writer") {
-          try {
-            const stored = localStorage.getItem("wsj_posts");
-            if (stored) {
-              const posts = JSON.parse(stored);
-              const remaining = posts.filter((p: any) => {
-                const emMatch = (p.authorEmail || "").toLowerCase().trim() === cleanEmail;
-                const nameMatch = (p.author || "").toLowerCase().trim() === (userToDelete.full_name || "").toLowerCase().trim();
-                return !emMatch && !nameMatch;
-              });
-              localStorage.setItem("wsj_posts", JSON.stringify(remaining));
-              window.dispatchEvent(new Event("wsj_posts_updated"));
-            }
-          } catch (e) {}
-        }
+      const data = await res.json().catch(() => null);
 
-        fetchUsers();
-        loadPostsData();
-      } else {
-        setAdminNoticePopup(data.message || "Failed to delete user.");
+      // Cascade delete all articles written by this writer from state & localStorage
+      if (userToDelete && userToDelete.role?.toLowerCase() === "writer") {
+        try {
+          const stored = localStorage.getItem("wsj_posts");
+          if (stored) {
+            const posts = JSON.parse(stored);
+            const remaining = posts.filter((p: any) => {
+              const emMatch = (p.authorEmail || "").toLowerCase().trim() === cleanEmail;
+              const nameMatch = (p.author || "").toLowerCase().trim() === (userToDelete.full_name || "").toLowerCase().trim();
+              return !emMatch && !nameMatch;
+            });
+            localStorage.setItem("wsj_posts", JSON.stringify(remaining));
+            window.dispatchEvent(new Event("wsj_posts_updated"));
+          }
+        } catch (e) {}
       }
+
+      fetchUsers();
+      loadPostsData();
     } catch (err) {
       console.error("Error deleting user:", err);
     }
@@ -2284,34 +2434,53 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
   // Load current user from storage & guard auth
   const loadUserData = () => {
     if (typeof window === "undefined") return;
-    const tabUserStr = sessionStorage.getItem("wsj_user");
-    if (tabUserStr) {
-      try {
-        const parsed = JSON.parse(tabUserStr);
-        if (parsed && (parsed.role?.toLowerCase() === "admin" || parsed.role?.toLowerCase() === "default admin")) {
-          setCurrentUser(parsed);
-          return;
-        }
-        if (parsed && parsed.role?.toLowerCase() === "writer") {
-          router.push("/writer-dashboard");
-          return;
-        }
-        if (parsed && parsed.role?.toLowerCase() === "reader") {
-          router.push("/reader-dashboard");
-          return;
-        }
-      } catch (e) {}
+    const tabUserStr = sessionStorage.getItem("wsj_user") || localStorage.getItem("currentUser");
+    const token = sessionStorage.getItem("wsj_token") || localStorage.getItem("wsj_token");
+
+    if (!tabUserStr || !token) {
+      setCurrentUser(null);
+      setIsAuthLoading(false);
+      router.push("/signin");
+      return;
     }
 
-    const adminUser = {
-      full_name: "Admin User",
-      email: "admin@gmail.com",
-      role: "ADMIN",
-      bio: "Senior System Administrator & Chief Editor",
-      avatar_url: "",
-    };
+    try {
+      const parsed = JSON.parse(tabUserStr);
+      if (parsed?.is_blocked) {
+        sessionStorage.clear();
+        localStorage.removeItem("wsj_token");
+        setCurrentUser(null);
+        setIsAuthLoading(false);
+        router.push("/signin");
+        return;
+      }
 
-    setCurrentUser(adminUser);
+      const role = (parsed?.role || "").toLowerCase().trim();
+      if (role === "admin" || role === "default admin") {
+        setCurrentUser(parsed);
+        setIsAuthLoading(false);
+        return;
+      }
+
+      if (role === "writer") {
+        setIsAuthLoading(false);
+        router.push("/writer-dashboard");
+        return;
+      }
+
+      if (role === "reader") {
+        setIsAuthLoading(false);
+        router.push("/reader-dashboard");
+        return;
+      }
+    } catch (e) {
+      console.error("Failed to parse user session:", e);
+    }
+
+    // Invalid session or role -> redirect to signin
+    setCurrentUser(null);
+    setIsAuthLoading(false);
+    router.push("/signin");
   };
 
   // Load newsletter subscribers from storage & Express Backend API
@@ -2327,7 +2496,10 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
     }
 
     try {
-      const res = await fetch("http://localhost:5000/api/newsletter").catch(() => null);
+      const res = await fetch("http://localhost:5000/api/newsletter", {
+        headers: getAuthHeaders(),
+        credentials: "include",
+      }).catch(() => null);
       if (res && res.ok) {
         const data = await res.json();
         if (data.success && Array.isArray(data.subscribers)) {
@@ -3035,7 +3207,7 @@ ${divider70}
       try {
         await fetch("http://localhost:5000/api/ads", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: getAuthHeaders({ "Content-Type": "application/json" }),
           body: JSON.stringify({ slots: adSlots }),
         });
       } catch (e) {
@@ -3147,7 +3319,8 @@ ${divider70}
     if (targetEmail) {
       fetch("http://localhost:5000/api/newsletter", {
         method: "DELETE",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders({ "Content-Type": "application/json" }),
+        credentials: "include",
         body: JSON.stringify({ email: targetEmail }),
       }).catch((e) => console.error("Error deleting subscriber from Express API:", e));
     }
@@ -3234,7 +3407,7 @@ ${divider70}
     });
   };
 
-  const confirmDeleteContactSubmission = (item: ContactSubmission) => {
+  const confirmDeleteContactSubmission = (item: ContactSubmissionItem) => {
     setDeleteConfirmModal({
       isOpen: true,
       title: "Delete Contact Submission",
@@ -3263,6 +3436,7 @@ ${divider70}
 
         await fetch(`http://localhost:5000/api/posts/${encodeURIComponent(targetId)}`, {
           method: "DELETE",
+          headers: getAuthHeaders(),
         }).catch(() => null);
       } catch (err) {}
     }
@@ -3292,6 +3466,19 @@ ${divider70}
     return matchesCategory && matchesPlacement && matchesSearch;
   });
 
+  if (isAuthLoading || !currentUser) {
+    return (
+      <div className="min-h-screen bg-[#fafafa] flex items-center justify-center font-sans">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="w-10 h-10 border-3 border-gray-300 border-t-black rounded-full animate-spin" />
+          <p className="text-xs uppercase tracking-widest text-gray-500 font-semibold">
+            Verifying Admin Session...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#fafafa] flex flex-col lg:flex-row font-sans text-[#333333] relative">
       {/* Mobile Drawer Backdrop Overlay */}
@@ -3306,7 +3493,7 @@ ${divider70}
       {/* LEFT SIDEBAR (Compact non-scrollable layout)                      */}
       {/* ================================================================= */}
       <aside
-        className={`fixed lg:sticky top-0 bottom-0 left-0 z-50 lg:z-20 w-64 lg:w-72 bg-white text-[#0f172a] border-r-2 border-[#cbd5e1] flex flex-col justify-between shrink-0 h-screen overflow-hidden shadow-2xs transition-transform duration-200 ease-in-out ${
+        className={`fixed top-0 bottom-0 left-0 z-50 lg:z-20 w-64 lg:w-72 bg-white text-[#0f172a] border-r-2 border-[#cbd5e1] flex flex-col justify-between shrink-0 h-screen overflow-hidden shadow-2xs transition-transform duration-200 ease-in-out ${
           isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >
@@ -3315,7 +3502,7 @@ ${divider70}
           <Link
             href={(() => {
               if (currentUser) {
-                const nameStr = currentUser.username || currentUser.name || currentUser.displayName || "";
+                const nameStr = currentUser.username || currentUser.name || currentUser.displayName || currentUser.full_name || "";
                 if (nameStr) {
                   return `/admin/${nameStr.toLowerCase().trim().replace(/\s+/g, "-")}`;
                 }
@@ -3723,7 +3910,7 @@ ${divider70}
       {/* ================================================================= */}
       {/* RIGHT MAIN WORKSPACE CONTENT AREA                                 */}
       {/* ================================================================= */}
-      <main className="flex-1 p-3.5 sm:p-6 lg:p-10 max-w-7xl w-full min-w-0 overflow-y-auto">
+      <main className="flex-1 lg:ml-72 p-3.5 sm:p-6 lg:p-10 max-w-7xl w-full min-w-0">
         {/* Top Workspace Header Bar */}
         <div className="flex items-center justify-between mb-6 sm:mb-8 pb-2 gap-3">
           {/* Left Title & Welcome Subtitle */}
@@ -4600,9 +4787,15 @@ ${divider70}
                                 ADMIN
                               </span>
                             ) : userRoleLower === "writer" ? (
-                              <span className="border border-[#cbd5e1] text-[#0f172a] bg-[#e2e8f0] text-[10px] font-mono font-bold px-3 py-1 rounded-full uppercase tracking-wider inline-block">
-                                WRITER
-                              </span>
+                              (user.writer_type || "").toLowerCase() === "contributor" ? (
+                                <span className="border border-amber-300 text-amber-900 bg-amber-50 text-[10px] font-mono font-bold px-3 py-1 rounded-full uppercase tracking-wider inline-block">
+                                  CONTRIBUTOR
+                                </span>
+                              ) : (
+                                <span className="border border-[#cbd5e1] text-[#0f172a] bg-[#e2e8f0] text-[10px] font-mono font-bold px-3 py-1 rounded-full uppercase tracking-wider inline-block">
+                                  STAFF WRITER
+                                </span>
+                              )
                             ) : (
                               <span className="border border-[#e2e8f0] text-[#64748b] bg-[#f8fafc] text-[10px] font-mono font-bold px-3 py-1 rounded-full uppercase tracking-wider inline-block">
                                 READER
@@ -5030,7 +5223,7 @@ ${divider70}
                           <td className="py-4 px-4 text-[#6b7280] whitespace-nowrap font-medium text-[11px]">
                             {(() => {
                               const createdTime = item.created_at ? new Date(item.created_at).getTime() : Date.now();
-                              const expDate = new Date(createdTime + 365 * 24 * 60 * 60 * 1000);
+                              const expDate = item.end_date ? new Date(item.end_date) : new Date(createdTime + 365 * 24 * 60 * 60 * 1000);
                               return formatSubmissionDate(expDate.toISOString());
                             })()}
                           </td>
@@ -5051,8 +5244,8 @@ ${divider70}
                           <td className="py-4 px-4 whitespace-nowrap">
                             {(() => {
                               const createdTime = item.created_at ? new Date(item.created_at).getTime() : Date.now();
-                              const oneYearMs = 365 * 24 * 60 * 60 * 1000;
-                              const isExpired = Date.now() - createdTime > oneYearMs;
+                              const expTime = item.end_date ? new Date(item.end_date).getTime() : (createdTime + 365 * 24 * 60 * 60 * 1000);
+                              const isExpired = Date.now() > expTime;
                               return isExpired ? (
                                 <span className="bg-[#fef2f2] text-[#dc2626] border border-[#fecaca] px-3 py-1 rounded-full text-[11px] font-bold inline-block">
                                   Expired
@@ -6173,9 +6366,9 @@ ${divider70}
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
               </svg>
             </div>
-            <h2 className="text-xl font-bold text-[#374151]">{activeTab} Management</h2>
+            <h2 className="text-xl font-bold text-[#374151]">{String(activeTab)} Management</h2>
             <p className="text-xs text-[#6b7280] mt-1 max-w-md">
-              Manage all {activeTab.toLowerCase()} settings and records from your administrator portal.
+              Manage all {String(activeTab).toLowerCase()} settings and records from your administrator portal.
             </p>
             <button
               onClick={() => setActiveTab("Overview")}
@@ -6192,7 +6385,7 @@ ${divider70}
       {/* ================================================================= */}
       {showAddUserModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-150">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl relative border border-slate-200 font-sans">
+          <div className="bg-white rounded-3xl max-w-2xl max-h-[90vh] overflow-y-auto w-full p-6 sm:p-8 shadow-2xl relative border border-slate-200 font-sans">
             {/* Modal Header */}
             <div className="flex items-center justify-between mb-6 pb-2 border-b border-slate-100">
               <div className="flex items-center space-x-2.5">
@@ -6266,12 +6459,25 @@ ${divider70}
                   WORKSPACE ROLE
                 </label>
                 <select
-                  value={newUserRole}
-                  onChange={(e) => setNewUserRole(e.target.value as any)}
+                  value={newUserRole === "writer" && newUserWriterType === "contributor" ? "contributor" : newUserRole}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === "contributor") {
+                      setNewUserRole("writer");
+                      setNewUserWriterType("contributor");
+                    } else if (val === "writer") {
+                      setNewUserRole("writer");
+                      setNewUserWriterType("staff");
+                    } else {
+                      setNewUserRole(val as any);
+                      setNewUserWriterType("staff");
+                    }
+                  }}
                   className="w-full bg-white border border-[#d1d5db] rounded-2xl px-4 py-3 text-xs font-semibold text-[#111827] outline-none focus:border-[#64748b] transition-colors cursor-pointer"
                 >
                   {isLoggedInUserDefaultAdmin && <option value="admin">Admin</option>}
-                  <option value="writer">Writer</option>
+                  <option value="writer">Staff Writer</option>
+                  <option value="contributor">Contributor</option>
                   <option value="reader">Reader</option>
                 </select>
               </div>
@@ -6303,7 +6509,7 @@ ${divider70}
       {/* ================================================================= */}
       {showViewUserModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-150">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl relative border border-slate-200 font-sans">
+          <div className="bg-white rounded-3xl max-w-2xl max-h-[90vh] overflow-y-auto w-full p-6 sm:p-8 shadow-2xl relative border border-slate-200 font-sans">
             {/* Modal Header */}
             <div className="flex items-center justify-between mb-6 pb-2 border-b border-slate-100">
               <div className="flex items-center space-x-2">
@@ -6397,15 +6603,58 @@ ${divider70}
                   </div>
                 </>
               ) : (
-                <div>
-                  <label className="block text-[10px] font-mono font-bold text-[#94a3b8] uppercase tracking-wider mb-1">
-                    EMAIL
-                  </label>
-                  <div className="flex items-center space-x-2 text-xs font-semibold text-[#334155]">
-                    <svg className="w-4 h-4 text-[#64748b] shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-                    </svg>
-                    <span className="break-all select-text">{showViewUserModal.email}</span>
+                <div className="space-y-4">
+                  {/* Contributor / Staff ID & Issued Date */}
+                  {(showViewUserModal.role?.toLowerCase() === "writer" || (showViewUserModal.writer_type || "").toLowerCase() === "contributor") && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 border border-slate-200/80 p-3 rounded-2xl">
+                      <div>
+                        <label className="block text-[10px] font-mono font-bold text-[#64748b] uppercase tracking-wider mb-1">
+                          {(showViewUserModal.writer_type || "").toLowerCase() === "contributor" ? "CONTRIBUTOR ID" : "STAFF WRITER ID"}
+                        </label>
+                        <div className="text-xs font-mono font-bold text-[#0f172a] select-text">
+                          {showViewUserModal.press_id || `TC${String(showViewUserModal.id || 10001).padStart(5, "0")}`}
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-mono font-bold text-[#64748b] uppercase tracking-wider mb-1">
+                          ISSUED DATE
+                        </label>
+                        <div className="text-xs font-semibold text-[#0f172a] select-text">
+                          {showViewUserModal.issued_date || "October 20, 2026"}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[10px] font-mono font-bold text-[#94a3b8] uppercase tracking-wider mb-1">
+                        EMAIL
+                      </label>
+                      <div className="flex items-center space-x-2 text-xs font-semibold text-[#334155]">
+                        <svg className="w-4 h-4 text-[#64748b] shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                        </svg>
+                        <span className="break-all select-text">{showViewUserModal.email}</span>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-mono font-bold text-[#94a3b8] uppercase tracking-wider mb-1">
+                        COUNTRY
+                      </label>
+                      <div className="text-xs font-semibold text-[#334155] select-text">
+                        {showViewUserModal.country || "United States"}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-mono font-bold text-[#94a3b8] uppercase tracking-wider mb-1">
+                      PHONE NUMBER
+                    </label>
+                    <div className="text-xs font-semibold text-[#334155] select-text">
+                      {showViewUserModal.phone || "Not provided"}
+                    </div>
                   </div>
                 </div>
               )}
@@ -6440,14 +6689,186 @@ ${divider70}
                   </div>
                 </div>
               )}
+
+              {/* Credentials / Career Sections (Experience, Publications, Education) */}
+              {showViewUserModal.role?.toLowerCase() !== "reader" && (
+                <div className="space-y-5 pt-4 border-t border-slate-100">
+                  {/* Experience Section */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="text-[10px] font-mono font-bold text-[#64748b] uppercase tracking-wider">
+                        EXPERIENCE ({Array.isArray(showViewUserModal.experiences) ? showViewUserModal.experiences.length : 0})
+                      </label>
+                    </div>
+                    {Array.isArray(showViewUserModal.experiences) && showViewUserModal.experiences.length > 0 ? (
+                      <div className="space-y-3">
+                        {showViewUserModal.experiences.map((exp: any, idx: number) => {
+                          const displayDuration = formatDurationRange(exp.startDate, exp.endDate, exp.duration);
+                          return (
+                            <div key={exp.id || idx} className="bg-slate-50 border border-slate-200/80 p-3.5 rounded-2xl text-left">
+                              <div className="flex items-start justify-between gap-2">
+                                <h5
+                                  className="font-bold text-xs text-[#0f172a]"
+                                  style={{ fontFamily: "var(--font-poppins), 'Poppins', sans-serif" }}
+                                >
+                                  {exp.role || "Untitled Role"}
+                                </h5>
+                                {displayDuration && (
+                                  <span className="shrink-0 text-[10px] font-mono text-[#64748b]">
+                                    {displayDuration}
+                                  </span>
+                                )}
+                              </div>
+                              {exp.company && (
+                                <div className="text-[11px] font-semibold text-[#475569] mt-0.5">
+                                  {exp.company}
+                                </div>
+                              )}
+                              {exp.description && (
+                                <p className="text-xs text-[#64748b] mt-1.5 leading-relaxed whitespace-pre-line">
+                                  {exp.description}
+                                </p>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="bg-[#f8fafc] border border-slate-100 p-3 rounded-xl text-xs text-slate-400 italic">
+                        No experience added yet.
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Publications Section */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="text-[10px] font-mono font-bold text-[#64748b] uppercase tracking-wider">
+                        PUBLICATIONS ({Array.isArray(showViewUserModal.publications) ? showViewUserModal.publications.length : 0})
+                      </label>
+                    </div>
+                    {Array.isArray(showViewUserModal.publications) && showViewUserModal.publications.length > 0 ? (
+                      <div className="space-y-3">
+                        {showViewUserModal.publications.map((pub: any, idx: number) => {
+                          const displayDate = formatPublicationDate(pub.date || pub.time);
+                          return (
+                            <div key={pub.id || idx} className="bg-slate-50 border border-slate-200/80 p-3.5 rounded-2xl text-left space-y-1.5">
+                              <div className="flex items-start justify-between gap-2">
+                                <h5
+                                  className="font-bold text-xs text-[#0f172a]"
+                                  style={{ fontFamily: "var(--font-poppins), 'Poppins', sans-serif" }}
+                                >
+                                  {pub.title || "Untitled Publication"}
+                                </h5>
+                                {pub.type && (
+                                  <span className="shrink-0 text-[9.5px] font-medium px-2 py-0.5 rounded-full bg-[#f1f5f9] text-[#475569] border border-[#cbd5e1]">
+                                    {pub.type}
+                                  </span>
+                                )}
+                              </div>
+                              {displayDate && (
+                                <div className="text-[10.5px] text-[#64748b]">
+                                  {displayDate}
+                                </div>
+                              )}
+                              {pub.description && (
+                                <p className="text-xs text-[#64748b] leading-relaxed whitespace-pre-line">
+                                  {pub.description}
+                                </p>
+                              )}
+                              {pub.link && (
+                                <div className="pt-1">
+                                  <a
+                                    href={pub.link}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="inline-flex items-center space-x-1 text-[11px] font-bold text-[#2563eb] hover:underline"
+                                  >
+                                    <span>Show publication</span>
+                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                    </svg>
+                                  </a>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="bg-[#f8fafc] border border-slate-100 p-3 rounded-xl text-xs text-slate-400 italic">
+                        No publications added yet.
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Education Section */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="text-[10px] font-mono font-bold text-[#64748b] uppercase tracking-wider">
+                        EDUCATION ({Array.isArray(showViewUserModal.education) ? showViewUserModal.education.length : 0})
+                      </label>
+                    </div>
+                    {Array.isArray(showViewUserModal.education) && showViewUserModal.education.length > 0 ? (
+                      <div className="space-y-3">
+                        {showViewUserModal.education.map((edu: any, idx: number) => {
+                          const displayDuration = formatDurationRange(edu.startDate, edu.endDate, edu.duration);
+                          return (
+                            <div key={edu.id || idx} className="bg-slate-50 border border-slate-200/80 p-3.5 rounded-2xl text-left">
+                              <div className="flex items-start justify-between gap-2">
+                                <h5
+                                  className="font-bold text-xs text-[#0f172a]"
+                                  style={{ fontFamily: "var(--font-poppins), 'Poppins', sans-serif" }}
+                                >
+                                  {edu.university || "Untitled University"}
+                                </h5>
+                                {displayDuration && (
+                                  <span className="shrink-0 text-[10px] font-mono text-[#64748b]">
+                                    {displayDuration}
+                                  </span>
+                                )}
+                              </div>
+                              {edu.degree && (
+                                <div className="text-[11px] font-semibold text-[#475569] mt-0.5">
+                                  {edu.degree}
+                                </div>
+                              )}
+                              {edu.description && (
+                                <p className="text-xs text-[#64748b] mt-1.5 leading-relaxed whitespace-pre-line">
+                                  {edu.description}
+                                </p>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="bg-[#f8fafc] border border-slate-100 p-3 rounded-xl text-xs text-slate-400 italic">
+                        No education added yet.
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* Modal Footer Close Button */}
-            <div className="mt-6 pt-2">
+            {/* Modal Footer Buttons */}
+            <div className="flex items-center space-x-3 mt-6 pt-3 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => {
+                  const target = showViewUserModal;
+                  setShowViewUserModal(null);
+                  handleOpenEditUserModal(target);
+                }}
+                className="flex-1 bg-[#475569] hover:bg-[#334155] text-white font-bold text-xs uppercase tracking-wider py-3 rounded-2xl transition-colors cursor-pointer text-center shadow-xs"
+              >
+                EDIT USER
+              </button>
               <button
                 type="button"
                 onClick={() => setShowViewUserModal(null)}
-                className="w-full border border-slate-300 hover:bg-slate-50 text-[#334155] font-bold text-xs uppercase tracking-wider py-3 rounded-2xl transition-colors cursor-pointer text-center"
+                className="flex-1 border border-slate-300 hover:bg-slate-50 text-[#334155] font-bold text-xs uppercase tracking-wider py-3 rounded-2xl transition-colors cursor-pointer text-center"
               >
                 CLOSE
               </button>
@@ -6461,7 +6882,7 @@ ${divider70}
       {/* ================================================================= */}
       {showEditUserModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-150">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl relative border border-slate-200 font-sans">
+          <div className="bg-white rounded-3xl max-w-2xl max-h-[90vh] overflow-y-auto w-full p-6 sm:p-8 shadow-2xl relative border border-slate-200 font-sans">
             {/* Modal Header */}
             <div className="flex items-center justify-between mb-6 pb-2 border-b border-slate-100">
               <div className="flex items-center space-x-2.5">
@@ -6552,69 +6973,184 @@ ${divider70}
                   WORKSPACE ROLE
                 </label>
                 <select
-                  value={editUserRole}
-                  onChange={(e) => setEditUserRole(e.target.value as any)}
+                  value={editUserRole === "writer" && editUserWriterType === "contributor" ? "contributor" : editUserRole}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === "contributor") {
+                      setEditUserRole("writer");
+                      setEditUserWriterType("contributor");
+                    } else if (val === "writer") {
+                      setEditUserRole("writer");
+                      setEditUserWriterType("staff");
+                    } else {
+                      setEditUserRole(val as any);
+                      setEditUserWriterType("staff");
+                    }
+                  }}
                   className="w-full bg-white border border-[#d1d5db] rounded-2xl px-4 py-3 text-xs font-semibold text-[#111827] outline-none focus:border-[#64748b] transition-colors cursor-pointer"
                 >
                   {(isLoggedInUserDefaultAdmin || showEditUserModal.role?.toLowerCase() === "admin") && (
                     <option value="admin">Admin</option>
                   )}
-                  <option value="writer">Writer</option>
+                  <option value="writer">Staff Writer</option>
+                  <option value="contributor">Contributor</option>
                   <option value="reader">Reader</option>
                 </select>
               </div>
 
-              {/* For reader: Mobile Number & Country; For others: LinkedIn */}
+              {/* Role-specific fields */}
               {editUserRole === "reader" ? (
+                <div>
+                  <label className="block text-[10px] font-mono font-bold text-[#6b7280] uppercase tracking-wider mb-1.5">
+                    MOBILE NUMBER
+                  </label>
+                  <input
+                    type="tel"
+                    placeholder="e.g. 5551234567"
+                    value={editUserPhone}
+                    onChange={(e) => setEditUserPhone(e.target.value.replace(/\D/g, ""))}
+                    className="w-full bg-white border border-[#d1d5db] rounded-2xl px-4 py-3 text-xs text-[#111827] outline-none focus:border-[#64748b] transition-colors"
+                  />
+                </div>
+              ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-[10px] font-mono font-bold text-[#6b7280] uppercase tracking-wider mb-1.5">
-                      MOBILE NUMBER
+                      PHONE NUMBER
                     </label>
                     <input
                       type="tel"
-                      placeholder="e.g. 5551234567"
+                      placeholder="e.g. +1 555 123 4567"
                       value={editUserPhone}
-                      onChange={(e) => setEditUserPhone(e.target.value.replace(/\D/g, ""))}
+                      onChange={(e) => setEditUserPhone(e.target.value)}
                       className="w-full bg-white border border-[#d1d5db] rounded-2xl px-4 py-3 text-xs text-[#111827] outline-none focus:border-[#64748b] transition-colors"
                     />
                   </div>
                   <div>
                     <label className="block text-[10px] font-mono font-bold text-[#6b7280] uppercase tracking-wider mb-1.5">
-                      COUNTRY
+                      LINKEDIN URL
                     </label>
-                    <select
-                      value={editUserCountry}
-                      onChange={(e) => setEditUserCountry(e.target.value)}
-                      className="w-full bg-white border border-[#d1d5db] rounded-2xl px-4 py-3 text-xs font-semibold text-[#111827] outline-none focus:border-[#64748b] transition-colors cursor-pointer"
-                    >
-                      {[
-                        "United States", "United Kingdom", "Canada", "Australia", "Germany", "France", "India",
-                        "Japan", "China", "Brazil", "Mexico", "Italy", "Spain", "Netherlands", "Switzerland",
-                        "Sweden", "Singapore", "South Korea", "United Arab Emirates", "Saudi Arabia", "South Africa",
-                        "New Zealand", "Ireland", "Norway", "Denmark", "Finland", "Belgium", "Austria", "Poland",
-                        "Portugal", "Greece", "Argentina", "Chile", "Colombia", "Egypt", "Indonesia", "Israel",
-                        "Malaysia", "Nigeria", "Pakistan", "Philippines", "Qatar", "Sri Lanka", "Thailand", "Turkey", "Vietnam", "Other"
-                      ].map((c) => (
-                        <option key={c} value={c}>{c}</option>
-                      ))}
-                    </select>
+                    <input
+                      type="url"
+                      placeholder="https://linkedin.com/in/..."
+                      value={editUserLinkedin}
+                      onChange={(e) => setEditUserLinkedin(e.target.value)}
+                      className="w-full bg-white border border-[#d1d5db] rounded-2xl px-4 py-3 text-xs text-[#111827] outline-none focus:border-[#64748b] transition-colors"
+                    />
                   </div>
                 </div>
-              ) : (
-                <div>
-                  <label className="block text-[10px] font-mono font-bold text-[#6b7280] uppercase tracking-wider mb-1.5">
-                    LINKEDIN URL
-                  </label>
-                  <input
-                    type="url"
-                    placeholder="https://linkedin.com/in/..."
-                    value={editUserLinkedin}
-                    onChange={(e) => setEditUserLinkedin(e.target.value)}
-                    className="w-full bg-white border border-[#d1d5db] rounded-2xl px-4 py-3 text-xs text-[#111827] outline-none focus:border-[#64748b] transition-colors"
-                  />
+              )}
+
+              {/* Country Selection (Visible and editable for Staff Writers, Contributors, Readers, and Admins) */}
+              <div>
+                <label className="block text-[10px] font-mono font-bold text-[#6b7280] uppercase tracking-wider mb-1.5">
+                  COUNTRY
+                </label>
+                <select
+                  value={editUserCountry}
+                  onChange={(e) => setEditUserCountry(e.target.value)}
+                  className="w-full bg-white border border-[#d1d5db] rounded-2xl px-4 py-3 text-xs font-semibold text-[#111827] outline-none focus:border-[#64748b] transition-colors cursor-pointer"
+                >
+                  {[
+                    "United States", "United Kingdom", "Canada", "Australia", "Germany", "France", "India",
+                    "Japan", "China", "Brazil", "Mexico", "Italy", "Spain", "Netherlands", "Switzerland",
+                    "Sweden", "Singapore", "South Korea", "United Arab Emirates", "Saudi Arabia", "South Africa",
+                    "New Zealand", "Ireland", "Norway", "Denmark", "Finland", "Belgium", "Austria", "Poland",
+                    "Portugal", "Greece", "Argentina", "Chile", "Colombia", "Egypt", "Indonesia", "Israel",
+                    "Malaysia", "Nigeria", "Pakistan", "Philippines", "Qatar", "Sri Lanka", "Thailand", "Turkey", "Vietnam", "Other"
+                  ].map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Press ID Card Information (For Staff Writers & Contributors) */}
+              {(editUserRole === "writer" || editUserRole === "contributor") && (
+                <div className="pt-3 border-t border-slate-100 space-y-3">
+                  <div className="flex items-center space-x-2">
+                    <svg className="w-4 h-4 text-[#475569]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5zm6-10.125a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0zm1.294 6.364a4.125 4.125 0 00-6.338 0 .375.375 0 00.287.636h5.764a.375.375 0 00.287-.636z" />
+                    </svg>
+                    <span className="text-[11px] font-mono font-bold text-[#334155] uppercase tracking-wider">
+                      {editUserWriterType === "contributor" ? "CONTRIBUTOR ID SETTINGS" : "STAFF WRITER ID SETTINGS"}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[10px] font-mono font-bold text-[#6b7280] uppercase tracking-wider mb-1.5">
+                        {editUserWriterType === "contributor" ? "CONTRIBUTOR ID" : "STAFF WRITER ID"} (TCxxxxx)
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="TC12345"
+                        maxLength={7}
+                        value={editUserPressId}
+                        onChange={(e) => {
+                          const input = e.target.value.toUpperCase();
+                          const digits = input.replace(/^TC/i, "").replace(/[^0-9]/g, "").slice(0, 5);
+                          if (!input) {
+                            setEditUserPressId("");
+                          } else {
+                            setEditUserPressId(`TC${digits}`);
+                          }
+                        }}
+                        className={`w-full bg-white border rounded-2xl px-4 py-3 text-xs text-[#111827] outline-none transition-colors ${
+                          editUserPressId.trim() &&
+                          usersList.some(
+                            (u) =>
+                              (u.press_id || "").trim().toLowerCase() === editUserPressId.trim().toLowerCase() &&
+                              (u.email || "").trim().toLowerCase() !== (showEditUserModal?.email || "").trim().toLowerCase()
+                          )
+                            ? "border-red-500 focus:border-red-600 bg-red-50/20"
+                            : "border-[#d1d5db] focus:border-[#64748b]"
+                        }`}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-mono font-bold text-[#6b7280] uppercase tracking-wider mb-1.5">
+                        ISSUED DATE
+                      </label>
+                      <input
+                        type="date"
+                        value={editUserIssuedDate}
+                        onChange={(e) => setEditUserIssuedDate(e.target.value)}
+                        className="w-full bg-white border border-[#d1d5db] rounded-2xl px-4 py-3 text-xs font-semibold text-[#111827] outline-none focus:border-[#64748b] transition-colors cursor-pointer"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Red Alert if ID is already allocated */}
+                  {Boolean(
+                    editUserPressId.trim() &&
+                    usersList.some(
+                      (u) =>
+                        (u.press_id || "").trim().toLowerCase() === editUserPressId.trim().toLowerCase() &&
+                        (u.email || "").trim().toLowerCase() !== (showEditUserModal?.email || "").trim().toLowerCase()
+                    )
+                  ) && (
+                    <div className="flex items-center space-x-2 text-red-600 text-xs font-bold bg-red-50 border border-red-200 px-3.5 py-2.5 rounded-xl animate-in fade-in">
+                      <svg className="w-4 h-4 shrink-0 text-red-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                      </svg>
+                      <span>This ID is allocated for another contributor or Staff writer.</span>
+                    </div>
+                  )}
                 </div>
               )}
+
+              {/* Experience, Education & Publications Editor */}
+              <div className="pt-3 border-t border-slate-100">
+                <CredentialsEditor
+                  experiences={editUserExperiences}
+                  setExperiences={setEditUserExperiences}
+                  education={editUserEducation}
+                  setEducation={setEditUserEducation}
+                  publications={editUserPublications}
+                  setPublications={setEditUserPublications}
+                />
+              </div>
 
               {/* Action Buttons */}
               <div className="grid grid-cols-2 gap-3 pt-4">
@@ -6707,7 +7243,17 @@ ${divider70}
             <div className="py-2 text-sm text-slate-700 leading-relaxed">
               {userToBlock.is_blocked ? (
                 <>
-                  Are you sure you want to unblock <strong className="font-extrabold text-slate-900">{userToBlock.full_name}</strong> (<span className="font-mono text-xs text-slate-600">{userToBlock.email}</span>)? The user will be able to sign in again.
+                  <p>
+                    Are you sure you want to unblock <strong className="font-extrabold text-slate-900">{userToBlock.full_name}</strong> (<span className="font-mono text-xs text-slate-600">{userToBlock.email}</span>)? The user will be able to sign in again.
+                  </p>
+                  {userToBlock.block_reason && (
+                    <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-xs">
+                      <strong>Suspension reason:</strong> {userToBlock.block_reason}
+                    </div>
+                  )}
+                  <p className="mt-2 text-xs text-slate-500">
+                    Unblocking will reset their 7-day quota cycle from today, giving them a fresh start.
+                  </p>
                 </>
               ) : (
                 <>

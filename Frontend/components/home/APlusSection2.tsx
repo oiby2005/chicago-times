@@ -72,7 +72,7 @@ export const APlusSection2: React.FC = () => {
   return (
     <div className="w-full font-sans my-4 relative">
       {/* Category Tag in Top Right of Section */}
-      <div className="absolute top-2 right-2 md:top-6 md:right-6 bg-black text-white text-[10px] sm:text-[11px] font-sans font-bold uppercase tracking-wider px-2.5 py-1 z-10 shadow-xs">
+      <div className="absolute top-2 right-2 md:top-6 md:right-6 bg-black text-white text-[8px] sm:text-[9px] md:text-[11px] font-sans font-bold uppercase tracking-wider px-1.5 py-0.5 md:px-2.5 md:py-1 z-10 shadow-xs">
         {hero.category || "TRAVEL"}
       </div>
 

@@ -33,6 +33,7 @@ import WebpGlobalInterceptor from "@/components/ui/WebpGlobalInterceptor";
 import GlobalDataSync from "@/components/ui/GlobalDataSync";
 import PageNavigationLoader from "@/components/ui/PageNavigationLoader";
 import GoogleTranslateProvider from "@/components/ui/GoogleTranslateProvider";
+import FloatingAudioPlayer from "@/components/article/FloatingAudioPlayer";
 
 export default function RootLayout({
   children,
@@ -49,7 +50,7 @@ export default function RootLayout({
           strategy="afterInteractive"
         />
       </head>
-      <body className="min-h-screen max-w-full overflow-x-hidden bg-white font-sans text-[#111111] antialiased flex flex-col" suppressHydrationWarning>
+      <body className="min-h-screen bg-white font-sans text-[#111111] antialiased flex flex-col" suppressHydrationWarning>
         <Suspense fallback={null}>
           <PageNavigationLoader />
         </Suspense>
@@ -57,6 +58,7 @@ export default function RootLayout({
         <GlobalDataSync />
         <GoogleTranslateProvider />
         {children}
+        <FloatingAudioPlayer />
       </body>
     </html>
   );

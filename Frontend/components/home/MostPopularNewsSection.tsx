@@ -112,6 +112,8 @@ export const MostPopularNewsSection: React.FC = () => {
           <h3 className="font-serif font-bold text-[24px] sm:text-[28px] text-[#111111] tracking-tight leading-none">
             Most Popular News
           </h3>
+          {/* Mobile-only dashed divider below Most Popular News text */}
+          <div className="block md:hidden border-b border-dashed border-[#CCCCCC] my-3.5" />
         </div>
 
         {/* Popular Items List */}

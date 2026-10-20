@@ -3,12 +3,15 @@
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { getAuthorForArticle } from "@/data/authors";
+import { getAuthorForArticle, slugifyAuthorName } from "@/data/authors";
 import { ALL_69_SUBCATEGORIES } from "@/data/subCategories";
 import ImageSeoKeywordsInput from "@/components/article/ImageSeoKeywordsInput";
 import TargetedEmailDistribution from "@/components/article/TargetedEmailDistribution";
 import { getBillionairesList, BillionaireItem } from "@/data/billionaires";
 import { getEntrepreneursList, EntrepreneurItem } from "@/data/entrepreneurs";
+import { getAuthHeaders } from "@/lib/authHeader";
+import { sanitizeArticleHtml } from "@/lib/htmlSanitizer";
+import ArticleCommentsSection from "@/components/article/ArticleCommentsSection";
 
 const ALL_MAIN_CATEGORIES = [
   "News", "U.S. News", "International News",
@@ -113,7 +116,7 @@ const safeSavePostsToStorage = (posts: any[]): boolean => {
     try {
       fetch("http://localhost:5000/api/posts", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify(sanitized),
       }).catch(() => {});
     } catch (e) {}
@@ -190,7 +193,7 @@ export default function AdminReviewPostPage() {
   const [homeTagColor, setHomeTagColor] = useState<string>("default");
   const [imageSeoKeywords, setImageSeoKeywords] = useState<string[]>([]);
   const [targetedEmails, setTargetedEmails] = useState<string[]>([]);
-  const [broadcastToSubscribers, setBroadcastToSubscribers] = useState<boolean>(true);
+  const [broadcastToSubscribers, setBroadcastToSubscribers] = useState<boolean>(false);
   const [tagInput, setTagInput] = useState("");
   const [readDuration, setReadDuration] = useState("5 min read");
   const [isExclusive, setIsExclusive] = useState(true);
@@ -359,8 +362,32 @@ export default function AdminReviewPostPage() {
 
   // Current logged in user & Article author
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [articleAuthor, setArticleAuthor] = useState("Writer User");
   const [articleAuthorEmail, setArticleAuthorEmail] = useState("");
+  const [websiteWriters, setWebsiteWriters] = useState<{ id: string | number; name: string; email: string; slug: string }[]>([]);
+  const [subWriters, setSubWriters] = useState<{ id: string | number; name: string; email: string; slug: string }[]>([]);
+
+  useEffect(() => {
+    const fetchWebsiteWriters = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/api/writers");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.writers && Array.isArray(data.writers)) {
+            const list = data.writers.map((w: any) => ({
+              id: w.id,
+              name: w.full_name || w.name,
+              email: w.email,
+              slug: slugifyAuthorName(w.full_name || w.name || w.email),
+            }));
+            setWebsiteWriters(list);
+          }
+        }
+      } catch (e) {}
+    };
+    fetchWebsiteWriters();
+  }, []);
 
   // Editor Writing Area Font Size State
   const [editorFontSize, setEditorFontSize] = useState<number>(18);
@@ -397,12 +424,32 @@ export default function AdminReviewPostPage() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const storedUser = sessionStorage.getItem("wsj_user");
-      if (storedUser) {
-        try {
-          const parsed = JSON.parse(storedUser);
-          if (parsed) setCurrentUser(parsed);
-        } catch (e) {}
+      const storedUser = sessionStorage.getItem("wsj_user") || localStorage.getItem("currentUser");
+      const token = sessionStorage.getItem("wsj_token") || localStorage.getItem("wsj_token");
+
+      if (!storedUser || !token) {
+        router.push("/signin");
+        return;
+      }
+
+      try {
+        const parsed = JSON.parse(storedUser);
+        const role = (parsed?.role || "").toLowerCase().trim();
+        if (role !== "admin" && role !== "default admin") {
+          router.push(role === "writer" ? "/writer-dashboard" : "/signin");
+          return;
+        }
+        if (parsed?.is_blocked) {
+          sessionStorage.clear();
+          localStorage.removeItem("wsj_token");
+          router.push("/signin");
+          return;
+        }
+        setCurrentUser(parsed);
+        setIsAuthLoading(false);
+      } catch (e) {
+        router.push("/signin");
+        return;
       }
 
       const loadPostData = async () => {
@@ -459,6 +506,11 @@ export default function AdminReviewPostPage() {
 
             if (found.author) setArticleAuthor(found.author);
             if (found.authorEmail) setArticleAuthorEmail(found.authorEmail);
+            if (found.sub_writers && Array.isArray(found.sub_writers)) {
+              setSubWriters(found.sub_writers);
+            } else {
+              setSubWriters([]);
+            }
             if (found.homepagePlacement) setHomepagePlacement(found.homepagePlacement);
             setReadDuration(found.readDuration || found.readTime || "5 min read");
             setIsExclusive(found.isExclusive !== undefined ? found.isExclusive : true);
@@ -503,7 +555,9 @@ export default function AdminReviewPostPage() {
             }
             if (found.broadcastToSubscribers !== undefined && found.broadcastToSubscribers !== null) {
               const bVal = found.broadcastToSubscribers;
-              setBroadcastToSubscribers(bVal !== 0 && bVal !== "0" && bVal !== false && bVal !== "false");
+              setBroadcastToSubscribers(bVal === true || bVal === 1 || bVal === "1" || bVal === "true");
+            } else {
+              setBroadcastToSubscribers(false);
             }
 
             const plainText = bodyVal.replace(/<[^>]+>/g, " ").trim();
@@ -1187,6 +1241,17 @@ export default function AdminReviewPostPage() {
     window.addEventListener("mouseup", onMouseUp);
   };
 
+  const sanitizeEditorDOM = (container: HTMLElement | null) => {
+    if (!container) return;
+    const figures = Array.from(container.querySelectorAll("figure"));
+    figures.forEach((fig) => {
+      if (fig.parentElement && (fig.parentElement.tagName === "P" || fig.parentElement.tagName === "BLOCKQUOTE" || fig.parentElement.tagName === "PRE")) {
+        const parentBlock = fig.parentElement;
+        parentBlock.parentNode?.insertBefore(fig, parentBlock);
+      }
+    });
+  };
+
   const handleMoveImage = (direction: "up" | "down") => {
     if (!selectedImgEl || !editorRef.current) return;
     const figure = (selectedImgEl.closest("figure") || selectedImgEl) as HTMLElement;
@@ -1216,7 +1281,7 @@ export default function AdminReviewPostPage() {
 
     figure.style.marginTop = "12px";
 
-    if (typeof sanitizeEditorDOM === "function") sanitizeEditorDOM(editorRef.current);
+    sanitizeEditorDOM(editorRef.current);
     setTimeout(() => updateSelectedImgPos(selectedImgEl), 30);
     if (editorRef.current) {
       setBodyContent(editorRef.current.innerHTML);
@@ -1255,7 +1320,7 @@ export default function AdminReviewPostPage() {
         const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
         const res = await fetch(`${backendUrl}/api/upload-url`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: getAuthHeaders({ "Content-Type": "application/json" }),
           body: JSON.stringify({ url: finalUrl, folder: "articles" }),
         });
         if (res.ok) {
@@ -1439,6 +1504,7 @@ export default function AdminReviewPostPage() {
       readDuration: readDuration || "5 min read",
       author: authorName,
       authorEmail: articleAuthorEmail || (existingPosts.find((p) => p.id === targetId)?.authorEmail || ""),
+      sub_writers: subWriters,
       thumbnail: thumb,
       isExclusive: isExclusive,
       cardSummary: cardSummary,
@@ -1550,7 +1616,18 @@ export default function AdminReviewPostPage() {
     router.push("/admin-dashboard?tab=Overview");
   };
 
-  if (!isMounted) return null;
+  if (!isMounted || isAuthLoading || !currentUser) {
+    return (
+      <div className="min-h-screen bg-[#fafafa] flex items-center justify-center font-sans">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="w-10 h-10 border-3 border-gray-300 border-t-black rounded-full animate-spin" />
+          <p className="text-xs uppercase tracking-widest text-gray-500 font-semibold">
+            Verifying Admin Session...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div suppressHydrationWarning className="min-h-screen bg-[#f8fafc] text-[#0f172a] font-sans flex flex-col w-full touch-pan-y">
@@ -1629,7 +1706,7 @@ export default function AdminReviewPostPage() {
             
             {/* ==================== LEFT COLUMN: EDITOR CANVAS ==================== */}
             <div className="w-full lg:flex-1 max-w-[840px]">
-              <div className="bg-white border border-[#e2e8f0] rounded-2xl p-3.5 sm:p-6 min-h-[320px] sm:min-h-[480px] lg:min-h-[640px] h-auto shadow-2xs space-y-5 sm:space-y-6 overflow-visible">
+              <div className="bg-white border border-[#e2e8f0] rounded-2xl p-3.5 sm:p-6 min-h-[320px] sm:min-h-[480px] lg:min-h-[640px] shadow-2xs space-y-5 sm:space-y-6">
                 
                 {/* Integrated Rich Text Editor Formatting Toolbar */}
                 <div className="bg-[#f8fafc] border border-[#e2e8f0] rounded-xl p-2 sm:p-2.5 flex items-center justify-start space-x-2 sm:space-x-3 shadow-2xs overflow-x-auto no-scrollbar font-sans text-xs">
@@ -1915,20 +1992,6 @@ export default function AdminReviewPostPage() {
 
                     {sidebarTab === "DETAILS" && (
                       <div className="space-y-5">
-                        <div className="bg-[#f8fafc] border border-[#e2e8f0] rounded-xl p-3">
-                          <label className="flex items-center space-x-2.5 text-xs font-bold text-[#1e293b] cursor-pointer ">
-                            <input
-                              type="checkbox"
-                              checked={isExclusive}
-                              onChange={(e) => setIsExclusive(e.target.checked)}
-                              className="w-4 h-4 accent-[#2563eb] rounded border-gray-300 focus:ring-0 cursor-pointer"
-                            />
-                            <span className="uppercase text-[11px] font-sans font-bold tracking-wider text-[#1e293b]">
-                              Mark as EXCLUSIVE Article
-                            </span>
-                          </label>
-                        </div>
-
                         <div className="space-y-1.5">
                           <label className="block text-[10.5px] font-mono font-bold text-[#94a3b8] uppercase tracking-wider">
                             SELECT CATEGORY (MAIN)
@@ -2114,6 +2177,101 @@ export default function AdminReviewPostPage() {
 
                           <div className="text-[10px] font-mono font-bold text-[#94a3b8] tracking-wider pt-0.5 uppercase">
                             SELECTED: {selectedSubCategories.length} / 5
+                          </div>
+                        </div>
+
+                        {/* SUB WRITERS / CO-AUTHORS SECTION */}
+                        <div className="space-y-2.5 bg-[#f8fafc] border border-[#cbd5e1] rounded-2xl p-3.5">
+                          <div className="flex items-center justify-between">
+                            <label className="block text-[10.5px] font-mono font-bold text-[#475569] uppercase tracking-wider">
+                              ARTICLE WRITERS & CO-AUTHORS
+                            </label>
+                            <span className="text-[10px] font-mono font-bold text-[#ea580c] bg-orange-50 border border-orange-200 px-2 py-0.5 rounded-md">
+                              {1 + subWriters.length} Total
+                            </span>
+                          </div>
+
+                          {/* Primary Main Writer (Always First) */}
+                          <div className="flex items-center justify-between bg-white border border-[#cbd5e1] rounded-xl px-3 py-2 text-xs">
+                            <div className="flex items-center space-x-2 min-w-0">
+                              <span className="w-5 h-5 bg-[#0b132b] text-white rounded-full flex items-center justify-center font-bold text-[10px] shrink-0">
+                                1
+                              </span>
+                              <span className="font-bold text-[#0f172a] truncate">{authorName}</span>
+                            </div>
+                            <span className="text-[9.5px] font-mono font-bold text-gray-600 uppercase tracking-wider bg-gray-100 px-2 py-0.5 rounded shrink-0 ml-2">
+                              Main Writer
+                            </span>
+                          </div>
+
+                          {/* Sub Writers Added by Admin */}
+                          {subWriters.map((sw, idx) => (
+                            <div
+                              key={`${sw.email || sw.name}-${idx}`}
+                              className="flex items-center justify-between bg-white border border-[#ea580c]/30 rounded-xl px-3 py-2 text-xs shadow-2xs"
+                            >
+                              <div className="flex items-center space-x-2 min-w-0">
+                                <span className="w-5 h-5 bg-[#ea580c] text-white rounded-full flex items-center justify-center font-bold text-[10px] shrink-0">
+                                  {idx + 2}
+                                </span>
+                                <span className="font-semibold text-[#0f172a] truncate">{sw.name}</span>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => setSubWriters(subWriters.filter((_, i) => i !== idx))}
+                                className="text-red-500 hover:text-red-700 p-1 text-xs font-bold cursor-pointer transition-colors"
+                                title="Remove Sub Writer"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          ))}
+
+                          {/* Dropdown list of writers in our website */}
+                          <div className="pt-1">
+                            <select
+                              value=""
+                              onChange={(e) => {
+                                const selectedVal = e.target.value;
+                                if (!selectedVal) return;
+                                const chosen = websiteWriters.find(
+                                  (w) => String(w.id) === selectedVal || w.email === selectedVal || w.name === selectedVal
+                                );
+                                if (chosen) {
+                                  const isMain =
+                                    (articleAuthorEmail && chosen.email.toLowerCase() === articleAuthorEmail.toLowerCase()) ||
+                                    (authorName && chosen.name.toLowerCase() === authorName.toLowerCase());
+                                  const alreadyAdded = subWriters.some(
+                                    (sw) =>
+                                      sw.email?.toLowerCase() === chosen.email.toLowerCase() ||
+                                      sw.name?.toLowerCase() === chosen.name.toLowerCase()
+                                  );
+                                  if (!isMain && !alreadyAdded) {
+                                    setSubWriters([...subWriters, chosen]);
+                                  }
+                                }
+                              }}
+                              className="w-full bg-white border border-[#cbd5e1] rounded-xl px-3 py-2 text-xs font-bold text-[#1e293b] focus:outline-none focus:border-[#ea580c] cursor-pointer"
+                            >
+                              <option value="">+ Add Sub Writer from website...</option>
+                              {websiteWriters
+                                .filter((w) => {
+                                  const isMain =
+                                    (articleAuthorEmail && w.email.toLowerCase() === articleAuthorEmail.toLowerCase()) ||
+                                    (authorName && w.name.toLowerCase() === authorName.toLowerCase());
+                                  const alreadyAdded = subWriters.some(
+                                    (sw) =>
+                                      sw.email?.toLowerCase() === w.email.toLowerCase() ||
+                                      sw.name?.toLowerCase() === w.name.toLowerCase()
+                                  );
+                                  return !isMain && !alreadyAdded;
+                                })
+                                .map((w) => (
+                                  <option key={w.id || w.email} value={w.email}>
+                                    {w.name} ({w.email})
+                                  </option>
+                                ))}
+                            </select>
                           </div>
                         </div>
 
@@ -2615,11 +2773,6 @@ export default function AdminReviewPostPage() {
             <div className="flex flex-col lg:flex-row items-start justify-between gap-6 lg:gap-12">
               <div className="w-full lg:flex-1 max-w-[780px] text-left font-sans">
                 <div className="flex items-center space-x-3 mb-3 font-sans">
-                  {isExclusive && (
-                    <span className="inline-block border border-[#333333] rounded-[3px] px-2 py-[2px] text-[11.5px] font-sans font-bold text-[#111111] tracking-wider leading-none ">
-                      EXCLUSIVE
-                    </span>
-                  )}
                   <span className="text-[12px] font-sans font-bold text-[#666666] tracking-wider uppercase">
                     {mainCategory.toUpperCase()}
                   </span>
@@ -2632,7 +2785,10 @@ export default function AdminReviewPostPage() {
                 )}
 
                 {subheadline.trim() && (
-                  <p className="text-base sm:text-lg md:text-[19px] text-[#555555] font-sans leading-relaxed mb-6">
+                  <p
+                    className="font-georgia-serif font-bold text-base sm:text-lg md:text-[19px] text-[#111111] leading-relaxed mb-6"
+                    style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontWeight: 700, color: "#111111" }}
+                  >
                     {subheadline}
                   </p>
                 )}
@@ -2705,8 +2861,22 @@ export default function AdminReviewPostPage() {
 
                 <div
                   className="preview-body-text editor-body-text flow-root text-[#1a1a1a] leading-[1.75] font-serif space-y-5 [&_p]:mb-5 [&_p]:leading-[1.75] [&_img]:rounded-xl [&_img]:max-w-full [&_blockquote]:border-l-[5px] [&_blockquote]:border-[#ea580c] [&_blockquote]:bg-[#f8fafc] [&_blockquote]:py-3.5 [&_blockquote]:px-5 [&_blockquote]:my-3 [&_blockquote]:rounded-r-md [&_blockquote]:italic [&_blockquote]:text-[#334155] [&_blockquote]:flow-root [&_pre]:bg-[#f1f5f9] [&_pre]:border-none [&_pre]:outline-none [&_pre]:p-5 [&_pre]:rounded-xl [&_pre]:italic [&_pre]:text-[#334155] [&_pre]:text-base [&_pre]:my-4 [&_pre]:max-w-full [&_pre]:box-border [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_pre]:flow-root transition-all duration-150"
-                  dangerouslySetInnerHTML={{ __html: bodyContent }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeArticleHtml(bodyContent) }}
                 />
+
+                {/* Article Tags */}
+                {tags.length > 0 && (
+                  <div className="text-xs font-mono font-bold text-[#475569] tracking-wider uppercase my-6 flex flex-wrap gap-2">
+                    {tags.map((tag) => (
+                      <span key={tag}>#{tag.toUpperCase()}</span>
+                    ))}
+                  </div>
+                )}
+
+                {/* Comments Section */}
+                <div className="border-t border-[#e2e8f0] pt-6 mt-8 font-sans">
+                  <ArticleCommentsSection articleSlug="preview-mode" commentCount={0} readOnly={true} />
+                </div>
               </div>
 
               <div className="w-full lg:w-[300px] shrink-0 font-sans text-left">

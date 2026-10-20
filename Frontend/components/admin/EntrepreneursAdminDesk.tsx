@@ -8,6 +8,7 @@ import {
   getEntrepreneursList,
   saveEntrepreneursList,
 } from "@/data/entrepreneurs";
+import { getAuthHeaders } from "@/lib/authHeader";
 
 export const INDUSTRY_OPTIONS = [
   "Technology",
@@ -260,7 +261,7 @@ export default function EntrepreneursAdminDesk() {
         try {
           const res = await fetch("http://localhost:5000/api/upload", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: getAuthHeaders({ "Content-Type": "application/json" }),
             body: JSON.stringify({
               imageBase64: base64,
               fileName: `entrepreneur_${Date.now()}.${file.name.split(".").pop() || "webp"}`,
@@ -321,7 +322,7 @@ export default function EntrepreneursAdminDesk() {
           try {
             const res = await fetch("http://localhost:5000/api/upload", {
               method: "POST",
-              headers: { "Content-Type": "application/json" },
+              headers: getAuthHeaders({ "Content-Type": "application/json" }),
               body: JSON.stringify({
                 imageBase64: base64,
                 fileName: `company_${Date.now()}.${file.name.split('.').pop() || 'png'}`,
