@@ -247,27 +247,32 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
 
   // Resolve all writers (Main writer first, then sub writers added by admin)
   const allArticleWriters = React.useMemo(() => {
-    const list: { name: string; slug: string; linkedinUrl?: string }[] = [];
+    const list: { name: string; slug: string; email?: string; linkedinUrl?: string }[] = [];
+    const primaryEmail = (authorObj?.email || customPost?.authorEmail || "").toLowerCase().trim();
     if (authorObj && authorObj.name) {
       list.push({
         name: authorObj.name,
         slug: authorObj.slug || slugifyAuthorName(authorObj.name),
+        email: primaryEmail,
         linkedinUrl: authorObj.linkedinUrl,
       });
     } else if (authorName) {
       list.push({
         name: authorName,
         slug: slugifyAuthorName(authorName),
+        email: primaryEmail,
       });
     }
 
     if (customPost?.sub_writers && Array.isArray(customPost.sub_writers)) {
       customPost.sub_writers.forEach((sw: any) => {
         const swName = sw.name || sw.full_name || sw;
+        const swEmail = (sw.email || "").toLowerCase().trim();
         if (swName && typeof swName === "string" && !list.some((w) => w.name.toLowerCase() === swName.toLowerCase())) {
           list.push({
             name: swName,
             slug: sw.slug || slugifyAuthorName(swName),
+            email: swEmail,
             linkedinUrl: sw.linkedin || sw.linkedinUrl,
           });
         }
@@ -433,7 +438,7 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
                             return (
                               <React.Fragment key={`${writer.slug}-${idx}`}>
                                 <Link
-                                  href={`/author/${writer.slug}`}
+                                  href={writer.email ? `/author/${writer.slug}?email=${encodeURIComponent(writer.email)}` : `/author/${writer.slug}`}
                                   className="hover:underline hover:text-black cursor-pointer"
                                 >
                                   {writer.name}
@@ -527,7 +532,7 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
                             return (
                               <React.Fragment key={`${writer.slug}-${idx}`}>
                                 <Link
-                                  href={`/author/${writer.slug}`}
+                                  href={writer.email ? `/author/${writer.slug}?email=${encodeURIComponent(writer.email)}` : `/author/${writer.slug}`}
                                   className="hover:underline hover:text-black cursor-pointer"
                                 >
                                   {writer.name}

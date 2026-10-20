@@ -600,7 +600,7 @@ export default function CreateNewPostPage() {
 
   const authorName = currentUser?.full_name || currentUser?.name || currentUser?.username || (currentUser?.email === "writer1@gmail.com" ? "writer1" : "Writer User");
   const authorInitial = authorName.charAt(0).toUpperCase();
-  const authorImage = currentUser?.avatar_url || currentUser?.avatar || currentUser?.profileImage || currentUser?.image || getAuthorForArticle("", authorName)?.image || "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?fm=webp&fit=crop&w=300&q=80";
+  const authorImage = currentUser?.avatar_url || currentUser?.avatar || currentUser?.profileImage || currentUser?.image || getAuthorForArticle("", authorName, currentUser?.email)?.image || "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?fm=webp&fit=crop&w=300&q=80";
 
   const handleToggleBlockquote = () => {
     if (!editorRef.current) return;

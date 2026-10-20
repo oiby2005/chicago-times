@@ -34,6 +34,7 @@ const defaultAuthor: AuthorProfile = {
 
 const getFormattedRole = (u?: any, fallbackRole: string = "STAFF WRITER") => {
   if ((u?.writer_type || "").toLowerCase() === "contributor") return "CONTRIBUTOR";
+  if ((u?.writer_type || "").toLowerCase() === "staff") return "STAFF WRITER";
   const r = (u?.role || fallbackRole || "STAFF WRITER").toUpperCase();
   if (r === "WRITER") return "STAFF WRITER";
   return r;
@@ -94,25 +95,27 @@ export default function AuthorHeader({ author = defaultAuthor }: AuthorHeaderPro
         return;
       }
 
-      // 2. Match by email prefix or slug in users map
-      for (const email of Object.keys(map)) {
-        const u = map[email];
-        const uNameLower = (u.full_name || u.name || "").toLowerCase().trim();
-        const uSlug = uNameLower.replace(/[^a-z0-9]+/g, "-");
-        const emailPrefix = email.split("@")[0].toLowerCase();
+      // 2. Match by email prefix or slug in users map ONLY if authorEmailLower is not specified
+      if (!authorEmailLower) {
+        for (const email of Object.keys(map)) {
+          const u = map[email];
+          const uNameLower = (u.full_name || u.name || "").toLowerCase().trim();
+          const uSlug = uNameLower.replace(/[^a-z0-9]+/g, "-");
+          const emailPrefix = email.split("@")[0].toLowerCase();
 
-        if (authorSlugLower === uSlug || authorSlugLower === emailPrefix || (authorNameLower && authorNameLower === uNameLower)) {
-          setProfile({
-            name: extractSingleAuthorName(u.full_name || u.name || author.name),
-            role: getFormattedRole(u, author.role),
-            bio: u.bio !== undefined && u.bio !== "" ? u.bio : author?.bio || "Journalist & Writer",
-            image: u.avatar_url || u.image || author?.image || "",
-            email: u.email || author?.email || "worldnews@timeschicago.com",
-            country: u.country || (u as any).country || author?.country || "",
-            linkedinUrl: u.linkedin || u.linkedinUrl || author?.linkedinUrl || "https://www.linkedin.com",
-            twitterUrl: u.twitter || u.twitterUrl || author?.twitterUrl || "https://x.com",
-          });
-          return;
+          if (authorSlugLower === uSlug || authorSlugLower === emailPrefix || (authorNameLower && authorNameLower === uNameLower)) {
+            setProfile({
+              name: extractSingleAuthorName(u.full_name || u.name || author.name),
+              role: getFormattedRole(u, author.role),
+              bio: u.bio !== undefined && u.bio !== "" ? u.bio : author?.bio || "Journalist & Writer",
+              image: u.avatar_url || u.image || author?.image || "",
+              email: u.email || author?.email || "worldnews@timeschicago.com",
+              country: u.country || (u as any).country || author?.country || "",
+              linkedinUrl: u.linkedin || u.linkedinUrl || author?.linkedinUrl || "https://www.linkedin.com",
+              twitterUrl: u.twitter || u.twitterUrl || author?.twitterUrl || "https://x.com",
+            });
+            return;
+          }
         }
       }
     } catch (e) {}

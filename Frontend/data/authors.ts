@@ -183,7 +183,89 @@ export function getUserRoleUrl(user: any): string {
   return `/writer/${slug}`;
 }
 
-export function getAuthorBySlug(slug: string): Author {
+export function getAuthorByEmail(rawEmail: string): Author | null {
+  if (!rawEmail) return null;
+  const cleanEmail = rawEmail.toLowerCase().trim();
+
+  // 1. Check active user session
+  if (typeof window !== "undefined") {
+    try {
+      const storedUser = JSON.parse(sessionStorage.getItem("wsj_user") || "null");
+      if (storedUser && (storedUser.email || "").toLowerCase().trim() === cleanEmail) {
+        const uName = extractSingleAuthorName(storedUser.full_name || storedUser.name || cleanEmail.split("@")[0]);
+        const writerType = (storedUser.writer_type || "").toLowerCase();
+        const role = writerType === "contributor"
+          ? "CONTRIBUTOR"
+          : (writerType === "staff" ? "STAFF WRITER" : ((storedUser.role || "WRITER").toUpperCase() === "WRITER" ? "STAFF WRITER" : (storedUser.role || "WRITER").toUpperCase()));
+        return {
+          slug: slugifyAuthorName(uName),
+          name: uName,
+          email: cleanEmail,
+          role: role,
+          bio: storedUser.bio || (writerType === "contributor" ? "Independent Contributor & Columnist covering news, opinion, and current affairs." : "Journalist & Columnist covering business, economic policy, and global markets."),
+          image: storedUser.avatar_url || storedUser.image || "",
+          linkedinUrl: storedUser.linkedin || storedUser.linkedinUrl || "https://www.linkedin.com/in/your-profile",
+        };
+      }
+    } catch (e) {}
+  }
+
+  // 2. Check localStorage wsj_users_by_email
+  if (typeof window !== "undefined") {
+    try {
+      const profilesMap = JSON.parse(localStorage.getItem("wsj_users_by_email") || "{}");
+      if (profilesMap[cleanEmail]) {
+        const u = profilesMap[cleanEmail];
+        const uName = extractSingleAuthorName(u.full_name || u.name || cleanEmail.split("@")[0]);
+        const writerType = (u.writer_type || "").toLowerCase();
+        const role = writerType === "contributor"
+          ? "CONTRIBUTOR"
+          : (writerType === "staff" ? "STAFF WRITER" : ((u.role || "WRITER").toUpperCase() === "WRITER" ? "STAFF WRITER" : (u.role || "WRITER").toUpperCase()));
+        return {
+          slug: slugifyAuthorName(uName),
+          name: uName,
+          email: cleanEmail,
+          role: role,
+          bio: u.bio !== undefined && u.bio !== "" ? u.bio : (writerType === "contributor" ? "Independent Contributor & Columnist covering news, opinion, and current affairs." : "Journalist & Writer covering technology, innovation, and global developments."),
+          image: u.avatar_url || u.image || "",
+          linkedinUrl: u.linkedin || u.linkedinUrl || "https://www.linkedin.com/in/your-profile",
+        };
+      }
+    } catch (e) {}
+  }
+
+  // 3. Fallbacks for default hardcoded writers
+  if (cleanEmail === "writer1@gmail.com") {
+    return {
+      ...defaultWritersMap.writer1,
+      name: "Mayon",
+      role: "STAFF WRITER",
+      email: "writer1@gmail.com",
+      image: "https://f005.backblazeb2.com/file/timeschicago/avatars/avatar_writer1_gmail_com_1789032192513.webp",
+    };
+  }
+  if (cleanEmail === "writer@gmail.com") {
+    return {
+      ...defaultWritersMap.writer,
+      name: "Writer User",
+      role: "STAFF WRITER",
+      email: "writer@gmail.com",
+    };
+  }
+
+  // 4. Static authorsList
+  const found = authorsList.find((a) => (a.email || "").toLowerCase().trim() === cleanEmail);
+  if (found) return found;
+
+  return null;
+}
+
+export function getAuthorBySlug(slug: string, explicitEmail?: string): Author {
+  if (explicitEmail) {
+    const fromEmail = getAuthorByEmail(explicitEmail);
+    if (fromEmail) return fromEmail;
+  }
+
   if (!slug) slug = "writer";
 
   let cleanSlug = slug.toLowerCase().trim();
@@ -191,47 +273,10 @@ export function getAuthorBySlug(slug: string): Author {
     cleanSlug = cleanSlug.split("-and-")[0].trim();
   }
 
-  // Server-side check: read Backend/data/users.json
-  if (typeof window === "undefined") {
-    try {
-      const fs = require("fs");
-      const path = require("path");
-      const candidatePaths = [
-        path.resolve(process.cwd(), "../Backend/data/users.json"),
-        path.resolve(process.cwd(), "Backend/data/users.json"),
-        path.resolve(process.cwd(), "../../Backend/data/users.json"),
-      ];
-      for (const p of candidatePaths) {
-        if (fs.existsSync(p)) {
-          const raw = fs.readFileSync(p, "utf-8");
-          const usersMap = JSON.parse(raw);
-          for (const email of Object.keys(usersMap)) {
-            const u = usersMap[email];
-            if (!u) continue;
-            const uName = extractSingleAuthorName(u.full_name || u.name || "");
-            const uSlug = slugifyAuthorName(uName);
-            const prefix = email.split("@")[0].toLowerCase();
-            if (
-              cleanSlug === uSlug ||
-              cleanSlug === prefix ||
-              cleanSlug === uName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") ||
-              (cleanSlug === "writer1" && email === "writer1@gmail.com") ||
-              (cleanSlug === "writer" && email === "writer@gmail.com")
-            ) {
-              return {
-                slug: cleanSlug,
-                name: uName || (email === "writer1@gmail.com" ? "Mayon" : "Writer User"),
-                email: email,
-                role: (u.role || "WRITER").toUpperCase(),
-                bio: u.bio !== undefined && u.bio !== "" ? u.bio : "Journalist & Writer covering technology, innovation, and global developments.",
-                image: u.avatar_url || u.image || "",
-                linkedinUrl: u.linkedin || u.linkedinUrl || "https://www.linkedin.com/in/your-profile",
-              };
-            }
-          }
-        }
-      }
-    } catch (e) {}
+  // If cleanSlug itself is an email
+  if (cleanSlug.includes("@")) {
+    const fromEmail = getAuthorByEmail(cleanSlug);
+    if (fromEmail) return fromEmail;
   }
 
   if (typeof window !== "undefined") {
@@ -249,14 +294,24 @@ export function getAuthorBySlug(slug: string): Author {
         } else if (cleanSlug === "writer") {
           targetEmail = "writer@gmail.com";
         } else {
+          // First check exact email prefix (e.g. "oshidiishmitha")
           for (const email of Object.keys(profilesMap)) {
-            const u = profilesMap[email];
-            const uName = extractSingleAuthorName(u.full_name || u.name || "");
-            const uSlug = slugifyAuthorName(uName);
             const prefix = email.split("@")[0].toLowerCase();
-            if (cleanSlug === uSlug || cleanSlug === prefix) {
+            if (cleanSlug === prefix || cleanSlug === email.toLowerCase()) {
               targetEmail = email;
               break;
+            }
+          }
+          // If still not found, check slug match
+          if (!targetEmail) {
+            for (const email of Object.keys(profilesMap)) {
+              const u = profilesMap[email];
+              const uName = extractSingleAuthorName(u.full_name || u.name || "");
+              const uSlug = slugifyAuthorName(uName);
+              if (cleanSlug === uSlug) {
+                targetEmail = email;
+                break;
+              }
             }
           }
         }
@@ -264,19 +319,13 @@ export function getAuthorBySlug(slug: string): Author {
 
       // C. If targetEmail is resolved, load profile for that exact targetEmail
       if (targetEmail) {
-        const u = profilesMap[targetEmail] || {};
-        const baseTemplate = targetEmail === "writer1@gmail.com" ? defaultWritersMap.writer1 : defaultWritersMap.writer;
-        const uName = extractSingleAuthorName(u.full_name || u.name || (targetEmail === "writer1@gmail.com" ? "Mayon" : baseTemplate.name));
-
-        return {
-          slug: cleanSlug,
-          name: uName,
-          email: targetEmail,
-          role: (u.role || baseTemplate.role || "WRITER").toUpperCase(),
-          bio: u.bio !== undefined ? u.bio : baseTemplate.bio,
-          image: u.avatar_url || u.image || "",
-          linkedinUrl: u.linkedin || u.linkedinUrl || baseTemplate.linkedinUrl,
-        };
+        const fromEmail = getAuthorByEmail(targetEmail);
+        if (fromEmail) {
+          return {
+            ...fromEmail,
+            slug: cleanSlug,
+          };
+        }
       }
     } catch (e) {}
   }
@@ -286,6 +335,8 @@ export function getAuthorBySlug(slug: string): Author {
     return {
       ...defaultWritersMap.writer1,
       name: "Mayon",
+      role: "STAFF WRITER",
+      email: "writer1@gmail.com",
       image: "https://f005.backblazeb2.com/file/timeschicago/avatars/avatar_writer1_gmail_com_1789032192513.webp",
     };
   }
@@ -298,12 +349,16 @@ export function getAuthorBySlug(slug: string): Author {
           return {
             ...defaultWritersMap.writer,
             name: uName,
+            role: "STAFF WRITER",
             image: storedUser.avatar_url || storedUser.image || defaultWritersMap.writer.image,
           };
         }
       } catch (e) {}
     }
-    return defaultWritersMap.writer;
+    return {
+      ...defaultWritersMap.writer,
+      role: "STAFF WRITER",
+    };
   }
   if (authorsData[cleanSlug]) return authorsData[cleanSlug];
 
@@ -318,7 +373,7 @@ export function getAuthorBySlug(slug: string): Author {
   return {
     slug: singleSlug,
     name: singleName,
-    role: "WRITER",
+    role: "CONTRIBUTOR",
     bio: `Contributor and writer covering news, analysis, and current affairs.`,
     image: "",
     linkedinUrl: "https://www.linkedin.com/in/your-profile",
@@ -326,25 +381,56 @@ export function getAuthorBySlug(slug: string): Author {
 }
 
 export function getAuthorForArticle(articleSlugOrId: string, authorName?: string, authorEmail?: string): Author {
+  const email = (authorEmail || "").toLowerCase().trim();
+
+  // STRICT PRIORITY 1: Absolute precedence to authorEmail
+  if (email) {
+    const authorByEmail = getAuthorByEmail(email);
+    if (authorByEmail) {
+      if (authorName && (!authorByEmail.name || authorByEmail.name === "Writer User" || authorByEmail.name === email.split("@")[0])) {
+        return {
+          ...authorByEmail,
+          name: extractSingleAuthorName(authorName),
+        };
+      }
+      return authorByEmail;
+    }
+
+    // If not yet in cache, create Author based directly on this specific email
+    const cleanAuthor = authorName ? extractSingleAuthorName(authorName) : email.split("@")[0];
+    return {
+      slug: slugifyAuthorName(cleanAuthor),
+      name: cleanAuthor,
+      email: email,
+      role: "CONTRIBUTOR",
+      bio: "Independent Contributor & Writer covering news, analysis, and current affairs.",
+      image: "",
+      linkedinUrl: "https://www.linkedin.com/in/your-profile",
+    };
+  }
+
+  // Active user session fallback
   if (typeof window !== "undefined") {
     try {
       const storedUser = JSON.parse(sessionStorage.getItem("wsj_user") || "null");
       if (storedUser && (storedUser.full_name || storedUser.name)) {
         const uName = extractSingleAuthorName(storedUser.full_name || storedUser.name);
         const uEmail = (storedUser.email || "").toLowerCase().trim();
-        const aEmail = (authorEmail || "").toLowerCase().trim();
         const aName = (authorName || "").toLowerCase().trim();
         if (
-          (aEmail && aEmail === uEmail) ||
           aName === "writer user" ||
           aName === "by writer user" ||
           (uEmail === "writer@gmail.com" && (aName.includes("writer") || !authorName))
         ) {
+          const writerType = (storedUser.writer_type || "").toLowerCase();
+          const role = writerType === "contributor"
+            ? "CONTRIBUTOR"
+            : (writerType === "staff" ? "STAFF WRITER" : ((storedUser.role || "WRITER").toUpperCase() === "WRITER" ? "STAFF WRITER" : (storedUser.role || "WRITER").toUpperCase()));
           return {
             slug: slugifyAuthorName(uName),
             name: uName,
             email: uEmail,
-            role: (storedUser.role || "WRITER").toUpperCase(),
+            role: role,
             bio: storedUser.bio || defaultWritersMap.writer.bio,
             image: storedUser.avatar_url || storedUser.image || "",
             linkedinUrl: storedUser.linkedin || defaultWritersMap.writer.linkedinUrl,
@@ -353,10 +439,6 @@ export function getAuthorForArticle(articleSlugOrId: string, authorName?: string
       }
     } catch (e) {}
   }
-
-  const email = (authorEmail || "").toLowerCase().trim();
-  if (email === "writer1@gmail.com") return getAuthorBySlug("writer1");
-  if (email === "writer@gmail.com") return getAuthorBySlug("writer");
 
   if (!authorName) return defaultWritersMap.writer;
 

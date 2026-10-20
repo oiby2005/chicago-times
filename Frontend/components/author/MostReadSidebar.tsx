@@ -116,21 +116,26 @@ export default function MostReadSidebar({ authorName, authorEmail }: MostReadSid
           profileName = cleanStr(profilesMap[pEmail].full_name || profilesMap[pEmail].name || "");
         }
 
-        const isEmailMatch = targetEmail && pEmail && pEmail === targetEmail;
+        const isEmailMatch = Boolean(targetEmail && pEmail && pEmail === targetEmail);
+        const isSubWriterMatch = Array.isArray(p.sub_writers) && p.sub_writers.some((sw: any) => {
+          const swEmail = cleanStr(sw.email);
+          const swName = cleanStr(sw.name || sw.full_name || (typeof sw === "string" ? sw : ""));
+          if (targetEmail && swEmail && swEmail === targetEmail) return true;
+          if (!targetEmail && targetName && swName && (swName === targetName || swName.includes(targetName) || targetName.includes(swName))) return true;
+          return false;
+        });
+
+        // When targetEmail is provided, strictly filter by email
+        if (targetEmail) {
+          return isEmailMatch || isSubWriterMatch;
+        }
+
         const isNameMatch =
           (targetName && pName && (pName === targetName || pName.includes(targetName) || targetName.includes(pName))) ||
           (targetSlug && pSlug && (pSlug === targetSlug || pSlug.includes(targetSlug) || targetSlug.includes(pSlug))) ||
           (targetName && profileName && (profileName === targetName || profileName.includes(targetName) || targetName.includes(profileName)));
 
-        const isSubWriterMatch = Array.isArray(p.sub_writers) && p.sub_writers.some((sw: any) => {
-          const swEmail = cleanStr(sw.email);
-          const swName = cleanStr(sw.name || sw.full_name || (typeof sw === "string" ? sw : ""));
-          if (targetEmail && swEmail && swEmail === targetEmail) return true;
-          if (targetName && swName && (swName === targetName || swName.includes(targetName) || targetName.includes(swName))) return true;
-          return false;
-        });
-
-        return isEmailMatch || isNameMatch || isSubWriterMatch;
+        return isNameMatch || isSubWriterMatch;
       });
 
       if (filtered.length > 0) {

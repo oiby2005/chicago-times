@@ -597,7 +597,7 @@ export default function AdminEditPostPage() {
   const authorName = articleAuthor || "Writer User";
   const authorInitial = authorName.charAt(0).toUpperCase();
   const authorImage =
-    getAuthorForArticle("", authorName)?.image ||
+    getAuthorForArticle("", authorName, articleAuthorEmail)?.image ||
     "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?fm=webp&fit=crop&w=300&q=80";
 
   const handleToggleBlockquote = () => {

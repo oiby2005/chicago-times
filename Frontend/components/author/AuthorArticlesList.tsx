@@ -219,23 +219,29 @@ export default function AuthorArticlesList({
           const swEmail = (sw.email || "").toLowerCase().trim();
           const swName = (sw.name || sw.full_name || (typeof sw === "string" ? sw : "")).toLowerCase().trim();
           if (targetEmail && swEmail && swEmail === targetEmail) return true;
-          if (targetNameLower && swName && (swName === targetNameLower || swName.includes(targetNameLower) || targetNameLower.includes(swName))) return true;
+          if (!targetEmail && targetNameLower && swName && (swName === targetNameLower || swName.includes(targetNameLower) || targetNameLower.includes(swName))) return true;
           return false;
         });
         if (isSubWriter) return true;
 
-        // 1. Strict filtering for writer1 (writer1@gmail.com)
-        if (targetEmail === "writer1@gmail.com" || targetNameLower === "writer1") {
-          return pEmail === "writer1@gmail.com" || pAuthor === "writer1";
+        // Priority: When targetEmail is present, strictly filter by authorEmail!
+        if (targetEmail) {
+          if (targetEmail === "writer1@gmail.com") {
+            return pEmail === "writer1@gmail.com";
+          }
+          if (targetEmail === "writer@gmail.com") {
+            return pEmail === "writer@gmail.com" || (!pEmail && pAuthor !== "writer1");
+          }
+          return pEmail === targetEmail;
         }
 
-        // 2. Strict filtering for primary writer (writer@gmail.com)
-        if (targetEmail === "writer@gmail.com" || targetNameLower === "writer" || targetNameLower === "writer user") {
-          return pEmail === "writer@gmail.com" || (!pEmail && pAuthor !== "writer1");
+        // Fallback: ONLY when targetEmail is absent, match by name
+        if (targetNameLower === "writer1") {
+          return pAuthor === "writer1" || pEmail === "writer1@gmail.com";
         }
-
-        // 3. Direct email or exact name match for other authors
-        if (pEmail && targetEmail) return pEmail === targetEmail;
+        if (targetNameLower === "writer" || targetNameLower === "writer user") {
+          return pAuthor === "writer" || pAuthor === "writer user" || (!pAuthor && !pEmail);
+        }
         return pAuthor === targetNameLower;
       });
 

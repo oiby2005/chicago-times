@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import Header from "@/components/navigation/Header";
 import StickyHeaderBar from "@/components/navigation/StickyHeaderBar";
 import Footer from "@/components/layout/Footer";
@@ -11,24 +11,56 @@ import AuthorArticlesList from "@/components/author/AuthorArticlesList";
 import MostReadSidebar from "@/components/author/MostReadSidebar";
 import LouisVuittonAdBanner from "@/components/author/LouisVuittonAdBanner";
 import AuthorCredentialsSidebar from "@/components/author/AuthorCredentialsSidebar";
-import { getAuthorBySlug, slugifyAuthorName } from "@/data/authors";
+import { getAuthorBySlug, getAuthorByEmail, slugifyAuthorName } from "@/data/authors";
 
 export default function AuthorClientContent() {
   const routeParams = useParams();
+  const searchParams = useSearchParams();
   const rawSlug = routeParams?.slug;
   const slug = typeof rawSlug === "string" ? rawSlug : (Array.isArray(rawSlug) ? rawSlug[0] : "writer");
+  const emailParam = (searchParams?.get("email") || "").toLowerCase().trim();
 
-  const authorData = getAuthorBySlug(slug);
+  const [authorData, setAuthorData] = useState(() => getAuthorBySlug(slug, emailParam));
   const [hasPublishedArticles, setHasPublishedArticles] = useState<boolean>(true);
+
+  useEffect(() => {
+    const resolved = getAuthorBySlug(slug, emailParam);
+    setAuthorData(resolved);
+
+    // If emailParam exists, fetch fresh live profile from backend to ensure latest name and role
+    if (emailParam) {
+      fetch(`http://localhost:5000/api/users/${encodeURIComponent(emailParam)}`)
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (data && data.success && data.user) {
+            const u = data.user;
+            const writerType = (u.writer_type || "").toLowerCase();
+            const role = writerType === "contributor"
+              ? "CONTRIBUTOR"
+              : (writerType === "staff" ? "STAFF WRITER" : ((u.role || "WRITER").toUpperCase() === "WRITER" ? "STAFF WRITER" : (u.role || "WRITER").toUpperCase()));
+            setAuthorData((prev) => ({
+              ...prev,
+              name: u.full_name || u.name || prev.name,
+              role: role,
+              email: u.email || emailParam,
+              bio: u.bio !== undefined && u.bio !== "" ? u.bio : prev.bio,
+              image: u.avatar_url || prev.image,
+              linkedinUrl: u.linkedin || prev.linkedinUrl,
+            }));
+          }
+        })
+        .catch(() => {});
+    }
+  }, [slug, emailParam]);
 
   useEffect(() => {
     if (authorData && authorData.name && typeof window !== "undefined") {
       const correctSlug = slugifyAuthorName(authorData.name);
-      if (correctSlug && correctSlug.toLowerCase() !== slug.toLowerCase()) {
+      if (correctSlug && correctSlug.toLowerCase() !== slug.toLowerCase() && !emailParam) {
         window.history.replaceState(null, "", `/author/${correctSlug}`);
       }
     }
-  }, [authorData, slug]);
+  }, [authorData, slug, emailParam]);
 
   useEffect(() => {
     const isWriterUser = slug.toLowerCase() === "writer" || slug.toLowerCase() === "writer1" || (authorData?.email && authorData.email.includes("writer"));
@@ -43,7 +75,7 @@ export default function AuthorClientContent() {
         if (p2) posts = [...posts, ...JSON.parse(p2)];
       } catch (e) {}
 
-      const targetEmail = (authorData?.email || "").toLowerCase().trim();
+      const targetEmail = (authorData?.email || emailParam || "").toLowerCase().trim();
       const published = posts.filter((p: any) => {
         if (!p || (p.status !== "Published" && p.status !== "APPROVED")) return false;
         const pEmail = (p.authorEmail || "").toLowerCase().trim();
@@ -59,7 +91,7 @@ export default function AuthorClientContent() {
       });
       setHasPublishedArticles(published.length > 0);
     }
-  }, [slug, authorData]);
+  }, [slug, authorData, emailParam]);
 
   return (
     <main className="min-h-screen bg-white text-[#111111] font-sans flex flex-col justify-between ">
