@@ -183,6 +183,120 @@ export default function CareerClient() {
                       </div>
                     </div>
                   </div>
+
+                  {/* Card 3: Investigative Journalist */}
+                  <div
+                    className="w-full bg-white border border-[#e2e8f0] hover:border-[#64748b] rounded-2xl p-6 sm:p-7 shadow-xs hover:shadow-md transition-all duration-200 font-poppins flex flex-col justify-between"
+                    style={{ fontFamily: "var(--font-poppins), 'Poppins', sans-serif" }}
+                  >
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        {/* Search / Magnifying Glass Icon in Ash */}
+                        <div className="w-10 h-10 rounded-xl bg-[#f1f5f9] border border-[#e2e8f0] flex items-center justify-center text-[#475569]">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                          </svg>
+                        </div>
+
+                        {/* Ash Tag */}
+                        <span className="text-[10px] font-mono font-bold tracking-wider px-2.5 py-1 rounded-full bg-[#f8fafc] text-[#475569] border border-[#cbd5e1] uppercase">
+                          INVESTIGATIVE JOURNALIST
+                        </span>
+                      </div>
+
+                      <div>
+                        <h3 className="text-lg sm:text-xl font-bold text-[#0f172a]">
+                          Investigative Journalist
+                        </h3>
+                      </div>
+
+                      <p className="text-xs sm:text-[13px] text-[#475569] leading-relaxed">
+                        At Times Chicago, an investigative journalist uncovers high-impact enterprise stories, corporate accountability reports, and policy developments with deep reporting and verified documentation.
+                      </p>
+
+                      {/* Capabilities List */}
+                      <div className="pt-3 border-t border-slate-100 space-y-2">
+                        <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#64748b]">
+                          What You Can Do:
+                        </p>
+                        <ul className="space-y-1.5 text-xs text-[#334155]">
+                          <li className="flex items-start space-x-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#64748b] mt-1.5 shrink-0" />
+                            <span><strong>In-Depth Investigations:</strong> Produce detailed, original investigative features.</span>
+                          </li>
+                          <li className="flex items-start space-x-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#64748b] mt-1.5 shrink-0" />
+                            <span><strong>Direct Editorial Desk:</strong> Collaborate closely with senior editors.</span>
+                          </li>
+                          <li className="flex items-start space-x-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#64748b] mt-1.5 shrink-0" />
+                            <span><strong>Front-Page Visibility:</strong> Feature on homepage and major category headers.</span>
+                          </li>
+                          <li className="flex items-start space-x-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#64748b] mt-1.5 shrink-0" />
+                            <span><strong>Verified Credentials:</strong> Showcase awards, investigations, and verified credentials.</span>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Card 4: Financial & Markets Analyst */}
+                  <div
+                    className="w-full bg-white border border-[#e2e8f0] hover:border-[#64748b] rounded-2xl p-6 sm:p-7 shadow-xs hover:shadow-md transition-all duration-200 font-poppins flex flex-col justify-between"
+                    style={{ fontFamily: "var(--font-poppins), 'Poppins', sans-serif" }}
+                  >
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        {/* Trending Graph Icon in Ash */}
+                        <div className="w-10 h-10 rounded-xl bg-[#f1f5f9] border border-[#e2e8f0] flex items-center justify-center text-[#475569]">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
+                          </svg>
+                        </div>
+
+                        {/* Ash Tag */}
+                        <span className="text-[10px] font-mono font-bold tracking-wider px-2.5 py-1 rounded-full bg-[#f8fafc] text-[#475569] border border-[#cbd5e1] uppercase">
+                          MARKETS & FINANCE
+                        </span>
+                      </div>
+
+                      <div>
+                        <h3 className="text-lg sm:text-xl font-bold text-[#0f172a]">
+                          Financial & Markets Analyst
+                        </h3>
+                      </div>
+
+                      <p className="text-xs sm:text-[13px] text-[#475569] leading-relaxed">
+                        At Times Chicago, a financial and markets analyst reports on equities, emerging venture valuations, economic policy, and wealth trends, translating complex data into clear analysis.
+                      </p>
+
+                      {/* Capabilities List */}
+                      <div className="pt-3 border-t border-slate-100 space-y-2">
+                        <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#64748b]">
+                          What You Can Do:
+                        </p>
+                        <ul className="space-y-1.5 text-xs text-[#334155]">
+                          <li className="flex items-start space-x-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#64748b] mt-1.5 shrink-0" />
+                            <span><strong>Market Commentaries:</strong> Write daily analysis on equities, crypto, and economy.</span>
+                          </li>
+                          <li className="flex items-start space-x-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#64748b] mt-1.5 shrink-0" />
+                            <span><strong>Wealth & Indexes:</strong> Contribute to founder rankings and market reports.</span>
+                          </li>
+                          <li className="flex items-start space-x-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#64748b] mt-1.5 shrink-0" />
+                            <span><strong>Data Visualizations:</strong> Enhance articles with rich metrics and charts.</span>
+                          </li>
+                          <li className="flex items-start space-x-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#64748b] mt-1.5 shrink-0" />
+                            <span><strong>Global Distribution:</strong> Reach thousands of investors and business executives.</span>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </section>
 
