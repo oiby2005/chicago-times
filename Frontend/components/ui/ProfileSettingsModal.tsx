@@ -20,6 +20,7 @@ export interface UserProfile {
   bio?: string;
   linkedin?: string;
   country?: string;
+  phone?: string;
   avatar_url?: string;
   is_default_admin?: boolean;
   is_blocked?: boolean;
@@ -58,6 +59,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [country, setCountry] = useState("United States");
+  const [phone, setPhone] = useState("");
   const [role, setRole] = useState("READER");
   const [bio, setBio] = useState("");
   const [linkedin, setLinkedin] = useState("");
@@ -74,6 +76,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
       setFullName(currentUser.full_name || currentUser.name || "User");
       setEmail(currentUser.email || "user@gmail.com");
       setCountry(currentUser.country || (currentUser as any).country || "United States");
+      setPhone(currentUser.phone || (currentUser as any).mobile || "");
       setRole((currentUser.role || "READER").toUpperCase());
       setBio(currentUser.bio || "News Enthusiast");
       setLinkedin(currentUser.linkedin || "");
@@ -85,6 +88,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
       setFullName("User");
       setEmail("user@gmail.com");
       setCountry("United States");
+      setPhone("");
       setRole("READER");
       setBio("News Enthusiast");
       setLinkedin("");
@@ -130,6 +134,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
       bio: bio,
       linkedin: linkedin,
       country: country,
+      phone: phone.trim(),
       avatar_url: avatarUrl,
       experiences: experiences,
       education: education,
@@ -389,8 +394,8 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
             />
           </div>
 
-          {/* EMAIL & COUNTRY Fields */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          {/* EMAIL & PHONE & COUNTRY Fields */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label className="block font-mono text-[11px] font-bold text-[#64748b] tracking-wider uppercase mb-1.5">
                 EMAIL ADDRESS
@@ -399,8 +404,20 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 bg-white border border-[#e2e8f0] rounded-xl text-[#1e293b] font-sans text-[15px] focus:outline-none focus:border-[#00528a] focus:ring-2 focus:ring-[#00528a]/15 transition-all"
+                className="w-full px-3.5 py-3 bg-white border border-[#e2e8f0] rounded-xl text-[#1e293b] font-sans text-xs sm:text-[13.5px] focus:outline-none focus:border-[#00528a] focus:ring-2 focus:ring-[#00528a]/15 transition-all"
                 placeholder="name@timeschicago.com"
+              />
+            </div>
+            <div>
+              <label className="block font-mono text-[11px] font-bold text-[#64748b] tracking-wider uppercase mb-1.5">
+                PHONE NUMBER
+              </label>
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="w-full px-3.5 py-3 bg-white border border-[#e2e8f0] rounded-xl text-[#1e293b] font-sans text-xs sm:text-[13.5px] focus:outline-none focus:border-[#00528a] focus:ring-2 focus:ring-[#00528a]/15 transition-all"
+                placeholder="+1 (555) 000-0000"
               />
             </div>
             <div>
@@ -410,7 +427,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
               <select
                 value={country}
                 onChange={(e) => setCountry(e.target.value)}
-                className="w-full px-4 py-3 bg-white border border-[#e2e8f0] rounded-xl text-[#1e293b] font-sans text-[15px] focus:outline-none focus:border-[#00528a] focus:ring-2 focus:ring-[#00528a]/15 transition-all cursor-pointer"
+                className="w-full px-3.5 py-3 bg-white border border-[#e2e8f0] rounded-xl text-[#1e293b] font-sans text-xs sm:text-[13.5px] focus:outline-none focus:border-[#00528a] focus:ring-2 focus:ring-[#00528a]/15 transition-all cursor-pointer"
               >
                 {COUNTRIES_LIST.map((c) => (
                   <option key={c} value={c}>

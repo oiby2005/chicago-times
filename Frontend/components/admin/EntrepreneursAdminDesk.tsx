@@ -853,15 +853,15 @@ export default function EntrepreneursAdminDesk() {
                     {companies.map((comp, idx) => (
                       <div
                         key={comp.id || idx}
-                        className="p-3.5 rounded-2xl border border-[#e2e8f0] bg-[#f8fafc] flex flex-col md:flex-row gap-3 items-center"
+                        className="p-3.5 rounded-2xl border border-[#e2e8f0] bg-[#f8fafc] flex flex-col md:flex-row gap-2.5 items-stretch md:items-end w-full overflow-hidden"
                       >
                         {/* Logo Preview */}
-                        <div className="w-10 h-10 rounded-xl bg-white border border-[#cbd5e1] flex items-center justify-center overflow-hidden shrink-0 shadow-2xs">
+                        <div className="w-9 h-9 rounded-xl bg-white border border-[#cbd5e1] flex items-center justify-center overflow-hidden shrink-0 shadow-2xs mb-0.5 self-center md:self-end">
                           {comp.logoUrl ? (
                             <img
                               src={comp.logoUrl}
                               alt={comp.name || "Logo"}
-                              className="w-8 h-8 object-contain"
+                              className="w-7 h-7 object-contain"
                               onError={(e) => {
                                 (e.currentTarget as HTMLElement).style.display = "none";
                               }}
@@ -874,8 +874,8 @@ export default function EntrepreneursAdminDesk() {
                         </div>
 
                         {/* Company Name */}
-                        <div className="flex-1 min-w-[130px] w-full">
-                          <label className="block text-[10px] font-bold text-[#64748b] uppercase mb-0.5">
+                        <div className="flex-1 min-w-0 w-full">
+                          <label className="block text-[10px] font-bold text-[#64748b] uppercase mb-1">
                             Company Name
                           </label>
                           <input
@@ -888,22 +888,22 @@ export default function EntrepreneursAdminDesk() {
                         </div>
 
                         {/* Role */}
-                        <div className="w-full md:w-36 shrink-0">
-                          <label className="block text-[10px] font-bold text-[#64748b] uppercase mb-0.5">
+                        <div className="flex-1 min-w-0 w-full">
+                          <label className="block text-[10px] font-bold text-[#64748b] uppercase mb-1">
                             Role
                           </label>
                           <input
                             type="text"
                             value={comp.role}
                             onChange={(e) => handleUpdateCompany(idx, "role", e.target.value)}
-                            placeholder="e.g. CEO"
+                            placeholder="e.g. Founder & CEO"
                             className="w-full bg-white border border-[#cbd5e1] rounded-xl px-2.5 py-1.5 text-xs text-[#0f172a] focus:outline-none focus:border-[#0f172a]"
                           />
                         </div>
 
                         {/* Website (Auto-fetches logo) */}
-                        <div className="flex-1 min-w-[160px] w-full">
-                          <label className="block text-[10px] font-bold text-[#64748b] uppercase mb-0.5">
+                        <div className="flex-1 min-w-0 w-full">
+                          <label className="block text-[10px] font-bold text-[#64748b] uppercase mb-1">
                             Website (Auto-fetches Logo)
                           </label>
                           <input
@@ -915,21 +915,24 @@ export default function EntrepreneursAdminDesk() {
                           />
                         </div>
 
-                        {/* Custom Logo Upload / URL */}
-                        <div className="w-full md:w-48 shrink-0">
-                          <label className="block text-[10px] font-bold text-[#64748b] uppercase mb-0.5">
+                        {/* Custom Logo Upload / URL (With folder icon embedded inside) */}
+                        <div className="flex-1 min-w-0 w-full">
+                          <label className="block text-[10px] font-bold text-[#64748b] uppercase mb-1">
                             Custom Logo / Photo
                           </label>
-                          <div className="flex items-center space-x-1.5">
+                          <div className="relative flex items-center w-full">
                             <input
                               type="text"
                               value={comp.logoUrl || ""}
                               onChange={(e) => handleUpdateCompany(idx, "logoUrl", e.target.value)}
                               placeholder="Logo URL"
-                              className="flex-1 min-w-0 bg-white border border-[#cbd5e1] rounded-xl px-2 py-1.5 text-xs text-[#0f172a] focus:outline-none focus:border-[#0f172a]"
+                              className="w-full bg-white border border-[#cbd5e1] rounded-xl pl-2.5 pr-8 py-1.5 text-xs text-[#0f172a] focus:outline-none focus:border-[#0f172a]"
                             />
-                            <label className="px-2 py-1.5 bg-[#e2e8f0] hover:bg-[#cbd5e1] text-[#0f172a] rounded-xl text-[10px] font-bold cursor-pointer shrink-0 transition-colors" title="Upload company logo image">
-                              📁
+                            <label
+                              className="absolute right-1 top-1/2 -translate-y-1/2 p-1 hover:bg-slate-100 text-[#0f172a] rounded-lg text-xs cursor-pointer transition-colors flex items-center justify-center shrink-0"
+                              title="Upload company logo image"
+                            >
+                              <span className="text-sm leading-none">📁</span>
                               <input
                                 type="file"
                                 accept="image/*"
@@ -941,11 +944,11 @@ export default function EntrepreneursAdminDesk() {
                         </div>
 
                         {/* Remove */}
-                        <div className="shrink-0 flex items-center justify-end pt-1 md:pt-4">
+                        <div className="shrink-0 flex items-center justify-end mb-0.5">
                           <button
                             type="button"
                             onClick={() => handleRemoveCompany(idx)}
-                            className="text-[#ef4444] hover:text-[#dc2626] text-xs font-bold p-1 cursor-pointer"
+                            className="p-1.5 text-[#ef4444] hover:text-[#dc2626] hover:bg-red-50 rounded-lg text-xs font-bold cursor-pointer transition-colors"
                             title="Remove Company"
                           >
                             ✕

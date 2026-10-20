@@ -466,7 +466,7 @@ export const LogoHeader: React.FC = () => {
         </div>
 
         {/* Sub-Utility Edition Navigation */}
-        <div className="flex items-center justify-center max-w-full overflow-hidden md:overflow-x-auto lg:overflow-visible no-scrollbar w-full text-[10px] min-[360px]:text-[10.5px] min-[390px]:text-[11px] md:text-[12px] font-['Century_Gothic','Publica_Sans_Light','Kumbh_Sans',sans-serif] font-normal text-[#333333] tracking-tight z-30 whitespace-normal text-center md:whitespace-nowrap flex-wrap md:flex-nowrap my-1.5 pt-2 pb-2.5 md:pb-0.5 px-1 sm:px-1 border-b md:border-b-0 border-gray-200">
+        <div className="flex items-center justify-center max-w-full overflow-hidden md:overflow-x-auto lg:overflow-visible no-scrollbar w-full text-[10.5px] min-[360px]:text-[11px] min-[390px]:text-[11.5px] md:text-[12px] font-['Century_Gothic','Publica_Sans_Light','Kumbh_Sans',sans-serif] font-normal text-[#333333] tracking-tight z-30 whitespace-normal text-center md:whitespace-nowrap flex-wrap md:flex-nowrap my-1.5 pt-2 pb-2.5 md:pb-0.5 px-1 sm:px-1 border-b md:border-b-0 border-gray-200">
           {/* Edition Selection Dropdown Card - Desktop and Laptop only */}
           <div className="hidden md:inline-block relative" ref={editionRef}>
             <button

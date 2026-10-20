@@ -407,7 +407,7 @@ export const Footer: React.FC = () => {
       </div>
 
       {/* SECTION 4: Legal Links & Copyright Notice — Custom Shade 4 (#D4CDCD) */}
-      <div className={`w-full pt-5 transition-all duration-300 bg-[#D4CDCD] ${isBannerVisible ? "pb-[68px]" : "pb-5"}`}>
+      <div className={`w-full pt-5 transition-all duration-300 bg-[#D4CDCD] ${isBannerVisible ? "pb-[96px] sm:pb-[80px] md:pb-[68px]" : "pb-5"}`}>
         <Container>
           <div className="flex flex-col items-center justify-center text-center space-y-2">
             {/* Policy Links Row */}

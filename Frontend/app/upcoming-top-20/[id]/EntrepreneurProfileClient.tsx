@@ -815,8 +815,8 @@ export default function EntrepreneurProfileClient({ id }: { id: string }) {
             {/* 3rd Section: "Did you know" Fact Carousel (Exact structure as /world-billionaire/1) */}
             <DidYouKnowSlider facts={item.didYouKnowFacts} />
 
-            {/* 4th Section: Middle In-Line Advertisement Slot (Exact size with name inside grey box) */}
-            <div className="w-full my-6 flex flex-col items-center justify-center border-y border-dashed border-[#CCCCCC] py-4 bg-[#fafafa]">
+            {/* 4th Section: Middle In-Line Advertisement Slot (Exact size with name inside grey box - Desktop/Laptop/Tablet only) */}
+            <div className="hidden sm:flex w-full my-6 flex-col items-center justify-center border-y border-dashed border-[#CCCCCC] py-4 bg-[#fafafa]">
               <span className="text-[10px] uppercase font-sans tracking-widest text-[#94a3b8] font-bold mb-2">Advertisement</span>
               <AdPlaceholder
                 slotId="entrepreneur_profile_inline_ad"

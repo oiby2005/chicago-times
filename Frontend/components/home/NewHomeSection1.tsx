@@ -39,11 +39,11 @@ export default function NewHomeSection1() {
   const isPodcastSticky = activePodcastCount < 3;
 
   return (
-    <section className="w-full bg-white text-[#111111] pt-0 pb-6">
+    <section className="w-full bg-white text-[#111111] pt-0 pb-2 md:pb-6">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 mb-0 lg:mb-6 items-stretch border-b-0 lg:border-b border-dashed border-[#888070] pb-0 lg:pb-4">
         
         {/* Column 2 (Center 6 of 12 cols ~ 50%): A+ MAIN NEWS -> MAIN BOTTOM PANEL (ORDER-1 ON MOBILE, SHOWS FIRST) */}
-        <div className="col-span-12 lg:col-span-6 px-0 lg:px-[0.3cm] py-2 lg:py-0 flex flex-col justify-start lg:justify-between border-b lg:border-b-0 lg:border-r border-dashed border-[#888070] order-1 lg:order-2 pb-6 lg:pb-0 mb-6 lg:mb-0">
+        <div className="col-span-12 lg:col-span-6 px-0 lg:px-[0.3cm] pt-0 pb-6 lg:py-0 flex flex-col justify-start lg:justify-between border-b lg:border-b-0 lg:border-r border-dashed border-[#888070] order-1 lg:order-2 mb-6 lg:mb-0">
           <APlusMainNewsSection />
           <div className="pt-[35px] mb-[35px] lg:pt-2 lg:mb-4 lg:pb-0 border-b border-dashed border-[#888070] mx-1" />
           <MainBottomPanelSection />

@@ -771,6 +771,7 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
   const [editUserPublications, setEditUserPublications] = useState<any[]>([]);
   const [editUserIssuedDate, setEditUserIssuedDate] = useState("");
   const [editUserPressId, setEditUserPressId] = useState("");
+  const [editUserAvatarUrl, setEditUserAvatarUrl] = useState("");
   const [editUserError, setEditUserError] = useState("");
   const [isSubmittingEditUser, setIsSubmittingEditUser] = useState(false);
   const [userToDelete, setUserToDelete] = useState<UserDeskItem | null>(null);
@@ -2155,6 +2156,7 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
     setEditUserPublications(Array.isArray(user.publications) ? user.publications : []);
     setEditUserIssuedDate(user.issued_date || "");
     setEditUserPressId(user.press_id || "");
+    setEditUserAvatarUrl(user.avatar_url || (user as any).image || "");
     setEditUserError("");
   };
 
@@ -2199,6 +2201,7 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
           publications: editUserPublications,
           issued_date: editUserIssuedDate.trim(),
           press_id: editUserPressId.trim(),
+          avatar_url: editUserAvatarUrl.trim(),
         }),
       });
       const data = await res.json();
@@ -2230,8 +2233,9 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
             experiences: editUserExperiences,
             education: editUserEducation,
             publications: editUserPublications,
-          issued_date: editUserIssuedDate.trim(),
-          press_id: editUserPressId.trim(),
+            issued_date: editUserIssuedDate.trim(),
+            press_id: editUserPressId.trim(),
+            avatar_url: editUserAvatarUrl.trim(),
           };
           localStorage.setItem("wsj_users_by_email", JSON.stringify(map));
           window.dispatchEvent(new Event("wsj_user_updated"));
@@ -2245,13 +2249,14 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
                 full_name: editUserName.trim(),
                 name: editUserName.trim(),
                 role: editUserRole,
-          writer_type: editUserRole === "writer" ? editUserWriterType : "staff",
+                writer_type: editUserRole === "writer" ? editUserWriterType : "staff",
                 bio: editUserBio.trim(),
                 linkedin: editUserLinkedin.trim(),
                 phone: editUserPhone.trim(),
                 country: editUserCountry.trim(),
                 issued_date: editUserIssuedDate.trim(),
                 press_id: editUserPressId.trim(),
+                avatar_url: editUserAvatarUrl.trim(),
               };
               sessionStorage.setItem("wsj_user", JSON.stringify(updatedSessionUser));
             }
@@ -7118,6 +7123,90 @@ ${divider70}
                         onChange={(e) => setEditUserIssuedDate(e.target.value)}
                         className="w-full bg-white border border-[#d1d5db] rounded-2xl px-4 py-3 text-xs font-semibold text-[#111827] outline-none focus:border-[#64748b] transition-colors cursor-pointer"
                       />
+                    </div>
+                  </div>
+
+                  {/* ID Portrait Photo (For Staff Writers & Contributors) */}
+                  <div className="pt-1">
+                    <label className="block text-[10px] font-mono font-bold text-[#6b7280] uppercase tracking-wider mb-1.5">
+                      ID PORTRAIT PHOTO
+                    </label>
+                    <div className="flex flex-col sm:flex-row items-center gap-3 bg-white p-3 rounded-2xl border border-[#d1d5db]">
+                      <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center shrink-0">
+                        {editUserAvatarUrl ? (
+                          <img
+                            src={editUserAvatarUrl}
+                            alt="ID Preview"
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <svg className="w-8 h-8 text-slate-300" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                          </svg>
+                        )}
+                      </div>
+                      <div className="flex-1 w-full space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="text"
+                            value={editUserAvatarUrl}
+                            onChange={(e) => setEditUserAvatarUrl(e.target.value)}
+                            placeholder="Image URL (https://...)"
+                            className="flex-1 bg-white border border-[#d1d5db] rounded-xl px-3 py-2 text-xs text-[#111827] outline-none focus:border-[#64748b]"
+                          />
+                          {editUserAvatarUrl && (
+                            <button
+                              type="button"
+                              onClick={() => setEditUserAvatarUrl("")}
+                              className="p-2 text-slate-400 hover:text-red-500 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer text-xs font-bold"
+                              title="Remove photo"
+                            >
+                              ✕
+                            </button>
+                          )}
+                        </div>
+                        <label className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#334155] rounded-xl text-xs font-bold cursor-pointer transition-colors">
+                          <svg className="w-4 h-4 text-[#64748b]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                          </svg>
+                          <span>Upload ID Photo</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                const reader = new FileReader();
+                                reader.onload = async () => {
+                                  if (typeof reader.result === "string") {
+                                    const base64 = reader.result;
+                                    setEditUserAvatarUrl(base64);
+                                    try {
+                                      const res = await fetch("http://localhost:5000/api/upload", {
+                                        method: "POST",
+                                        headers: getAuthHeaders({ "Content-Type": "application/json" }),
+                                        body: JSON.stringify({
+                                          imageBase64: base64,
+                                          fileName: `id_avatar_${Date.now()}.${file.name.split('.').pop() || 'webp'}`,
+                                          folder: "avatars",
+                                        }),
+                                      });
+                                      const data = await res.json();
+                                      if (data.success && data.url) {
+                                        setEditUserAvatarUrl(data.url);
+                                      }
+                                    } catch (err) {
+                                      console.warn("Avatar upload notice:", err);
+                                    }
+                                  }
+                                };
+                                reader.readAsDataURL(file);
+                              }
+                            }}
+                          />
+                        </label>
+                      </div>
                     </div>
                   </div>
 

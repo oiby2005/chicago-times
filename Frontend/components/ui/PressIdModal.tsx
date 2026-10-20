@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { UserProfile } from "./ProfileSettingsModal";
 
 interface PressIdModalProps {
@@ -61,9 +61,45 @@ export const PressIdModal: React.FC<PressIdModalProps> = ({
   const displayPhone = (user as any).phone || (user as any).mobile || "—";
   const avatarSrc = user.avatar_url || (user as any).image || "";
 
-  const handlePrint = () => {
-    if (typeof window !== "undefined") {
-      window.print();
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleDownloadPdf = async () => {
+    if (!cardRef.current || isDownloading) return;
+    setIsDownloading(true);
+    try {
+      const card = cardRef.current;
+      const html2canvasModule = await import("html2canvas");
+      const html2canvas = html2canvasModule.default;
+      const jspdfModule = await import("jspdf");
+      const jsPDF = jspdfModule.default;
+
+      const canvas = await html2canvas(card, {
+        scale: 3,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: "#ffffff",
+        logging: false,
+      });
+
+      const imgData = canvas.toDataURL("image/png");
+      const pdfWidth = 85.6; // Standard card width in mm
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: [pdfWidth, pdfHeight],
+      });
+
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`${displayPressId}_TimesChicago_PressID.pdf`);
+    } catch (err) {
+      console.error("PDF generation fallback:", err);
+      if (typeof window !== "undefined") {
+        window.print();
+      }
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -240,20 +276,36 @@ export const PressIdModal: React.FC<PressIdModalProps> = ({
           </div>
         </div>
 
-        {/* Print / Done Actions */}
+        {/* Print / Download PDF / Done Actions */}
         <div className="flex items-center space-x-3 mt-5 w-full max-w-[340px]" style={poppinsFont}>
           <button
             type="button"
-            onClick={handlePrint}
-            className="flex-1 inline-flex items-center justify-center space-x-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold rounded-xl transition-colors cursor-pointer border border-slate-200"
+            onClick={handleDownloadPdf}
+            disabled={isDownloading}
+            className="flex-1 inline-flex items-center justify-center space-x-2 px-4 py-2.5 bg-black hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition-all cursor-pointer shadow-sm disabled:opacity-60"
             style={poppinsFont}
           >
-            <span>Print ID</span>
+            {isDownloading ? (
+              <>
+                <svg className="animate-spin w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                </svg>
+                <span>Generating PDF...</span>
+              </>
+            ) : (
+              <>
+                <svg className="w-4 h-4 text-white shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                </svg>
+                <span>Print ID (PDF)</span>
+              </>
+            )}
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 px-4 py-2 bg-black hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer"
+            className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold rounded-xl transition-colors cursor-pointer border border-slate-200"
             style={poppinsFont}
           >
             Close

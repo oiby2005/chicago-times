@@ -745,8 +745,8 @@ export default function BillionaireProfileClient({ id }: { id: string }) {
             {/* 4th Section: "Did you know" Fact Carousel */}
             <DidYouKnowSlider facts={item.didYouKnowFacts} />
 
-            {/* Middle In-Line Advertisement (Billionaire Profile Middle Inline Ad) */}
-            <div className="w-full my-6 flex flex-col items-center justify-center border-y border-dashed border-[#CCCCCC] py-4 bg-[#fafafa]">
+            {/* Middle In-Line Advertisement (Billionaire Profile Middle Inline Ad - Desktop/Laptop/Tablet only) */}
+            <div className="hidden sm:flex w-full my-6 flex-col items-center justify-center border-y border-dashed border-[#CCCCCC] py-4 bg-[#fafafa]">
               <span className="text-[10px] uppercase font-sans tracking-widest text-[#94a3b8] font-bold mb-2">Advertisement</span>
               <AdPlaceholder
                 slotId="billionaire_profile_inline_ad"
