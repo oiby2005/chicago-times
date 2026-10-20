@@ -55,7 +55,7 @@ const featuredLinksCol2 = [
 const aboutLinks: { name: string; href?: string; target?: string; disabled?: boolean; hidden?: boolean }[] = [
   { name: "About us", href: "/about-us" },
   { name: "Terms & Conditions", href: "/terms-and-conditions" },
-  { name: "Careers", href: "/careers" },
+  { name: "Careers", href: "/career" },
   { name: "RSS Feed", href: "/rss.xml", target: "_blank" },
   { name: "Leadership", href: "/leadership", hidden: true },
 ];

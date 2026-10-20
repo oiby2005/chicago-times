@@ -6,7 +6,7 @@ import StickyHeaderBar from "@/components/navigation/StickyHeaderBar";
 import Footer from "@/components/layout/Footer";
 import Container from "@/components/layout/Container";
 
-export default function CareersClient() {
+export default function CareerClient() {
   const [copied, setCopied] = useState<boolean>(false);
   const officialEmail = "worldnews@timeschicago.com";
 
@@ -57,10 +57,10 @@ export default function CareersClient() {
               </section>
 
               {/* ========================================================= */}
-              {/* SECTION 2: CURRENT OPPORTUNITIES (Small Square Box Card)  */}
+              {/* SECTION 2: CURRENT OPPORTUNITIES (Compact Cards)          */}
               {/* ========================================================= */}
               <section className="space-y-6">
-                {/* Heading with Vertical Ash Accent Bar (same font family as Intro text) */}
+                {/* Heading with Vertical Ash Accent Bar */}
                 <div className="flex items-center space-x-3">
                   <span className="w-1.5 h-7 bg-[#475569] rounded-xs inline-block" />
                   <h2 className="text-2xl sm:text-3xl font-bold text-[#0f172a] tracking-tight font-sans">
@@ -68,10 +68,11 @@ export default function CareersClient() {
                   </h2>
                 </div>
 
-                {/* Article Writer Card - Compact Small Box (Square format) with Poppins Sans font */}
-                <div className="flex justify-center sm:justify-start">
+                {/* Opportunities Cards Grid - Compact Box format with Poppins Sans font */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Card 1: Article Writer */}
                   <div
-                    className="w-full max-w-[360px] bg-white border border-[#e2e8f0] hover:border-[#64748b] rounded-2xl p-6 sm:p-7 shadow-xs hover:shadow-md transition-all duration-200 font-poppins"
+                    className="w-full bg-white border border-[#e2e8f0] hover:border-[#64748b] rounded-2xl p-6 sm:p-7 shadow-xs hover:shadow-md transition-all duration-200 font-poppins flex flex-col justify-between"
                     style={{ fontFamily: "var(--font-poppins), 'Poppins', sans-serif" }}
                   >
                     <div className="space-y-4">
@@ -120,6 +121,63 @@ export default function CareersClient() {
                           <li className="flex items-start space-x-2">
                             <span className="w-1.5 h-1.5 rounded-full bg-[#64748b] mt-1.5 shrink-0" />
                             <span><strong>Showcase Education:</strong> Display degrees and universities.</span>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Card 2: Contributing Writer */}
+                  <div
+                    className="w-full bg-white border border-[#e2e8f0] hover:border-[#64748b] rounded-2xl p-6 sm:p-7 shadow-xs hover:shadow-md transition-all duration-200 font-poppins flex flex-col justify-between"
+                    style={{ fontFamily: "var(--font-poppins), 'Poppins', sans-serif" }}
+                  >
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        {/* Quill / Pen Icon in Ash */}
+                        <div className="w-10 h-10 rounded-xl bg-[#f1f5f9] border border-[#e2e8f0] flex items-center justify-center text-[#475569]">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                          </svg>
+                        </div>
+
+                        {/* Ash Tag */}
+                        <span className="text-[10px] font-mono font-bold tracking-wider px-2.5 py-1 rounded-full bg-[#f8fafc] text-[#475569] border border-[#cbd5e1] uppercase">
+                          CONTRIBUTING WRITER
+                        </span>
+                      </div>
+
+                      <div>
+                        <h3 className="text-lg sm:text-xl font-bold text-[#0f172a]">
+                          Contributing Writer
+                        </h3>
+                      </div>
+
+                      <p className="text-xs sm:text-[13px] text-[#475569] leading-relaxed">
+                        At Times Chicago, a contributing writer provides expert opinion pieces, market analysis, and specialized commentary. As an independent contributor, you receive an official press credential and an author profile featuring your published columns and credentials.
+                      </p>
+
+                      {/* Capabilities List */}
+                      <div className="pt-3 border-t border-slate-100 space-y-2">
+                        <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#64748b]">
+                          What You Can Do:
+                        </p>
+                        <ul className="space-y-1.5 text-xs text-[#334155]">
+                          <li className="flex items-start space-x-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#64748b] mt-1.5 shrink-0" />
+                            <span><strong>Submit Columns:</strong> Write and submit analysis and opinion pieces.</span>
+                          </li>
+                          <li className="flex items-start space-x-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#64748b] mt-1.5 shrink-0" />
+                            <span><strong>Dedicated Profile:</strong> Display your credentials and author bio.</span>
+                          </li>
+                          <li className="flex items-start space-x-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#64748b] mt-1.5 shrink-0" />
+                            <span><strong>Press Credential:</strong> Receive an official Contributor ID.</span>
+                          </li>
+                          <li className="flex items-start space-x-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#64748b] mt-1.5 shrink-0" />
+                            <span><strong>Global Reach:</strong> Connect with an international readership.</span>
                           </li>
                         </ul>
                       </div>

@@ -1,5 +1,5 @@
 import React from "react";
-import CareersClient from "../careers/CareersClient";
+import CareerClient from "./CareerClient";
 import { getLinkPreviewMetadata } from "@/lib/linkPreview";
 
 export const metadata = getLinkPreviewMetadata({
@@ -9,6 +9,6 @@ export const metadata = getLinkPreviewMetadata({
   urlPath: "/career",
 });
 
-export default function CareerAliasPage() {
-  return <CareersClient />;
+export default function CareerPage() {
+  return <CareerClient />;
 }
