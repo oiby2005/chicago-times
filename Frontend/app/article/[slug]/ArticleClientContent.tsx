@@ -20,7 +20,7 @@ import ArticleVideosSection from "@/components/article/ArticleVideosSection";
 import NewsletterSignupBanner from "@/components/article/NewsletterSignupBanner";
 import ArticleCommentsSection from "@/components/article/ArticleCommentsSection";
 import ShareCardModal from "@/components/article/ShareCardModal";
-import { getAuthorForArticle, slugifyAuthorName } from "@/data/authors";
+import { getAuthorForArticle, slugifyAuthorName, getAuthorByEmail } from "@/data/authors";
 import { ensureWebpUrl, migrateLocalStorageToWebP } from "@/lib/webpConverter";
 import { sanitizeArticleHtml } from "@/lib/htmlSanitizer";
 import { getRelativeTime, getFormattedDateTime } from "@/lib/relativeTime";
