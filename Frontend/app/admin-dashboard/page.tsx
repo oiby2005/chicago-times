@@ -1595,10 +1595,10 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
         return false;
       }
     } else if (targetSubTab === "PODCAST") {
-      const isValid = isApple;
+      const isValid = isApple || isSpotify;
       if (!isValid) {
         showPopup(
-          "Only Apple Podcasts links are allowed for Podcast slots.",
+          "Only Apple Podcasts and Spotify links are allowed for Podcast slots.",
           "Platform Link Not Allowed"
         );
         return false;
@@ -1610,6 +1610,7 @@ const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
   const detectShortPlatform = (url: string) => {
     const lower = url.toLowerCase();
     if (lower.includes("podcasts.apple.com") || lower.includes("apple.com")) return "Apple Podcasts";
+    if (lower.includes("spotify.com") || lower.includes("open.spotify.com")) return "Spotify";
     if (lower.includes("youtube.com") || lower.includes("youtu.be")) return "Youtube Video";
     if (lower.includes("rumble.com")) return "Rumble Video";
     if (lower.includes("facebook.com") || lower.includes("fb.watch")) return "Facebook Short";
@@ -5812,7 +5813,7 @@ ${divider70}
                   </h3>
                   <p className="text-xs text-[#64748b] mt-0.5 font-sans">
                     {shortsSubTab === "PODCAST"
-                      ? "Paste any Apple Podcasts link."
+                      ? "Paste any Apple Podcasts or Spotify link."
                       : "Paste any YouTube, Rumble, Instagram, or Facebook link — platform and thumbnails are detected automatically."}
                   </p>
                 </div>
@@ -5862,7 +5863,7 @@ ${divider70}
                       onChange={handleShortUrlChange}
                       placeholder={
                         shortsSubTab === "PODCAST"
-                          ? "e.g. https://podcasts.apple.com/us/podcast/..."
+                          ? "e.g. https://podcasts.apple.com/us/podcast/... or https://open.spotify.com/episode/..."
                           : "e.g. https://www.youtube.com/shorts/... or https://rumble.com/... or https://instagram.com/reel/..."
                       }
                       className="w-full text-xs bg-[#f8fafc] border border-[#e2e8f0] focus:border-[#64748b] focus:bg-white rounded-xl px-4 py-2.5 transition-all text-[#0f172a] font-sans placeholder:text-[#94a3b8]"
@@ -5870,7 +5871,7 @@ ${divider70}
                     />
                     <p className="text-[10px] text-[#94a3b8] mt-1 font-sans">
                       {shortsSubTab === "PODCAST"
-                        ? "Supports Apple Podcasts."
+                        ? "Supports Apple Podcasts and Spotify."
                         : "Supports YouTube Shorts, Rumble videos, Instagram Reels, and Facebook Reels."}
                     </p>
                   </div>
@@ -5887,6 +5888,7 @@ ${divider70}
                       {shortsSubTab === "PODCAST" ? (
                         <>
                           <option value="Apple Podcasts">Apple Podcasts</option>
+                          <option value="Spotify">Spotify</option>
                         </>
                       ) : (
                         <>

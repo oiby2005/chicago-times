@@ -27,30 +27,48 @@ export default function AuthorClientContent({ slug: propSlug }: { slug?: string 
     const resolved = getAuthorBySlug(slug, emailParam);
     setAuthorData(resolved);
 
-    // If emailParam exists, fetch fresh live profile from backend to ensure latest name and role
-    if (emailParam) {
-      fetch(`http://localhost:5000/api/users/${encodeURIComponent(emailParam)}`)
-        .then((res) => (res.ok ? res.json() : null))
-        .then((data) => {
-          if (data && data.success && data.user) {
-            const u = data.user;
-            const writerType = (u.writer_type || "").toLowerCase();
-            const role = writerType === "contributor"
-              ? "CONTRIBUTOR"
-              : (writerType === "staff" ? "STAFF WRITER" : ((u.role || "WRITER").toUpperCase() === "WRITER" ? "STAFF WRITER" : (u.role || "WRITER").toUpperCase()));
-            setAuthorData((prev) => ({
-              ...prev,
-              name: u.full_name || u.name || prev.name,
-              role: role,
-              email: u.email || emailParam,
-              bio: u.bio !== undefined && u.bio !== "" ? u.bio : prev.bio,
-              image: u.avatar_url || prev.image,
-              linkedinUrl: u.linkedin || prev.linkedinUrl,
-            }));
-          }
-        })
-        .catch(() => {});
-    }
+    // Fetch fresh live profile from backend to ensure latest name, avatar and role
+    const userQuery = emailParam
+      ? fetch(`http://localhost:5000/api/users/${encodeURIComponent(emailParam)}`)
+      : fetch("http://localhost:5000/api/users");
+
+    userQuery
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!data) return;
+        let u: any = null;
+        if (data.user) {
+          u = data.user;
+        } else {
+          const userList: any[] = Array.isArray(data.list)
+            ? data.list
+            : (Array.isArray(data.users) ? data.users : Object.values(data.users || {}));
+          const cleanSlug = slug.toLowerCase().trim();
+          u = userList.find((usr: any) => {
+            const uName = (usr.full_name || usr.name || "").toLowerCase().trim();
+            const uSlug = uName.replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+            const uEmailSlug = (usr.email || "").split("@")[0].toLowerCase().trim();
+            const uId = String(usr.id || "");
+            return uSlug === cleanSlug || uEmailSlug === cleanSlug || uName === cleanSlug || uId === cleanSlug;
+          });
+        }
+        if (u) {
+          const writerType = (u.writer_type || "").toLowerCase().trim();
+          const role = writerType === "contributor"
+            ? "CONTRIBUTOR"
+            : (writerType === "staff" || writerType === "staff_writer" ? "STAFF WRITER" : ((u.role || "WRITER").toUpperCase() === "WRITER" ? "STAFF WRITER" : (u.role || "WRITER").toUpperCase()));
+          setAuthorData((prev) => ({
+            ...prev,
+            name: u.full_name || u.name || prev.name,
+            role: role,
+            email: u.email || emailParam || prev.email,
+            bio: u.bio !== undefined && u.bio !== "" ? u.bio : prev.bio,
+            image: u.avatar_url || (u as any).image || prev.image,
+            linkedinUrl: u.linkedin || prev.linkedinUrl,
+          }));
+        }
+      })
+      .catch(() => {});
   }, [slug, emailParam]);
 
   useEffect(() => {

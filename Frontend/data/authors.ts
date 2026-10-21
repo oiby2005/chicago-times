@@ -170,7 +170,7 @@ export function getUserDashboardUrl(user: any): string {
   const slug = getWriterSlugFromUser(user);
   const role = (user.role || "").toUpperCase();
   if (role === "ADMIN") return `/admin-dashboard/${slug}`;
-  if (role === "READER") return `/reader/${slug}/saved`;
+  if (role === "READER") return `/reader/${slug}`;
   return `/writer-dashboard/${slug}`;
 }
 
@@ -464,28 +464,52 @@ export async function fetchAuthorBySlug(slugParam: string): Promise<Author> {
     const res = await fetch("http://localhost:5000/api/users", { cache: "no-store" });
     if (res.ok) {
       const data = await res.json();
-      if (data?.success && Array.isArray(data.users)) {
-        const found = data.users.find((u: any) => {
+      const userList: any[] = Array.isArray(data.list)
+        ? data.list
+        : (Array.isArray(data.users) ? data.users : Object.values(data.users || {}));
+
+      if (userList.length > 0) {
+        const found = userList.find((u: any) => {
           const uName = (u.full_name || u.name || "").toLowerCase().trim();
           const uSlug = uName.replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
           const uEmailSlug = (u.email || "").split("@")[0].toLowerCase().trim();
-          return uSlug === cleanSlug || uEmailSlug === cleanSlug || uName === cleanSlug;
+          const uId = String(u.id || "");
+          return uSlug === cleanSlug || uEmailSlug === cleanSlug || uName === cleanSlug || uId === cleanSlug;
         });
 
         if (found) {
           const uName = found.full_name || found.name || "Journalist";
-          const isContributor = (found.writer_type || "").toLowerCase() === "contributor";
+          const rawWriterType = (found.writer_type || "").toLowerCase().trim();
+          const rawRole = (found.role || "").toLowerCase().trim();
+          
+          let role = "STAFF WRITER";
+          if (rawWriterType === "contributor") {
+            role = "CONTRIBUTOR";
+          } else if (rawWriterType === "staff" || rawWriterType === "staff_writer") {
+            role = "STAFF WRITER";
+          } else if (rawRole === "writer") {
+            role = rawWriterType === "contributor" ? "CONTRIBUTOR" : "STAFF WRITER";
+          } else if (rawRole === "admin") {
+            role = "ADMIN";
+          } else if (rawRole === "reader") {
+            role = "READER";
+          }
+
+          const isContributor = role === "CONTRIBUTOR";
+          const avatar = found.avatar_url || (found as any).image || "";
+
           return {
             slug: cleanSlug,
             name: uName,
             email: found.email,
-            role: isContributor ? "CONTRIBUTOR" : "STAFF WRITER",
+            role: role,
             bio:
               found.bio ||
               (isContributor
                 ? "Independent Contributor & Columnist covering news, opinion, and current affairs."
                 : "Journalist & Columnist covering business, economic policy, and global markets."),
-            image: found.avatar_url || (found as any).image || "",
+            image: avatar,
+            avatarUrl: avatar,
             linkedinUrl: found.linkedin || "https://www.linkedin.com/in/your-profile",
           };
         }

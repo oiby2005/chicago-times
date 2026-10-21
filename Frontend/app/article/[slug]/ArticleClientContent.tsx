@@ -457,7 +457,7 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
                             return (
                               <React.Fragment key={`${writer.slug}-${idx}`}>
                                 <Link
-                                  href={writer.email ? `/author/${writer.slug}?email=${encodeURIComponent(writer.email)}` : `/author/${writer.slug}`}
+                                  href={`/author/${writer.slug}`}
                                   className="hover:underline hover:text-black cursor-pointer"
                                 >
                                   {writer.name}
@@ -551,7 +551,7 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
                             return (
                               <React.Fragment key={`${writer.slug}-${idx}`}>
                                 <Link
-                                  href={writer.email ? `/author/${writer.slug}?email=${encodeURIComponent(writer.email)}` : `/author/${writer.slug}`}
+                                  href={`/author/${writer.slug}`}
                                   className="hover:underline hover:text-black cursor-pointer"
                                 >
                                   {writer.name}

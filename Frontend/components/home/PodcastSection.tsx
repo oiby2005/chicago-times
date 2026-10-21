@@ -572,7 +572,7 @@ export const PodcastSection: React.FC<PodcastSectionProps> = ({ onActiveCountCha
       {/* Bottom Link: View all our podcasts */}
       <div className="pt-2 text-center">
         <a
-          href="https://podcasts.apple.com/in/podcast/jadetimes-talks/id1791836245?l=kn"
+          href="https://podcasts.apple.com/us/podcast/beyond-the-world/id6825324188"
           target="_blank"
           rel="noopener noreferrer"
           className="font-sans text-xs font-bold text-[#b8860b] hover:underline uppercase tracking-wider inline-flex items-center"

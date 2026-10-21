@@ -13,14 +13,15 @@ export async function generateMetadata({ params }: AuthorPageProps): Promise<Met
   const slug = resolvedParams.slug;
   const author = await fetchAuthorBySlug(slug);
 
-  const displayRole = author.role === "WRITER" || author.role === "writer" ? "Writer User" : (author.role || "Writer User");
+  const roleLabel = author.role || "STAFF WRITER";
+  const displayTitle = `${author.name} | ${roleLabel}`;
 
   return getLinkPreviewMetadata({
     type: "author",
-    title: author.name,
-    authorRole: displayRole,
-    authorBio: displayRole,
-    image: author.image || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?fm=webp&fit=crop&w=300&q=80",
+    title: displayTitle,
+    authorRole: roleLabel,
+    authorBio: author.bio || `${author.name} is a ${roleLabel} at Times Chicago.`,
+    image: author.image || author.avatarUrl || "/images/design-reference/Fav-Icon-Padded.jpg",
     urlPath: `/author/${slug}`,
   });
 }
