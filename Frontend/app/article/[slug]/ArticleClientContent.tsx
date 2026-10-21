@@ -249,31 +249,50 @@ export default function ArticleClientContent({ slug, initialArticle }: ArticleCl
   const allArticleWriters = React.useMemo(() => {
     const list: { name: string; slug: string; email?: string; linkedinUrl?: string }[] = [];
     const primaryEmail = (authorObj?.email || customPost?.authorEmail || "").toLowerCase().trim();
-    if (authorObj && authorObj.name) {
+    let mainName = authorObj?.name || authorName;
+    let mainSlug = authorObj?.slug || slugifyAuthorName(mainName);
+    let mainLinkedin = authorObj?.linkedinUrl;
+
+    if (primaryEmail) {
+      const livePrimary = getAuthorByEmail(primaryEmail);
+      if (livePrimary && livePrimary.name) {
+        mainName = livePrimary.name;
+        mainSlug = livePrimary.slug || slugifyAuthorName(livePrimary.name);
+        mainLinkedin = livePrimary.linkedinUrl || mainLinkedin;
+      }
+    }
+
+    if (mainName) {
       list.push({
-        name: authorObj.name,
-        slug: authorObj.slug || slugifyAuthorName(authorObj.name),
+        name: mainName,
+        slug: mainSlug,
         email: primaryEmail,
-        linkedinUrl: authorObj.linkedinUrl,
-      });
-    } else if (authorName) {
-      list.push({
-        name: authorName,
-        slug: slugifyAuthorName(authorName),
-        email: primaryEmail,
+        linkedinUrl: mainLinkedin,
       });
     }
 
     if (customPost?.sub_writers && Array.isArray(customPost.sub_writers)) {
       customPost.sub_writers.forEach((sw: any) => {
-        const swName = sw.name || sw.full_name || sw;
+        let swName = sw.name || sw.full_name || sw;
+        let swSlug = sw.slug || slugifyAuthorName(String(swName));
+        let swLinkedin = sw.linkedin || sw.linkedinUrl;
         const swEmail = (sw.email || "").toLowerCase().trim();
+
+        if (swEmail) {
+          const liveSub = getAuthorByEmail(swEmail);
+          if (liveSub && liveSub.name) {
+            swName = liveSub.name;
+            swSlug = liveSub.slug || slugifyAuthorName(liveSub.name);
+            swLinkedin = liveSub.linkedinUrl || swLinkedin;
+          }
+        }
+
         if (swName && typeof swName === "string" && !list.some((w) => w.name.toLowerCase() === swName.toLowerCase())) {
           list.push({
             name: swName,
-            slug: sw.slug || slugifyAuthorName(swName),
+            slug: swSlug,
             email: swEmail,
-            linkedinUrl: sw.linkedin || sw.linkedinUrl,
+            linkedinUrl: swLinkedin,
           });
         }
       });

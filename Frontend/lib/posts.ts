@@ -21,6 +21,26 @@ export function stripHtmlTags(html?: string): string {
   return html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
 }
 
+export async function fetchCustomPostBySlugOrId(slugParam: string): Promise<CustomPost | null> {
+  if (!slugParam) return null;
+  const decoded = decodeURIComponent(slugParam).trim();
+
+  try {
+    const res = await fetch(`http://localhost:5000/api/posts/${encodeURIComponent(decoded)}`, {
+      cache: "no-store",
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data?.success && data?.post) {
+        return data.post;
+      }
+    }
+  } catch (e) {}
+
+  // Fallback to local file lookup
+  return getCustomPostBySlugOrId(slugParam);
+}
+
 export function getCustomPostBySlugOrId(slugParam: string): CustomPost | null {
   if (!slugParam) return null;
   const decodedSlug = decodeURIComponent(slugParam).trim();

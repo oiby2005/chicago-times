@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import ArticleClientContent from "@/app/article/[slug]/ArticleClientContent";
 import { getArticleBySlug } from "@/data/articles";
 import { getLinkPreviewMetadata } from "@/lib/linkPreview";
-import { getCustomPostBySlugOrId, stripHtmlTags } from "@/lib/posts";
+import { fetchCustomPostBySlugOrId, stripHtmlTags } from "@/lib/posts";
 
 interface ArticlePageProps {
   params: Promise<{ slug: string; articleSlug?: string }>;
@@ -12,7 +12,7 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
   const resolvedParams = await params;
   const targetSlug = resolvedParams.articleSlug || resolvedParams.slug;
 
-  const customPost = getCustomPostBySlugOrId(targetSlug);
+  const customPost = await fetchCustomPostBySlugOrId(targetSlug);
   const staticArticle = getArticleBySlug(targetSlug) || {};
 
   let title = customPost?.title || staticArticle.title;
@@ -49,7 +49,7 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
 export default async function SlugArticlePage({ params }: ArticlePageProps) {
   const resolvedParams = await params;
   const targetSlug = resolvedParams.articleSlug || resolvedParams.slug;
-  const customPost = getCustomPostBySlugOrId(targetSlug);
+  const customPost = await fetchCustomPostBySlugOrId(targetSlug);
   const staticArticle = getArticleBySlug(targetSlug);
 
   const initialArticle = customPost || staticArticle;

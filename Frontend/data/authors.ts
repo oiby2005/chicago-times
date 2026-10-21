@@ -455,3 +455,43 @@ export function getAuthorForArticle(articleSlugOrId: string, authorName?: string
 
   return getAuthorBySlug(targetSlug);
 }
+
+export async function fetchAuthorBySlug(slugParam: string): Promise<Author> {
+  if (!slugParam) return getAuthorBySlug("writer");
+  const cleanSlug = slugParam.toLowerCase().trim();
+
+  try {
+    const res = await fetch("http://localhost:5000/api/users", { cache: "no-store" });
+    if (res.ok) {
+      const data = await res.json();
+      if (data?.success && Array.isArray(data.users)) {
+        const found = data.users.find((u: any) => {
+          const uName = (u.full_name || u.name || "").toLowerCase().trim();
+          const uSlug = uName.replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+          const uEmailSlug = (u.email || "").split("@")[0].toLowerCase().trim();
+          return uSlug === cleanSlug || uEmailSlug === cleanSlug || uName === cleanSlug;
+        });
+
+        if (found) {
+          const uName = found.full_name || found.name || "Journalist";
+          const isContributor = (found.writer_type || "").toLowerCase() === "contributor";
+          return {
+            slug: cleanSlug,
+            name: uName,
+            email: found.email,
+            role: isContributor ? "CONTRIBUTOR" : "STAFF WRITER",
+            bio:
+              found.bio ||
+              (isContributor
+                ? "Independent Contributor & Columnist covering news, opinion, and current affairs."
+                : "Journalist & Columnist covering business, economic policy, and global markets."),
+            image: found.avatar_url || (found as any).image || "",
+            linkedinUrl: found.linkedin || "https://www.linkedin.com/in/your-profile",
+          };
+        }
+      }
+    }
+  } catch (e) {}
+
+  return getAuthorBySlug(slugParam);
+}

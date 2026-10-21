@@ -1681,6 +1681,34 @@ app.get('/api/posts', async (req, res) => {
   }
 });
 
+app.get('/api/posts/:idOrSlug', async (req, res) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  const param = (req.params.idOrSlug || '').trim();
+  const cleanParam = param.toLowerCase();
+  try {
+    const [rows] = await db.query(
+      'SELECT * FROM posts WHERE id = ? OR LOWER(slug) = ? LIMIT 1',
+      [param, cleanParam]
+    );
+    if (rows && rows.length > 0) {
+      return res.status(200).json({ success: true, post: formatPostRow(rows[0]) });
+    }
+    // Also try matching slugified title
+    const [allRows] = await db.query('SELECT * FROM posts');
+    const matched = (allRows || []).find((r) => {
+      const pSlug = (r.slug || '').toLowerCase().trim();
+      const tSlug = (r.title || '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      return pSlug === cleanParam || tSlug === cleanParam || String(r.id) === param;
+    });
+    if (matched) {
+      return res.status(200).json({ success: true, post: formatPostRow(matched) });
+    }
+    return res.status(404).json({ success: false, message: 'Post not found' });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 app.post('/api/posts', requireWriterOrAdmin, async (req, res) => {
   try {
     const incomingPosts = req.body;
@@ -2700,10 +2728,48 @@ app.put('/api/users/edit', protect, async (req, res) => {
 
       // Propagate updated name to posts table for articles written by this author email
       if (userName && userName.trim().length > 0) {
+        const trimmedName = userName.trim();
+        const newSlug = trimmedName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
         await db.query(
-          'UPDATE posts SET author = ? WHERE LOWER(authorEmail) = ?',
-          [userName.trim(), cleanEmail]
+          "UPDATE posts SET author = ? WHERE LOWER(authorEmail) = ? OR LOWER(authorEmail) = ?",
+          [trimmedName, cleanEmail, lookupEmail]
         );
+
+        // Also update sub_writers JSON across all posts
+        try {
+          const [postsWithSubs] = await db.query(
+            "SELECT id, sub_writers FROM posts WHERE sub_writers IS NOT NULL AND sub_writers != '' AND sub_writers != '[]'"
+          );
+          for (const p of postsWithSubs || []) {
+            let subs = [];
+            try {
+              subs = typeof p.sub_writers === "string" ? JSON.parse(p.sub_writers) : p.sub_writers;
+            } catch (e) {}
+            if (Array.isArray(subs) && subs.length > 0) {
+              let changed = false;
+              const updatedSubs = subs.map((sw) => {
+                const swEmail = (sw.email || "").toLowerCase().trim();
+                if (swEmail === cleanEmail || swEmail === lookupEmail) {
+                  changed = true;
+                  return {
+                    ...sw,
+                    name: trimmedName,
+                    full_name: trimmedName,
+                    slug: newSlug,
+                    email: cleanEmail,
+                  };
+                }
+                return sw;
+              });
+              if (changed) {
+                await db.query("UPDATE posts SET sub_writers = ? WHERE id = ?", [JSON.stringify(updatedSubs), p.id]);
+              }
+            }
+          }
+        } catch (subErr) {
+          console.warn("Sub-writers update notice:", subErr.message);
+        }
       }
     } catch (e) {
       console.warn('MySQL User Edit Notice:', e.message);

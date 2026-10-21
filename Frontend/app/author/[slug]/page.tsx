@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { Metadata } from "next";
 import AuthorClientContent from "./AuthorClientContent";
-import { getAuthorBySlug } from "@/data/authors";
+import { fetchAuthorBySlug } from "@/data/authors";
 import { getLinkPreviewMetadata } from "@/lib/linkPreview";
 
 interface AuthorPageProps {
@@ -11,7 +11,7 @@ interface AuthorPageProps {
 export async function generateMetadata({ params }: AuthorPageProps): Promise<Metadata> {
   const resolvedParams = await params;
   const slug = resolvedParams.slug;
-  const author = getAuthorBySlug(slug);
+  const author = await fetchAuthorBySlug(slug);
 
   const displayRole = author.role === "WRITER" || author.role === "writer" ? "Writer User" : (author.role || "Writer User");
 
