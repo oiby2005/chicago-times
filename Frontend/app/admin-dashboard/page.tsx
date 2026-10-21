@@ -7229,17 +7229,19 @@ ${divider70}
                 </div>
               )}
 
-              {/* Experience, Education & Publications Editor */}
-              <div className="pt-3 border-t border-slate-100">
-                <CredentialsEditor
-                  experiences={editUserExperiences}
-                  setExperiences={setEditUserExperiences}
-                  education={editUserEducation}
-                  setEducation={setEditUserEducation}
-                  publications={editUserPublications}
-                  setPublications={setEditUserPublications}
-                />
-              </div>
+              {/* Experience, Education & Publications Editor (ONLY for Writers & Contributors) */}
+              {(editUserRole === "writer" || editUserRole === "contributor") && (
+                <div className="pt-3 border-t border-slate-100">
+                  <CredentialsEditor
+                    experiences={editUserExperiences}
+                    setExperiences={setEditUserExperiences}
+                    education={editUserEducation}
+                    setEducation={setEditUserEducation}
+                    publications={editUserPublications}
+                    setPublications={setEditUserPublications}
+                  />
+                </div>
+              )}
 
               {/* Action Buttons */}
               <div className="grid grid-cols-2 gap-3 pt-4">

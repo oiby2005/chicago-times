@@ -302,7 +302,7 @@ export const StickyHeaderBar: React.FC<StickyHeaderBarProps> = ({ visible = true
                 <div className="relative" ref={dropdownRef}>
                   <button
                     onClick={() => setShowDropdown(!showDropdown)}
-                    className="w-8 h-8 sm:w-9 sm:h-9 bg-[#f3f4f6] hover:bg-[#e5e7eb] border-none rounded-full flex items-center justify-center relative p-0.5 transition-colors cursor-pointer shadow-xs shrink-0"
+                    className="w-8 h-8 rounded-none border border-gray-300 hover:border-gray-500 transition-colors cursor-pointer shrink-0 relative overflow-hidden p-0 flex items-center justify-center bg-transparent"
                     aria-label="User Profile"
                     title={currentUser?.full_name || "User Profile"}
                     suppressHydrationWarning
@@ -311,14 +311,14 @@ export const StickyHeaderBar: React.FC<StickyHeaderBarProps> = ({ visible = true
                       <img
                         src={currentUser.avatar_url}
                         alt={currentUser?.full_name || "User Profile"}
-                        className="w-full h-full object-cover rounded-full"
+                        className="w-full h-full object-cover rounded-none block"
                       />
                     ) : (
-                      <svg className="w-4 h-4 text-[#1e293b]" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                      </svg>
+                      <div className="w-full h-full rounded-none bg-slate-700 text-white flex items-center justify-center text-xs font-bold font-sans">
+                        {displayName ? displayName.charAt(0).toUpperCase() : "U"}
+                      </div>
                     )}
-                    <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#00c853] border-2 border-white rounded-full" />
+                    <span className="absolute bottom-0 right-0 w-2 h-2 bg-[#00c853] z-10" />
                   </button>
                   {showDropdown && renderDropdownMenu()}
                 </div>

@@ -433,21 +433,21 @@ export const LogoHeader: React.FC = () => {
                   type="button"
                   suppressHydrationWarning
                   onClick={() => setShowDropdown(!showDropdown)}
-                  className="relative p-0.5 rounded-full border border-gray-300 hover:border-gray-500 transition-colors focus:outline-none cursor-pointer flex items-center justify-center bg-gray-100"
+                  className="relative w-8 h-8 rounded-none border border-gray-300 hover:border-gray-500 transition-colors focus:outline-none cursor-pointer flex items-center justify-center overflow-hidden p-0 bg-transparent"
                   aria-label="User Profile"
                 >
                   {currentUser?.avatar_url || (currentUser as any)?.image ? (
                     <img
                       src={currentUser.avatar_url || (currentUser as any).image}
                       alt={displayName}
-                      className="w-7 h-7 rounded-full object-cover"
+                      className="w-full h-full object-cover rounded-none block"
                     />
                   ) : (
-                    <div className="w-7 h-7 rounded-full bg-slate-700 text-white flex items-center justify-center text-xs font-bold font-sans">
+                    <div className="w-full h-full rounded-none bg-slate-700 text-white flex items-center justify-center text-xs font-bold font-sans">
                       {displayName ? displayName.charAt(0).toUpperCase() : "U"}
                     </div>
                   )}
-                  <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#00c853] border-2 border-white rounded-full shadow-2xs z-10" />
+                  <span className="absolute bottom-0 right-0 w-2 h-2 bg-[#00c853] z-10" />
                 </button>
 
                 {showDropdown && renderDropdownMenu()}
@@ -466,7 +466,7 @@ export const LogoHeader: React.FC = () => {
         </div>
 
         {/* Sub-Utility Edition Navigation */}
-        <div className="flex items-center justify-center max-w-full overflow-hidden md:overflow-x-auto lg:overflow-visible no-scrollbar w-full text-[10.5px] min-[360px]:text-[11px] min-[390px]:text-[11.5px] md:text-[12px] font-['Century_Gothic','Publica_Sans_Light','Kumbh_Sans',sans-serif] font-normal text-[#333333] tracking-tight z-30 whitespace-normal text-center md:whitespace-nowrap flex-wrap md:flex-nowrap my-1.5 pt-2 pb-2.5 md:pb-0.5 px-1 sm:px-1 border-b md:border-b-0 border-gray-200">
+        <div className="flex items-center justify-center max-w-full overflow-hidden md:overflow-x-auto lg:overflow-visible no-scrollbar w-full text-[9.5px] min-[360px]:text-[10px] min-[375px]:text-[10.5px] min-[390px]:text-[10.8px] min-[412px]:text-[11.2px] sm:text-[11.5px] md:text-[12px] font-['Century_Gothic','Publica_Sans_Light','Kumbh_Sans',sans-serif] font-normal text-[#333333] tracking-tight z-30 whitespace-nowrap flex-nowrap text-center my-1.5 pt-2 pb-2.5 md:pb-0.5 px-1 sm:px-2 md:px-1 border-b md:border-b-0 border-gray-200">
           {/* Edition Selection Dropdown Card - Desktop and Laptop only */}
           <div className="hidden md:inline-block relative" ref={editionRef}>
             <button
@@ -517,29 +517,29 @@ export const LogoHeader: React.FC = () => {
           {/* Opinions */}
           <a
             href="/opinions"
-            className="hover:underline cursor-pointer font-normal text-[#333333] hover:text-black leading-none"
+            className="hover:underline cursor-pointer font-normal text-[#333333] hover:text-black leading-none shrink-0"
           >
             Opinions
           </a>
 
           {/* Gap between Opinions and | */}
-          <span className="mx-0.5 min-[390px]:mx-1 sm:ml-[15px] sm:mr-[15px] text-[#999999] font-light text-[9px] sm:text-[10px] leading-none shrink-0">|</span>
+          <span className="mx-1 min-[360px]:mx-1.5 min-[390px]:mx-2 sm:ml-[15px] sm:mr-[15px] text-[#999999] font-light text-[9px] sm:text-[10px] leading-none shrink-0">|</span>
 
           {/* Upcoming Top 20 Entrepreneurs */}
           <Link
             href="/upcoming-top-20"
-            className="hover:underline cursor-pointer font-normal text-[#333333] hover:text-black leading-none"
+            className="hover:underline cursor-pointer font-normal text-[#333333] hover:text-black leading-none shrink-0"
           >
             Upcoming Top 20 Entrepreneurs
           </Link>
 
           {/* Gap between Upcoming Top 20 and | */}
-          <span className="mx-0.5 min-[390px]:mx-1 sm:ml-[15px] sm:mr-[15px] text-[#999999] font-light text-[9px] sm:text-[10px] leading-none shrink-0">|</span>
+          <span className="mx-1 min-[360px]:mx-1.5 min-[390px]:mx-2 sm:ml-[15px] sm:mr-[15px] text-[#999999] font-light text-[9px] sm:text-[10px] leading-none shrink-0">|</span>
 
           {/* World 20 Billionaires */}
           <Link
             href="/world-billionaire"
-            className="hover:underline cursor-pointer font-normal text-[#333333] hover:text-black leading-none"
+            className="hover:underline cursor-pointer font-normal text-[#333333] hover:text-black leading-none shrink-0 pr-1"
           >
             World 20 Billionaires
           </Link>

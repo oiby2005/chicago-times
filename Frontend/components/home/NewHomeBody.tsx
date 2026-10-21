@@ -7,7 +7,7 @@ import NewHomeSection1 from "@/components/home/NewHomeSection1";
 export default function NewHomeBody() {
   return (
     <div className="bg-white min-h-[50vh] text-[#111111]">
-      <Container className="pt-2 sm:pt-3 md:pt-[1cm] pb-3 md:pb-10">
+      <Container className="pt-4 sm:pt-5 md:pt-[1cm] pb-3 md:pb-10">
         {/* New Homepage Content (Up to Business Category & Ad 1) */}
         <NewHomeSection1 />
       </Container>

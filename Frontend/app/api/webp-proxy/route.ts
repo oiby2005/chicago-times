@@ -14,6 +14,8 @@ export async function GET(request: NextRequest) {
   }
 
   const cleanUrl = imageUrl.trim();
+  const format = (searchParams.get("format") || "webp").toLowerCase();
+  const isPng = format === "png";
 
   try {
     // 1. Handle base64 data URLs directly
@@ -36,13 +38,16 @@ export async function GET(request: NextRequest) {
       }
 
       const buffer = Buffer.from(base64Data, "base64");
-      const webpBuffer = await sharp(buffer).toFormat("webp", { quality: 85 }).toBuffer();
+      const outBuffer = isPng
+        ? await sharp(buffer).png().toBuffer()
+        : await sharp(buffer).toFormat("webp", { quality: 85 }).toBuffer();
 
-      return new NextResponse(new Uint8Array(webpBuffer), {
+      return new NextResponse(new Uint8Array(outBuffer), {
         headers: {
-          "Content-Type": "image/webp",
-          "Content-Disposition": 'inline; filename="image.webp"',
+          "Content-Type": isPng ? "image/png" : "image/webp",
+          "Content-Disposition": `inline; filename="image.${isPng ? "png" : "webp"}"`,
           "Cache-Control": "public, max-age=31536000, immutable",
+          "Access-Control-Allow-Origin": "*",
         },
       });
     }
@@ -62,14 +67,17 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 3. Convert ANY input image format (AVIF, PNG, JPEG, GIF) into pure WebP format!
-    const webpBuffer = await sharp(fetchResult.buffer).toFormat("webp", { quality: 85 }).toBuffer();
+    // 3. Convert input image format into pure WebP or PNG format
+    const outBuffer = isPng
+      ? await sharp(fetchResult.buffer).png().toBuffer()
+      : await sharp(fetchResult.buffer).toFormat("webp", { quality: 85 }).toBuffer();
 
-    return new NextResponse(new Uint8Array(webpBuffer), {
+    return new NextResponse(new Uint8Array(outBuffer), {
       headers: {
-        "Content-Type": "image/webp",
-        "Content-Disposition": 'inline; filename="article-image.webp"',
+        "Content-Type": isPng ? "image/png" : "image/webp",
+        "Content-Disposition": `inline; filename="article-image.${isPng ? "png" : "webp"}"`,
         "Cache-Control": "public, max-age=31536000, immutable",
+        "Access-Control-Allow-Origin": "*",
       },
     });
   } catch (err) {

@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { Metadata } from "next";
 import AuthorClientContent from "./AuthorClientContent";
 import { getAuthorBySlug } from "@/data/authors";
@@ -25,5 +26,9 @@ export async function generateMetadata({ params }: AuthorPageProps): Promise<Met
 }
 
 export default async function AuthorPage({ params }: AuthorPageProps) {
-  return <AuthorClientContent />;
+  return (
+    <Suspense fallback={null}>
+      <AuthorClientContent />
+    </Suspense>
+  );
 }

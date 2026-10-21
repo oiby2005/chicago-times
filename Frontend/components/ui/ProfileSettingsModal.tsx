@@ -31,14 +31,64 @@ export interface UserProfile {
   press_id?: string;
 }
 
-const COUNTRIES_LIST = [
-  "United States", "United Kingdom", "Canada", "Australia", "Germany", "France", "India",
-  "Japan", "China", "Brazil", "Mexico", "Italy", "Spain", "Netherlands", "Switzerland",
-  "Sweden", "Singapore", "South Korea", "United Arab Emirates", "Saudi Arabia", "South Africa",
-  "New Zealand", "Ireland", "Norway", "Denmark", "Finland", "Belgium", "Austria", "Poland",
-  "Portugal", "Greece", "Argentina", "Chile", "Colombia", "Egypt", "Indonesia", "Israel",
-  "Malaysia", "Nigeria", "Pakistan", "Philippines", "Qatar", "Sri Lanka", "Thailand", "Turkey", "Vietnam", "Other"
+export interface CountryPhoneConfig {
+  name: string;
+  dialCode: string;
+  maxDigits: number;
+  placeholder: string;
+}
+
+export const COUNTRY_PHONE_CONFIGS: CountryPhoneConfig[] = [
+  { name: "United States", dialCode: "+1", maxDigits: 10, placeholder: "555 123 4567" },
+  { name: "United Kingdom", dialCode: "+44", maxDigits: 10, placeholder: "7911 123456" },
+  { name: "Canada", dialCode: "+1", maxDigits: 10, placeholder: "555 123 4567" },
+  { name: "Australia", dialCode: "+61", maxDigits: 9, placeholder: "412 345 678" },
+  { name: "Germany", dialCode: "+49", maxDigits: 11, placeholder: "151 12345678" },
+  { name: "France", dialCode: "+33", maxDigits: 9, placeholder: "6 12 34 56 78" },
+  { name: "India", dialCode: "+91", maxDigits: 10, placeholder: "98765 43210" },
+  { name: "Japan", dialCode: "+81", maxDigits: 10, placeholder: "90 1234 5678" },
+  { name: "China", dialCode: "+86", maxDigits: 11, placeholder: "138 0013 8000" },
+  { name: "Brazil", dialCode: "+55", maxDigits: 11, placeholder: "11 91234 5678" },
+  { name: "Mexico", dialCode: "+52", maxDigits: 10, placeholder: "55 1234 5678" },
+  { name: "Italy", dialCode: "+39", maxDigits: 10, placeholder: "320 123 4567" },
+  { name: "Spain", dialCode: "+34", maxDigits: 9, placeholder: "612 34 56 78" },
+  { name: "Netherlands", dialCode: "+31", maxDigits: 9, placeholder: "6 12345678" },
+  { name: "Switzerland", dialCode: "+41", maxDigits: 9, placeholder: "79 123 45 67" },
+  { name: "Sweden", dialCode: "+46", maxDigits: 9, placeholder: "70 123 45 67" },
+  { name: "Singapore", dialCode: "+65", maxDigits: 8, placeholder: "8123 4567" },
+  { name: "South Korea", dialCode: "+82", maxDigits: 10, placeholder: "10 1234 5678" },
+  { name: "United Arab Emirates", dialCode: "+971", maxDigits: 9, placeholder: "50 123 4567" },
+  { name: "Saudi Arabia", dialCode: "+966", maxDigits: 9, placeholder: "50 123 4567" },
+  { name: "South Africa", dialCode: "+27", maxDigits: 9, placeholder: "71 123 4567" },
+  { name: "New Zealand", dialCode: "+64", maxDigits: 9, placeholder: "21 123 4567" },
+  { name: "Ireland", dialCode: "+353", maxDigits: 9, placeholder: "85 123 4567" },
+  { name: "Norway", dialCode: "+47", maxDigits: 8, placeholder: "412 34 567" },
+  { name: "Denmark", dialCode: "+45", maxDigits: 8, placeholder: "20 12 34 56" },
+  { name: "Finland", dialCode: "+358", maxDigits: 10, placeholder: "40 123 4567" },
+  { name: "Belgium", dialCode: "+32", maxDigits: 9, placeholder: "470 12 34 56" },
+  { name: "Austria", dialCode: "+43", maxDigits: 10, placeholder: "664 1234567" },
+  { name: "Poland", dialCode: "+48", maxDigits: 9, placeholder: "512 345 678" },
+  { name: "Portugal", dialCode: "+351", maxDigits: 9, placeholder: "912 345 678" },
+  { name: "Greece", dialCode: "+30", maxDigits: 10, placeholder: "691 234 5678" },
+  { name: "Argentina", dialCode: "+54", maxDigits: 10, placeholder: "11 1234 5678" },
+  { name: "Chile", dialCode: "+56", maxDigits: 9, placeholder: "9 1234 5678" },
+  { name: "Colombia", dialCode: "+57", maxDigits: 10, placeholder: "300 123 4567" },
+  { name: "Egypt", dialCode: "+20", maxDigits: 10, placeholder: "100 123 4567" },
+  { name: "Indonesia", dialCode: "+62", maxDigits: 11, placeholder: "812 3456 7890" },
+  { name: "Israel", dialCode: "+972", maxDigits: 9, placeholder: "50 123 4567" },
+  { name: "Malaysia", dialCode: "+60", maxDigits: 10, placeholder: "12 345 6789" },
+  { name: "Nigeria", dialCode: "+234", maxDigits: 10, placeholder: "802 123 4567" },
+  { name: "Pakistan", dialCode: "+92", maxDigits: 10, placeholder: "300 1234567" },
+  { name: "Philippines", dialCode: "+63", maxDigits: 10, placeholder: "917 123 4567" },
+  { name: "Qatar", dialCode: "+974", maxDigits: 8, placeholder: "3312 3456" },
+  { name: "Sri Lanka", dialCode: "+94", maxDigits: 9, placeholder: "77 123 4567" },
+  { name: "Thailand", dialCode: "+66", maxDigits: 9, placeholder: "81 234 5678" },
+  { name: "Turkey", dialCode: "+90", maxDigits: 10, placeholder: "532 123 4567" },
+  { name: "Vietnam", dialCode: "+84", maxDigits: 9, placeholder: "91 234 5678" },
+  { name: "Other", dialCode: "+1", maxDigits: 15, placeholder: "123456789" },
 ];
+
+const COUNTRIES_LIST = COUNTRY_PHONE_CONFIGS.map((c) => c.name);
 
 interface ProfileSettingsModalProps {
   isOpen: boolean;
@@ -59,7 +109,8 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [country, setCountry] = useState("United States");
-  const [phone, setPhone] = useState("");
+  const [countryDialCode, setCountryDialCode] = useState("+1");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [role, setRole] = useState("READER");
   const [bio, setBio] = useState("");
   const [linkedin, setLinkedin] = useState("");
@@ -75,8 +126,29 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
     if (currentUser) {
       setFullName(currentUser.full_name || currentUser.name || "User");
       setEmail(currentUser.email || "user@gmail.com");
-      setCountry(currentUser.country || (currentUser as any).country || "United States");
-      setPhone(currentUser.phone || (currentUser as any).mobile || "");
+      const initCountry = currentUser.country || (currentUser as any).country || "United States";
+      setCountry(initCountry);
+
+      const rawPhone = String(currentUser.phone || (currentUser as any).mobile || "").trim();
+      let matchedDial = "+1";
+      let digits = "";
+
+      if (rawPhone.startsWith("+")) {
+        const sortedConfigs = [...COUNTRY_PHONE_CONFIGS].sort((a, b) => b.dialCode.length - a.dialCode.length);
+        const found = sortedConfigs.find((c) => rawPhone.startsWith(c.dialCode));
+        if (found) {
+          matchedDial = found.dialCode;
+          digits = rawPhone.slice(found.dialCode.length).replace(/\D/g, "").slice(0, found.maxDigits);
+        } else {
+          digits = rawPhone.replace(/\D/g, "").slice(0, 15);
+        }
+      } else {
+        matchedDial = "+1";
+        digits = rawPhone.replace(/\D/g, "").slice(0, 15);
+      }
+
+      setCountryDialCode(matchedDial);
+      setPhoneNumber(digits);
       setRole((currentUser.role || "READER").toUpperCase());
       setBio(currentUser.bio || "News Enthusiast");
       setLinkedin(currentUser.linkedin || "");
@@ -88,7 +160,8 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
       setFullName("User");
       setEmail("user@gmail.com");
       setCountry("United States");
-      setPhone("");
+      setCountryDialCode("+1");
+      setPhoneNumber("");
       setRole("READER");
       setBio("News Enthusiast");
       setLinkedin("");
@@ -98,6 +171,41 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
       setPublications([]);
     }
   }, [currentUser, isOpen]);
+
+  const effectiveRole = (currentUser?.role || role || "").toLowerCase().trim();
+  const isAdminOrReader = effectiveRole === "admin" || effectiveRole === "reader";
+
+  // Strictly ONLY for Staff Writer or Contributor. Admin and Reader MUST NEVER be true!
+  const isStaffOrContributor =
+    !isAdminOrReader &&
+    (effectiveRole === "writer" ||
+      effectiveRole === "staff writer" ||
+      effectiveRole === "contributor" ||
+      (currentUser?.writer_type === "contributor" || currentUser?.writer_type === "staff"));
+
+  const activePhoneConfig =
+    COUNTRY_PHONE_CONFIGS.find((c) => c.dialCode === countryDialCode) ||
+    COUNTRY_PHONE_CONFIGS[0];
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Only allow numbers (strictly strip any letters/symbols)
+    const rawDigits = e.target.value.replace(/\D/g, "");
+    // Do not allow entering more numbers than allowed for the selected country code
+    const limited = rawDigits.slice(0, activePhoneConfig.maxDigits);
+    setPhoneNumber(limited);
+  };
+
+  const handleDialCodeChange = (newCode: string) => {
+    setCountryDialCode(newCode);
+    const cfg = COUNTRY_PHONE_CONFIGS.find((c) => c.dialCode === newCode) || COUNTRY_PHONE_CONFIGS[0];
+    setPhoneNumber((prev) => prev.slice(0, cfg.maxDigits));
+    // Separate: DO NOT change country dropdown!
+  };
+
+  const handleCountryChange = (newCountry: string) => {
+    setCountry(newCountry);
+    // Separate: DO NOT change country dial code!
+  };
 
   if (!isOpen) return null;
 
@@ -126,6 +234,10 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
     if (isSaving) return;
     setIsSaving(true);
 
+    const fullPhone = isStaffOrContributor && phoneNumber.trim()
+      ? `${countryDialCode} ${phoneNumber.trim()}`
+      : (isStaffOrContributor ? "" : (currentUser?.phone || ""));
+
     const updatedUser: UserProfile = {
       ...(currentUser || {}),
       full_name: fullName,
@@ -134,11 +246,11 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
       bio: bio,
       linkedin: linkedin,
       country: country,
-      phone: phone.trim(),
+      phone: fullPhone,
       avatar_url: avatarUrl,
-      experiences: experiences,
-      education: education,
-      publications: publications,
+      experiences: isStaffOrContributor ? experiences : (currentUser?.experiences || []),
+      education: isStaffOrContributor ? education : (currentUser?.education || []),
+      publications: isStaffOrContributor ? publications : (currentUser?.publications || []),
     };
 
     // 1. Immediately apply to active session & trigger instant UI updates
@@ -305,7 +417,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-black/50 backdrop-blur-xs transition-opacity animate-in fade-in duration-200">
       {/* Modal Dialog Box matching screenshot */}
-      <div className="bg-white rounded-2xl w-full max-w-[580px] sm:max-w-[640px] p-5 sm:p-7 shadow-2xl relative border border-[#e2e8f0] transform transition-all animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
+      <div className={`bg-white rounded-2xl w-full ${isStaffOrContributor ? "max-w-[580px] sm:max-w-[640px]" : "max-w-[480px] sm:max-w-[520px]"} p-5 sm:p-7 shadow-2xl relative border border-[#e2e8f0] transform transition-all animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto`}>
         
         {/* Toast Notification on Save */}
         {showSavedToast && (
@@ -394,8 +506,8 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
             />
           </div>
 
-          {/* EMAIL & PHONE & COUNTRY Fields */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {/* EMAIL & COUNTRY Fields (Clean 2-column for all users) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             <div>
               <label className="block font-mono text-[11px] font-bold text-[#64748b] tracking-wider uppercase mb-1.5">
                 EMAIL ADDRESS
@@ -404,20 +516,8 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3.5 py-3 bg-white border border-[#e2e8f0] rounded-xl text-[#1e293b] font-sans text-xs sm:text-[13.5px] focus:outline-none focus:border-[#00528a] focus:ring-2 focus:ring-[#00528a]/15 transition-all"
+                className="w-full px-4 py-3 bg-white border border-[#e2e8f0] rounded-xl text-[#1e293b] font-sans text-[14px] sm:text-[15px] focus:outline-none focus:border-[#00528a] focus:ring-2 focus:ring-[#00528a]/15 transition-all"
                 placeholder="name@timeschicago.com"
-              />
-            </div>
-            <div>
-              <label className="block font-mono text-[11px] font-bold text-[#64748b] tracking-wider uppercase mb-1.5">
-                PHONE NUMBER
-              </label>
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="w-full px-3.5 py-3 bg-white border border-[#e2e8f0] rounded-xl text-[#1e293b] font-sans text-xs sm:text-[13.5px] focus:outline-none focus:border-[#00528a] focus:ring-2 focus:ring-[#00528a]/15 transition-all"
-                placeholder="+1 (555) 000-0000"
               />
             </div>
             <div>
@@ -426,8 +526,8 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
               </label>
               <select
                 value={country}
-                onChange={(e) => setCountry(e.target.value)}
-                className="w-full px-3.5 py-3 bg-white border border-[#e2e8f0] rounded-xl text-[#1e293b] font-sans text-xs sm:text-[13.5px] focus:outline-none focus:border-[#00528a] focus:ring-2 focus:ring-[#00528a]/15 transition-all cursor-pointer"
+                onChange={(e) => handleCountryChange(e.target.value)}
+                className="w-full px-4 py-3 bg-white border border-[#e2e8f0] rounded-xl text-[#1e293b] font-sans text-[14px] sm:text-[15px] focus:outline-none focus:border-[#00528a] focus:ring-2 focus:ring-[#00528a]/15 transition-all cursor-pointer"
               >
                 {COUNTRIES_LIST.map((c) => (
                   <option key={c} value={c}>
@@ -437,6 +537,51 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
               </select>
             </div>
           </div>
+
+          {/* PHONE NUMBER & COUNTRY CODE (ONLY for Staff Writer and Contributor) */}
+          {isStaffOrContributor && (
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
+              {/* Choose Country Code separately */}
+              <div className="sm:col-span-5">
+                <label className="block font-mono text-[11px] font-bold text-[#64748b] tracking-wider uppercase mb-1.5">
+                  COUNTRY CODE
+                </label>
+                <select
+                  value={countryDialCode}
+                  onChange={(e) => handleDialCodeChange(e.target.value)}
+                  className="w-full px-3 py-3 bg-white border border-[#e2e8f0] rounded-xl text-[#1e293b] font-sans text-xs sm:text-[13px] focus:outline-none focus:border-[#00528a] focus:ring-2 focus:ring-[#00528a]/15 transition-all cursor-pointer truncate"
+                  title="Choose Country Code"
+                >
+                  {COUNTRY_PHONE_CONFIGS.map((cfg) => (
+                    <option key={`${cfg.name}-${cfg.dialCode}`} value={cfg.dialCode}>
+                      {cfg.dialCode} ({cfg.name})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Phone Number Input */}
+              <div className="sm:col-span-7">
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block font-mono text-[11px] font-bold text-[#64748b] tracking-wider uppercase">
+                    PHONE NUMBER
+                  </label>
+                  <span className="font-mono text-[10px] text-gray-400">
+                    {phoneNumber.length}/{activePhoneConfig.maxDigits} digits
+                  </span>
+                </div>
+                <input
+                  type="tel"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  value={phoneNumber}
+                  onChange={handlePhoneChange}
+                  className="w-full px-4 py-3 bg-white border border-[#e2e8f0] rounded-xl text-[#1e293b] font-sans text-xs sm:text-[14px] focus:outline-none focus:border-[#00528a] focus:ring-2 focus:ring-[#00528a]/15 transition-all"
+                  placeholder={`e.g. ${activePhoneConfig.placeholder}`}
+                />
+              </div>
+            </div>
+          )}
 
           {/* BIO Field */}
           <div>
@@ -452,44 +597,47 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
             />
           </div>
 
-          {/* LINKEDIN PROFILE Field */}
-          <div>
-            <label className="block font-mono text-[11px] font-bold text-[#64748b] tracking-wider uppercase mb-1.5">
-              LINKEDIN PROFILE
-            </label>
-            <div className="relative flex items-center">
-              <div className="absolute left-3.5 flex items-center justify-center pointer-events-none">
-                {/* LinkedIn Badge Icon matching Image 2 */}
-                <div className="w-5 h-5 flex items-center justify-center cursor-default">
-                  <svg className="w-5 h-5 text-[#0077b5] fill-current" viewBox="0 0 24 24">
-                    <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
-                  </svg>
+          {/* LINKEDIN PROFILE Field (for Staff Writers and Contributors) */}
+          {isStaffOrContributor && (
+            <div>
+              <label className="block font-mono text-[11px] font-bold text-[#64748b] tracking-wider uppercase mb-1.5">
+                LINKEDIN PROFILE
+              </label>
+              <div className="relative flex items-center">
+                <div className="absolute left-3.5 flex items-center justify-center pointer-events-none">
+                  <div className="w-5 h-5 flex items-center justify-center cursor-default">
+                    <svg className="w-5 h-5 text-[#0077b5] fill-current" viewBox="0 0 24 24">
+                      <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                    </svg>
+                  </div>
                 </div>
+                <input
+                  type="text"
+                  value={linkedin}
+                  onChange={(e) => setLinkedin(e.target.value)}
+                  className="w-full pl-11 pr-4 py-3 bg-white border border-[#e2e8f0] rounded-xl text-[#1e293b] font-sans text-[15px] focus:outline-none focus:border-[#00528a] focus:ring-2 focus:ring-[#00528a]/15 transition-all"
+                  placeholder="https://www.linkedin.com/in/your-profile"
+                />
               </div>
-              <input
-                type="text"
-                value={linkedin}
-                onChange={(e) => setLinkedin(e.target.value)}
-                className="w-full pl-11 pr-4 py-3 bg-white border border-[#e2e8f0] rounded-xl text-[#1e293b] font-sans text-[15px] focus:outline-none focus:border-[#00528a] focus:ring-2 focus:ring-[#00528a]/15 transition-all"
-                placeholder="https://www.linkedin.com/in/your-profile"
+              <p className="font-sans text-[12px] text-[#94a3b8] mt-1.5">
+                Shown on your article bylines so readers can connect with you.
+              </p>
+            </div>
+          )}
+
+          {/* Experience, Publications & Education ONLY for Staff Writers & Contributors */}
+          {isStaffOrContributor && (
+            <div className="pt-2 border-t border-slate-100">
+              <CredentialsEditor
+                experiences={experiences}
+                setExperiences={setExperiences}
+                education={education}
+                setEducation={setEducation}
+                publications={publications}
+                setPublications={setPublications}
               />
             </div>
-            <p className="font-sans text-[12px] text-[#94a3b8] mt-1.5">
-              Shown on your article bylines so readers can connect with you.
-            </p>
-          </div>
-
-          {/* Experience, Publications & Education for Staff Writers & Contributors */}
-          <div className="pt-2 border-t border-slate-100">
-            <CredentialsEditor
-              experiences={experiences}
-              setExperiences={setExperiences}
-              education={education}
-              setEducation={setEducation}
-              publications={publications}
-              setPublications={setPublications}
-            />
-          </div>
+          )}
         </div>
 
         {/* Action Buttons Footer matching screenshot */}

@@ -391,6 +391,22 @@ export const Footer: React.FC = () => {
               <span>Rumble</span>
             </a>
 
+            {/* iTunes */}
+            <a
+              href="https://podcasts.apple.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center space-x-2 hover:text-[#00558c] transition-colors"
+            >
+              <svg className="w-4 h-4 text-gray-600 fill-none stroke-current stroke-2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                <path d="M9 16.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z" fill="currentColor" />
+                <path d="M15 14.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z" fill="currentColor" />
+                <path d="M10.5 14V8l6-1.5v6" strokeWidth="1.8" />
+              </svg>
+              <span>iTunes</span>
+            </a>
+
             {/* Newsletter */}
             <a
               href="/newsletter"

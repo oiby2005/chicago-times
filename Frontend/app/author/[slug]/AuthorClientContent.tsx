@@ -13,10 +13,10 @@ import LouisVuittonAdBanner from "@/components/author/LouisVuittonAdBanner";
 import AuthorCredentialsSidebar from "@/components/author/AuthorCredentialsSidebar";
 import { getAuthorBySlug, getAuthorByEmail, slugifyAuthorName } from "@/data/authors";
 
-export default function AuthorClientContent() {
+export default function AuthorClientContent({ slug: propSlug }: { slug?: string } = {}) {
   const routeParams = useParams();
   const searchParams = useSearchParams();
-  const rawSlug = routeParams?.slug;
+  const rawSlug = propSlug || routeParams?.slug;
   const slug = typeof rawSlug === "string" ? rawSlug : (Array.isArray(rawSlug) ? rawSlug[0] : "writer");
   const emailParam = (searchParams?.get("email") || "").toLowerCase().trim();
 
